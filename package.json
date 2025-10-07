@@ -1,0 +1,18 @@
+{
+  "name": "forrealbank",
+  "private": true,
+  "packageManager": "pnpm@10.18.0",
+  "engines": {
+    "node": "^20.11 || ^22.0"
+  },
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down -v"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

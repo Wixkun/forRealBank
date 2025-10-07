@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16
+    container_name: forrealbank-db
+    restart: unless-stopped
+    env_file:
+      - ./env/db.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: forrealbank-pgadmin
+    restart: unless-stopped
+    env_file:
+      - ./env/pgadmin.env
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+    user: "0"
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api-nest/Dockerfile
+    container_name: forrealbank-api
+    restart: unless-stopped
+    env_file:
+      - ./apps/api-nest/.env
+    command: pnpm start:dev
+    volumes:
+      - ./apps/api-nest:/usr/src/app/apps/api-nest
+      - /usr/src/app/apps/api-nest/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dbdata:
+  pgadmin_data:
