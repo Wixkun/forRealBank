@@ -1,24 +1,43 @@
 import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
 import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
 import { User } from '@forreal/domain/user/User';
-import { randomUUID } from 'node:crypto';
-
-type Input = { email: string; password: string; name?: string | null };
-type Output = { id: string; email: string };
+import { RoleName } from '@forreal/domain/user/RoleName';
+import { randomUUID } from 'crypto';
 
 export class RegisterUserUseCase {
   constructor(
-    private readonly users: IUserRepository,
-    private readonly hasher: IPasswordHasher
+    private readonly userRepository: IUserRepository,
+    private readonly passwordHasher: IPasswordHasher,
   ) {}
 
-  async execute({ email, password, name }: Input): Promise<Output> {
-    if (await this.users.existsByEmail(email)) {
-      throw new Error('EMAIL_TAKEN');
-    }
-    const passwordHash = await this.hasher.hash(password);
-    const user = new User(randomUUID(), email, passwordHash, name ?? null, new Date());
-    await this.users.save(user);
-    return { id: user.id, email: user.email };
+  async execute(input: { email: string; password: string; firstName: string; lastName: string }) {
+    const emailAlreadyUsed = await this.userRepository.existsByEmail(input.email);
+    if (emailAlreadyUsed) throw new Error('EMAIL_ALREADY_REGISTERED');
+
+    const firstName = (input.firstName ?? '').replace(/\s+/g, ' ').trim();
+    const lastName = (input.lastName ?? '').replace(/\s+/g, ' ').trim();
+    if (!firstName || !lastName) throw new Error('INVALID_FULL_NAME');
+
+    const userId = randomUUID();
+    const creationDate = new Date();
+    const hashedPassword = await this.passwordHasher.hash(input.password);
+
+    const newUser = new User(
+      userId,
+      input.email,
+      hashedPassword,
+      new Set<RoleName>([RoleName.CLIENT]),
+      creationDate,
+      creationDate,
+      firstName,
+      lastName,
+      undefined,
+      false,
+      undefined,
+      undefined,
+    );
+
+    await this.userRepository.save(newUser);
+    return { success: true };
   }
 }

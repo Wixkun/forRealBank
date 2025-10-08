@@ -1,8 +1,11 @@
 export interface JwtPayload {
   sub: string;
-  email: string;
+  jti: string;
   iat?: number;
   exp?: number;
+  nbf?: number;
+  iss?: string;
+  aud?: string;
 }
 
 export interface ITokenService {

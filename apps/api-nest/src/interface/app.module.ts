@@ -12,6 +12,7 @@ import { UserEntity } from '@forreal/infrastructure-typeorm/entities/UserEntity'
 import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
 import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt/BcryptHasher';
 import { JwtTokenService } from '@forreal/infrastructure-jwt-nest/JwtTokenService';
+import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
 
 @Module({
   imports: [
@@ -23,10 +24,12 @@ import { JwtTokenService } from '@forreal/infrastructure-jwt-nest/JwtTokenServic
       type: 'postgres',
       url: process.env.DATABASE_URL,
       synchronize: true,
-      entities: [UserEntity],
+      logging: true,
+      migrationsRun: false,
+      entities: [UserEntity, RoleEntity],
       autoLoadEntities: true,
     }),
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, RoleEntity]),
     AuthModule,
   ],
   providers: [

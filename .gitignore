@@ -29,5 +29,5 @@ apps/**/.env
 .nyc_output/
 report.*.json
 **/docker-data/
-**/dbdata/
+volumes/dbdata/
 **/pgadmin_data/

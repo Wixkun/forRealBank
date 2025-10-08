@@ -2,12 +2,13 @@ import {
   Body,
   Controller,
   Get,
-  HttpCode,
   Post,
   Res,
   UseGuards,
   ConflictException,
   UnauthorizedException,
+  HttpCode,
+  BadRequestException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { RegisterDto } from './dto/register.dto';
@@ -16,55 +17,76 @@ import { RegisterUserUseCase } from '@forreal/application/user/usecases/Register
 import { LoginUserUseCase } from '@forreal/application/user/usecases/LoginUserUseCase';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 @Controller('/auth')
 export class AuthController {
   constructor(
-    private readonly registerUser: RegisterUserUseCase,
-    private readonly loginUser: LoginUserUseCase,
+    private readonly registerUserUseCase: RegisterUserUseCase,
+    private readonly loginUserUseCase: LoginUserUseCase,
   ) {}
 
+  @HttpCode(201)
   @Post('register')
-  async register(@Body() dto: RegisterDto) {
+  async register(@Body() registerData: RegisterDto) {
     try {
-      return await this.registerUser.execute(dto);
-    } catch (e) {
-      if (e instanceof Error && e.message === 'EMAIL_TAKEN') {
-        throw new ConflictException('Email déjà utilisé');
+      await this.registerUserUseCase.execute({
+        email: registerData.email,
+        password: registerData.password,
+        firstName: registerData.firstName,
+        lastName: registerData.lastName,
+      });
+      return { success: true };
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'EMAIL_ALREADY_REGISTERED' || error.message === 'EMAIL_TAKEN') {
+          throw new ConflictException('Email already registered');
+        }
+        if (error.message === 'INVALID_FULL_NAME' || error.message === 'INVALID_NAME') {
+          throw new BadRequestException('First name and last name are required');
+        }
       }
-      throw e;
+      throw error;
     }
   }
 
   @HttpCode(200)
   @Post('login')
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(@Body() loginData: LoginDto, @Res({ passthrough: true }) response: Response) {
     try {
-      const { accessToken } = await this.loginUser.execute(dto);
-      res.cookie('access_token', accessToken, {
+      const { accessToken } = await this.loginUserUseCase.execute(loginData);
+
+      response.cookie('access_token', accessToken, {
         httpOnly: true,
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 15 * 60 * 1000,
       });
-      return { accessToken };
-    } catch (e) {
-      if (e instanceof Error && e.message === 'INVALID_CREDENTIALS') {
-        throw new UnauthorizedException('Identifiants invalides');
+
+      return { success: true };
+    } catch (error) {
+      if (error instanceof Error && error.message === 'INVALID_CREDENTIALS') {
+        throw new UnauthorizedException('Invalid email or password');
       }
-      throw e;
+      throw error;
     }
   }
 
   @HttpCode(200)
   @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token', { path: '/' });
-    return { ok: true };
+  async logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('access_token', {
+      path: '/',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    });
+    return { success: true };
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  me() {
-    return { ok: true };
+  getAuthenticatedUser() {
+    return { success: true };
   }
 }
