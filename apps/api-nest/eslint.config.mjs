@@ -27,7 +27,6 @@ export default tseslint.config(
       },
     },
     rules: {
-      // Évite l’erreur de fin de ligne sous Windows
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
 
       '@typescript-eslint/no-explicit-any': 'off',

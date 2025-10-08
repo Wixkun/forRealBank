@@ -1,0 +1,10 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/domain" },
+    { "path": "packages/application" },
+    { "path": "packages/infrastructure/crypto-bcrypt" },
+    { "path": "packages/infrastructure/jwt-nest" },
+    { "path": "packages/infrastructure/typeorm" }
+  ]
+}

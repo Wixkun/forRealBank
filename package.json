@@ -6,13 +6,18 @@
     "node": "^20.11 || ^22.0"
   },
   "scripts": {
-    "dev": "pnpm -r dev",
-    "build": "pnpm -r build",
+    "build": "pnpm -r --filter @forreal/domain build && pnpm -r --filter @forreal/application build && pnpm -r --filter api-nest build",
+    "dev": "pnpm -r --parallel dev",
     "lint": "pnpm -r lint",
     "db:up": "docker compose up -d",
-    "db:down": "docker compose down -v"
+    "db:down": "docker compose down -v",
+    "bootstrap": "pnpm install --force && pnpm -r build",
+    "dk:up": "docker compose up --build",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
+    "docker:prod": "docker compose -f docker-compose.yml up --build"
   },
   "devDependencies": {
+    "rimraf": "^6.0.1",
     "typescript": "^5.9.3"
   }
 }

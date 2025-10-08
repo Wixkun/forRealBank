@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node16",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolvePackageJsonExports": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@forreal/domain/*": ["packages/domain/src/*"],
+      "@forreal/application/*": ["packages/application/src/*"],
+      "@forreal/infrastructure-typeorm/*": ["packages/infrastructure/typeorm/src/*"],
+      "@forreal/infrastructure-crypto-bcrypt/*": ["packages/infrastructure/crypto-bcrypt/src/*"],
+      "@forreal/infrastructure-jwt-nest/*": ["packages/infrastructure/jwt-nest/src/*"]
+    }
+  }
+}

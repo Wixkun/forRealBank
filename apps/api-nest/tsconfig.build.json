@@ -2,7 +2,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "declaration": true,
-    "removeComments": true
-  },
-  "exclude": ["node_modules", "test", "**/*spec.ts"]
+    "sourceMap": false,
+    "baseUrl": ".",
+    "paths": {
+      "@forreal/domain/*": ["../../packages/domain/src/*"],
+      "@forreal/infrastructure-typeorm/*": ["../../packages/infrastructure/typeorm/src/*"],
+      "@forreal/infrastructure-crypto-bcrypt/*": ["../../packages/infrastructure/crypto-bcrypt/src/*"],
+      "@forreal/infrastructure-jwt-nest/*": ["../../packages/infrastructure/jwt-nest/src/*"],
+      "@forreal/application/*": ["../../packages/application/src/*"]
+    }
+  }
 }

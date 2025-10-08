@@ -1,36 +1,39 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { AuthModule } from './auth/auth.module';
+
+import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
+import { ITokenService } from '@forreal/domain/user/ports/ITokenService';
+
+import { UserEntity } from '@forreal/infrastructure-typeorm/entities/UserEntity';
+import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
+import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt/BcryptHasher';
+import { JwtTokenService } from '@forreal/infrastructure-jwt-nest/JwtTokenService';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => {
-        const url = cfg.get<string>('DATABASE_URL');
-        if (url) {
-          return {
-            type: 'postgres',
-            url,
-            autoLoadEntities: true,
-            synchronize: true,
-          };
-        }
-        return {
-          type: 'postgres',
-          host: cfg.get<string>('DB_HOST', 'db'),
-          port: cfg.get<number>('DB_PORT', 5432),
-          username: cfg.get<string>('DB_USER', 'forreal'),
-          password: cfg.get<string>('DB_PASS', 'forreal'),
-          database: cfg.get<string>('DB_NAME', 'forrealbank'),
-          autoLoadEntities: true,
-          synchronize: true,
-        };
-      },
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['../../env/api.env'],
     }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      synchronize: true,
+      entities: [UserEntity],
+      autoLoadEntities: true,
+    }),
+    TypeOrmModule.forFeature([UserEntity]),
     AuthModule,
   ],
+  providers: [
+    { provide: IUserRepository, useClass: UserRepository },
+    { provide: IPasswordHasher, useClass: BcryptHasher },
+    { provide: ITokenService, useClass: JwtTokenService },
+  ],
+  exports: [IUserRepository, IPasswordHasher, ITokenService],
 })
 export class AppModule {}
