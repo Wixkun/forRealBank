@@ -1,16 +1,15 @@
 export interface JwtPayload {
-  sub: string;
-  jti: string;
-  iat?: number;
-  exp?: number;
-  nbf?: number;
-  iss?: string;
-  aud?: string;
+  userId: string;
+  sessionId: string;
+  issuedAt: Date;
+  expiresAt: Date;
+  issuer: string;
+  audience: string;
 }
 
 export interface ITokenService {
   sign(payload: JwtPayload): Promise<string>;
-  verify<T = unknown>(token: string): Promise<T>;
+  verify(token: string): Promise<JwtPayload>;
 }
 
 export const ITokenService = Symbol('ITokenService');
