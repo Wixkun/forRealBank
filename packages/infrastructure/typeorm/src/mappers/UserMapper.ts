@@ -39,7 +39,7 @@ export class UserMapper {
       .map(role => role.name)
       .filter(isValidRoleName);
 
-    return new User(
+    const user = new User(
       entity.id,
       entity.email,
       entity.passwordHash,
@@ -53,5 +53,10 @@ export class UserMapper {
       entity.bannedAt ?? undefined,
       entity.banReason ?? undefined,
     );
+
+    Object.setPrototypeOf(user, User.prototype);
+
+    return user;
   }
+
 }

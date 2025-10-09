@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
+
 import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
 import { User } from '@forreal/domain/user/User';
 import { RoleName } from '@forreal/domain/user/RoleName';
@@ -11,12 +12,26 @@ import { UserMapper } from '../mappers/UserMapper';
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(
-    @InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
-    @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+
+    @InjectRepository(RoleEntity)
+    private readonly roleRepository: Repository<RoleEntity>,
   ) {}
 
+  async findById(id: string): Promise<User | null> {
+    const userEntity = await this.userRepository.findOne({
+      where: { id },
+      relations: ['roles'],
+    });
+    return userEntity ? UserMapper.toDomain(userEntity) : null;
+  }
+
   async findByEmail(email: string): Promise<User | null> {
-    const userEntity = await this.userRepository.findOne({ where: { email }, relations: ['roles'] });
+    const userEntity = await this.userRepository.findOne({
+      where: { email },
+      relations: ['roles'],
+    });
     return userEntity ? UserMapper.toDomain(userEntity) : null;
   }
 
