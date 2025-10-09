@@ -12,6 +12,7 @@ import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/Use
 import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt/BcryptHasher';
 import { JwtTokenService } from '@forreal/infrastructure-jwt-nest/JwtTokenService';
 import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity'
       autoLoadEntities: true,
     }),
     TypeOrmModule.forFeature([UserEntity, RoleEntity]),
-    AuthModule,
+    AuthModule, UsersModule,
   ],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
