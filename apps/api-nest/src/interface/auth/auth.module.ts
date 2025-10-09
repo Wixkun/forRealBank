@@ -1,7 +1,10 @@
 import { Module, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
 
 import { AuthController } from './auth.controller';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { JwtStrategy } from './jwt.strategy';
 
 import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
 import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
@@ -33,16 +36,18 @@ const loginUserProvider: Provider = {
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, RoleEntity]),
+    PassportModule.register({ defaultStrategy: 'jwt', session: false }),
   ],
   controllers: [AuthController],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
-
+    JwtStrategy,
+    JwtAuthGuard,
     registerUserProvider,
     loginUserProvider,
   ],
-  exports: [RegisterUserUseCase, LoginUserUseCase],
+  exports: [RegisterUserUseCase, LoginUserUseCase, JwtAuthGuard],
 })
 export class AuthModule {}
