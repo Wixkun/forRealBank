@@ -48,6 +48,7 @@ const loginUserProvider: Provider = {
     registerUserProvider,
     loginUserProvider,
   ],
-  exports: [RegisterUserUseCase, LoginUserUseCase, JwtAuthGuard],
+
+  exports: [ITokenService, JwtAuthGuard],
 })
 export class AuthModule {}

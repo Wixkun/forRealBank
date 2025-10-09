@@ -7,4 +7,7 @@ export interface IUserRepository {
   save(user: User): Promise<void>;
   existsByEmail(email: string): Promise<boolean>;
   findById(id: string): Promise<User | null>;
+  deleteById(id: string): Promise<void>;
+  list(params?: { limit?: number; offset?: number; search?: string }): Promise<import('../User').User[]>;
+  count(params?: { search?: string }): Promise<number>;
 }
