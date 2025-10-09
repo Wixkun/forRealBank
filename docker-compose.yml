@@ -48,6 +48,18 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+    container_name: forrealbank-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001
 
 volumes:
   dbdata:
