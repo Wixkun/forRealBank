@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const hideLayout = pathname === '/login' || pathname === '/register';
+  const hideLayout = pathname === '/login' || pathname === '/register' || pathname === '/forgot-password' || pathname === '/';
 
   return (
     <html lang="fr">

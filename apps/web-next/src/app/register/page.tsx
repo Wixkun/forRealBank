@@ -1,13 +1,15 @@
 'use client';
 import { useState } from 'react';
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ email, password });
+    console.log({ firstName, lastName, email, password });
   };
 
   return (
@@ -30,6 +32,34 @@ export default function LoginPage() {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm mb-1 text-gray-200">First Name</label>
+              <input
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
+                focus:outline-none focus:ring-2 focus:ring-teal-400"
+                required
+              />
+            </div>
+
+            <div className="flex-1">
+              <label className="block text-sm mb-1 text-gray-200">Last Name</label>
+              <input
+                type="text"
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
+                focus:outline-none focus:ring-2 focus:ring-teal-400"
+                required
+              />
+            </div>
+          </div>
+
           <div>
             <label className="block text-sm mb-1 text-gray-200">Email</label>
             <input
@@ -56,28 +86,19 @@ export default function LoginPage() {
             />
           </div>
 
-          <div className="flex items-center justify-between text-sm text-gray-300">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" className="accent-teal-500" /> Remember me
-            </label>
-            <a href="/forgot-password" className="hover:text-teal-300 transition">
-              Forgot password?
-            </a>
-          </div>
-
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 
             hover:from-teal-400 hover:to-cyan-500 transition 
             text-white font-semibold py-2 rounded-lg shadow-lg"
           >
-            Login
+            Register
           </button>
 
           <p className="text-center text-sm text-gray-300 mt-4">
-            Don’t have an account?{' '}
-            <a href="/register" className="text-teal-400 hover:underline">
-              Register
+            Already have an account?{' '}
+            <a href="/login" className="text-teal-400 hover:underline">
+              Login
             </a>
           </p>
         </form>
