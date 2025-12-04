@@ -4,7 +4,6 @@ import { AppModule } from './interface/app.module';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -23,7 +22,6 @@ async function bootstrap() {
   });
 
   app.use(cookieParser());
-  app.use(helmet());
 
   if (isProd) {
     const expressApp = app.getHttpAdapter().getInstance();
