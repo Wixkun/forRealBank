@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "register": {
+      "title": "Créer un compte",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "S'inscrire",
+      "loading": "Inscription...",
+      "loginLink": "Déjà un compte ? Se connecter"
+    }
+  },
+  "home": {
+    "title": "Eudaimonia",
+    "description": "La recherche de la sagesse et de la paix intérieure à travers la raison, la vertu et la maîtrise de soi. Un chemin vers la vraie liberté."
+  }
+}

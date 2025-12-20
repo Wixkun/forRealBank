@@ -1,0 +1,18 @@
+{
+  "auth": {
+    "register": {
+      "title": "Create an account",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Register",
+      "loading": "Registering...",
+      "loginLink": "Already have an account? Login"
+    }
+  },
+  "home": {
+    "title": "Eudaimonia",
+    "description": "The pursuit of wisdom and inner peace through reason, virtue, and self-mastery. A path toward true freedom."
+  }
+}
