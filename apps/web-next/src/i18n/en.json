@@ -11,8 +11,215 @@
       "loginLink": "Already have an account? Login"
     }
   },
+  "dashboard": {
+    "greeting": "Hello,",
+    "totalBalance": "Total Balance",
+    "monthlyGrowth": "+2.5% this month",
+    "accounts": "Accounts",
+    "recentTransactions": "Recent Transactions",
+    "quickActions": {
+      "send": "Send",
+      "receive": "Receive",
+      "stats": "Stats",
+      "more": "More"
+    },
+    "accountTypes": {
+      "checking": "Checking Account",
+      "savings": "Savings"
+    }
+  },
+  "account": {
+    "title": "Account Details",
+    "balance": "Current Balance",
+    "iban": "IBAN",
+    "accountNumber": "Account Number",
+    "openedOn": "Opened on",
+    "status": "Status",
+    "active": "Active",
+    "transactions": "Transactions",
+    "allTransactions": "All Transactions",
+    "noTransactions": "No transactions yet",
+    "quickTransfer": "Quick Transfer",
+    "transferAmount": "Amount",
+    "transferTo": "Transfer to",
+    "transferDescription": "Description",
+    "transferButton": "Send Transfer",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "transactionTypes": {
+      "credit": "Credit",
+      "debit": "Debit",
+      "transfer": "Transfer",
+      "payment": "Payment",
+      "deposit": "Deposit",
+      "withdrawal": "Withdrawal"
+    },
+    "filters": {
+      "all": "All",
+      "credits": "Credits",
+      "debits": "Debits",
+      "period": "Period"
+    }
+  },
+  "brokerage": {
+    "title": "Brokerage Account",
+    "portfolio": "Portfolio",
+    "totalValue": "Total Value",
+    "totalGain": "Total Gain/Loss",
+    "dayChange": "Today's Change",
+    "positions": "Positions",
+    "noPositions": "No positions yet",
+    "symbol": "Symbol",
+    "quantity": "Quantity",
+    "avgPrice": "Avg Price",
+    "currentPrice": "Current Price",
+    "totalValue": "Total Value",
+    "gainLoss": "Gain/Loss",
+    "trade": "Trade",
+    "buy": "Buy",
+    "sell": "Sell",
+    "tradeSymbol": "Symbol",
+    "tradeQuantity": "Quantity",
+    "tradePrice": "Price",
+    "tradeTotal": "Total",
+    "placeOrder": "Place Order",
+    "orderHistory": "Order History",
+    "noOrders": "No orders yet",
+    "assetTypes": {
+      "stock": "Stock",
+      "crypto": "Crypto",
+      "etf": "ETF",
+      "commodity": "Commodity"
+    },
+    "orderTypes": {
+      "market": "Market",
+      "limit": "Limit",
+      "stop": "Stop"
+    },
+    "orderStatus": {
+      "pending": "Pending",
+      "executed": "Executed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "market": {
+    "title": "Market Overview",
+    "subtitle": "Explore and trade assets",
+    "filters": {
+      "all": "All Assets",
+      "stocks": "Stocks",
+      "crypto": "Crypto",
+      "etf": "ETFs",
+      "commodities": "Commodities"
+    },
+    "trade": "Trade",
+    "buy": "Buy",
+    "sell": "Sell",
+    "tradeSymbol": "Symbol",
+    "tradeQuantity": "Quantity",
+    "orderType": "Order Type",
+    "tradePrice": "Price",
+    "placeOrder": "Place Order",
+    "orderTypes": {
+      "market": "Market",
+      "limit": "Limit",
+      "stop": "Stop"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "404",
+      "subtitle": "Page Not Found",
+      "description": "The page you are looking for does not exist or has been moved.",
+      "backHome": "Back to Home",
+      "backDashboard": "Go to Dashboard"
+    },
+    "500": {
+      "title": "500",
+      "subtitle": "Server Error",
+      "description": "An unexpected error occurred. Our team has been notified and is working on it.",
+      "tryAgain": "Try Again",
+      "backHome": "Back to Home"
+    }
+  },
   "home": {
-    "title": "Eudaimonia",
-    "description": "The pursuit of wisdom and inner peace through reason, virtue, and self-mastery. A path toward true freedom."
+    "hero": {
+      "subtitle": "Next-Generation Banking & Trading",
+      "title": "Your Financial Freedom Starts Here",
+      "description": "AvenirBank combines the power of modern banking with advanced trading tools to offer you a complete and secure financial experience.",
+      "ctaPrimary": "Open an account",
+      "ctaSecondary": "Discover our services"
+    },
+    "features": {
+      "title": "Why Choose AvenirBank",
+      "subtitle": "A complete platform to manage your wealth with confidence",
+      "items": {
+        "security": {
+          "title": "Maximum Security",
+          "description": "Institutional-grade banking protection with multi-factor authentication and end-to-end encryption"
+        },
+        "trading": {
+          "title": "Real-Time Trading",
+          "description": "Access global markets 24/7 with professional analysis tools and live quotes"
+        },
+        "global": {
+          "title": "Global Reach",
+          "description": "Operate in 150+ countries with multi-currency support and instant international transfers"
+        },
+        "protection": {
+          "title": "Protected Funds",
+          "description": "Your deposits are guaranteed up to €100,000 with full FDIC insurance"
+        }
+      }
+    },
+    "services": {
+      "title": "Our Services",
+      "subtitle": "Financial solutions tailored to your needs",
+      "banking": {
+        "title": "Banking Services",
+        "description": "Manage your daily finances with our premium checking account with no hidden fees.",
+        "features": {
+          "cards": "Premium Visa and Mastercard bank cards",
+          "transfers": "Free and instant SEPA transfers",
+          "savings": "Savings accounts with competitive rates",
+          "loans": "Personal loans with quick approval"
+        }
+      },
+      "trading": {
+        "title": "Trading Platform",
+        "description": "Invest in stocks, ETFs, cryptocurrencies, and commodities with reduced fees.",
+        "features": {
+          "markets": "Access to 50+ global stock exchanges",
+          "analysis": "Advanced technical analysis tools",
+          "mobile": "Mobile trading with real-time notifications",
+          "education": "Free training and webinars for beginners"
+        }
+      },
+      "wealth": {
+        "title": "Wealth Management",
+        "description": "Optimize your portfolio with our certified financial advisors and AI robo-advisors.",
+        "features": {
+          "advisory": "Personalized advice from experts",
+          "portfolio": "Automated diversified portfolios",
+          "tax": "Tax optimization and declarations",
+          "estate": "Estate planning and life insurance"
+        }
+      },
+      "business": {
+        "title": "Business Solutions",
+        "description": "Banking and treasury tools designed for entrepreneurs and SMEs.",
+        "features": {
+          "accounts": "Multi-user business accounts",
+          "payments": "Payment and invoicing solutions",
+          "cashflow": "Real-time cash flow management",
+          "financing": "Business financing and credit"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to transform your financial experience?",
+      "description": "Join over 500,000 customers who trust AvenirBank to manage their money smartly. Open an account in 5 minutes, 100% online.",
+      "button": "Get started now"
+    }
   }
 }

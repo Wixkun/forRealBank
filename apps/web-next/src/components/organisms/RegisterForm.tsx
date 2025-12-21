@@ -7,10 +7,12 @@ import { FormField } from '@/components/molecules/FormField';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 export function RegisterForm() {
   const t = useTranslations('auth.register');
   const router = useRouter();
+  const [error, setError] = useState<string>('');
 
   const {
     register,
@@ -21,19 +23,35 @@ export function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
-    await fetch(`${apiUrl}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(data),
-    });
+    try {
+      setError('');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(data),
+      });
 
-    router.push('/login?registered=true');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
+
+      router.push('/login?registered=true');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during registration');
+    }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {error && (
+        <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+      
       <div className="flex gap-4">
         <FormField
           label={t('firstName')}

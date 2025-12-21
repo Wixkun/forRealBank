@@ -11,8 +11,215 @@
       "loginLink": "Déjà un compte ? Se connecter"
     }
   },
+  "dashboard": {
+    "greeting": "Bonjour,",
+    "totalBalance": "Solde total",
+    "monthlyGrowth": "+2.5% ce mois",
+    "accounts": "Comptes",
+    "recentTransactions": "Transactions récentes",
+    "quickActions": {
+      "send": "Envoyer",
+      "receive": "Recevoir",
+      "stats": "Stats",
+      "more": "Plus"
+    },
+    "accountTypes": {
+      "checking": "Compte Principal",
+      "savings": "Épargne"
+    }
+  },
+  "account": {
+    "title": "Détails du compte",
+    "balance": "Solde actuel",
+    "iban": "IBAN",
+    "accountNumber": "Numéro de compte",
+    "openedOn": "Ouvert le",
+    "status": "Statut",
+    "active": "Actif",
+    "transactions": "Transactions",
+    "allTransactions": "Toutes les transactions",
+    "noTransactions": "Aucune transaction pour le moment",
+    "quickTransfer": "Virement rapide",
+    "transferAmount": "Montant",
+    "transferTo": "Destinataire",
+    "transferDescription": "Description",
+    "transferButton": "Envoyer le virement",
+    "deposit": "Dépôt",
+    "withdraw": "Retrait",
+    "transactionTypes": {
+      "credit": "Crédit",
+      "debit": "Débit",
+      "transfer": "Virement",
+      "payment": "Paiement",
+      "deposit": "Dépôt",
+      "withdrawal": "Retrait"
+    },
+    "filters": {
+      "all": "Tout",
+      "credits": "Crédits",
+      "debits": "Débits",
+      "period": "Période"
+    }
+  },
+  "brokerage": {
+    "title": "Compte de courtage",
+    "portfolio": "Portefeuille",
+    "totalValue": "Valeur totale",
+    "totalGain": "Gain/Perte total",
+    "dayChange": "Variation du jour",
+    "positions": "Positions",
+    "noPositions": "Aucune position pour le moment",
+    "symbol": "Symbole",
+    "quantity": "Quantité",
+    "avgPrice": "Prix moyen",
+    "currentPrice": "Prix actuel",
+    "totalValue": "Valeur totale",
+    "gainLoss": "Gain/Perte",
+    "trade": "Trader",
+    "buy": "Acheter",
+    "sell": "Vendre",
+    "tradeSymbol": "Symbole",
+    "tradeQuantity": "Quantité",
+    "tradePrice": "Prix",
+    "tradeTotal": "Total",
+    "placeOrder": "Passer l'ordre",
+    "orderHistory": "Historique des ordres",
+    "noOrders": "Aucun ordre pour le moment",
+    "assetTypes": {
+      "stock": "Action",
+      "crypto": "Crypto",
+      "etf": "ETF",
+      "commodity": "Matière première"
+    },
+    "orderTypes": {
+      "market": "Marché",
+      "limit": "Limite",
+      "stop": "Stop"
+    },
+    "orderStatus": {
+      "pending": "En attente",
+      "executed": "Exécuté",
+      "cancelled": "Annulé"
+    }
+  },
+  "market": {
+    "title": "Vue du marché",
+    "subtitle": "Explorez et tradez des actifs",
+    "filters": {
+      "all": "Tous les actifs",
+      "stocks": "Actions",
+      "crypto": "Crypto",
+      "etf": "ETFs",
+      "commodities": "Matières premières"
+    },
+    "trade": "Trader",
+    "buy": "Acheter",
+    "sell": "Vendre",
+    "tradeSymbol": "Symbole",
+    "tradeQuantity": "Quantité",
+    "orderType": "Type d'ordre",
+    "tradePrice": "Prix",
+    "placeOrder": "Passer l'ordre",
+    "orderTypes": {
+      "market": "Marché",
+      "limit": "Limite",
+      "stop": "Stop"
+    }
+  },
+  "errors": {
+    "404": {
+      "title": "404",
+      "subtitle": "Page non trouvée",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+      "backHome": "Retour à l'accueil",
+      "backDashboard": "Aller au tableau de bord"
+    },
+    "500": {
+      "title": "500",
+      "subtitle": "Erreur serveur",
+      "description": "Une erreur inattendue s'est produite. Notre équipe a été notifiée et travaille dessus.",
+      "tryAgain": "Réessayer",
+      "backHome": "Retour à l'accueil"
+    }
+  },
   "home": {
-    "title": "Eudaimonia",
-    "description": "La recherche de la sagesse et de la paix intérieure à travers la raison, la vertu et la maîtrise de soi. Un chemin vers la vraie liberté."
+    "hero": {
+      "subtitle": "Banque & Courtage Nouvelle Génération",
+      "title": "Votre Liberté Financière Commence Ici",
+      "description": "AvenirBank combine la puissance d'une banque moderne avec les outils de courtage avancés pour vous offrir une expérience financière complète et sécurisée.",
+      "ctaPrimary": "Ouvrir un compte",
+      "ctaSecondary": "Découvrir nos services"
+    },
+    "features": {
+      "title": "Pourquoi choisir AvenirBank",
+      "subtitle": "Une plateforme complète pour gérer votre patrimoine avec confiance",
+      "items": {
+        "security": {
+          "title": "Sécurité Maximale",
+          "description": "Protection bancaire de niveau institutionnel avec authentification multi-facteurs et cryptage de bout en bout"
+        },
+        "trading": {
+          "title": "Trading en Temps Réel",
+          "description": "Accédez aux marchés mondiaux 24/7 avec des outils d'analyse professionnels et des cotations en direct"
+        },
+        "global": {
+          "title": "Portée Mondiale",
+          "description": "Opérez dans 150+ pays avec support multi-devises et transferts internationaux instantanés"
+        },
+        "protection": {
+          "title": "Fonds Protégés",
+          "description": "Vos dépôts sont garantis jusqu'à 100 000€ avec une assurance FDIC complète"
+        }
+      }
+    },
+    "services": {
+      "title": "Nos Services",
+      "subtitle": "Des solutions financières adaptées à vos besoins",
+      "banking": {
+        "title": "Services Bancaires",
+        "description": "Gérez vos finances quotidiennes avec notre compte courant premium sans frais cachés.",
+        "features": {
+          "cards": "Cartes bancaires premium Visa et Mastercard",
+          "transfers": "Virements SEPA gratuits et instantanés",
+          "savings": "Comptes d'épargne avec taux compétitifs",
+          "loans": "Prêts personnels avec approbation rapide"
+        }
+      },
+      "trading": {
+        "title": "Plateforme de Trading",
+        "description": "Investissez dans les actions, ETFs, crypto-monnaies et matières premières avec des frais réduits.",
+        "features": {
+          "markets": "Accès à 50+ bourses mondiales",
+          "analysis": "Outils d'analyse technique avancés",
+          "mobile": "Trading mobile avec notifications en temps réel",
+          "education": "Formation gratuite et webinaires pour débutants"
+        }
+      },
+      "wealth": {
+        "title": "Gestion de Patrimoine",
+        "description": "Optimisez votre portefeuille avec nos conseillers financiers certifiés et nos robots-conseillers IA.",
+        "features": {
+          "advisory": "Conseil personnalisé par des experts",
+          "portfolio": "Portefeuilles diversifiés automatisés",
+          "tax": "Optimisation fiscale et déclarations",
+          "estate": "Planification successorale et assurance-vie"
+        }
+      },
+      "business": {
+        "title": "Solutions Professionnelles",
+        "description": "Des outils bancaires et de trésorerie conçus pour les entrepreneurs et les PME.",
+        "features": {
+          "accounts": "Comptes professionnels multi-utilisateurs",
+          "payments": "Solutions de paiement et facturation",
+          "cashflow": "Gestion de trésorerie en temps réel",
+          "financing": "Financement et crédit professionnel"
+        }
+      }
+    },
+    "cta": {
+      "title": "Prêt à transformer votre expérience financière ?",
+      "description": "Rejoignez plus de 500 000 clients qui font confiance à AvenirBank pour gérer leur argent intelligemment. Ouverture de compte en 5 minutes, 100% en ligne.",
+      "button": "Commencer maintenant"
+    }
   }
 }

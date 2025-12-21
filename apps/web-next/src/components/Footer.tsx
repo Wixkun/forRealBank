@@ -62,7 +62,7 @@ export default function Footer() {
         <div className="text-sm text-gray-400 text-center md:text-left">
           © {new Date().getFullYear()}{' '}
           <span className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold">
-            ForReal
+            Avenir
           </span>. Tous droits réservés.
         </div>
 

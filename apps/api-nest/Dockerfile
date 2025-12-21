@@ -14,11 +14,11 @@ COPY packages/infrastructure/jwt-nest/package.json ./packages/infrastructure/jwt
 COPY packages/domain/package.json ./packages/domain/
 COPY packages/application/package.json ./packages/application/
 
-RUN pnpm install --recursive --frozen-lockfile
+RUN pnpm install --filter api-nest... --frozen-lockfile --include-workspace-root
 
 COPY . .
 
 WORKDIR /usr/src/app/apps/api-nest
 EXPOSE 3001
 
-CMD ["pnpm", "start:dev"]
+CMD ["pnpm", "exec", "nest", "start", "--watch"]

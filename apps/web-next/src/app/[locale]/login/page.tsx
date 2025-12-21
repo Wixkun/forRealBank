@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -43,7 +44,7 @@ function LoginForm() {
         throw new Error(data.message || 'Login failed');
       }
 
-      router.push('/');
+      router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
@@ -67,7 +68,7 @@ function LoginForm() {
           bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 
           bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(45,212,191,0.3)]"
         >
-          ForReal
+          Avenir
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,9 +113,9 @@ function LoginForm() {
             <label className="flex items-center gap-2">
               <input type="checkbox" className="accent-teal-500" /> Remember me
             </label>
-            <a href="/forgot-password" className="hover:text-teal-300 transition">
+            <Link href="/forgot-password" className="hover:text-teal-300 transition">
               Forgot password?
-            </a>
+            </Link>
           </div>
 
           <button
@@ -130,9 +131,9 @@ function LoginForm() {
 
           <p className="text-center text-sm text-gray-300 mt-4">
             Don’t have an account?{' '}
-            <a href="/register" className="text-teal-400 hover:underline">
+            <Link href="/register" className="text-teal-400 hover:underline">
               Register
-            </a>
+            </Link>
           </p>
         </form>
       </div>

@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -45,9 +46,9 @@ export default function ForgotPasswordPage() {
 
           <p className="text-center text-sm text-gray-300 mt-4">
             Remembered your password?{' '}
-            <a href="/login" className="text-teal-400 hover:underline">
+            <Link href="/login" className="text-teal-400 hover:underline">
               Back to Login
-            </a>
+            </Link>
           </p>
         </form>
       </div>
