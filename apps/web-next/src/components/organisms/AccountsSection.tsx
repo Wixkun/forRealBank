@@ -6,8 +6,8 @@ type Account = {
   id: string;
   name: string;
   balance: number;
-  iban: string;
-  type: 'checking' | 'savings';
+  iban?: string | undefined;
+  type: string;
   accountType?: 'banking' | 'brokerage';
 };
 
@@ -32,7 +32,7 @@ export function AccountsSection({ title, accounts, locale }: AccountsSectionProp
             id={account.id}
             name={account.name}
             balance={account.balance}
-            iban={account.iban}
+            iban={account.iban as string | undefined}
             type={account.type}
             accountType={account.accountType}
             locale={locale}

@@ -85,14 +85,7 @@ export default async function HomePage({
 
   return (
     <main className="relative min-h-screen bg-[#0d0f14] text-white overflow-hidden">
-      <HeroSection
-        title={t('hero.title')}
-        subtitle={t('hero.subtitle')}
-        description={t('hero.description')}
-        ctaPrimary={t('hero.ctaPrimary')}
-        ctaSecondary={t('hero.ctaSecondary')}
-        locale={locale}
-      />
+      <HeroSection />
       
       <FeaturesSection
         title={t('features.title')}

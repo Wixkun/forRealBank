@@ -5,10 +5,8 @@ import {
   Post,
   Res,
   UseGuards,
-  ConflictException,
-  UnauthorizedException,
   HttpCode,
-  BadRequestException,
+  UnauthorizedException,
   Req,
   Inject,
 } from '@nestjs/common';
@@ -20,27 +18,29 @@ import { LoginUserUseCase } from '@forreal/application/user/usecases/LoginUserUs
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ITokenService } from '@forreal/domain/user/ports/ITokenService';
 import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { AuthErrorMapper } from './error-mapper';
 
 const isProduction = process.env.NODE_ENV === 'production';
+const TOKEN_EXPIRY_MS = 15 * 60 * 1000;
 
 @Controller('/auth')
 export class AuthController {
   constructor(
-    private readonly registerUser: RegisterUserUseCase,
-    private readonly loginUser: LoginUserUseCase,
+    private readonly registerUserUseCase: RegisterUserUseCase,
+    private readonly loginUserUseCase: LoginUserUseCase,
 
     @Inject(ITokenService)
-    private readonly tokens: ITokenService,
+    private readonly tokenService: ITokenService,
 
     @Inject(IUserRepository)
-    private readonly users: IUserRepository,
+    private readonly userRepository: IUserRepository,
   ) {}
 
   @HttpCode(201)
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     try {
-      await this.registerUser.execute({
+      await this.registerUserUseCase.execute({
         email: dto.email.trim().toLowerCase(),
         password: dto.password,
         firstName: dto.firstName.trim(),
@@ -49,17 +49,7 @@ export class AuthController {
 
       return { success: true, message: 'User successfully registered' };
     } catch (error) {
-      if (error instanceof Error) {
-        switch (error.message) {
-          case 'EMAIL_ALREADY_REGISTERED':
-          case 'EMAIL_TAKEN':
-            throw new ConflictException('Email already registered');
-          case 'INVALID_FULL_NAME':
-          case 'INVALID_NAME':
-            throw new BadRequestException('First and last name are required');
-        }
-      }
-      throw error;
+      throw AuthErrorMapper.mapToHttpException(error);
     }
   }
 
@@ -67,22 +57,19 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     try {
-      const { accessToken } = await this.loginUser.execute(dto);
+      const { accessToken } = await this.loginUserUseCase.execute(dto);
 
       res.cookie('access_token', accessToken, {
         httpOnly: true,
         secure: isProduction,
         sameSite: isProduction ? 'none' : 'lax',
         path: '/',
-        maxAge: 15 * 60 * 1000, // 15 min
+        maxAge: TOKEN_EXPIRY_MS,
       });
 
       return { success: true, message: 'Login successful' };
     } catch (error) {
-      if (error instanceof Error && error.message === 'INVALID_CREDENTIALS') {
-        throw new UnauthorizedException('Invalid email or password');
-      }
-      throw error;
+      throw AuthErrorMapper.mapToHttpException(error);
     }
   }
 
@@ -107,8 +94,8 @@ export class AuthController {
     if (!token) throw new UnauthorizedException('Missing access token');
 
     try {
-      const decoded = await this.tokens.verify(token);
-      const user = await this.users.findById(decoded.userId);
+      const decodedToken = await this.tokenService.verify(token);
+      const user = await this.userRepository.findById(decodedToken.userId);
 
       if (!user) {
         throw new UnauthorizedException('User not found');

@@ -3,35 +3,60 @@ import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
 import { ITokenService } from '@forreal/domain/user/ports/ITokenService';
 import { randomUUID } from 'crypto';
 
+const TOKEN_EXPIRY_MINUTES = 15;
+
+/**
+ * Access Token Payload
+ * Data structure encoded in JWT tokens
+ * @interface AccessTokenPayload
+ */
 interface AccessTokenPayload {
+  /** User's unique identifier */
   userId: string;
+  /** Session unique identifier */
   sessionId: string;
+  /** Timestamp when token was issued */
   issuedAt: Date;
+  /** Timestamp when token expires */
   expiresAt: Date;
+  /** Token issuer identifier */
   issuer: string;
+  /** Token audience identifier */
   audience: string;
 }
 
+/**
+ * Login User Use Case
+ * Authenticates a user with email and password, generates JWT token
+ * @class LoginUserUseCase
+ */
 export class LoginUserUseCase {
   constructor(
-    private readonly userRepo: IUserRepository,
-    private readonly hasher: IPasswordHasher,
-    private readonly tokens: ITokenService,
+    private readonly userRepository: IUserRepository,
+    private readonly passwordHasher: IPasswordHasher,
+    private readonly tokenService: ITokenService,
   ) {}
 
+  /**
+   * Execute login operation
+   * Validates credentials, updates last login timestamp, and generates token
+   * @param input - Login credentials (email and password)
+   * @returns Promise containing the generated access token
+   * @throws Error with code INVALID_CREDENTIALS if credentials are invalid
+   */
   async execute(input: { email: string; password: string }): Promise<{ accessToken: string }> {
-    const user = await this.userRepo.findByEmail(input.email);
+    const user = await this.userRepository.findByEmail(input.email);
     if (!user) throw new Error('INVALID_CREDENTIALS');
 
-    const ok = await this.hasher.compare(input.password, user.passwordHash);
-    if (!ok) throw new Error('INVALID_CREDENTIALS');
+    const isPasswordValid = await this.passwordHasher.compare(input.password, user.passwordHash);
+    if (!isPasswordValid) throw new Error('INVALID_CREDENTIALS');
 
     user.markLogin();
-    await this.userRepo.save(user);
+    await this.userRepository.save(user);
 
     const sessionId = randomUUID();
     const issuedAt = new Date();
-    const expiresAt = new Date(issuedAt.getTime() + 15 * 60 * 1000);
+    const expiresAt = new Date(issuedAt.getTime() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
 
     const payload: AccessTokenPayload = {
       userId: user.id,
@@ -42,7 +67,7 @@ export class LoginUserUseCase {
       audience: 'forrealbank.api',
     };
 
-    const accessToken = await this.tokens.sign(payload);
+    const accessToken = await this.tokenService.sign(payload);
 
     return { accessToken };
   }

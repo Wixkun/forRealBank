@@ -6,9 +6,10 @@ import { PortfolioSummaryCard } from '@/components/molecules/PortfolioSummaryCar
 import { PositionsListSection } from '@/components/organisms/PositionsListSection';
 import { TradingPanelSection } from '@/components/organisms/TradingPanelSection';
 import { useMarketData } from '@/hooks/useMarketData';
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
+import { fetchTradingPositionsClient, placeTradingOrder } from '@/lib/api';
 
-type Position = {
+type PositionView = {
   id: string;
   symbol: string;
   name: string;
@@ -21,6 +22,15 @@ type Position = {
   gainLossPercent: string;
 };
 
+type RawPosition = {
+  id: string;
+  symbol: string;
+  name: string;
+  assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
+  quantity: number;
+  avgPurchasePrice: number;
+};
+
 type BrokeragePageContentProps = {
   locale: string;
   accountData: {
@@ -28,7 +38,7 @@ type BrokeragePageContentProps = {
     name: string;
     type: string;
   };
-  initialPositions: Position[];
+  initialPositions: PositionView[];
   translations: {
     totalValue: string;
     totalGain: string;
@@ -52,13 +62,6 @@ type BrokeragePageContentProps = {
       stop: string;
     };
   };
-  onTrade: (data: {
-    action: 'buy' | 'sell';
-    symbol: string;
-    quantity: number;
-    orderType: 'market' | 'limit' | 'stop';
-    price?: number;
-  }) => void;
 };
 
 export function BrokeragePageContent({
@@ -66,16 +69,55 @@ export function BrokeragePageContent({
   accountData,
   initialPositions,
   translations,
-  onTrade,
 }: BrokeragePageContentProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
 
-  const symbols = useMemo(() => initialPositions.map(p => p.symbol), [initialPositions]);
+  const formatCurrency = useCallback(
+    (value: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value),
+    [locale]
+  );
+
+  const formatSignedCurrency = useCallback(
+    (value: number) => {
+      const formatted = formatCurrency(Math.abs(value));
+      if (value > 0) return `+${formatted}`;
+      if (value < 0) return `-${formatted}`;
+      return `+${formatted}`;
+    },
+    [formatCurrency]
+  );
+
+  const mapPosition = useCallback(
+    (pos: RawPosition): PositionView => {
+      const currentPrice = pos.avgPurchasePrice;
+      const totalValueNum = currentPrice * pos.quantity;
+      const gainLossNum = totalValueNum - (pos.avgPurchasePrice * pos.quantity);
+      const gainLossPercentNum = (gainLossNum / (pos.avgPurchasePrice * pos.quantity)) * 100;
+
+      return {
+        id: pos.id,
+        symbol: pos.symbol,
+        name: pos.name,
+        assetType: pos.assetType,
+        quantity: pos.quantity,
+        avgPrice: formatCurrency(pos.avgPurchasePrice),
+        currentPrice: formatCurrency(currentPrice),
+        totalValue: formatCurrency(totalValueNum),
+        gainLoss: formatSignedCurrency(gainLossNum),
+        gainLossPercent: `${gainLossPercentNum >= 0 ? '+' : ''}${gainLossPercentNum.toFixed(2)}%`,
+      };
+    },
+    [formatCurrency, formatSignedCurrency]
+  );
+
+  const [basePositions, setBasePositions] = useState<PositionView[]>(initialPositions);
+
+  const symbols = useMemo(() => basePositions.map(p => p.symbol), [basePositions]);
   const { data: marketData, loading } = useMarketData(symbols, 30000);
 
   const updatedPositions = useMemo(() => {
-    return initialPositions.map(position => {
+    return basePositions.map(position => {
       const liveData = marketData[position.symbol];
       if (!liveData) return position;
 
@@ -87,13 +129,13 @@ export function BrokeragePageContent({
 
       return {
         ...position,
-        currentPrice: `€${currentPrice.toFixed(2)}`,
-        totalValue: `€${totalValue.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
-        gainLoss: `${gainLoss >= 0 ? '+' : ''}€${Math.abs(gainLoss).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
+        currentPrice: formatCurrency(currentPrice),
+        totalValue: formatCurrency(totalValue),
+        gainLoss: formatSignedCurrency(gainLoss),
         gainLossPercent: `${gainLossPercent >= 0 ? '+' : ''}${gainLossPercent.toFixed(2)}%`,
       };
     });
-  }, [initialPositions, marketData]);
+  }, [basePositions, marketData, formatCurrency, formatSignedCurrency]);
 
   const portfolioData = useMemo(() => {
     const totalValue = updatedPositions.reduce((sum, p) => {
@@ -125,6 +167,32 @@ export function BrokeragePageContent({
       dayChangePercent: `${dayChangePercent >= 0 ? '+' : ''}${dayChangePercent.toFixed(2)}%`,
     };
   }, [updatedPositions, marketData]);
+
+  const handleTrade = useCallback(async (data: {
+    action: 'buy' | 'sell';
+    symbol: string;
+    quantity: number;
+    orderType: 'market' | 'limit' | 'stop';
+    price?: number;
+  }) => {
+    try {
+      await placeTradingOrder({
+        accountId: accountData.id,
+        symbol: data.symbol.toUpperCase(),
+        side: data.action,
+        quantity: data.quantity,
+        orderType: data.orderType,
+        price: data.price,
+      });
+
+      const fresh: RawPosition[] = await fetchTradingPositionsClient(accountData.id);
+      const mapped = fresh.map((pos) => mapPosition(pos));
+      setBasePositions(mapped);
+    } catch (error) {
+      console.error('Trade failed', error);
+      alert('Order failed. Please try again.');
+    }
+  }, [accountData.id, mapPosition]);
 
   if (!mounted) {
     return (
@@ -182,7 +250,7 @@ export function BrokeragePageContent({
 
           <div>
             <TradingPanelSection
-              onTrade={onTrade}
+              onTrade={handleTrade}
               labels={{
                 title: translations.trade,
                 buy: translations.buy,

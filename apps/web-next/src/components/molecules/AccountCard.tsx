@@ -7,8 +7,8 @@ type AccountCardProps = {
   id: string;
   name: string;
   balance: number;
-  iban: string;
-  type: 'checking' | 'savings';
+  iban?: string;
+  type: string;
   accountType?: 'banking' | 'brokerage';
   locale: string;
 };
@@ -20,7 +20,7 @@ export function AccountCard({ id, name, balance, iban, type, accountType = 'bank
 
   const href = accountType === 'brokerage' 
     ? `/${locale}/brokerage/${id}` 
-    : `/${locale}/account/${type}`;
+    : `/${locale}/account/${id}`;
 
   return (
     <Link href={href} className={`block backdrop-blur-sm hover:shadow-xl rounded-2xl p-5 transition cursor-pointer group border ${
@@ -34,7 +34,7 @@ export function AccountCard({ id, name, balance, iban, type, accountType = 'bank
             <div className={`w-3 h-3 rounded-full shadow-lg ${type === 'checking' ? 'bg-gradient-to-r from-teal-400 to-cyan-400' : 'bg-gradient-to-r from-gray-400 to-gray-500'}`}></div>
             <h4 className={`font-medium text-base ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{name}</h4>
           </div>
-          <p className={`text-sm font-mono ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{iban}</p>
+          {iban && <p className={`text-sm font-mono ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{iban}</p>}
         </div>
         <div className="text-right">
           <p className={`text-2xl font-semibold ${currentTheme === 'dark' ? 'bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent' : 'text-teal-600'}`}>

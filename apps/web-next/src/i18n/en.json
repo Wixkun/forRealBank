@@ -20,6 +20,7 @@
     "quickActions": {
       "send": "Send",
       "receive": "Receive",
+      "chat": "Chat",
       "stats": "Stats",
       "more": "More"
     },

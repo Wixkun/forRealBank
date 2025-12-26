@@ -5,6 +5,7 @@ type QuickAction = {
   icon: string;
   label: string;
   variant: 'teal' | 'cyan' | 'gray';
+  href?: string;
 };
 
 type QuickActionsSectionProps = {
@@ -20,6 +21,7 @@ export function QuickActionsSection({ actions }: QuickActionsSectionProps) {
           icon={action.icon}
           label={action.label}
           variant={action.variant}
+          href={action.href}
         />
       ))}
     </div>

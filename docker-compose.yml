@@ -59,7 +59,7 @@ services:
     depends_on:
       - api
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
 
 volumes:
   dbdata:

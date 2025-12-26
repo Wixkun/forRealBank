@@ -30,6 +30,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ListUsersQueryDto } from './dto/list-users.dto';
 import { UpdateRolesDto } from './dto/update-roles.dto';
 import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { UserPresenter } from './user.presenter';
 
 @Controller('/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -46,6 +47,18 @@ export class UsersController {
   ) {}
 
   @HttpCode(200)
+    @Get('me')
+    async getMe(@Req() req: Request) {
+      const auth = (req as any).auth;
+      if (!auth?.userId) throw new BadRequestException('Missing auth context');
+
+      const user = await this.users.findById(auth.userId);
+      if (!user) throw new NotFoundException('User not found');
+
+      return UserPresenter.toDTO(user);
+    }
+
+    @HttpCode(200)
   @Patch('me')
   async updateMe(@Body() dto: UpdateProfileDto, @Req() req: Request) {
     try {
@@ -88,16 +101,7 @@ export class UsersController {
     return {
       success: true,
       total: res.total,
-      items: res.items.map((user) => ({
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        roles: Array.from(user.roles),
-        createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt,
-        isBanned: user.isBanned,
-      })),
+      items: UserPresenter.toListDTO(res.items),
     };
   }
 
@@ -108,18 +112,7 @@ export class UsersController {
     if (!user) throw new NotFoundException('User not found');
     return {
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        roles: Array.from(user.roles),
-        createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt,
-        isBanned: user.isBanned,
-        bannedAt: user.bannedAt,
-        banReason: user.banReason,
-      },
+      user: UserPresenter.toDetailDTO(user),
     };
   }
 

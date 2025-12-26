@@ -1,5 +1,26 @@
 import { getTranslations } from 'next-intl/server';
 import { AccountPageWrapper } from '@/components/templates/AccountPageWrapper';
+import { getBankAccount, getAccountTransactions } from '@/lib/server-api';
+
+type BankAccount = {
+  id: string;
+  name: string;
+  accountType: 'checking' | 'savings';
+  balance: number;
+  accountNumber?: string;
+  iban: string;
+  openedAt: string;
+  status: string;
+};
+
+type ApiTransaction = {
+  id: string;
+  type: 'credit' | 'debit' | 'transfer' | 'payment' | 'deposit' | 'withdrawal';
+  description: string;
+  date: string;
+  amount: number;
+  balance?: number;
+};
 
 type PageProps = {
   params: Promise<{
@@ -11,84 +32,55 @@ type PageProps = {
 export default async function AccountPage({ params }: PageProps) {
   const { locale, accountId } = await params;
   const t = await getTranslations({ locale, namespace: 'account' });
+  const dashboardTranslations = await getTranslations({ locale, namespace: 'dashboard' });
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);
+
+  let account: BankAccount | null = null;
+  let transactions: ApiTransaction[] = [];
+
+  try {
+    account = await getBankAccount(accountId);
+    transactions = await getAccountTransactions(accountId, 50);
+  } catch (error) {
+    console.error('[Account Page] Error loading account:', error);
+    account = null;
+  }
+
+
+
+  if (!account) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+        <div className="text-white text-lg">Chargement du compte...</div>
+      </div>
+    );
+  }
+
+  const accountTypeLabel = account.accountType === 'savings'
+    ? dashboardTranslations('accountTypes.savings')
+    : dashboardTranslations('accountTypes.checking');
 
   const accountData = {
-    id: accountId,
-    name: accountId === 'checking' ? 'Main Account' : 'Savings Account',
-    type: accountId === 'checking' ? 'Checking Account' : 'Savings Account',
-    balance: accountId === 'checking' ? '€12,458.50' : '€45,230.00',
-    accountNumber: `****${accountId === 'checking' ? '4789' : '8923'}`,
-    iban: `FR76 3000 6000 0112 3456 ${accountId === 'checking' ? '7890' : '1234'} 189`,
-    openedOn: accountId === 'checking' ? 'January 15, 2023' : 'March 22, 2023',
-    status: t('active'),
+    id: account.id,
+    name: account.name,
+    type: accountTypeLabel,
+    balance: formatCurrency(account.balance),
+    accountNumber: account.accountNumber || account.id,
+    iban: account.iban,
+    openedOn: new Date(account.openedAt).toLocaleDateString(locale),
+    status: account.status === 'active' ? t('active') : account.status,
   };
 
-  const transactions = [
-    {
-      id: '1',
-      type: 'credit' as const,
-      description: 'Salary Deposit',
-      date: '2024-12-15',
-      amount: '€3,500.00',
-      balance: '€12,458.50',
-    },
-    {
-      id: '2',
-      type: 'debit' as const,
-      description: 'Rent Payment',
-      date: '2024-12-10',
-      amount: '€1,200.00',
-      balance: '€8,958.50',
-    },
-    {
-      id: '3',
-      type: 'debit' as const,
-      description: 'Grocery Store',
-      date: '2024-12-08',
-      amount: '€156.30',
-      balance: '€10,158.50',
-    },
-    {
-      id: '4',
-      type: 'credit' as const,
-      description: 'Freelance Payment',
-      date: '2024-12-05',
-      amount: '€850.00',
-      balance: '€10,314.80',
-    },
-    {
-      id: '5',
-      type: 'payment' as const,
-      description: 'Electric Bill',
-      date: '2024-12-03',
-      amount: '€85.50',
-      balance: '€9,464.80',
-    },
-    {
-      id: '6',
-      type: 'debit' as const,
-      description: 'Restaurant',
-      date: '2024-12-01',
-      amount: '€67.20',
-      balance: '€9,550.30',
-    },
-    {
-      id: '7',
-      type: 'transfer' as const,
-      description: 'Transfer to Savings',
-      date: '2024-11-28',
-      amount: '€500.00',
-      balance: '€9,617.50',
-    },
-    {
-      id: '8',
-      type: 'credit' as const,
-      description: 'Tax Refund',
-      date: '2024-11-25',
-      amount: '€420.00',
-      balance: '€10,117.50',
-    },
-  ];
+  const formattedTransactions = transactions.map((txn: ApiTransaction) => ({
+    id: txn.id,
+    type: txn.type,
+    description: txn.description,
+    date: new Date(txn.date).toLocaleDateString(locale),
+    amount: formatCurrency(txn.amount),
+    balance: txn.balance !== undefined ? formatCurrency(txn.balance) : undefined,
+  }));
 
   const translations = {
     balance: t('balance'),
@@ -114,7 +106,7 @@ export default async function AccountPage({ params }: PageProps) {
     <AccountPageWrapper
       locale={locale}
       accountData={accountData}
-      transactions={transactions}
+      transactions={formattedTransactions}
       translations={translations}
     />
   );

@@ -13,6 +13,8 @@ export default function Header() {
 
         <nav className="hidden md:flex space-x-6 text-sm font-medium">
           <Link href="/" className="hover:text-teal-300 transition">Accueil</Link>
+          <Link href="/dashboard" className="hover:text-teal-300 transition">Dashboard</Link>
+          <Link href="/chat" className="hover:text-teal-300 transition">💬 Chat</Link>
           <Link href="/services" className="hover:text-teal-300 transition">Nos Services</Link>
           <Link href="/about" className="hover:text-teal-300 transition">À propos</Link>
           <Link href="/contact" className="hover:text-teal-300 transition">Contact</Link>

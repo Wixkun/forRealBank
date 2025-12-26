@@ -26,7 +26,7 @@ export function RegisterForm() {
     try {
       setError('');
       const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

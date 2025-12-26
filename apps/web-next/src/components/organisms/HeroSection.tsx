@@ -1,23 +1,7 @@
 'use client';
 import Image from 'next/image';
 
-type HeroSectionProps = {
-  title: string;
-  subtitle: string;
-  description: string;
-  ctaPrimary: string;
-  ctaSecondary: string;
-  locale: string;
-};
-
-export function HeroSection({ 
-  title, 
-  subtitle, 
-  description, 
-  ctaPrimary, 
-  ctaSecondary,
-  locale 
-}: HeroSectionProps) {
+export function HeroSection() {
   const scrollToFeatures = () => {
     document.getElementById('features')?.scrollIntoView({ 
       behavior: 'smooth',

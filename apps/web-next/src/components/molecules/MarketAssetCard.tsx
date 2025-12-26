@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Icon } from '@/components/ui/Icon';
+import Image from 'next/image';
 
 type MarketAssetCardProps = {
   symbol: string;
@@ -87,11 +88,12 @@ export function MarketAssetCard({
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           {logoUrl ? (
-            <img
+            <Image
               src={logoUrl}
               alt={`${name} logo`}
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-full object-contain border border-gray-700/40 bg-white/5"
-              loading="lazy"
             />
           ) : (
             <div

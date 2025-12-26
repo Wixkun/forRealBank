@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense, FormEvent } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
 function LoginForm() {
@@ -10,7 +10,10 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const locale = pathname.split('/')[1] || 'en';
 
   useEffect(() => {
     if (searchParams?.get('registered') === 'true') {
@@ -18,15 +21,17 @@ function LoginForm() {
     }
   }, [searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
     setLoading(true);
+    console.log('📝 Login attempt:', { email, password });
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      console.log('🌐 API URL:', apiUrl);
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -37,15 +42,25 @@ function LoginForm() {
           password,
         }),
       });
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
       const data = await response.json();
+      console.log('📡 Response body:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
 
-      router.push('/dashboard');
+      console.log('✅ Login success, navigating to /' + locale + '/dashboard');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('auth_token', data.token || 'authenticated');
+      }
+      setTimeout(() => {
+        router.push(`/${locale}/dashboard`);
+      }, 500);
     } catch (err: unknown) {
+      console.error('❌ Login error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred during login');
     } finally {
       setLoading(false);

@@ -50,22 +50,11 @@ type BrokeragePageWrapperProps = {
 };
 
 export function BrokeragePageWrapper(props: BrokeragePageWrapperProps) {
-  const handleTrade = (data: {
-    action: 'buy' | 'sell';
-    symbol: string;
-    quantity: number;
-    orderType: 'market' | 'limit' | 'stop';
-    price?: number;
-  }) => {
-    console.log('Trade requested:', data);
-  };
-
   return (
     <ThemeProvider>
       <BrokeragePageContent 
         {...props} 
         initialPositions={props.positions}
-        onTrade={handleTrade} 
       />
     </ThemeProvider>
   );

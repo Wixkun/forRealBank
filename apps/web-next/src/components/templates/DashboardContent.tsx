@@ -17,6 +17,7 @@ type DashboardContentProps = {
     quickActions: {
       send: string;
       receive: string;
+      chat: string;
       stats: string;
       more: string;
     };
@@ -35,8 +36,8 @@ type DashboardContentProps = {
       id: string;
       name: string;
       balance: number;
-      iban: string;
-      type: 'checking' | 'savings';
+      iban?: string;
+      type: string;
       accountType?: 'banking' | 'brokerage';
     }>;
     recentTransactions: Array<{
@@ -67,7 +68,8 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
   const quickActions = [
     { icon: '↗', label: translations.quickActions.send, variant: 'teal' as const },
     { icon: '↓', label: translations.quickActions.receive, variant: 'teal' as const },
-    { icon: '📊', label: translations.quickActions.stats, variant: 'cyan' as const },
+    { icon: '💬', label: translations.quickActions.chat, variant: 'cyan' as const, href: `/${locale}/chat` },
+    { icon: '�📊', label: translations.quickActions.stats, variant: 'cyan' as const },
     { icon: '⚙️', label: translations.quickActions.more, variant: 'gray' as const },
   ];
 

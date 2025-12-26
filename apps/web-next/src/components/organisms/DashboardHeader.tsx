@@ -6,7 +6,7 @@ type DashboardHeaderProps = {
   userName: string;
 };
 
-export function DashboardHeader({ userName }: DashboardHeaderProps) {
+export function DashboardHeader({ }: DashboardHeaderProps) {
   const { theme, toggleTheme, mounted } = useTheme();
 
   if (!mounted) {

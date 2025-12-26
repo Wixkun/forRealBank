@@ -1,5 +1,35 @@
 import { getTranslations } from 'next-intl/server';
 import { BrokeragePageWrapper } from '@/components/templates/BrokeragePageWrapper';
+import { getBrokerageAccount, getTradingPositions, getMarketPrices } from '@/lib/server-api';
+import { redirect } from 'next/navigation';
+
+type BrokerageAccount = {
+  id: string;
+  name: string;
+  status?: string;
+};
+
+type TradingPosition = {
+  id: string;
+  symbol: string;
+  name: string;
+  assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
+  quantity: number;
+  avgPurchasePrice: number;
+};
+
+type Position = {
+  id: string;
+  symbol: string;
+  name: string;
+  assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
+  quantity: number;
+  avgPrice: string;
+  currentPrice: string;
+  totalValue: string;
+  gainLoss: string;
+  gainLossPercent: string;
+};
 
 type PageProps = {
   params: Promise<{
@@ -12,110 +42,58 @@ export default async function BrokeragePage({ params }: PageProps) {
   const { locale, accountId } = await params;
   const t = await getTranslations({ locale, namespace: 'brokerage' });
 
-  const accountData = {
-    id: accountId,
-    name: 'Trading Account',
-    type: t('title'),
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);
+
+  const formatSignedCurrency = (value: number) => {
+    const formatted = formatCurrency(Math.abs(value));
+    if (value > 0) return `+${formatted}`;
+    if (value < 0) return `-${formatted}`;
+    return `+${formatted}`;
   };
 
-  const positions = [
-    {
-      id: '1',
-      symbol: 'AAPL',
-      name: 'Apple Inc.',
-      assetType: 'stock' as const,
-      quantity: 50,
-      avgPrice: '€145.30',
-      currentPrice: '€178.50',
-      totalValue: '€8,925.00',
-      gainLoss: '+€1,660.00',
-      gainLossPercent: '+22.86%',
-    },
-    {
-      id: '2',
-      symbol: 'BTC',
-      name: 'Bitcoin',
-      assetType: 'crypto' as const,
-      quantity: 0.5,
-      avgPrice: '€35,000.00',
-      currentPrice: '€42,000.00',
-      totalValue: '€21,000.00',
-      gainLoss: '+€3,500.00',
-      gainLossPercent: '+20.00%',
-    },
-    {
-      id: '3',
-      symbol: 'MSFT',
-      name: 'Microsoft Corporation',
-      assetType: 'stock' as const,
-      quantity: 30,
-      avgPrice: '€320.00',
-      currentPrice: '€378.85',
-      totalValue: '€11,365.50',
-      gainLoss: '+€1,765.50',
-      gainLossPercent: '+18.39%',
-    },
-    {
-      id: '4',
-      symbol: 'ETH',
-      name: 'Ethereum',
-      assetType: 'crypto' as const,
-      quantity: 5,
-      avgPrice: '€1,800.00',
-      currentPrice: '€2,250.00',
-      totalValue: '€11,250.00',
-      gainLoss: '+€2,250.00',
-      gainLossPercent: '+25.00%',
-    },
-    {
-      id: '5',
-      symbol: 'SPY',
-      name: 'SPDR S&P 500 ETF',
-      assetType: 'etf' as const,
-      quantity: 25,
-      avgPrice: '€410.00',
-      currentPrice: '€448.20',
-      totalValue: '€11,205.00',
-      gainLoss: '+€955.00',
-      gainLossPercent: '+9.32%',
-    },
-    {
-      id: '6',
-      symbol: 'TSLA',
-      name: 'Tesla Inc.',
-      assetType: 'stock' as const,
-      quantity: 15,
-      avgPrice: '€230.00',
-      currentPrice: '€245.50',
-      totalValue: '€3,682.50',
-      gainLoss: '+€232.50',
-      gainLossPercent: '+6.74%',
-    },
-    {
-      id: '7',
-      symbol: 'GOLD',
-      name: 'Gold Futures',
-      assetType: 'commodity' as const,
-      quantity: 10,
-      avgPrice: '€1,850.00',
-      currentPrice: '€2,020.00',
-      totalValue: '€20,200.00',
-      gainLoss: '+€1,700.00',
-      gainLossPercent: '+9.19%',
-    },
-    {
-      id: '8',
-      symbol: 'SOL',
-      name: 'Solana',
-      assetType: 'crypto' as const,
-      quantity: 100,
-      avgPrice: '€95.00',
-      currentPrice: '€108.23',
-      totalValue: '€10,823.00',
-      gainLoss: '+€1,323.00',
-      gainLossPercent: '+13.93%',
-    },
-  ];
+  let account: BrokerageAccount | null = null;
+  let positions: TradingPosition[] = [];
+  let formattedPositions: Position[] = [];
+
+  try {
+    account = await getBrokerageAccount(accountId);
+    positions = await getTradingPositions(accountId);
+    const priceMap = await getMarketPrices(positions.map((p: TradingPosition) => p.symbol));
+
+    formattedPositions = positions.map((pos) => {
+      const live = priceMap[pos.symbol];
+      const currentPrice = live?.price ?? pos.avgPurchasePrice;
+      const totalValueNum = currentPrice * pos.quantity;
+      const gainLossNum = totalValueNum - (pos.avgPurchasePrice * pos.quantity);
+      const gainLossPercentNum = (gainLossNum / (pos.avgPurchasePrice * pos.quantity)) * 100;
+
+      return {
+        id: pos.id,
+        symbol: pos.symbol,
+        name: pos.name,
+        assetType: pos.assetType,
+        quantity: pos.quantity,
+        avgPrice: formatCurrency(pos.avgPurchasePrice),
+        currentPrice: formatCurrency(currentPrice),
+        totalValue: formatCurrency(totalValueNum),
+        gainLoss: formatSignedCurrency(gainLossNum),
+        gainLossPercent: `${gainLossPercentNum >= 0 ? '+' : ''}${gainLossPercentNum.toFixed(2)}%`,
+      };
+    });
+  } catch {
+    redirect('/login');
+  }
+
+  if (!account) {
+    redirect('/login');
+  }
+
+  const accountData = {
+    id: account.id,
+    name: account.name,
+    type: t('title'),
+  };
 
   const translations = {
     totalValue: t('totalValue'),
@@ -145,7 +123,7 @@ export default async function BrokeragePage({ params }: PageProps) {
     <BrokeragePageWrapper
       locale={locale}
       accountData={accountData}
-      positions={positions}
+      positions={formattedPositions}
       translations={translations}
     />
   );

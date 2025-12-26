@@ -37,7 +37,6 @@ export function PositionCard({
   const currentTheme = mounted ? theme : 'dark';
 
   const isPositive = gainLoss.startsWith('+') || !gainLoss.startsWith('-');
-  const iconColor = isPositive ? 'text-teal-400' : 'text-red-400';
   const textColor = isPositive ? 'text-teal-400' : 'text-red-400';
 
   const assetIcons = {

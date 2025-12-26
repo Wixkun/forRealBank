@@ -1,56 +1,48 @@
-import { getTranslations } from 'next-intl/server';
+'use client';
+
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { DashboardWrapper } from '@/components/templates/DashboardWrapper';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
-export default async function DashboardPage({
-  params
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: 'dashboard' });
+export interface Account {
+  id: string;
+  name: string;
+  balance: number;
+  iban?: string;
+  type: string;
+  accountType?: 'banking' | 'brokerage';
+}
 
-  const accountData = {
-    user: {
-      firstName: 'Alexis',
-      lastName: 'Montoya',
-      email: 'alexis@example.com',
-    },
-    accounts: [
-      {
-        id: '1',
-        name: t('accountTypes.checking'),
-        balance: 5420.50,
-        iban: 'FR76 1234 5678 9012 3456 7890 123',
-        type: 'checking' as const,
-        accountType: 'banking' as const,
-      },
-      {
-        id: '2',
-        name: t('accountTypes.savings'),
-        balance: 12350.00,
-        iban: 'FR76 9876 5432 1098 7654 3210 987',
-        type: 'savings' as const,
-        accountType: 'banking' as const,
-      },
-      {
-        id: 'trading',
-        name: 'Trading Account',
-        balance: 78450.25,
-        iban: 'FR76 5555 6666 7777 8888 9999 000',
-        type: 'checking' as const,
-        accountType: 'brokerage' as const,
-      },
-    ],
-    recentTransactions: [
-      { id: '1', date: '20 Déc', description: 'Salaire', amount: 3500, type: 'credit' as const },
-      { id: '2', date: '18 Déc', description: 'Carrefour', amount: -85.40, type: 'debit' as const },
-      { id: '3', date: '15 Déc', description: 'Netflix', amount: -13.99, type: 'debit' as const },
-      { id: '4', date: '12 Déc', description: 'Virement Épargne', amount: -500, type: 'debit' as const },
-      { id: '5', date: '10 Déc', description: 'Remboursement', amount: 45.20, type: 'credit' as const },
-    ],
-  };
+export interface Transaction {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  type: 'credit' | 'debit';
+}
 
-  const totalBalance = accountData.accounts.reduce((sum, acc) => sum + acc.balance, 0);
+const INITIAL_ACCOUNT_DATA = {
+  user: {
+    firstName: 'Loading...',
+    lastName: '',
+    email: 'user@example.com',
+  },
+  accounts: [],
+  recentTransactions: [],
+};
+
+/**
+ * Dashboard Page Component
+ * Main dashboard view with accounts overview and recent transactions
+ * Uses client-side data fetching for real-time updates
+ */
+export default function DashboardPage() {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'en';
+  const t = useTranslations('dashboard');
+
+  const { accountData } = useDashboardData(INITIAL_ACCOUNT_DATA, locale);
 
   const translations = {
     greeting: t('greeting'),
@@ -61,6 +53,7 @@ export default async function DashboardPage({
     quickActions: {
       send: t('quickActions.send'),
       receive: t('quickActions.receive'),
+      chat: t('quickActions.chat'),
       stats: t('quickActions.stats'),
       more: t('quickActions.more'),
     },
@@ -69,6 +62,11 @@ export default async function DashboardPage({
       savings: t('accountTypes.savings'),
     },
   };
+
+  const totalBalance = accountData.accounts.reduce(
+    (sum, acc) => sum + (acc.balance || 0),
+    0
+  );
 
   return (
     <DashboardWrapper

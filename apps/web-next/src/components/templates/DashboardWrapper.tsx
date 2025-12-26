@@ -13,6 +13,7 @@ type DashboardWrapperProps = {
     quickActions: {
       send: string;
       receive: string;
+      chat: string;
       stats: string;
       more: string;
     };
@@ -31,8 +32,8 @@ type DashboardWrapperProps = {
       id: string;
       name: string;
       balance: number;
-      iban: string;
-      type: 'checking' | 'savings';
+      iban?: string;
+      type: string;
       accountType?: 'banking' | 'brokerage';
     }>;
     recentTransactions: Array<{
