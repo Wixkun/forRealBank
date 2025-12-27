@@ -14,9 +14,9 @@ import { ListNotificationsByUserUseCase } from '@forreal/application/notificatio
 
 @Module({
   imports: [TypeOrmModule.forFeature([NotificationEntity, UserEntity])],
+  controllers: [NotificationsController],
   providers: [
     NotificationsService,
-      NotificationsController,
     { provide: INotificationRepository, useClass: NotificationRepository },
     {
       provide: SendNotificationUseCase,

@@ -18,12 +18,17 @@ interface UseChatOptions {
   wsUrl?: string;
 }
 
-export function useChat({ conversationId, userId, apiUrl = 'http://localhost:3001/api', wsUrl = 'http://localhost:3001/api/chat' }: UseChatOptions) {
+export function useChat({ conversationId, userId, apiUrl = 'http://localhost:3001/api', wsUrl }: UseChatOptions) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
+  const [presentUserIds, setPresentUserIds] = useState<string[]>([]);
 
-  const { emit, on, off, isConnected } = useWebSocket({ url: wsUrl, userId });
+  const derivedWsUrl = wsUrl
+    || (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_WS_URL)
+    || `${apiUrl.replace(/\/$/, '').replace(/\/api$/, '')}/chat`;
+
+  const { emit, on, off, isConnected } = useWebSocket({ url: derivedWsUrl, userId });
 
   useEffect(() => {
     const loadMessages = async () => {
@@ -74,14 +79,23 @@ export function useChat({ conversationId, userId, apiUrl = 'http://localhost:300
       }
     };
 
+    const handlePresenceUpdate = (data?: unknown) => {
+      if (data && typeof data === 'object' && 'userIds' in data) {
+        const arr = (data as { userIds: string[] }).userIds;
+        if (Array.isArray(arr)) setPresentUserIds(arr);
+      }
+    };
+
     on('new_message', handleNewMessage);
     on('user_typing', handleUserTyping);
     on('user_stopped_typing', handleUserStoppedTyping);
+    on('presence_update', handlePresenceUpdate);
 
     return () => {
       off('new_message', handleNewMessage);
       off('user_typing', handleUserTyping);
       off('user_stopped_typing', handleUserStoppedTyping);
+      off('presence_update', handlePresenceUpdate);
     };
   }, [on, off]);
 
@@ -106,6 +120,7 @@ export function useChat({ conversationId, userId, apiUrl = 'http://localhost:300
     typingUsers: Array.from(typingUsers),
     isLoading,
     isConnected,
+    presentUserIds,
     sendMessage,
     startTyping,
     stopTyping,

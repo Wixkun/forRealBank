@@ -6,19 +6,19 @@ import { BalanceCard } from '@/components/molecules/BalanceCard';
 import { AccountsSection } from '@/components/organisms/AccountsSection';
 import { TransactionsSection } from '@/components/organisms/TransactionsSection';
 import { QuickActionsSection } from '@/components/organisms/QuickActionsSection';
+import NewsFeed from '@/components/feed/NewsFeed';
+import { useAuth } from '@/hooks/useAuth';
 
 type DashboardContentProps = {
   translations: {
     greeting: string;
     totalBalance: string;
-    monthlyGrowth: string;
     accounts: string;
     recentTransactions: string;
     quickActions: {
       send: string;
       receive: string;
       chat: string;
-      stats: string;
       more: string;
     };
     accountTypes: {
@@ -54,6 +54,7 @@ type DashboardContentProps = {
 
 export function DashboardContent({ translations, accountData, totalBalance, locale }: DashboardContentProps) {
   const { theme, mounted } = useTheme();
+  const { user } = useAuth();
 
   if (!mounted) {
     return (
@@ -69,7 +70,6 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
     { icon: '↗', label: translations.quickActions.send, variant: 'teal' as const },
     { icon: '↓', label: translations.quickActions.receive, variant: 'teal' as const },
     { icon: '💬', label: translations.quickActions.chat, variant: 'cyan' as const, href: `/${locale}/chat` },
-    { icon: '�📊', label: translations.quickActions.stats, variant: 'cyan' as const },
     { icon: '⚙️', label: translations.quickActions.more, variant: 'gray' as const },
   ];
 
@@ -79,7 +79,7 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
         ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900' 
         : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
     }`}>
-      <DashboardHeader userName={accountData.user.firstName} />
+      <DashboardHeader userName={accountData.user.firstName} userId={user?.id} />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         <div className="mb-8">
@@ -98,7 +98,6 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
         <BalanceCard
           label={translations.totalBalance}
           amount={totalBalance}
-          growthText={translations.monthlyGrowth}
         />
 
         <AccountsSection
@@ -113,6 +112,10 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
         />
 
         <QuickActionsSection actions={quickActions} />
+
+        <div className="mt-10">
+          <NewsFeed />
+        </div>
       </main>
     </div>
   );

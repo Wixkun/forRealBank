@@ -6,25 +6,15 @@ import { User } from '@forreal/domain/user/User';
  * @interface UserResponseDTO
  */
 export interface UserResponseDTO {
-  /** User's unique identifier */
   id: string;
-  /** User's email address */
   email: string;
-  /** User's first name */
   firstName: string;
-  /** User's last name */
   lastName: string;
-  /** Array of role names assigned to the user */
   roles: string[];
-  /** Timestamp of user creation */
   createdAt: Date;
-  /** Timestamp of user's last login (optional) */
   lastLoginAt?: Date;
-  /** Whether the user is banned */
   isBanned?: boolean;
-  /** Timestamp when user was banned (optional) */
   bannedAt?: Date;
-  /** Reason for banning the user (optional) */
   banReason?: string;
 }
 

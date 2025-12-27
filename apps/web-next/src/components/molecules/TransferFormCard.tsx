@@ -2,9 +2,12 @@
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/Button';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { transferSchema, TransferFormData } from '@/lib/schemas/transfer.schema';
 
 type TransferFormCardProps = {
-  onSubmit: (data: { amount: string; recipient: string; description: string }) => void;
+  onSubmit: (data: { amount: string; recipient: string; description?: string }) => void;
   labels: {
     title: string;
     amount: string;
@@ -18,13 +21,19 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<TransferFormData>({
+    resolver: zodResolver(transferSchema),
+  });
+
+  const onSubmitForm = (data: TransferFormData) => {
     onSubmit({
-      amount: formData.get('amount') as string,
-      recipient: formData.get('recipient') as string,
-      description: formData.get('description') as string,
+      amount: data.amount,
+      recipient: data.recipient,
+      description: data.description,
     });
   };
 
@@ -44,7 +53,7 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
         {labels.title}
       </h3>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
         <div>
           <label
             htmlFor="amount"
@@ -57,16 +66,20 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
           <input
             type="number"
             id="amount"
-            name="amount"
             step="0.01"
-            required
+            {...register('amount')}
             className={`w-full px-4 py-3 rounded-xl border transition-colors ${
-              currentTheme === 'dark'
+              errors.amount
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : currentTheme === 'dark'
                 ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
                 : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="0.00"
           />
+          {errors.amount && (
+            <p className="mt-1 text-sm text-red-500">{errors.amount.message}</p>
+          )}
         </div>
 
         <div>
@@ -81,15 +94,19 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
           <input
             type="text"
             id="recipient"
-            name="recipient"
-            required
+            {...register('recipient')}
             className={`w-full px-4 py-3 rounded-xl border transition-colors ${
-              currentTheme === 'dark'
+              errors.recipient
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : currentTheme === 'dark'
                 ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
                 : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
           />
+          {errors.recipient && (
+            <p className="mt-1 text-sm text-red-500">{errors.recipient.message}</p>
+          )}
         </div>
 
         <div>
@@ -103,22 +120,28 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
           </label>
           <textarea
             id="description"
-            name="description"
             rows={3}
+            {...register('description')}
             className={`w-full px-4 py-3 rounded-xl border transition-colors resize-none ${
-              currentTheme === 'dark'
+              errors.description
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : currentTheme === 'dark'
                 ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
                 : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="Optional description..."
           />
+          {errors.description && (
+            <p className="mt-1 text-sm text-red-500">{errors.description.message}</p>
+          )}
         </div>
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-semibold py-3 rounded-xl transition-all hover:scale-[1.02]"
+          disabled={isSubmitting}
+          className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {labels.submit}
+          {isSubmitting ? 'Processing...' : labels.submit}
         </Button>
       </form>
     </div>

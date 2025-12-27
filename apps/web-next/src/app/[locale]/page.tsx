@@ -3,6 +3,33 @@ import { HeroSection } from '@/components/organisms/HeroSection';
 import { FeaturesSection } from '@/components/organisms/FeaturesSection';
 import { ServicesSection } from '@/components/organisms/ServicesSection';
 import { CTASection } from '@/components/organisms/CTASection';
+import Header from '@/components/Header';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'home' });
+
+  return {
+    title: t('meta.title'),
+    description: t('meta.description'),
+    openGraph: {
+      title: t('meta.title'),
+      description: t('meta.description'),
+      type: 'website',
+      locale: locale,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('meta.title'),
+      description: t('meta.description'),
+    },
+  };
+}
 
 export default async function HomePage({
   params
@@ -84,27 +111,30 @@ export default async function HomePage({
   ];
 
   return (
-    <main className="relative min-h-screen bg-[#0d0f14] text-white overflow-hidden">
-      <HeroSection />
-      
-      <FeaturesSection
-        title={t('features.title')}
-        subtitle={t('features.subtitle')}
-        features={features}
-      />
-      
-      <ServicesSection
-        title={t('services.title')}
-        subtitle={t('services.subtitle')}
-        services={services}
-      />
-      
-      <CTASection
-        title={t('cta.title')}
-        description={t('cta.description')}
-        buttonText={t('cta.button')}
-        locale={locale}
-      />
-    </main>
+    <>
+      <Header />
+      <main className="relative min-h-screen bg-[#0d0f14] text-white overflow-hidden">
+        <HeroSection />
+        
+        <FeaturesSection
+          title={t('features.title')}
+          subtitle={t('features.subtitle')}
+          features={features}
+        />
+        
+        <ServicesSection
+          title={t('services.title')}
+          subtitle={t('services.subtitle')}
+          services={services}
+        />
+        
+        <CTASection
+          title={t('cta.title')}
+          description={t('cta.description')}
+          buttonText={t('cta.button')}
+          locale={locale}
+        />
+      </main>
+    </>
   );
 }

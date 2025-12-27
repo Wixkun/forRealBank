@@ -60,6 +60,7 @@ services:
       - api
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+      - API_URL=http://forrealbank-api:3001/api
 
 volumes:
   dbdata:

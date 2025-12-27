@@ -7,14 +7,12 @@ type DashboardWrapperProps = {
   translations: {
     greeting: string;
     totalBalance: string;
-    monthlyGrowth: string;
     accounts: string;
     recentTransactions: string;
     quickActions: {
       send: string;
       receive: string;
       chat: string;
-      stats: string;
       more: string;
     };
     accountTypes: {

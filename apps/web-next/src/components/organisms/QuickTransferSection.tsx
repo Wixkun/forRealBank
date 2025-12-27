@@ -3,7 +3,7 @@
 import { TransferFormCard } from '@/components/molecules/TransferFormCard';
 
 type QuickTransferSectionProps = {
-  onTransfer: (data: { amount: string; recipient: string; description: string }) => void;
+  onTransfer: (data: { amount: string; recipient: string; description?: string }) => void;
   labels: {
     title: string;
     amount: string;

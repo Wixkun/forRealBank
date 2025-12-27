@@ -21,7 +21,7 @@ export default function PrivateConversation({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { messages, typingUsers, isConnected, sendMessage, startTyping, stopTyping } = useChat({
+  const { messages, typingUsers, isConnected, presentUserIds, sendMessage, startTyping, stopTyping } = useChat({
     conversationId,
     userId,
   });
@@ -67,7 +67,7 @@ export default function PrivateConversation({
       <div className="p-4 border-b">
         <h3 className="font-semibold text-lg">{advisorName}</h3>
         <p className="text-sm text-gray-500">
-          {advisorRole} • {isConnected ? 'En ligne' : 'Hors ligne'}
+          {advisorRole} • {presentUserIds.some((id) => id !== userId) ? 'En ligne' : 'Hors ligne'}
         </p>
       </div>
 

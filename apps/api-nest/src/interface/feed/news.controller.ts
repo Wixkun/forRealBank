@@ -1,40 +1,37 @@
-import { Controller, Get, Post, Body, Param, Query, Inject, Sse } from '@nestjs/common';
-import { Observable, interval, map } from 'rxjs';
-import { CreateNewsUseCase } from '@forreal/application/feed/usecases/CreateNewsUseCase';
-import { ListNewsUseCase } from '@forreal/application/feed/usecases/ListNewsUseCase';
-import { DeleteNewsUseCase } from '@forreal/application/feed/usecases/DeleteNewsUseCase';
+import { Controller, Get, Post, Body, Param, Query, Inject, Sse, Delete } from '@nestjs/common';
+import { Observable, interval, map, switchMap, merge } from 'rxjs';
+import { NewsService } from './news.service';
 
 @Controller('news')
 export class NewsController {
   constructor(
-    @Inject(CreateNewsUseCase) private readonly createNewsUseCase: CreateNewsUseCase,
-    @Inject(ListNewsUseCase) private readonly listNewsUseCase: ListNewsUseCase,
-    @Inject(DeleteNewsUseCase) private readonly deleteNewsUseCase: DeleteNewsUseCase,
+    @Inject(NewsService) private readonly newsService: NewsService,
   ) {}
 
   @Post()
   async create(@Body() body: { authorId: string; title: string; content: string }) {
-    return this.createNewsUseCase.execute(body);
+    return this.newsService.createNews(body.authorId, body.title, body.content);
   }
 
   @Get()
   async list(@Query('limit') limit?: number, @Query('offset') offset?: number) {
-    return this.listNewsUseCase.execute({ limit: limit ? +limit : 20, offset: offset ? +offset : 0 });
+    return this.newsService.listNews(limit ? +limit : 20, offset ? +offset : 0);
   }
 
-  @Get(':id')
+  @Delete(':id')
   async delete(@Param('id') id: string) {
-    return this.deleteNewsUseCase.execute({ newsId: id });
+    return this.newsService.deleteNews(id);
   }
 
   @Sse('stream')
   stream(): Observable<MessageEvent> {
-    return interval(5000).pipe(
-      map(async () => {
-        const news = await this.listNewsUseCase.execute({ limit: 10, offset: 0 });
-        return { data: news } as MessageEvent;
-      }),
-      map((promise) => promise as any),
+    return merge(
+      this.newsService.getNewsChangeObservable(),
+      interval(5000).pipe(
+        switchMap(async () => this.newsService.listNews(10, 0)),
+      ),
+    ).pipe(
+      map((news) => ({ data: news } as MessageEvent)),
     );
   }
 }

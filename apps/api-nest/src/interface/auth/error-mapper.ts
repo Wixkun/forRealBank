@@ -11,15 +11,10 @@ import {
  * @enum AuthErrorCode
  */
 export enum AuthErrorCode {
-  /** Email address is already registered in the system */
   EMAIL_ALREADY_REGISTERED = 'EMAIL_ALREADY_REGISTERED',
-  /** Email address is already taken */
   EMAIL_TAKEN = 'EMAIL_TAKEN',
-  /** Full name (first and last) is invalid or missing */
   INVALID_FULL_NAME = 'INVALID_FULL_NAME',
-  /** Name field is invalid or missing */
   INVALID_NAME = 'INVALID_NAME',
-  /** Email or password credentials are invalid */
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
 }
 

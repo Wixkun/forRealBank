@@ -7,7 +7,7 @@ type TransactionListItemProps = {
   type: 'credit' | 'debit' | 'transfer' | 'payment' | 'deposit' | 'withdrawal';
   description: string;
   date: string;
-  amount: string;
+  amount: number;
   balance?: string;
 };
 
@@ -73,7 +73,7 @@ export function TransactionListItem({
             isCredit ? 'text-teal-400' : 'text-gray-400'
           }`}
         >
-          {isCredit ? '+' : '-'} {amount}
+          {isCredit ? '+' : '-'} {Math.abs(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
         </p>
         {balance && (
           <p

@@ -62,7 +62,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
 
         const accountsResponse = await fetch(`${apiUrl}/accounts`, {
           credentials: 'include',
-          cache: 'no-store',
+          next: { revalidate: 30 },
         });
 
         if (!accountsResponse.ok) {
@@ -86,7 +86,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
           `${apiUrl}/transactions/recent?limit=${DASHBOARD_CONFIG.RECENT_TRANSACTIONS_LIMIT}`,
           {
             credentials: 'include',
-            cache: 'no-store',
+            next: { revalidate: 30 },
           }
         );
 

@@ -1,7 +1,9 @@
-import { getTranslations } from 'next-intl/server';
+'use client';
+
+import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { BrokeragePageWrapper } from '@/components/templates/BrokeragePageWrapper';
-import { getBrokerageAccount, getTradingPositions, getMarketPrices } from '@/lib/server-api';
-import { redirect } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 type BrokerageAccount = {
   id: string;
@@ -31,62 +33,115 @@ type Position = {
   gainLossPercent: string;
 };
 
-type PageProps = {
-  params: Promise<{
-    locale: string;
-    accountId: string;
-  }>;
-};
+export default function BrokeragePage() {
+  const params = useParams();
+  const router = useRouter();
+  const locale = (params?.locale as string) || 'en';
+  const accountId = params?.accountId as string;
+  const t = useTranslations('brokerage');
+  const tCommon = useTranslations('common');
 
-export default async function BrokeragePage({ params }: PageProps) {
-  const { locale, accountId } = await params;
-  const t = await getTranslations({ locale, namespace: 'brokerage' });
+  const [account, setAccount] = useState<BrokerageAccount | null>(null);
+  const [positions, setPositions] = useState<Position[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
 
-  const formatSignedCurrency = (value: number) => {
-    const formatted = formatCurrency(Math.abs(value));
-    if (value > 0) return `+${formatted}`;
-    if (value < 0) return `-${formatted}`;
-    return `+${formatted}`;
-  };
+        // Fetch brokerage account
+        const accountRes = await fetch(`/api/proxy/accounts/brokerage/${accountId}`);
+        if (!accountRes.ok) {
+          if (accountRes.status === 401) {
+            router.push('/login');
+            return;
+          }
+          throw new Error(`Failed to fetch account: ${accountRes.status}`);
+        }
+        const accountData = await accountRes.json();
+        setAccount(accountData);
 
-  let account: BrokerageAccount | null = null;
-  let positions: TradingPosition[] = [];
-  let formattedPositions: Position[] = [];
+        // Fetch trading positions
+        const posRes = await fetch(`/api/proxy/trading/positions/${accountId}`);
+        if (posRes.ok) {
+          const positionsData: TradingPosition[] = await posRes.json();
+          
+          // Fetch market prices
+          const symbols = positionsData.map(p => p.symbol).join(',');
+          const pricesRes = await fetch(`/api/market-data?symbols=${symbols}`);
+          const priceMap: Record<string, { price: number }> = pricesRes.ok 
+            ? (await pricesRes.json()).data || {}
+            : {};
 
-  try {
-    account = await getBrokerageAccount(accountId);
-    positions = await getTradingPositions(accountId);
-    const priceMap = await getMarketPrices(positions.map((p: TradingPosition) => p.symbol));
+          // Format positions
+          const formattedPositions = positionsData.map((pos) => {
+            const live = priceMap[pos.symbol];
+            const currentPrice = live?.price ?? pos.avgPurchasePrice;
+            const totalValueNum = currentPrice * pos.quantity;
+            const gainLossNum = totalValueNum - (pos.avgPurchasePrice * pos.quantity);
+            const gainLossPercentNum = (gainLossNum / (pos.avgPurchasePrice * pos.quantity)) * 100;
 
-    formattedPositions = positions.map((pos) => {
-      const live = priceMap[pos.symbol];
-      const currentPrice = live?.price ?? pos.avgPurchasePrice;
-      const totalValueNum = currentPrice * pos.quantity;
-      const gainLossNum = totalValueNum - (pos.avgPurchasePrice * pos.quantity);
-      const gainLossPercentNum = (gainLossNum / (pos.avgPurchasePrice * pos.quantity)) * 100;
+            console.log(`[${pos.symbol}] avg: ${pos.avgPurchasePrice}, current: ${currentPrice}, qty: ${pos.quantity}, gain: ${gainLossNum}`);
 
-      return {
-        id: pos.id,
-        symbol: pos.symbol,
-        name: pos.name,
-        assetType: pos.assetType,
-        quantity: pos.quantity,
-        avgPrice: formatCurrency(pos.avgPurchasePrice),
-        currentPrice: formatCurrency(currentPrice),
-        totalValue: formatCurrency(totalValueNum),
-        gainLoss: formatSignedCurrency(gainLossNum),
-        gainLossPercent: `${gainLossPercentNum >= 0 ? '+' : ''}${gainLossPercentNum.toFixed(2)}%`,
-      };
-    });
-  } catch {
-    redirect('/login');
+            const formatCurrency = (value: number) =>
+              new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);
+
+            const formatSignedCurrency = (value: number) => {
+              const formatted = formatCurrency(Math.abs(value));
+              if (value > 0) return `+${formatted}`;
+              if (value < 0) return `-${formatted}`;
+              return `+${formatted}`;
+            };
+
+            return {
+              id: pos.id,
+              symbol: pos.symbol,
+              name: pos.name,
+              assetType: pos.assetType,
+              quantity: pos.quantity,
+              avgPrice: formatCurrency(pos.avgPurchasePrice),
+              currentPrice: formatCurrency(currentPrice),
+              totalValue: formatCurrency(totalValueNum),
+              gainLoss: formatSignedCurrency(gainLossNum),
+              gainLossPercent: `${gainLossPercentNum >= 0 ? '+' : ''}${gainLossPercentNum.toFixed(2)}%`,
+            };
+          });
+
+          setPositions(formattedPositions);
+        }
+      } catch (err) {
+        console.error('[Brokerage Page] Error loading account:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (accountId) {
+      fetchData();
+    }
+  }, [accountId, locale, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+        <div className="text-white text-lg">{tCommon('loadingAccount')}</div>
+      </div>
+    );
   }
 
-  if (!account) {
-    redirect('/login');
+  if (error || !account) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+        <div className="text-white">
+          <div className="text-lg mb-2">{tCommon('errorLoadingAccount')}</div>
+          <div className="text-sm text-gray-300">ID: {accountId}</div>
+          {error && <div className="text-sm text-red-300 mt-2">{error}</div>}
+        </div>
+      </div>
+    );
   }
 
   const accountData = {
@@ -123,7 +178,7 @@ export default async function BrokeragePage({ params }: PageProps) {
     <BrokeragePageWrapper
       locale={locale}
       accountData={accountData}
-      positions={formattedPositions}
+      positions={positions}
       translations={translations}
     />
   );

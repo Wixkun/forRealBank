@@ -2,8 +2,12 @@
 import { useState, useEffect, Suspense, FormEvent } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { AuthLayout } from '@/components/templates/AuthLayout';
 
 function LoginForm() {
+  const t = useTranslations('auth.login');
+  const tCommon = useTranslations('common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,21 +20,42 @@ function LoginForm() {
   const locale = pathname.split('/')[1] || 'en';
 
   useEffect(() => {
+    // Check if user is already authenticated
+    const checkAuth = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        const response = await fetch(`${apiUrl}/auth/me`, {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          // User is authenticated, redirect to dashboard
+          router.push(`/${locale}/dashboard`);
+        }
+      } catch {
+        // User is not authenticated, stay on login page
+      }
+    };
+    
+    checkAuth();
+    
     if (searchParams?.get('registered') === 'true') {
-      setSuccessMessage('Registration successful! Please login.');
+      setSuccessMessage(t('registrationSuccess'));
     }
-  }, [searchParams]);
+  }, [searchParams, router, locale, t]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
     setLoading(true);
-    console.log('📝 Login attempt:', { email, password });
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-      console.log('🌐 API URL:', apiUrl);
       const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
@@ -42,17 +67,13 @@ function LoginForm() {
           password,
         }),
       });
-      console.log('📡 Response status:', response.status);
-      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
       const data = await response.json();
-      console.log('📡 Response body:', data);
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || t('loginFailed'));
       }
 
-      console.log('✅ Login success, navigating to /' + locale + '/dashboard');
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth_token', data.token || 'authenticated');
       }
@@ -61,30 +82,14 @@ function LoginForm() {
       }, 500);
     } catch (err: unknown) {
       console.error('❌ Login error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
+      setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center 
-      bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800 
-      bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/wallpaper.jpeg')" }}
-    >
-      <div className="absolute inset-0 bg-black/30" />
-
-      <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 text-white">
-        
-        <h2
-          className="text-4xl font-bold text-center mb-6 
-          bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 
-          bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(45,212,191,0.3)]"
-        >
-          Avenir
-        </h2>
+    <AuthLayout title={t('title')}>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {successMessage && (
@@ -99,10 +104,10 @@ function LoginForm() {
           )}
 
           <div>
-            <label className="block text-sm mb-1 text-gray-200">Email</label>
+            <label className="block text-sm mb-1 text-gray-200">{t('email')}</label>
             <input
               type="email"
-              placeholder="example@bank.com"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
@@ -112,25 +117,16 @@ function LoginForm() {
           </div>
 
           <div>
-            <label className="block text-sm mb-1 text-gray-200">Password</label>
+            <label className="block text-sm mb-1 text-gray-200">{t('password')}</label>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder={t('passwordPlaceholder')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
               focus:outline-none focus:ring-2 focus:ring-teal-400"
               required
             />
-          </div>
-
-          <div className="flex items-center justify-between text-sm text-gray-300">
-            <label className="flex items-center gap-2">
-              <input type="checkbox" className="accent-teal-500" /> Remember me
-            </label>
-            <Link href="/forgot-password" className="hover:text-teal-300 transition">
-              Forgot password?
-            </Link>
           </div>
 
           <button
@@ -141,18 +137,17 @@ function LoginForm() {
             text-white font-semibold py-2 rounded-lg shadow-lg
             disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? t('loading') : t('submit')}
           </button>
 
           <p className="text-center text-sm text-gray-300 mt-4">
-            Don’t have an account?{' '}
-            <Link href="/register" className="text-teal-400 hover:underline">
-              Register
+            {tCommon('alreadyHaveAccount')} {' '}
+            <Link href={`/${locale}/register`} className="text-teal-400 hover:underline">
+              {tCommon('register')}
             </Link>
           </p>
         </form>
-      </div>
-    </div>
+    </AuthLayout>
   );
 }
 

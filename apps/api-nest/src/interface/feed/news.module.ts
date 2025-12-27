@@ -18,9 +18,9 @@ import { DeleteNewsUseCase } from '@forreal/application/feed/usecases/DeleteNews
 
 @Module({
   imports: [TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity])],
+  controllers: [NewsController],
   providers: [
     NewsService,
-      NewsController,
     { provide: INewsRepository, useClass: NewsRepository },
     { provide: IUserRepository, useClass: UserRepository },
     {

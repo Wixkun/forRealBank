@@ -1,5 +1,28 @@
 {
+  "common": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "loading": "Loading...",
+    "loadingAccount": "Loading account...",
+    "error": "Error",
+    "errorLoadingAccount": "Error loading account",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
   "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Login",
+      "loading": "Logging in...",
+      "emailPlaceholder": "example@bank.com",
+      "passwordPlaceholder": "********",
+      "registrationSuccess": "Registration successful! Please login.",
+      "loginFailed": "Login failed",
+      "genericError": "An error occurred during login"
+    },
     "register": {
       "title": "Create an account",
       "firstName": "First name",
@@ -144,6 +167,10 @@
     }
   },
   "home": {
+    "meta": {
+      "title": "AvenirBank - Next-Generation Banking & Trading",
+      "description": "AvenirBank combines the power of modern banking with advanced trading tools. Manage your accounts, invest in stocks and trade crypto securely."
+    },
     "hero": {
       "subtitle": "Next-Generation Banking & Trading",
       "title": "Your Financial Freedom Starts Here",

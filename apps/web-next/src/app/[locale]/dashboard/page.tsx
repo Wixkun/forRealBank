@@ -32,11 +32,6 @@ const INITIAL_ACCOUNT_DATA = {
   recentTransactions: [],
 };
 
-/**
- * Dashboard Page Component
- * Main dashboard view with accounts overview and recent transactions
- * Uses client-side data fetching for real-time updates
- */
 export default function DashboardPage() {
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
@@ -47,14 +42,12 @@ export default function DashboardPage() {
   const translations = {
     greeting: t('greeting'),
     totalBalance: t('totalBalance'),
-    monthlyGrowth: t('monthlyGrowth'),
     accounts: t('accounts'),
     recentTransactions: t('recentTransactions'),
     quickActions: {
       send: t('quickActions.send'),
       receive: t('quickActions.receive'),
       chat: t('quickActions.chat'),
-      stats: t('quickActions.stats'),
       more: t('quickActions.more'),
     },
     accountTypes: {

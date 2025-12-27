@@ -18,10 +18,13 @@ interface NewsFeedProps {
 export default function NewsFeed({ apiUrl = 'http://localhost:3001/api' }: NewsFeedProps) {
   const [news, setNews] = useState<NewsItem[]>([]);
 
-  const { isConnected } = useSSE<NewsItem[]>({
+  type NewsSSEPayload = NewsItem[] | { data: NewsItem[] };
+
+  const { isConnected } = useSSE<NewsSSEPayload>({
     url: `${apiUrl}/news/stream`,
-    onMessage: (newData) => {
-      setNews(newData);
+    onMessage: (payload) => {
+      const arr = Array.isArray(payload) ? payload : (payload as { data?: NewsItem[] })?.data ?? [];
+      setNews(arr as NewsItem[]);
     },
   });
 

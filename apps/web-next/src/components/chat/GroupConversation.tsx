@@ -17,7 +17,7 @@ export default function GroupConversation({
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, isConnected, sendMessage } = useChat({ conversationId, userId });
+  const { messages, presentUserIds, isConnected, sendMessage } = useChat({ conversationId, userId });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -60,7 +60,7 @@ export default function GroupConversation({
       <div className="p-4 border-b">
         <h3 className="font-semibold text-lg">Discussion de groupe</h3>
         <p className="text-sm text-gray-500">
-          {participants.length} participant{participants.length > 1 ? 's' : ''} · {isConnected ? 'En ligne' : 'Hors ligne'}
+          {participants.length} participant{participants.length > 1 ? 's' : ''} · {presentUserIds.filter((id) => id !== userId).length > 0 ? 'En ligne' : 'Hors ligne'}
         </p>
       </div>
 

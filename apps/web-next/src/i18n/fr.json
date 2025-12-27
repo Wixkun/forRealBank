@@ -1,5 +1,28 @@
 {
+  "common": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "loading": "Chargement...",
+    "loadingAccount": "Chargement du compte...",
+    "error": "Erreur",
+    "errorLoadingAccount": "Erreur de chargement du compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter"
+  },
   "auth": {
+    "login": {
+      "title": "Connexion",
+      "email": "Email",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "loading": "Connexion...",
+      "emailPlaceholder": "exemple@banque.com",
+      "passwordPlaceholder": "********",
+      "registrationSuccess": "Inscription réussie ! Connectez-vous.",
+      "loginFailed": "La connexion a échoué",
+      "genericError": "Une erreur est survenue lors de la connexion"
+    },
     "register": {
       "title": "Créer un compte",
       "firstName": "Prénom",
@@ -144,6 +167,10 @@
     }
   },
   "home": {
+    "meta": {
+      "title": "AvenirBank - Banque & Courtage Nouvelle Génération",
+      "description": "AvenirBank combine la puissance d'une banque moderne avec les outils de courtage avancés. Gérez vos comptes, investissez en bourse et tradez les cryptos en toute sécurité."
+    },
     "hero": {
       "subtitle": "Banque & Courtage Nouvelle Génération",
       "title": "Votre Liberté Financière Commence Ici",

@@ -6,7 +6,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
  * @interface FetchOptions
  */
 interface FetchOptions extends Omit<RequestInit, 'cache'> {
-  /** HTTP cache policy */
   cache?: RequestCache;
 }
 
@@ -201,17 +200,11 @@ export async function fetchTradingPositionsClient(accountId: string) {
  * @returns Promise containing the created order information
  */
 export async function placeTradingOrder(body: {
-  /** Account identifier */
   accountId: string;
-  /** Trading symbol (e.g., AAPL, GOOGL) */
   symbol: string;
-  /** Order direction (buy or sell) */
   side: 'buy' | 'sell';
-  /** Number of shares to trade */
   quantity: number;
-  /** Order type (market, limit, or stop) */
   orderType: 'market' | 'limit' | 'stop';
-  /** Price for limit/stop orders */
   price?: number;
 }) {
   return apiCall<unknown>(

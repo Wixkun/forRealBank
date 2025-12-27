@@ -11,17 +11,11 @@ const TOKEN_EXPIRY_MINUTES = 15;
  * @interface AccessTokenPayload
  */
 interface AccessTokenPayload {
-  /** User's unique identifier */
   userId: string;
-  /** Session unique identifier */
   sessionId: string;
-  /** Timestamp when token was issued */
   issuedAt: Date;
-  /** Timestamp when token expires */
   expiresAt: Date;
-  /** Token issuer identifier */
   issuer: string;
-  /** Token audience identifier */
   audience: string;
 }
 

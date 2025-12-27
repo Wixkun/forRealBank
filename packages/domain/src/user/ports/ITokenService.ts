@@ -4,17 +4,11 @@
  * @interface JwtPayload
  */
 export interface JwtPayload {
-  /** User's unique identifier */
   userId: string;
-  /** Session unique identifier */
   sessionId: string;
-  /** Timestamp when the token was issued */
   issuedAt: Date;
-  /** Timestamp when the token expires */
   expiresAt: Date;
-  /** Token issuer identifier */
   issuer: string;
-  /** Token audience identifier */
   audience: string;
 }
 

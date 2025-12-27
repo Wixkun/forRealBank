@@ -1,6 +1,9 @@
-import { getTranslations } from 'next-intl/server';
+'use client';
+
+import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { AccountPageWrapper } from '@/components/templates/AccountPageWrapper';
-import { getBankAccount, getAccountTransactions } from '@/lib/server-api';
+import { useEffect, useState } from 'react';
 
 type BankAccount = {
   id: string;
@@ -22,45 +25,75 @@ type ApiTransaction = {
   balance?: number;
 };
 
-type PageProps = {
-  params: Promise<{
-    locale: string;
-    accountId: string;
-  }>;
-};
+export default function AccountPage() {
+  const params = useParams();
+  const locale = (params?.locale as string) || 'en';
+  const accountId = params?.accountId as string;
+  const t = useTranslations('account');
+    const tCommon = useTranslations('common');
+  const dashboardT = useTranslations('dashboard');
 
-export default async function AccountPage({ params }: PageProps) {
-  const { locale, accountId } = await params;
-  const t = await getTranslations({ locale, namespace: 'account' });
-  const dashboardTranslations = await getTranslations({ locale, namespace: 'dashboard' });
+  const [account, setAccount] = useState<BankAccount | null>(null);
+  const [transactions, setTransactions] = useState<ApiTransaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const accountRes = await fetch(`/api/proxy/accounts/bank/${accountId}`);
+        if (!accountRes.ok) {
+          throw new Error(`Failed to fetch account: ${accountRes.status}`);
+        }
+        const accountData = await accountRes.json();
+        setAccount(accountData);
+
+        const txnRes = await fetch(`/api/proxy/transactions/account/${accountId}?limit=50`);
+        if (txnRes.ok) {
+          const txnData = await txnRes.json();
+          setTransactions(txnData);
+        }
+      } catch (err) {
+        console.error('[Account Page] Error loading account:', err);
+        setError(err instanceof Error ? err.message : 'Unknown error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (accountId) {
+      fetchData();
+    }
+  }, [accountId]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);
 
-  let account: BankAccount | null = null;
-  let transactions: ApiTransaction[] = [];
-
-  try {
-    account = await getBankAccount(accountId);
-    transactions = await getAccountTransactions(accountId, 50);
-  } catch (error) {
-    console.error('[Account Page] Error loading account:', error);
-    account = null;
-  }
-
-
-
-  if (!account) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
-        <div className="text-white text-lg">Chargement du compte...</div>
+        <div className="text-white text-lg">{tCommon('loadingAccount')}</div>
+      </div>
+    );
+  }
+
+  if (error || !account) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+        <div className="text-white">
+          <div className="text-lg mb-2">{tCommon('errorLoadingAccount')}</div>
+          <div className="text-sm text-gray-300">ID: {accountId}</div>
+          {error && <div className="text-sm text-red-300 mt-2">{error}</div>}
+        </div>
       </div>
     );
   }
 
   const accountTypeLabel = account.accountType === 'savings'
-    ? dashboardTranslations('accountTypes.savings')
-    : dashboardTranslations('accountTypes.checking');
+    ? dashboardT('accountTypes.savings')
+    : dashboardT('accountTypes.checking');
 
   const accountData = {
     id: account.id,
@@ -78,7 +111,7 @@ export default async function AccountPage({ params }: PageProps) {
     type: txn.type,
     description: txn.description,
     date: new Date(txn.date).toLocaleDateString(locale),
-    amount: formatCurrency(txn.amount),
+    amount: txn.amount, 
     balance: txn.balance !== undefined ? formatCurrency(txn.balance) : undefined,
   }));
 

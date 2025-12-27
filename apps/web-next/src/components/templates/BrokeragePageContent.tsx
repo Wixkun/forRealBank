@@ -121,7 +121,7 @@ export function BrokeragePageContent({
       const liveData = marketData[position.symbol];
       if (!liveData) return position;
 
-      const avgPriceNum = parseFloat(position.avgPrice.replace(/[€,]/g, ''));
+      const avgPriceNum = parseFloat(position.avgPrice.replace(/[€\s]/g, '').replace(',', '.'));
       const currentPrice = liveData.price;
       const totalValue = currentPrice * position.quantity;
       const gainLoss = totalValue - (avgPriceNum * position.quantity);
@@ -139,11 +139,11 @@ export function BrokeragePageContent({
 
   const portfolioData = useMemo(() => {
     const totalValue = updatedPositions.reduce((sum, p) => {
-      return sum + parseFloat(p.totalValue.replace(/[€,]/g, ''));
+      return sum + parseFloat(p.totalValue.replace(/[€\s]/g, '').replace(',', '.'));
     }, 0);
 
     const totalCost = updatedPositions.reduce((sum, p) => {
-      const avgPrice = parseFloat(p.avgPrice.replace(/[€,]/g, ''));
+      const avgPrice = parseFloat(p.avgPrice.replace(/[€\s]/g, '').replace(',', '.'));
       return sum + (avgPrice * p.quantity);
     }, 0);
 
@@ -153,7 +153,7 @@ export function BrokeragePageContent({
     const dayChangeValue = updatedPositions.reduce((sum, p) => {
       const liveData = marketData[p.symbol];
       if (!liveData) return sum;
-      const currentValue = parseFloat(p.totalValue.replace(/[€,]/g, ''));
+      const currentValue = parseFloat(p.totalValue.replace(/[€\s]/g, '').replace(',', '.'));
       return sum + (currentValue * (liveData.change24h / 100));
     }, 0);
 

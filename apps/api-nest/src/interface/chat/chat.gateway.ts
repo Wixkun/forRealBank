@@ -19,6 +19,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private connectedUsers = new Map<string, { socketId: string; userId: string }>();
   private typingUsers = new Map<string, Set<string>>(); // conversationId -> Set<userId>
+  private roomMembers = new Map<string, Set<string>>(); // conversationId -> Set<userId>
+  private socketRooms = new Map<string, Set<string>>(); // socketId -> Set<conversationId>
 
   constructor(
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
@@ -35,11 +37,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log(`Client disconnected: ${client.id}`);
+    const user = this.connectedUsers.get(client.id);
+    if (user) {
+      this.typingUsers.forEach((users) => users.delete(user.userId));
+    }
+    const rooms = this.socketRooms.get(client.id);
+    if (rooms && user) {
+      rooms.forEach((conversationId) => {
+        const members = this.roomMembers.get(conversationId);
+        if (members) {
+          members.delete(user.userId);
+          this.roomMembers.set(conversationId, members);
+          this.broadcastPresence(conversationId);
+        }
+      });
+    }
+    this.socketRooms.delete(client.id);
     this.connectedUsers.delete(client.id);
-    this.typingUsers.forEach((users) => {
-      const user = this.connectedUsers.get(client.id);
-      if (user) users.delete(user.userId);
-    });
   }
 
   @SubscribeMessage('join_conversation')
@@ -47,21 +61,37 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string; userId: string },
   ) {
+    console.log('[WS] join_conversation', { socketId: client.id, conversationId: data.conversationId, userId: data.userId });
+    client.join(`conversation:${data.conversationId}`);
+    let socketSet = this.socketRooms.get(client.id);
+    if (!socketSet) {
+      socketSet = new Set<string>();
+      this.socketRooms.set(client.id, socketSet);
+    }
+    socketSet.add(data.conversationId);
+    let members = this.roomMembers.get(data.conversationId);
+    if (!members) {
+      members = new Set<string>();
+      this.roomMembers.set(data.conversationId, members);
+    }
+    members.add(data.userId);
+    this.broadcastPresence(data.conversationId);
     try {
       await this.addConversationParticipantUseCase.execute({
         conversationId: data.conversationId,
         userId: data.userId,
       });
-      client.join(`conversation:${data.conversationId}`);
-      this.server.to(`conversation:${data.conversationId}`).emit('user_joined', {
-        conversationId: data.conversationId,
-        userId: data.userId,
-      });
-      return { success: true };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      return { success: false, error: message };
+      if (!message?.toLowerCase?.().includes('already')) {
+        console.error('[WS][ERROR] join_conversation', { socketId: client.id, error: message });
+      }
     }
+    this.server.to(`conversation:${data.conversationId}`).emit('user_joined', {
+      conversationId: data.conversationId,
+      userId: data.userId,
+    });
+    return { success: true };
   }
 
   @SubscribeMessage('send_message')
@@ -70,6 +100,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { conversationId: string; senderId: string; content: string },
   ) {
     try {
+      console.log('[WS] send_message', { socketId: client.id, conversationId: data.conversationId, senderId: data.senderId, contentLen: data.content?.length ?? 0 });
       const messageResult = await this.sendMessageUseCase.execute({
         conversationId: data.conversationId,
         senderId: data.senderId,
@@ -90,6 +121,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return { success: true, messageId: messageResult.messageId };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      console.error('[WS][ERROR] send_message', { socketId: client.id, error: message });
       return { success: false, error: message };
     }
   }
@@ -99,6 +131,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string; userId: string },
   ) {
+    console.log('[WS] typing_start', { socketId: client.id, conversationId: data.conversationId, userId: data.userId });
     let typingUserIds = this.typingUsers.get(data.conversationId);
     if (!typingUserIds) {
       typingUserIds = new Set<string>();
@@ -119,6 +152,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string; userId: string },
   ) {
+    console.log('[WS] typing_stop', { socketId: client.id, conversationId: data.conversationId, userId: data.userId });
     this.clearTyping(data.conversationId, data.userId);
     return { success: true };
   }
@@ -140,6 +174,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { conversationId: string },
   ) {
     client.leave(`conversation:${data.conversationId}`);
+    const user = this.connectedUsers.get(client.id);
+    if (user) {
+      const rooms = this.socketRooms.get(client.id);
+      if (rooms) {
+        rooms.delete(data.conversationId);
+        this.socketRooms.set(client.id, rooms);
+      }
+      const members = this.roomMembers.get(data.conversationId);
+      if (members) {
+        members.delete(user.userId);
+        this.roomMembers.set(data.conversationId, members);
+        this.broadcastPresence(data.conversationId);
+      }
+    }
     return { success: true };
+  }
+
+  private broadcastPresence(conversationId: string) {
+    const members = Array.from(this.roomMembers.get(conversationId) || []);
+    this.server.to(`conversation:${conversationId}`).emit('presence_update', {
+      conversationId,
+      userIds: members,
+    });
   }
 }

@@ -4,6 +4,10 @@ import { useState } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/Button';
 import { useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { tradeSchema, TradeFormData } from '@/lib/schemas/trade.schema';
+import { z } from 'zod';
 
 type TradeFormCardProps = {
   onTrade: (data: {
@@ -31,23 +35,37 @@ type TradeFormCardProps = {
   };
 };
 
+type TradeFormInput = z.input<typeof tradeSchema>;
+
 export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
   const [action, setAction] = useState<'buy' | 'sell'>('buy');
-  const [orderType, setOrderType] = useState<'market' | 'limit' | 'stop'>('market');
   const searchParams = useSearchParams();
   const initialSymbol = (defaultSymbol || searchParams?.get('symbol') || '').toUpperCase();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<TradeFormInput, unknown, TradeFormData>({
+    resolver: zodResolver(tradeSchema),
+    defaultValues: {
+      symbol: initialSymbol,
+      orderType: 'market',
+    },
+  });
+
+  const orderType = watch('orderType');
+
+  const onSubmitForm = (data: TradeFormData) => {
     onTrade({
       action,
-      symbol: formData.get('symbol') as string,
-      quantity: Number(formData.get('quantity')),
-      orderType,
-      price: orderType !== 'market' ? Number(formData.get('price')) : undefined,
+      symbol: data.symbol,
+      quantity: data.quantity,
+      orderType: data.orderType,
+      price: data.price,
     });
   };
 
@@ -96,7 +114,7 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
         <div>
           <label
             htmlFor="symbol"
@@ -109,16 +127,19 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
           <input
             type="text"
             id="symbol"
-            name="symbol"
-            required
+            {...register('symbol')}
             className={`w-full px-4 py-3 rounded-xl border transition-colors uppercase ${
-              currentTheme === 'dark'
+              errors.symbol
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : currentTheme === 'dark'
                 ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
                 : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="AAPL, BTC, etc."
-            defaultValue={initialSymbol}
           />
+          {errors.symbol && (
+            <p className="mt-1 text-sm text-red-500">{errors.symbol.message}</p>
+          )}
         </div>
 
         <div>
@@ -133,16 +154,20 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
           <input
             type="number"
             id="quantity"
-            name="quantity"
             step="0.01"
-            required
+            {...register('quantity')}
             className={`w-full px-4 py-3 rounded-xl border transition-colors ${
-              currentTheme === 'dark'
+              errors.quantity
+                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                : currentTheme === 'dark'
                 ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
                 : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="1"
           />
+          {errors.quantity && (
+            <p className="mt-1 text-sm text-red-500">{errors.quantity.message}</p>
+          )}
         </div>
 
         <div>
@@ -155,11 +180,9 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
           </label>
           <div className="flex gap-2">
             {(['market', 'limit', 'stop'] as const).map((type) => (
-              <button
+              <label
                 key={type}
-                type="button"
-                onClick={() => setOrderType(type)}
-                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer text-center ${
                   orderType === type
                     ? 'bg-teal-500 text-white'
                     : currentTheme === 'dark'
@@ -167,10 +190,19 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
+                <input
+                  type="radio"
+                  value={type}
+                  {...register('orderType')}
+                  className="sr-only"
+                />
                 {labels.orderTypes[type]}
-              </button>
+              </label>
             ))}
           </div>
+          {errors.orderType && (
+            <p className="mt-1 text-sm text-red-500">{errors.orderType.message}</p>
+          )}
         </div>
 
         {orderType !== 'market' && (
@@ -186,28 +218,33 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
             <input
               type="number"
               id="price"
-              name="price"
               step="0.01"
-              required
+              {...register('price')}
               className={`w-full px-4 py-3 rounded-xl border transition-colors ${
-                currentTheme === 'dark'
+                errors.price
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                  : currentTheme === 'dark'
                   ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
                   : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
               } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
               placeholder="0.00"
             />
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-500">{errors.price.message}</p>
+            )}
           </div>
         )}
 
         <Button
           type="submit"
-          className={`w-full font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] ${
+          disabled={isSubmitting}
+          className={`w-full font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${
             action === 'buy'
               ? 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white'
               : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white'
           }`}
         >
-          {labels.placeOrder}
+          {isSubmitting ? 'Processing...' : labels.placeOrder}
         </Button>
       </form>
     </div>

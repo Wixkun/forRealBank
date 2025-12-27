@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface UseSSEOptions<T> {
   url: string;
@@ -13,6 +13,14 @@ export function useSSE<T = unknown>({ url, enabled = true, onMessage, onError }:
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Event | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  
+  const onMessageRef = useRef(onMessage);
+  const onErrorRef = useRef(onError);
+
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+    onErrorRef.current = onError;
+  }, [onMessage, onError]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -28,7 +36,7 @@ export function useSSE<T = unknown>({ url, enabled = true, onMessage, onError }:
       try {
         const parsedData = JSON.parse(event.data);
         setData(parsedData);
-        onMessage?.(parsedData);
+        onMessageRef.current?.(parsedData);
       } catch (e) {
         console.error('Failed to parse SSE data:', e);
       }
@@ -37,7 +45,7 @@ export function useSSE<T = unknown>({ url, enabled = true, onMessage, onError }:
     eventSource.onerror = (err) => {
       setError(err);
       setIsConnected(false);
-      onError?.(err);
+      onErrorRef.current?.(err);
       console.error('SSE error:', err);
     };
 
@@ -45,7 +53,8 @@ export function useSSE<T = unknown>({ url, enabled = true, onMessage, onError }:
       eventSource.close();
       setIsConnected(false);
     };
-  }, [url, enabled, onMessage, onError]);
+  }, [url, enabled]);
 
   return { data, error, isConnected };
 }
+

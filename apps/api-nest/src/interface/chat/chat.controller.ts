@@ -5,6 +5,9 @@ import { SendMessageUseCase } from '@forreal/application/chat/usecases/SendMessa
 import { ListMessagesUseCase } from '@forreal/application/chat/usecases/ListMessagesUseCase';
 import { MarkMessageReadUseCase } from '@forreal/application/chat/usecases/MarkMessageReadUseCase';
 import { LinkAdvisorClientUseCase } from '@forreal/application/chat/usecases/LinkAdvisorClientUseCase';
+import { ListConversationsByUserUseCase } from '@forreal/application/chat/usecases/ListConversationsByUserUseCase';
+import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application/chat/usecases/ListParticipantsDetailsByConversationUseCase';
+import { AddConversationParticipantUseCase } from '@forreal/application/chat/usecases/AddConversationParticipantUseCase';
 
 @Controller('chat')
 export class ChatController {
@@ -14,6 +17,9 @@ export class ChatController {
     @Inject(ListMessagesUseCase) private readonly listMessagesUseCase: ListMessagesUseCase,
     @Inject(MarkMessageReadUseCase) private readonly markMessageReadUseCase: MarkMessageReadUseCase,
     @Inject(LinkAdvisorClientUseCase) private readonly linkAdvisorClientUseCase: LinkAdvisorClientUseCase,
+    @Inject(ListConversationsByUserUseCase) private readonly listConversationsByUserUseCase: ListConversationsByUserUseCase,
+    @Inject(ListParticipantsDetailsByConversationUseCase) private readonly listParticipantsDetails: ListParticipantsDetailsByConversationUseCase,
+    @Inject(AddConversationParticipantUseCase) private readonly addConversationParticipant: AddConversationParticipantUseCase,
   ) {}
 
   @Post('conversations')
@@ -48,5 +54,28 @@ export class ChatController {
   @Post('messages/:id/read')
   async markMessageRead(@Param('id') messageId: string) {
     return this.markMessageReadUseCase.execute({ messageId });
+  }
+
+  @Get('conversations/group/by-user/:userId')
+  async listGroupConversationsByUser(@Param('userId') userId: string) {
+    return this.listConversationsByUserUseCase.execute({ userId, type: 'GROUP' });
+  }
+
+  @Get('conversations/by-user/:userId')
+  async listConversationsByUser(@Param('userId') userId: string) {
+    return this.listConversationsByUserUseCase.execute({ userId });
+  }
+
+  @Post('conversations/:id/participants')
+  async addParticipant(
+    @Param('id') conversationId: string,
+    @Body() body: { userId: string },
+  ) {
+    return this.addConversationParticipant.execute({ conversationId, userId: body.userId });
+  }
+
+  @Get('conversations/:id/participants')
+  async listParticipants(@Param('id') conversationId: string) {
+    return this.listParticipantsDetails.execute({ conversationId });
   }
 }

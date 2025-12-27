@@ -24,7 +24,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
       'Content-Type': 'application/json',
       ...options.headers,
     },
-    cache: 'no-store',
+    next: { revalidate: 30 },
   });
 
   if (!response.ok) {
@@ -70,7 +70,7 @@ export async function getMarketPrices(symbols: string[]) {
   if (!symbols.length) return {};
   const params = symbols.join(',');
   const res = await fetch(`${WEB_URL}/api/market-data?symbols=${params}`, {
-    cache: 'no-store',
+    next: { revalidate: 60 },
   });
   if (!res.ok) {
     throw new Error('Failed to fetch market prices');

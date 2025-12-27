@@ -5,7 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 type BalanceCardProps = {
   label: string;
   amount: number;
-  growthText: string;
+  growthText?: string;
 };
 
 export function BalanceCard({ label, amount, growthText }: BalanceCardProps) {
@@ -27,21 +27,23 @@ export function BalanceCard({ label, amount, growthText }: BalanceCardProps) {
       }`}></div>
       <div className="relative">
         <p className={`text-base mb-2 ${currentTheme === 'dark' ? 'text-gray-400' : 'text-white/90'}`}>{label}</p>
-        <p className={`text-6xl font-bold mb-4 drop-shadow-lg ${
+        <p className={`text-6xl font-bold drop-shadow-lg ${
           currentTheme === 'dark'
             ? 'bg-gradient-to-r from-teal-300 via-cyan-200 to-teal-400 bg-clip-text text-transparent'
             : 'text-white'
         }`}>
           {amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
         </p>
-        <div className={`flex items-center gap-2 text-base backdrop-blur-sm rounded-full px-3 py-1 w-fit border ${
-          currentTheme === 'dark'
-            ? 'text-teal-300 bg-teal-500/10 border-teal-500/20'
-            : 'text-white bg-white/20 border-white/30'
-        }`}>
-          <span>↗</span>
-          <span>{growthText}</span>
-        </div>
+        {growthText && (
+          <div className={`flex items-center gap-2 text-base backdrop-blur-sm rounded-full px-3 py-1 w-fit border mt-4 ${
+            currentTheme === 'dark'
+              ? 'text-teal-300 bg-teal-500/10 border-teal-500/20'
+              : 'text-white bg-white/20 border-white/30'
+          }`}>
+            <span>↗</span>
+            <span>{growthText}</span>
+          </div>
+        )}
       </div>
     </div>
   );

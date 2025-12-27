@@ -9,10 +9,13 @@ interface UseWebSocketOptions {
   autoConnect?: boolean;
 }
 
+type SocketListener = (...args: unknown[]) => void;
+
 export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOptions) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
+  const listenersRef = useRef<Map<string, Set<(data?: unknown) => void>>>(new Map());
 
   useEffect(() => {
     if (!autoConnect) return;
@@ -25,6 +28,9 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
     newSocket.on('connect', () => {
       setIsConnected(true);
       console.log('WebSocket connected');
+      listenersRef.current.forEach((handlers, event) => {
+        handlers.forEach((handler) => newSocket.on(event, handler));
+      });
     });
 
     newSocket.on('disconnect', () => {
@@ -35,7 +41,12 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
     socketRef.current = newSocket;
     setSocket(newSocket);
 
+    const listenersSnapshot = listenersRef.current;
+
     return () => {
+      listenersSnapshot.forEach((handlers, event) => {
+        handlers.forEach((handler) => newSocket.off(event, handler));
+      });
       newSocket.close();
     };
   }, [url, userId, autoConnect]);
@@ -47,14 +58,35 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
   };
 
   const on = (event: string, handler: (data?: unknown) => void) => {
+    let set = listenersRef.current.get(event);
+    if (!set) {
+      set = new Set();
+      listenersRef.current.set(event, set);
+    }
+    set.add(handler);
     if (socketRef.current) {
       socketRef.current.on(event, handler);
     }
   };
 
   const off = (event: string, handler?: (data?: unknown) => void) => {
-    if (socketRef.current) {
-      socketRef.current.off(event, handler);
+    const set = listenersRef.current.get(event);
+    if (set) {
+      if (handler) {
+        set.delete(handler);
+        if (socketRef.current) socketRef.current.off(event, handler as SocketListener);
+      } else {
+        set.forEach((h) => {
+          if (socketRef.current) socketRef.current.off(event, h as SocketListener);
+        });
+        listenersRef.current.delete(event);
+      }
+    } else if (socketRef.current) {
+      if (handler) {
+        socketRef.current.off(event, handler as SocketListener);
+      } else {
+        socketRef.current.off(event);
+      }
     }
   };
 

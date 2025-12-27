@@ -19,10 +19,12 @@ export class AccountsController {
   @Get('bank')
   async getBankAccounts(@Req() req: Request) {
     const userId = (req.user as any).id;
+    console.log('[AccountsController] getBankAccounts - userId:', userId);
     const accounts = await this.bankAccountRepo.find({
       where: { userId },
       order: { createdAt: 'ASC' },
     });
+    console.log('[AccountsController] getBankAccounts - found', accounts.length, 'accounts');
     return accounts;
   }
 
@@ -63,6 +65,7 @@ export class AccountsController {
   @Get()
   async getAllAccounts(@Req() req: Request) {
     const userId = (req.user as any).id;
+    console.log('[AccountsController] getAllAccounts - userId:', userId);
     const bankAccounts = await this.bankAccountRepo.find({
       where: { userId },
       order: { createdAt: 'ASC' },
@@ -71,6 +74,7 @@ export class AccountsController {
       where: { userId },
       order: { createdAt: 'ASC' },
     });
+    console.log('[AccountsController] getAllAccounts - bank:', bankAccounts.length, 'brokerage:', brokerageAccounts.length);
 
     return {
       bankAccounts: bankAccounts.map(acc => ({

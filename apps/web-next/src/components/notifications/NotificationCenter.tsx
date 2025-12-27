@@ -8,7 +8,7 @@ interface NotificationCenterProps {
   apiUrl?: string;
 }
 
-export default function NotificationCenter({ userId, apiUrl = 'http://localhost:3001/api' }: NotificationCenterProps) {
+export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { notifications, unreadCount, isConnected, markAsRead } = useNotifications({ userId, apiUrl });
 

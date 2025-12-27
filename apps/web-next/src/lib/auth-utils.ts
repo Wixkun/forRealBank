@@ -4,17 +4,11 @@
  * @constant AUTH_CONFIG
  */
 export const AUTH_CONFIG = {
-  /** Token validity period in minutes */
   TOKEN_EXPIRY_MINUTES: 15,
-  /** Cookie max-age in milliseconds */
   COOKIE_MAX_AGE_MS: 15 * 60 * 1000,
-  /** Maximum number of authentication retry attempts */
   MAX_AUTH_RETRY_ATTEMPTS: 3,
-  /** Delay between retry attempts in milliseconds */
   AUTH_RETRY_DELAY_MS: 500,
-  /** SameSite attribute for secure production environments */
   COOKIE_SAME_SITE_SECURE: 'none',
-  /** SameSite attribute for development environments */
   COOKIE_SAME_SITE_DEV: 'lax',
 } as const;
 

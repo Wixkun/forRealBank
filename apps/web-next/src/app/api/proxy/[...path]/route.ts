@@ -11,13 +11,14 @@ export async function GET(request: NextRequest) {
 
     const path = pathMatch[1];
     const searchParams = request.nextUrl.searchParams.toString();
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const fullUrl = `${apiUrl}/${path}${searchParams ? '?' + searchParams : ''}`;
 
     console.log('[Proxy] GET request to:', fullUrl);
 
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();
+    console.log('[Proxy] Cookies being sent:', cookieHeader);
 
     const response = await fetch(fullUrl, {
       method: 'GET',
@@ -27,6 +28,8 @@ export async function GET(request: NextRequest) {
       },
       credentials: 'include',
     });
+
+    console.log('[Proxy] Response status:', response.status);
 
     const data = await response.json();
 
@@ -49,7 +52,7 @@ export async function POST(request: NextRequest) {
     }
 
     const path = pathMatch[1];
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const fullUrl = `${apiUrl}/${path}`;
 
     console.log('[Proxy] POST request to:', fullUrl);
