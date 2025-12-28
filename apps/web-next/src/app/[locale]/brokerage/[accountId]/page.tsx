@@ -51,7 +51,6 @@ export default function BrokeragePage() {
       try {
         setLoading(true);
 
-        // Fetch brokerage account
         const accountRes = await fetch(`/api/proxy/accounts/brokerage/${accountId}`);
         if (!accountRes.ok) {
           if (accountRes.status === 401) {
@@ -63,19 +62,16 @@ export default function BrokeragePage() {
         const accountData = await accountRes.json();
         setAccount(accountData);
 
-        // Fetch trading positions
         const posRes = await fetch(`/api/proxy/trading/positions/${accountId}`);
         if (posRes.ok) {
           const positionsData: TradingPosition[] = await posRes.json();
           
-          // Fetch market prices
           const symbols = positionsData.map(p => p.symbol).join(',');
           const pricesRes = await fetch(`/api/market-data?symbols=${symbols}`);
           const priceMap: Record<string, { price: number }> = pricesRes.ok 
             ? (await pricesRes.json()).data || {}
             : {};
 
-          // Format positions
           const formattedPositions = positionsData.map((pos) => {
             const live = priceMap[pos.symbol];
             const currentPrice = live?.price ?? pos.avgPurchasePrice;

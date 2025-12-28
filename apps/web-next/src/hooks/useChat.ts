@@ -39,7 +39,7 @@ export function useChat({ conversationId, userId, apiUrl = 'http://localhost:300
           throw new Error(`HTTP error! status: ${res.status}`);
         }
         const data = await res.json();
-        setMessages(Array.isArray(data) ? data : []);
+        setMessages(Array.isArray(data) ? (data as Message[]) : []);
       } catch (err) {
         console.error('Failed to load messages:', err);
         setMessages([]);
@@ -59,7 +59,17 @@ export function useChat({ conversationId, userId, apiUrl = 'http://localhost:300
   useEffect(() => {
     const handleNewMessage = (msg?: unknown) => {
       if (msg && typeof msg === 'object' && 'messageId' in msg) {
-        setMessages((prev) => [...prev, msg as Message]);
+        const incoming = msg as Message;
+        setMessages((prev) => {
+          const alreadySameId = prev.some((m) => m.messageId === incoming.messageId);
+          const alreadySameContent = prev.some(
+            (m) => m.senderId === incoming.senderId && m.content === incoming.content && m.createdAt === incoming.createdAt
+          );
+          if (alreadySameId || alreadySameContent) {
+            return prev;
+          }
+          return [...prev, incoming];
+        });
       }
     };
 

@@ -250,4 +250,50 @@
       "button": "Get started now"
     }
   }
+  ,
+  "chat": {
+    "loadingConversations": "Loading your conversations...",
+    "loginRequired": "Please log in to access messaging.",
+    "directorSectionTitle": "Clients & Advisors",
+    "advisorSectionTitle": "My clients",
+    "createPrivateHint": "Click to create a private conversation.",
+    "alreadyCreatedSuffix": "(already created)",
+    "noneAvailable": "None available.",
+    "contactAdvisor": "Contact my advisor",
+    "creating": "Creating...",
+    "noConversationsTitle": "No conversations",
+    "noConversationsDescription": "No conversations found for your account.",
+    "selectConversation": "Select a conversation to start",
+    "list": {
+      "title": "Conversations",
+      "searchPlaceholder": "Search a conversation...",
+      "loading": "Loading conversations...",
+      "empty": "No conversations",
+      "emptySearch": "No conversations found",
+      "clearSearch": "Clear search",
+      "relative": {
+        "justNow": "Just now",
+        "minutesAgo": "{count}m ago",
+        "hoursAgo": "{count}h ago",
+        "yesterday": "Yesterday"
+      }
+    }
+    ,
+    "display": {
+      "advisorDefaultName": "Your advisor",
+      "advisorDefaultRole": "Financial Advisor",
+      "online": "Online",
+      "offline": "Offline",
+      "reconnecting": "Reconnecting...",
+      "empty": {
+        "title": "No messages yet",
+        "subtitle": "Start the conversation by sending a message"
+      },
+      "input": {
+        "placeholder": "Type your message..."
+      },
+      "send": "Send",
+      "groupMembers": "{count} members"
+    }
+  }
 }

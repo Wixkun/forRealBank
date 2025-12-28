@@ -1,24 +1,66 @@
 import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
 import { IConversationRepository } from '@forreal/domain/chat/ports/IConversationRepository';
+import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { RoleName } from '@forreal/domain/user/RoleName';
 
 export class ListConversationsByUserUseCase {
   constructor(
     private readonly participantRepository: IConversationParticipantRepository,
     private readonly conversationRepository?: IConversationRepository,
+    private readonly userRepository?: IUserRepository,
   ) {}
 
   async execute(input: { userId: string; type?: 'PRIVATE' | 'GROUP' }) {
     const participants = await this.participantRepository.listByUser(input.userId);
-    const ids = Array.from(new Set(participants.map(p => p.conversationId)));
+    const conversationIds = Array.from(new Set(participants.map(p => p.conversationId)));
     
-    if (input.type && this.conversationRepository) {
-      const conversations = await Promise.all(ids.map(id => this.conversationRepository!.findById(id)));
-      const filteredIds = conversations
-        .filter(conv => conv && conv.type === input.type)
-        .map(conv => conv!.id);
-      return filteredIds.map(id => ({ id }));
+    if (!this.conversationRepository || !this.userRepository) {
+      return conversationIds.map(id => ({ id }));
     }
-    
-    return ids.map(id => ({ id }));
+
+    const conversations = await Promise.all(
+      conversationIds.map(async (id) => {
+        const conversation = await this.conversationRepository!.findById(id);
+        if (!conversation) return null;
+
+        if (input.type && conversation.type !== input.type) return null;
+
+        const convParticipants = await this.participantRepository.listByConversation(id);
+        const participantDetails = await Promise.all(
+          convParticipants.map(async (p) => {
+            const user = await this.userRepository!.findById(p.userId);
+            const roles = user?.roles ? Array.from(user.roles) : [];
+            const role = roles.includes(RoleName.DIRECTOR) ? RoleName.DIRECTOR : (roles[0] || '');
+            
+            return {
+              id: p.userId,
+              firstName: user?.firstName || 'Unknown',
+              lastName: user?.lastName || 'User',
+              role: role,
+            };
+          })
+        );
+
+        let name = '';
+        if (conversation.type === 'PRIVATE') {
+          const otherParticipant = participantDetails.find(p => p.id !== input.userId);
+          name = otherParticipant
+            ? `${otherParticipant.firstName} ${otherParticipant.lastName}`
+            : 'Private Conversation';
+        } else {
+          name = `Group (${participantDetails.length} members)`;
+        }
+
+        return {
+          id: conversation.id,
+          name,
+          type: conversation.type,
+          participants: participantDetails,
+          createdAt: conversation.createdAt,
+        };
+      })
+    );
+
+    return conversations.filter((c) => c !== null);
   }
 }

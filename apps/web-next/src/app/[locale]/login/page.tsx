@@ -20,7 +20,6 @@ function LoginForm() {
   const locale = pathname.split('/')[1] || 'en';
 
   useEffect(() => {
-    // Check if user is already authenticated
     const checkAuth = async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
@@ -33,11 +32,9 @@ function LoginForm() {
         });
         
         if (response.ok) {
-          // User is authenticated, redirect to dashboard
           router.push(`/${locale}/dashboard`);
         }
       } catch {
-        // User is not authenticated, stay on login page
       }
     };
     

@@ -8,6 +8,10 @@ import { LinkAdvisorClientUseCase } from '@forreal/application/chat/usecases/Lin
 import { ListConversationsByUserUseCase } from '@forreal/application/chat/usecases/ListConversationsByUserUseCase';
 import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application/chat/usecases/ListParticipantsDetailsByConversationUseCase';
 import { AddConversationParticipantUseCase } from '@forreal/application/chat/usecases/AddConversationParticipantUseCase';
+import { ListClientsOfAdvisorUseCase } from '@forreal/application/chat/usecases/ListClientsOfAdvisorUseCase';
+import { FindAdvisorOfClientUseCase } from '@forreal/application/chat/usecases/FindAdvisorOfClientUseCase';
+import { ListUsersByRoleUseCase } from '@forreal/application/user/usecases/ListUsersByRoleUseCase';
+import { RoleName } from '@forreal/domain/user/RoleName';
 
 @Controller('chat')
 export class ChatController {
@@ -20,6 +24,9 @@ export class ChatController {
     @Inject(ListConversationsByUserUseCase) private readonly listConversationsByUserUseCase: ListConversationsByUserUseCase,
     @Inject(ListParticipantsDetailsByConversationUseCase) private readonly listParticipantsDetails: ListParticipantsDetailsByConversationUseCase,
     @Inject(AddConversationParticipantUseCase) private readonly addConversationParticipant: AddConversationParticipantUseCase,
+    @Inject(ListClientsOfAdvisorUseCase) private readonly listClientsOfAdvisor: ListClientsOfAdvisorUseCase,
+    @Inject(FindAdvisorOfClientUseCase) private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
+    @Inject(ListUsersByRoleUseCase) private readonly listUsersByRole: ListUsersByRoleUseCase,
   ) {}
 
   @Post('conversations')
@@ -64,6 +71,25 @@ export class ChatController {
   @Get('conversations/by-user/:userId')
   async listConversationsByUser(@Param('userId') userId: string) {
     return this.listConversationsByUserUseCase.execute({ userId });
+  }
+
+  @Get('advisor/:advisorId/clients')
+  async listClients(@Param('advisorId') advisorId: string) {
+    return this.listClientsOfAdvisor.execute({ advisorId });
+  }
+
+  @Get('client/:clientId/advisor')
+  async getAdvisorOfClient(@Param('clientId') clientId: string) {
+    return this.findAdvisorOfClient.execute({ clientId });
+  }
+
+  @Get('users/by-role/:role')
+  async listUsersByRoleEndpoint(@Param('role') role: string) {
+    const normalized = role.toUpperCase() as keyof typeof RoleName;
+    if (!RoleName[normalized]) {
+      return [];
+    }
+    return this.listUsersByRole.execute({ role: RoleName[normalized] });
   }
 
   @Post('conversations/:id/participants')

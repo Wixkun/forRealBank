@@ -250,4 +250,50 @@
       "button": "Commencer maintenant"
     }
   }
+  ,
+  "chat": {
+    "loadingConversations": "Chargement de vos conversations...",
+    "loginRequired": "Veuillez vous connecter pour accéder à la messagerie.",
+    "directorSectionTitle": "Clients & Conseillers",
+    "advisorSectionTitle": "Mes clients",
+    "createPrivateHint": "Cliquez pour créer une conversation privée.",
+    "alreadyCreatedSuffix": "(déjà créé)",
+    "noneAvailable": "Aucun disponible.",
+    "contactAdvisor": "Contacter mon conseiller",
+    "creating": "Création...",
+    "noConversationsTitle": "Aucune conversation",
+    "noConversationsDescription": "Aucune conversation trouvée pour votre compte.",
+    "selectConversation": "Sélectionnez une conversation pour commencer",
+    "list": {
+      "title": "Conversations",
+      "searchPlaceholder": "Rechercher une conversation...",
+      "loading": "Chargement des conversations...",
+      "empty": "Aucune conversation",
+      "emptySearch": "Aucune conversation trouvée",
+      "clearSearch": "Effacer la recherche",
+      "relative": {
+        "justNow": "À l'instant",
+        "minutesAgo": "Il y a {count}m",
+        "hoursAgo": "Il y a {count}h",
+        "yesterday": "Hier"
+      }
+    }
+    ,
+    "display": {
+      "advisorDefaultName": "Votre conseiller",
+      "advisorDefaultRole": "Conseiller financier",
+      "online": "En ligne",
+      "offline": "Hors ligne",
+      "reconnecting": "Reconnexion...",
+      "empty": {
+        "title": "Aucun message pour le moment",
+        "subtitle": "Commencez la conversation en envoyant un message"
+      },
+      "input": {
+        "placeholder": "Tapez votre message..."
+      },
+      "send": "Envoyer",
+      "groupMembers": "{count} membres"
+    }
+  }
 }

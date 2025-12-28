@@ -16,7 +16,6 @@ export default function GroupChatPage() {
   const conversationId = searchParams.get('conversationId') || '';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
-  // Auto-load the first GROUP conversation if none specified
   useEffect(() => {
     if (conversationId || !user || autoLoadAttemptedRef.current) return;
     
@@ -54,7 +53,6 @@ export default function GroupChatPage() {
           setParticipants(Array.isArray(data) ? data : []);
         }
       } catch {
-        // ignore
       } finally {
         setLoading(false);
       }

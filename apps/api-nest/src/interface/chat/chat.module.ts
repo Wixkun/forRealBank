@@ -28,6 +28,9 @@ import { MarkMessageReadUseCase } from '@forreal/application/chat/usecases/MarkM
 import { LinkAdvisorClientUseCase } from '@forreal/application/chat/usecases/LinkAdvisorClientUseCase';
 import { ListConversationsByUserUseCase } from '@forreal/application/chat/usecases/ListConversationsByUserUseCase';
 import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application/chat/usecases/ListParticipantsDetailsByConversationUseCase';
+import { ListClientsOfAdvisorUseCase } from '@forreal/application/chat/usecases/ListClientsOfAdvisorUseCase';
+import { FindAdvisorOfClientUseCase } from '@forreal/application/chat/usecases/FindAdvisorOfClientUseCase';
+import { ListUsersByRoleUseCase } from '@forreal/application/user/usecases/ListUsersByRoleUseCase';
 import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
 import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
 
@@ -88,8 +91,9 @@ import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/Use
       useFactory: (
         participantRepo: IConversationParticipantRepository,
         conversationRepo: IConversationRepository,
-      ) => new ListConversationsByUserUseCase(participantRepo, conversationRepo),
-      inject: [IConversationParticipantRepository, IConversationRepository],
+        userRepo: IUserRepository,
+      ) => new ListConversationsByUserUseCase(participantRepo, conversationRepo, userRepo),
+      inject: [IConversationParticipantRepository, IConversationRepository, IUserRepository],
     },
     {
       provide: ListParticipantsDetailsByConversationUseCase,
@@ -98,6 +102,27 @@ import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/Use
         userRepo: IUserRepository,
       ) => new ListParticipantsDetailsByConversationUseCase(participantRepo, userRepo),
       inject: [IConversationParticipantRepository, IUserRepository],
+    },
+    {
+      provide: ListClientsOfAdvisorUseCase,
+      useFactory: (
+        advisorClientRepo: IAdvisorClientRepository,
+        userRepo: IUserRepository,
+      ) => new ListClientsOfAdvisorUseCase(advisorClientRepo, userRepo),
+      inject: [IAdvisorClientRepository, IUserRepository],
+    },
+    {
+      provide: FindAdvisorOfClientUseCase,
+      useFactory: (
+        advisorClientRepo: IAdvisorClientRepository,
+        userRepo: IUserRepository,
+      ) => new FindAdvisorOfClientUseCase(advisorClientRepo, userRepo),
+      inject: [IAdvisorClientRepository, IUserRepository],
+    },
+    {
+      provide: ListUsersByRoleUseCase,
+      useFactory: (userRepo: IUserRepository) => new ListUsersByRoleUseCase(userRepo),
+      inject: [IUserRepository],
     },
   ],
   exports: [ChatService],
