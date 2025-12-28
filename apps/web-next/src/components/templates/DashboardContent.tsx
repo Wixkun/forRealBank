@@ -67,10 +67,8 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
   }
 
   const quickActions = [
-    { icon: '↗', label: translations.quickActions.send, variant: 'teal' as const },
-    { icon: '↓', label: translations.quickActions.receive, variant: 'teal' as const },
+    { icon: '↗', label: translations.quickActions.send, variant: 'teal' as const, href: `/${locale}/transfer` },
     { icon: '💬', label: translations.quickActions.chat, variant: 'cyan' as const, href: `/${locale}/chat` },
-    { icon: '⚙️', label: translations.quickActions.more, variant: 'gray' as const },
   ];
 
   return (

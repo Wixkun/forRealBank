@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { transferSchema, TransferFormData } from '@/lib/schemas/transfer.schema';
 
 type TransferFormCardProps = {
-  onSubmit: (data: { amount: string; recipient: string; description?: string }) => void;
+  onSubmit: (data: { amount: string; recipient?: string; description?: string }) => void;
   labels: {
     title: string;
     amount: string;
@@ -15,9 +15,10 @@ type TransferFormCardProps = {
     description: string;
     submit: string;
   };
+  hideRecipient?: boolean;
 };
 
-export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
+export function TransferFormCard({ onSubmit, labels, hideRecipient = false }: TransferFormCardProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
 
@@ -82,6 +83,7 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
           )}
         </div>
 
+        {!hideRecipient && (
         <div>
           <label
             htmlFor="recipient"
@@ -108,6 +110,7 @@ export function TransferFormCard({ onSubmit, labels }: TransferFormCardProps) {
             <p className="mt-1 text-sm text-red-500">{errors.recipient.message}</p>
           )}
         </div>
+        )}
 
         <div>
           <label

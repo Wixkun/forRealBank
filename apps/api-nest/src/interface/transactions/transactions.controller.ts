@@ -1,10 +1,15 @@
-import { Controller, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, Req, Post, Body } from '@nestjs/common';
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BankTransactionEntity } from '@forreal/infrastructure-typeorm/entities/BankTransactionEntity';
 import { BankAccountEntity } from '@forreal/infrastructure-typeorm/entities/BankAccountEntity';
+import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm/entities/BrokerageAccountEntity';
+import { BankAccountRepository } from '@forreal/infrastructure-typeorm/repositories/BankAccountRepository';
+import { BrokerageAccountRepository } from '@forreal/infrastructure-typeorm/repositories/BrokerageAccountRepository';
+import { BankTransactionRepository } from '@forreal/infrastructure-typeorm/repositories/BankTransactionRepository';
+import { InitiateTransferUseCase } from '@forreal/application/transactions/usecases/InitiateTransferUseCase';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
@@ -14,6 +19,8 @@ export class TransactionsController {
     private readonly transactionRepo: Repository<BankTransactionEntity>,
     @InjectRepository(BankAccountEntity)
     private readonly accountRepo: Repository<BankAccountEntity>,
+    @InjectRepository(BrokerageAccountEntity)
+    private readonly brokerageRepo: Repository<BrokerageAccountEntity>,
   ) {}
 
   @Get('account/:accountId')
@@ -85,5 +92,46 @@ export class TransactionsController {
       date: t.createdAt.toISOString().split('T')[0],
       amount: parseFloat(t.amount.toString()),
     }));
+  }
+
+  @Post('transfer')
+  async initiateTransfer(
+    @Req() req: Request,
+    @Body() body: {
+      sourceType: 'bank' | 'brokerage';
+      sourceAccountId: string;
+      destinationAccountId?: string;
+      destinationIban?: string;
+      amount: number;
+      description?: string;
+    },
+  ) {
+    const userId = (req.user as any)?.id;
+    const usecase = new InitiateTransferUseCase(
+      new BankAccountRepository(this.accountRepo),
+      new BrokerageAccountRepository(this.brokerageRepo),
+      new BankTransactionRepository(this.transactionRepo),
+    );
+
+    const result = await usecase.execute({
+      userId,
+      sourceType: body.sourceType,
+      sourceAccountId: body.sourceAccountId,
+      destinationAccountId: body.destinationAccountId,
+      destinationIban: body.destinationIban,
+      amount: Number(body.amount),
+      description: body.description,
+    });
+
+    if (!result.success) {
+      return { success: false, error: result.message };
+    }
+
+    return {
+      success: true,
+      message: result.message,
+      sourceBalance: result.sourceBalance,
+      destinationBalance: result.destinationBalance,
+    };
   }
 }

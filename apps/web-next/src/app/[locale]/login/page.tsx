@@ -22,15 +22,13 @@ function LoginForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-        const response = await fetch(`${apiUrl}/auth/me`, {
+        const response = await fetch(`/api/proxy/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        
         if (response.ok) {
           router.push(`/${locale}/dashboard`);
         }
@@ -52,8 +50,7 @@ function LoginForm() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-      const response = await fetch(`${apiUrl}/auth/login`, {
+      const response = await fetch(`/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

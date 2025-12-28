@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('[Auth Login] Received body:', JSON.stringify(body));
     
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const fullUrl = `${apiUrl}/auth/login`;
 
     console.log('[Auth Login] POST request to:', fullUrl);
@@ -16,7 +16,6 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Content-Length': String(bodyString.length),
       },
       body: bodyString,
     });

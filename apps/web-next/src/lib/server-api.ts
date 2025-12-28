@@ -78,3 +78,23 @@ export async function getMarketPrices(symbols: string[]) {
   const json = await res.json();
   return json.data || {};
 }
+
+export async function postTransfer(payload: {
+  sourceType: 'bank' | 'brokerage';
+  sourceAccountId: string;
+  destinationAccountId?: string;
+  destinationIban?: string;
+  amount: number;
+  description?: string;
+}) {
+  const url = `${PROXY_URL}/api/proxy/transactions/transfer`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(`Transfer failed: ${res.status}`);
+  }
+  return res.json();
+}

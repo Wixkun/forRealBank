@@ -11,7 +11,8 @@ export const transferSchema = z.object({
     .string()
     .min(14, 'Invalid IBAN format')
     .max(34, 'Invalid IBAN format')
-    .regex(/^[A-Z]{2}[0-9]{2}/, 'IBAN must start with country code and check digits'),
+    .regex(/^[A-Z]{2}[0-9]{2}/, 'IBAN must start with country code and check digits')
+    .optional(),
   description: z.string().max(140, 'Description must be 140 characters or less').optional(),
 });
 
