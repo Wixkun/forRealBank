@@ -16,7 +16,7 @@ type ServicesSectionProps = {
 export function ServicesSection({ title, subtitle, services }: ServicesSectionProps) {
   return (
     <section id="services" className="py-24 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-4">
             <span className="bg-gradient-to-r from-white via-teal-100 to-cyan-200 bg-clip-text text-transparent">

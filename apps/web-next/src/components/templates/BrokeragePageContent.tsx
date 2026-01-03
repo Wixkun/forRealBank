@@ -216,7 +216,7 @@ export function BrokeragePageContent({
         locale={locale}
       />
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className=" px-6 py-8">
         <div className="mb-8 relative">
           {loading && (
             <div className="absolute top-2 right-2 text-xs text-teal-400 animate-pulse">

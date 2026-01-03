@@ -48,7 +48,7 @@ export default function Header() {
 
   return (
     <header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-end">
+      <div className="px-6 py-4 flex items-center justify-end">
         <div className="flex items-center gap-3">
           <LanguageSwitcher theme="dark" />
           

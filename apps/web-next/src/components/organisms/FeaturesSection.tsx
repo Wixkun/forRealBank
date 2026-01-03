@@ -15,7 +15,7 @@ type FeaturesSectionProps = {
 export function FeaturesSection({ title, subtitle, features }: FeaturesSectionProps) {
   return (
     <section id="features" className="py-24 px-4 bg-gradient-to-b from-transparent via-teal-950/10 to-transparent">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-4">
             <span className="bg-gradient-to-r from-white via-teal-100 to-cyan-200 bg-clip-text text-transparent">

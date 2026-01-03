@@ -99,7 +99,7 @@ export function BrokeragePageTemplate({
         locale={locale}
       />
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className=" px-6 py-8">
         <div className="mb-8">
           <PortfolioSummaryCard
             {...portfolioData}
