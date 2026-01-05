@@ -75,7 +75,7 @@ function LoginForm() {
         router.push(`/${locale}/dashboard`);
       }, 500);
     } catch (err: unknown) {
-      console.error('❌ Login error:', err);
+      console.error('Login error:', err);
       setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);

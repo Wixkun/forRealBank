@@ -18,9 +18,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   server!: Server;
 
   private connectedUsers = new Map<string, { socketId: string; userId: string }>();
-  private typingUsers = new Map<string, Set<string>>(); // conversationId -> Set<userId>
-  private roomMembers = new Map<string, Set<string>>(); // conversationId -> Set<userId>
-  private socketRooms = new Map<string, Set<string>>(); // socketId -> Set<conversationId>
+  private typingUsers = new Map<string, Set<string>>(); 
+  private roomMembers = new Map<string, Set<string>>(); 
+  private socketRooms = new Map<string, Set<string>>();
 
   constructor(
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
