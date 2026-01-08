@@ -100,7 +100,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { conversationId: string; senderId: string; content: string },
   ) {
     try {
-      console.log('[WS] send_message', { socketId: client.id, conversationId: data.conversationId, senderId: data.senderId, contentLen: data.content?.length ?? 0 });
+      console.log('send_message', { socketId: client.id, conversationId: data.conversationId, senderId: data.senderId, contentLen: data.content?.length ?? 0 });
       const messageResult = await this.sendMessageUseCase.execute({
         conversationId: data.conversationId,
         senderId: data.senderId,
