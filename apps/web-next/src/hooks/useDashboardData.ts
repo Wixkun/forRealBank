@@ -27,13 +27,6 @@ interface AccountData {
   recentTransactions: Transaction[];
 }
 
-/**
- * Custom hook for loading dashboard data
- * Fetches user info, accounts, and recent transactions
- * @param initialData - Initial server-side data
- * @param locale - Current locale for cache key
- * @returns Account data including user info, accounts, and transactions
- */
 export function useDashboardData(initialData: AccountData, locale: string) {
   const [accountData, setAccountData] = useState<AccountData>(initialData);
   const [isLoading, setIsLoading] = useState(false);
@@ -115,11 +108,6 @@ export function useDashboardData(initialData: AccountData, locale: string) {
   return { accountData, isLoading, error };
 }
 
-/**
- * Normalize account data to consistent format
- * @param accounts - Raw account data from API
- * @returns Normalized account array
- */
 function normalizeAccounts(accounts: Array<Record<string, unknown>>): Account[] {
   return accounts.map((acc) => ({
     id: acc.id as string,
@@ -131,11 +119,6 @@ function normalizeAccounts(accounts: Array<Record<string, unknown>>): Account[] 
   }));
 }
 
-/**
- * Normalize transaction data to consistent format
- * @param transactions - Raw transaction data from API
- * @returns Normalized transaction array
- */
 function normalizeTransactions(transactions: Array<Record<string, unknown>>): Transaction[] {
   return transactions.map((t) => {
     const amount = t.amount as number;

@@ -5,11 +5,6 @@ import { randomUUID } from 'crypto';
 
 const TOKEN_EXPIRY_MINUTES = 15;
 
-/**
- * Access Token Payload
- * Data structure encoded in JWT tokens
- * @interface AccessTokenPayload
- */
 interface AccessTokenPayload {
   userId: string;
   sessionId: string;
@@ -19,11 +14,6 @@ interface AccessTokenPayload {
   audience: string;
 }
 
-/**
- * Login User Use Case
- * Authenticates a user with email and password, generates JWT token
- * @class LoginUserUseCase
- */
 export class LoginUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
@@ -31,13 +21,6 @@ export class LoginUserUseCase {
     private readonly tokenService: ITokenService,
   ) {}
 
-  /**
-   * Execute login operation
-   * Validates credentials, updates last login timestamp, and generates token
-   * @param input - Login credentials (email and password)
-   * @returns Promise containing the generated access token
-   * @throws Error with code INVALID_CREDENTIALS if credentials are invalid
-   */
   async execute(input: { email: string; password: string }): Promise<{ accessToken: string }> {
     const user = await this.userRepository.findByEmail(input.email);
     if (!user) throw new Error('INVALID_CREDENTIALS');

@@ -5,11 +5,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-/**
- * Authentication error codes
- * Enumeration of all possible authentication-related errors
- * @enum AuthErrorCode
- */
 export enum AuthErrorCode {
   EMAIL_ALREADY_REGISTERED = 'EMAIL_ALREADY_REGISTERED',
   EMAIL_TAKEN = 'EMAIL_TAKEN',
@@ -28,19 +23,7 @@ const ERROR_EXCEPTION_MAP: Record<AuthErrorCode, [typeof BadRequestException | t
   [AuthErrorCode.INVALID_CREDENTIALS]: [UnauthorizedException, 'Invalid email or password'],
 };
 
-/**
- * Authentication Error Mapper
- * Centralizes mapping of domain authentication errors to HTTP exceptions
- * Ensures consistent error responses across all authentication endpoints
- * @class AuthErrorMapper
- */
 export class AuthErrorMapper {
-  /**
-   * Map a domain error to a corresponding HTTP exception
-   * Unknown errors are mapped to InternalServerErrorException
-   * @param error - The error to map (can be any type)
-   * @returns Appropriate NestJS HTTP exception instance
-   */
   static mapToHttpException(error: unknown): HttpException {
     if (!(error instanceof Error)) {
       return new InternalServerErrorException('An unexpected error occurred');
