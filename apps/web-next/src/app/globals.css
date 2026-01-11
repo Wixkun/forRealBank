@@ -25,7 +25,6 @@ body {
   background-color: #0d0f14;
 }
 
-/* Row/card enter animation */
 @keyframes row-enter {
   from {
     opacity: 0;
@@ -41,7 +40,6 @@ body {
   animation: row-enter 250ms ease-out both;
 }
 
-/* Sparkline draw animation */
 @keyframes draw-line {
   from {
     stroke-dashoffset: 140;

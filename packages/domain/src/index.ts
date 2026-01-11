@@ -36,3 +36,4 @@ export * from './user/ports/IUserRepository';
 export * from './user/ports/IPasswordHasher';
 export * from './user/ports/ITokenService';
 export * from './user/ports/IUserIdGenerator';
+export * from './user/ports/ISessionIdGenerator';

@@ -1,24 +1,9 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
-/**
- * Extended fetch options interface
- * Includes all standard RequestInit options plus optional cache configuration
- * @interface FetchOptions
- */
 interface FetchOptions extends Omit<RequestInit, 'cache'> {
   cache?: RequestCache;
 }
 
-/**
- * Generic API call function
- * Centralized request handler for all unauthenticated API calls
- * @template T - The expected response type
- * @param endpoint - The API endpoint path (relative to API_URL)
- * @param options - Optional fetch configuration
- * @param errorMessage - Custom error message for failed requests
- * @returns Promise containing the parsed JSON response
- * @throws Error if the request fails
- */
 async function apiCall<T>(
   endpoint: string,
   options: FetchOptions = {},
@@ -36,18 +21,6 @@ async function apiCall<T>(
   return response.json();
 }
 
-/**
- * Authenticated API call function
- * Adds authorization header for token-based requests
- * @template T - The expected response type
- * @param endpoint - The API endpoint path
- * @param token - The authorization token (JWT)
- * @param method - HTTP method (default: GET)
- * @param body - Optional request body for POST/PUT operations
- * @param errorMessage - Custom error message for failed requests
- * @returns Promise containing the parsed JSON response
- * @throws Error if the request fails
- */
 async function apiCallWithAuth<T>(
   endpoint: string,
   token: string,
@@ -68,11 +41,6 @@ async function apiCallWithAuth<T>(
   return apiCall<T>(endpoint, options, errorMessage);
 }
 
-/**
- * Fetch market assets
- * @param type - Optional asset type filter
- * @returns Promise containing market assets
- */
 export async function fetchMarketAssets(type?: string) {
   const endpoint = `/market/assets${type && type !== 'all' ? `?type=${type}` : ''}`;
   return apiCall<Array<{
@@ -83,21 +51,10 @@ export async function fetchMarketAssets(type?: string) {
   }>>(endpoint, {}, 'Failed to fetch market assets');
 }
 
-/**
- * Fetch user accounts data
- * @param token - Authorization token
- * @returns Promise containing accounts information
- */
 export async function fetchAccountsData(token: string) {
   return apiCallWithAuth<unknown>('/accounts', token, 'GET', undefined, 'Failed to fetch accounts');
 }
 
-/**
- * Fetch recent transactions for authenticated user
- * @param token - Authorization token
- * @param limit - Maximum number of transactions to return
- * @returns Promise containing recent transactions
- */
 export async function fetchRecentTransactions(token: string, limit: number = 5) {
   return apiCallWithAuth<unknown>(
     `/transactions/recent?limit=${limit}`,
@@ -108,14 +65,6 @@ export async function fetchRecentTransactions(token: string, limit: number = 5) 
   );
 }
 
-/**
- * Fetch transactions for a specific account
- * @param accountId - The account identifier
- * @param token - Authorization token
- * @param limit - Maximum number of transactions to return
- * @param type - Optional transaction type filter
- * @returns Promise containing account transactions
- */
 export async function fetchAccountTransactions(
   accountId: string,
   token: string,
@@ -126,12 +75,6 @@ export async function fetchAccountTransactions(
   return apiCallWithAuth<unknown>(endpoint, token, 'GET', undefined, 'Failed to fetch account transactions');
 }
 
-/**
- * Fetch trading positions for an account
- * @param accountId - The account identifier
- * @param token - Authorization token
- * @returns Promise containing trading positions
- */
 export async function fetchTradingPositions(accountId: string, token: string) {
   return apiCallWithAuth<unknown>(
     `/trading/positions/${accountId}`,
@@ -142,12 +85,6 @@ export async function fetchTradingPositions(accountId: string, token: string) {
   );
 }
 
-/**
- * Fetch bank account details
- * @param accountId - The bank account identifier
- * @param token - Authorization token
- * @returns Promise containing bank account information
- */
 export async function fetchBankAccount(accountId: string, token: string) {
   return apiCallWithAuth<unknown>(
     `/accounts/bank/${accountId}`,
@@ -158,12 +95,6 @@ export async function fetchBankAccount(accountId: string, token: string) {
   );
 }
 
-/**
- * Fetch brokerage account details
- * @param accountId - The brokerage account identifier
- * @param token - Authorization token
- * @returns Promise containing brokerage account information
- */
 export async function fetchBrokerageAccount(accountId: string, token: string) {
   return apiCallWithAuth<unknown>(
     `/accounts/brokerage/${accountId}`,
@@ -174,11 +105,6 @@ export async function fetchBrokerageAccount(accountId: string, token: string) {
   );
 }
 
-/**
- * Fetch trading positions for a client account
- * @param accountId - The account identifier
- * @returns Promise containing trading positions
- */
 export async function fetchTradingPositionsClient(accountId: string) {
   return apiCall<Array<{
     id: string;
@@ -194,11 +120,6 @@ export async function fetchTradingPositionsClient(accountId: string) {
   );
 }
 
-/**
- * Place a new trading order
- * @param body - Order details including account, symbol, side, quantity, type, and optional price
- * @returns Promise containing the created order information
- */
 export async function placeTradingOrder(body: {
   accountId: string;
   symbol: string;

@@ -23,12 +23,8 @@ import { TradingModule } from './trading/trading.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath:
-        process.env.NODE_ENV === 'production'
-          ? ['../../env/api.env']
-          : ['../../env/local.env'],
+    ConfigModule.forRoot({ isGlobal: true,
+      envFilePath: ['../../env/api.env'],
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

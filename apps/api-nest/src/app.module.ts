@@ -7,7 +7,7 @@ import { AppService } from './app.service';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '../../env/local.env',
+      envFilePath: ['../../env/api.env'],
     }),
   ],
   controllers: [AppController],

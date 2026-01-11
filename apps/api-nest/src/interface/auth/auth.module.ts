@@ -58,12 +58,10 @@ const loginUserProvider: Provider = {
   ],
   controllers: [AuthController],
   providers: [
-    // repositories / services
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
 
-    // UUID generator (CORRECT)
     { provide: USER_ID_GENERATOR, useClass: UserUuidGenerator },
 
     JwtStrategy,
