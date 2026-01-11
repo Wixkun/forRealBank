@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.18.0",
   "engines": {
-    "node": "^20.11 || ^22.0"
+    "node": "^20.11.0 || ^22.0"
   },
   "scripts": {
     "build": "pnpm -r --filter @forreal/domain build && pnpm -r --filter @forreal/application build && pnpm -r --filter api-nest build",
@@ -18,7 +18,8 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "@types/node": "^20.11.0"
   },
   "dependencies": {
     "react-icons": "^5.5.0"
