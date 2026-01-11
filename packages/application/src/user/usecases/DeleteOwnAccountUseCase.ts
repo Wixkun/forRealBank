@@ -1,4 +1,4 @@
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IUserRepository } from '@forreal/domain';
 
 export class DeleteOwnAccountUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

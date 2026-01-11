@@ -1,4 +1,4 @@
-import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
+import { IPasswordHasher } from '@forreal/domain';
 import bcrypt from 'bcryptjs';
 
 export class BcryptHasher implements IPasswordHasher {

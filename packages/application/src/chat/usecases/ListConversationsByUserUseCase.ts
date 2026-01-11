@@ -1,7 +1,7 @@
-import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
-import { IConversationRepository } from '@forreal/domain/chat/ports/IConversationRepository';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { IConversationParticipantRepository } from '@forreal/domain';
+import { IConversationRepository } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 
 export class ListConversationsByUserUseCase {
   constructor(

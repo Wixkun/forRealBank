@@ -1,4 +1,4 @@
-import { News } from '@forreal/domain/feed/News';
+import { News } from '@forreal/domain';
 import { NewsEntity } from '../entities/NewsEntity';
 
 export class NewsMapper {

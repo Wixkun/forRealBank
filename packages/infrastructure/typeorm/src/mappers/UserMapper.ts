@@ -1,5 +1,5 @@
-import { User } from '@forreal/domain/user/User';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { User } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 import { UserEntity } from '../entities/UserEntity';
 
 function isValidRoleName(name: string): name is RoleName {

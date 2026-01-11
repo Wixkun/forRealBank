@@ -1,6 +1,6 @@
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
-import { ITokenService } from '@forreal/domain/user/ports/ITokenService';
+import { IUserRepository } from '@forreal/domain';
+import { IPasswordHasher } from '@forreal/domain';
+import { ITokenService } from '@forreal/domain';
 import { randomUUID } from 'crypto';
 
 const TOKEN_EXPIRY_MINUTES = 15;

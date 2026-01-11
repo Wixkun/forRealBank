@@ -1,15 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
+    "module": "Node16",
     "declaration": true,
-    "sourceMap": false,
-    "baseUrl": ".",
-    "paths": {
-      "@forreal/domain/*": ["../../packages/domain/src/*"],
-      "@forreal/infrastructure-typeorm/*": ["../../packages/infrastructure/typeorm/src/*"],
-      "@forreal/infrastructure-crypto-bcrypt/*": ["../../packages/infrastructure/crypto-bcrypt/src/*"],
-      "@forreal/infrastructure-jwt-nest/*": ["../../packages/infrastructure/jwt-nest/src/*"],
-      "@forreal/application/*": ["../../packages/application/src/*"]
-    }
+    "sourceMap": false
   }
 }

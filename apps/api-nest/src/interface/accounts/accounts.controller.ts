@@ -3,8 +3,8 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { BankAccountEntity } from '@forreal/infrastructure-typeorm/entities/BankAccountEntity';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm/entities/BrokerageAccountEntity';
+import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
+import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('accounts')
 @UseGuards(JwtAuthGuard)

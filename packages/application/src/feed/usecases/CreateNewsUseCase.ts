@@ -1,6 +1,6 @@
-import { INewsRepository } from '@forreal/domain/feed/ports/INewsRepository';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { INewsRepository } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 
 const ALLOWED_NEWS_AUTHOR_ROLES = [RoleName.ADVISOR, RoleName.DIRECTOR];
 

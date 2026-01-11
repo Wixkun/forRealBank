@@ -3,15 +3,15 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
-import { ITokenService } from '@forreal/domain/user/ports/ITokenService';
+import { IUserRepository } from '@forreal/domain';
+import { IPasswordHasher } from '@forreal/domain';
+import { ITokenService } from '@forreal/domain';
 
-import { UserEntity } from '@forreal/infrastructure-typeorm/entities/UserEntity';
-import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
-import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt/BcryptHasher';
-import { JwtTokenService } from '@forreal/infrastructure-jwt-nest/JwtTokenService';
-import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
+import { UserEntity } from '@forreal/infrastructure-typeorm';
+import { UserRepository } from '@forreal/infrastructure-typeorm';
+import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt';
+import { JwtTokenService } from '@forreal/infrastructure-jwt-nest';
+import { RoleEntity } from '@forreal/infrastructure-typeorm';
 import { UsersModule } from './users/users.module';
 import { ChatModule } from './chat/chat.module';
 import { NewsModule } from './feed/news.module';
@@ -25,7 +25,10 @@ import { TradingModule } from './trading/trading.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['../../env/api.env'],
+      envFilePath:
+        process.env.NODE_ENV === 'production'
+          ? ['../../env/api.env']
+          : ['../../env/local.env'],
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',

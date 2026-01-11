@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionsController } from './transactions.controller';
-import { BankTransactionEntity } from '@forreal/infrastructure-typeorm/entities/BankTransactionEntity';
-import { BankAccountEntity } from '@forreal/infrastructure-typeorm/entities/BankAccountEntity';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm/entities/BrokerageAccountEntity';
+import { BankTransactionEntity } from '@forreal/infrastructure-typeorm';
+import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
+import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
 
 @Module({
   imports: [

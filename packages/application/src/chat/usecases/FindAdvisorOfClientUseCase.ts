@@ -1,5 +1,5 @@
-import { IAdvisorClientRepository } from '@forreal/domain/chat/ports/IAdvisorClientRepository';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IAdvisorClientRepository } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
 
 export class FindAdvisorOfClientUseCase {
   constructor(

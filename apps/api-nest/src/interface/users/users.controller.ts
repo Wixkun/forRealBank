@@ -16,20 +16,20 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { RoleName } from '@forreal/domain';
 
-import { UpdateUserProfileUseCase } from '@forreal/application/user/usecases/UpdateUserProfileUseCase';
-import { DeleteOwnAccountUseCase } from '@forreal/application/user/usecases/DeleteOwnAccountUseCase';
-import { ListUsersUseCase } from '@forreal/application/user/usecases/ListUsersUseCase';
-import { UpdateUserRolesUseCase } from '@forreal/application/user/usecases/UpdateUserRolesUseCase';
-import { DeleteUserByAdminUseCase } from '@forreal/application/user/usecases/DeleteUserByAdminUseCase';
-import { BanUserUseCase } from '@forreal/application/user/usecases/BanUserUseCase';
-import { UnbanUserUseCase } from '@forreal/application/user/usecases/UnbanUserUseCase';
+import { UpdateUserProfileUseCase } from '@forreal/application';
+import { DeleteOwnAccountUseCase } from '@forreal/application';
+import { ListUsersUseCase } from '@forreal/application';
+import { UpdateUserRolesUseCase } from '@forreal/application';
+import { DeleteUserByAdminUseCase } from '@forreal/application';
+import { BanUserUseCase } from '@forreal/application';
+import { UnbanUserUseCase } from '@forreal/application';
 
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ListUsersQueryDto } from './dto/list-users.dto';
 import { UpdateRolesDto } from './dto/update-roles.dto';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IUserRepository } from '@forreal/domain';
 import { UserPresenter } from './user.presenter';
 
 @Controller('/users')

@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IMessageRepository } from '@forreal/domain/chat/ports/IMessageRepository';
-import { Message } from '@forreal/domain/chat/Message';
+import { IMessageRepository } from '@forreal/domain';
+import { Message } from '@forreal/domain';
 import { MessageEntity } from '../entities/MessageEntity';
 import { ConversationEntity } from '../entities/ConversationEntity';
 import { UserEntity } from '../entities/UserEntity';

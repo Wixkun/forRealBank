@@ -1,4 +1,4 @@
-import { INewsRepository } from '@forreal/domain/feed/ports/INewsRepository';
+import { INewsRepository } from '@forreal/domain';
 
 export class DeleteNewsUseCase {
   constructor(private readonly newsRepository: INewsRepository) {}

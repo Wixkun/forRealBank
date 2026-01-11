@@ -1,4 +1,4 @@
-import { AdvisorClient } from '@forreal/domain/chat/AdvisorClient';
+import { AdvisorClient } from '@forreal/domain';
 import { AdvisorClientEntity } from '../entities/AdvisorClientEntity';
 
 export class AdvisorClientMapper {

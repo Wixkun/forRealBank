@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { INotificationRepository } from '@forreal/domain/notifications/ports/INotificationRepository';
-import { Notification } from '@forreal/domain/notifications/Notification';
+import { INotificationRepository } from '@forreal/domain';
+import { Notification } from '@forreal/domain';
 import { NotificationEntity } from '../entities/NotificationEntity';
 import { UserEntity } from '../entities/UserEntity';
 import { NotificationMapper } from '../mappers/NotificationMapper';

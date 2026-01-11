@@ -1,4 +1,4 @@
-import { IMessageRepository } from '@forreal/domain/chat/ports/IMessageRepository';
+import { IMessageRepository } from '@forreal/domain';
 
 export class ListMessagesUseCase {
   constructor(private readonly messageRepository: IMessageRepository) {}

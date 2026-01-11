@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
-import { RoleName } from '@forreal/domain/user/RoleName';
-import { ITokenService, ITokenService as ITokenServiceToken } from '@forreal/domain/user/ports/ITokenService';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { RoleName } from '@forreal/domain';
+import { ITokenService, ITokenService as ITokenServiceToken } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

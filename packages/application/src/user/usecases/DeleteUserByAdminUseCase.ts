@@ -1,4 +1,4 @@
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IUserRepository } from '@forreal/domain';
 
 /**
  * Delete User By Admin Use Case

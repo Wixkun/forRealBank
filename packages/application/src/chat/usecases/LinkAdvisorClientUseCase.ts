@@ -1,4 +1,4 @@
-import { IAdvisorClientRepository } from '@forreal/domain/chat/ports/IAdvisorClientRepository';
+import { IAdvisorClientRepository } from '@forreal/domain';
 
 export class LinkAdvisorClientUseCase {
   constructor(private readonly advisorClientRepository: IAdvisorClientRepository) {}

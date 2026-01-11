@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { IBrokerageRepository } from '@forreal/domain/brokerage/ports/IBrokerageRepository';
-import { BrokerageAccount } from '@forreal/domain/brokerage/BrokerageAccount';
+import { IBrokerageRepository } from '@forreal/domain';
+import { BrokerageAccount } from '@forreal/domain';
 import { BrokerageAccountEntity } from '../entities/BrokerageAccountEntity';
 
 export class BrokerageAccountRepository implements IBrokerageRepository {

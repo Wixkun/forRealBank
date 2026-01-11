@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, ILike } from 'typeorm';
 
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { User } from '@forreal/domain/user/User';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { IUserRepository } from '@forreal/domain';
+import { User } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 import { UserEntity } from '../entities/UserEntity';
 import { RoleEntity } from '../entities/RoleEntity';
 import { UserMapper } from '../mappers/UserMapper';

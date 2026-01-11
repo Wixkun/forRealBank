@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
-import { ConversationParticipant } from '@forreal/domain/chat/ConversationParticipant';
+import { IConversationParticipantRepository } from '@forreal/domain';
+import { ConversationParticipant } from '@forreal/domain';
 import { ConversationParticipantEntity } from '../entities/ConversationParticipantEntity';
 import { ConversationEntity } from '../entities/ConversationEntity';
 import { UserEntity } from '../entities/UserEntity';

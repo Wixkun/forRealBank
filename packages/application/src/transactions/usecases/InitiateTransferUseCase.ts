@@ -1,8 +1,8 @@
-import { IAccountRepository } from '@forreal/domain/accounts/ports/IAccountRepository';
-import { IBrokerageRepository } from '@forreal/domain/brokerage/ports/IBrokerageRepository';
-import { ITransactionRepository } from '@forreal/domain/transactions/ports/ITransactionRepository';
-import { BankAccount } from '@forreal/domain/accounts/BankAccount';
-import { BrokerageAccount } from '@forreal/domain/brokerage/BrokerageAccount';
+import { IAccountRepository } from '@forreal/domain';
+import { IBrokerageRepository } from '@forreal/domain';
+import { ITransactionRepository } from '@forreal/domain';
+import { BankAccount } from '@forreal/domain';
+import { BrokerageAccount } from '@forreal/domain';
 
 export type TransferRequest = {
   userId: string;

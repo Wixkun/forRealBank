@@ -1,4 +1,4 @@
-import { User } from '@forreal/domain/user/User';
+import { User } from '@forreal/domain';
 
 /**
  * User Response DTO

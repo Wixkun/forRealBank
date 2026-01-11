@@ -1,4 +1,4 @@
-import { INotificationRepository } from '@forreal/domain/notifications/ports/INotificationRepository';
+import { INotificationRepository } from '@forreal/domain';
 
 export class ListNotificationsByUserUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}

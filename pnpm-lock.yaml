@@ -273,6 +273,12 @@ importers:
         specifier: ^9.0.7
         version: 9.0.8
 
+  packages/infrastructure/uuid-node:
+    dependencies:
+      '@forreal/domain':
+        specifier: workspace:*
+        version: link:../../domain
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

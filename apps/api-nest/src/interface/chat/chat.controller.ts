@@ -1,17 +1,17 @@
 import { Controller, Get, Post, Body, Param, Query, Inject } from '@nestjs/common';
-import { ConversationType } from '@forreal/domain/chat/Conversation';
-import { CreateConversationUseCase } from '@forreal/application/chat/usecases/CreateConversationUseCase';
-import { SendMessageUseCase } from '@forreal/application/chat/usecases/SendMessageUseCase';
-import { ListMessagesUseCase } from '@forreal/application/chat/usecases/ListMessagesUseCase';
-import { MarkMessageReadUseCase } from '@forreal/application/chat/usecases/MarkMessageReadUseCase';
-import { LinkAdvisorClientUseCase } from '@forreal/application/chat/usecases/LinkAdvisorClientUseCase';
-import { ListConversationsByUserUseCase } from '@forreal/application/chat/usecases/ListConversationsByUserUseCase';
-import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application/chat/usecases/ListParticipantsDetailsByConversationUseCase';
-import { AddConversationParticipantUseCase } from '@forreal/application/chat/usecases/AddConversationParticipantUseCase';
-import { ListClientsOfAdvisorUseCase } from '@forreal/application/chat/usecases/ListClientsOfAdvisorUseCase';
-import { FindAdvisorOfClientUseCase } from '@forreal/application/chat/usecases/FindAdvisorOfClientUseCase';
-import { ListUsersByRoleUseCase } from '@forreal/application/user/usecases/ListUsersByRoleUseCase';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { ConversationType } from '@forreal/domain';
+import { CreateConversationUseCase } from '@forreal/application';
+import { SendMessageUseCase } from '@forreal/application';
+import { ListMessagesUseCase } from '@forreal/application';
+import { MarkMessageReadUseCase } from '@forreal/application';
+import { LinkAdvisorClientUseCase } from '@forreal/application';
+import { ListConversationsByUserUseCase } from '@forreal/application';
+import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application';
+import { AddConversationParticipantUseCase } from '@forreal/application';
+import { ListClientsOfAdvisorUseCase } from '@forreal/application';
+import { FindAdvisorOfClientUseCase } from '@forreal/application';
+import { ListUsersByRoleUseCase } from '@forreal/application';
+import { RoleName } from '@forreal/domain';
 
 @Controller('chat')
 export class ChatController {

@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MarketAssetEntity } from '@forreal/infrastructure-typeorm/entities/MarketAssetEntity';
+import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('market')
 export class MarketController {

@@ -1,4 +1,4 @@
-import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
+import { IConversationParticipantRepository } from '@forreal/domain';
 
 export class AddConversationParticipantUseCase {
   constructor(private readonly participantRepository: IConversationParticipantRepository) {}

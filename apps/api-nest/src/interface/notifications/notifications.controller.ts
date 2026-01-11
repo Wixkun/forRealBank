@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Param, Query, Inject, Sse, MessageEvent } from '@nestjs/common';
 import { Observable, interval } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { SendNotificationUseCase } from '@forreal/application/notifications/usecases/SendNotificationUseCase';
-import { MarkNotificationReadUseCase } from '@forreal/application/notifications/usecases/MarkNotificationReadUseCase';
-import { ListNotificationsByUserUseCase } from '@forreal/application/notifications/usecases/ListNotificationsByUserUseCase';
+import { SendNotificationUseCase } from '@forreal/application';
+import { MarkNotificationReadUseCase } from '@forreal/application';
+import { ListNotificationsByUserUseCase } from '@forreal/application';
 
 @Controller('notifications')
 export class NotificationsController {

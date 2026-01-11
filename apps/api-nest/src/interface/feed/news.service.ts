@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Subject } from 'rxjs';
-import { CreateNewsUseCase } from '@forreal/application/feed/usecases/CreateNewsUseCase';
-import { ListNewsUseCase } from '@forreal/application/feed/usecases/ListNewsUseCase';
-import { DeleteNewsUseCase } from '@forreal/application/feed/usecases/DeleteNewsUseCase';
+import { CreateNewsUseCase } from '@forreal/application';
+import { ListNewsUseCase } from '@forreal/application';
+import { DeleteNewsUseCase } from '@forreal/application';
 
 @Injectable()
 export class NewsService {

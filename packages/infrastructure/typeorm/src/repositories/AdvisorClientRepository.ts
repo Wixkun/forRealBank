@@ -1,8 +1,8 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IAdvisorClientRepository } from '@forreal/domain/chat/ports/IAdvisorClientRepository';
-import { AdvisorClient } from '@forreal/domain/chat/AdvisorClient';
+import { IAdvisorClientRepository } from '@forreal/domain';
+import { AdvisorClient } from '@forreal/domain';
 import { AdvisorClientEntity } from '../entities/AdvisorClientEntity';
 import { UserEntity } from '../entities/UserEntity';
 import { AdvisorClientMapper } from '../mappers/AdvisorClientMapper';

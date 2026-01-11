@@ -1,5 +1,5 @@
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { User } from '@forreal/domain/user/User';
+import { IUserRepository } from '@forreal/domain';
+import { User } from '@forreal/domain';
 
 export class ListUsersUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

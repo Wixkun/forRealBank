@@ -1,5 +1,5 @@
-import { IConversationRepository } from '@forreal/domain/chat/ports/IConversationRepository';
-import { ConversationType } from '@forreal/domain/chat/Conversation';
+import { IConversationRepository } from '@forreal/domain';
+import { ConversationType } from '@forreal/domain';
 
 export class CreateConversationUseCase {
   constructor(private readonly conversationRepository: IConversationRepository) {}

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MarketController } from './market.controller';
-import { MarketAssetEntity } from '@forreal/infrastructure-typeorm/entities/MarketAssetEntity';
+import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 
 @Module({
   imports: [

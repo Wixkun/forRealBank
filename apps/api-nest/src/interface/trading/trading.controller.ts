@@ -3,10 +3,10 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { TradingPositionEntity } from '@forreal/infrastructure-typeorm/entities/TradingPositionEntity';
-import { TradingOrderEntity } from '@forreal/infrastructure-typeorm/entities/TradingOrderEntity';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm/entities/BrokerageAccountEntity';
-import { MarketAssetEntity } from '@forreal/infrastructure-typeorm/entities/MarketAssetEntity';
+import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
+import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
+import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('trading')
 @UseGuards(JwtAuthGuard)

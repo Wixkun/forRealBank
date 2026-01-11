@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { IAccountRepository } from '@forreal/domain/accounts/ports/IAccountRepository';
-import { BankAccount } from '@forreal/domain/accounts/BankAccount';
+import { IAccountRepository } from '@forreal/domain';
+import { BankAccount } from '@forreal/domain';
 import { BankAccountEntity } from '../entities/BankAccountEntity';
 
 export class BankAccountRepository implements IAccountRepository {

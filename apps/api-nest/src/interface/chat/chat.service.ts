@@ -1,11 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ConversationType } from '@forreal/domain/chat/Conversation';
-import { CreateConversationUseCase } from '@forreal/application/chat/usecases/CreateConversationUseCase';
-import { AddConversationParticipantUseCase } from '@forreal/application/chat/usecases/AddConversationParticipantUseCase';
-import { SendMessageUseCase } from '@forreal/application/chat/usecases/SendMessageUseCase';
-import { ListMessagesUseCase } from '@forreal/application/chat/usecases/ListMessagesUseCase';
-import { MarkMessageReadUseCase } from '@forreal/application/chat/usecases/MarkMessageReadUseCase';
-import { LinkAdvisorClientUseCase } from '@forreal/application/chat/usecases/LinkAdvisorClientUseCase';
+import { ConversationType } from '@forreal/domain';
+import { CreateConversationUseCase } from '@forreal/application';
+import { AddConversationParticipantUseCase } from '@forreal/application';
+import { SendMessageUseCase } from '@forreal/application';
+import { ListMessagesUseCase } from '@forreal/application';
+import { MarkMessageReadUseCase } from '@forreal/application';
+import { LinkAdvisorClientUseCase } from '@forreal/application';
 
 @Injectable()
 export class ChatService {

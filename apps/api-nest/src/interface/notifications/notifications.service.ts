@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { SendNotificationUseCase } from '@forreal/application/notifications/usecases/SendNotificationUseCase';
-import { MarkNotificationReadUseCase } from '@forreal/application/notifications/usecases/MarkNotificationReadUseCase';
-import { ListNotificationsByUserUseCase } from '@forreal/application/notifications/usecases/ListNotificationsByUserUseCase';
+import { SendNotificationUseCase } from '@forreal/application';
+import { MarkNotificationReadUseCase } from '@forreal/application';
+import { ListNotificationsByUserUseCase } from '@forreal/application';
 
 @Injectable()
 export class NotificationsService {

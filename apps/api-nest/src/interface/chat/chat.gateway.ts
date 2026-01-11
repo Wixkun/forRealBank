@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UseGuards, Inject } from '@nestjs/common';
-import { SendMessageUseCase } from '@forreal/application/chat/usecases/SendMessageUseCase';
-import { AddConversationParticipantUseCase } from '@forreal/application/chat/usecases/AddConversationParticipantUseCase';
+import { SendMessageUseCase } from '@forreal/application';
+import { AddConversationParticipantUseCase } from '@forreal/application';
 
 @WebSocketGateway({ cors: { origin: '*' }, namespace: '/chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

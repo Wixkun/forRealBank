@@ -3,13 +3,13 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { BankTransactionEntity } from '@forreal/infrastructure-typeorm/entities/BankTransactionEntity';
-import { BankAccountEntity } from '@forreal/infrastructure-typeorm/entities/BankAccountEntity';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm/entities/BrokerageAccountEntity';
-import { BankAccountRepository } from '@forreal/infrastructure-typeorm/repositories/BankAccountRepository';
-import { BrokerageAccountRepository } from '@forreal/infrastructure-typeorm/repositories/BrokerageAccountRepository';
-import { BankTransactionRepository } from '@forreal/infrastructure-typeorm/repositories/BankTransactionRepository';
-import { InitiateTransferUseCase } from '@forreal/application/transactions/usecases/InitiateTransferUseCase';
+import { BankTransactionEntity } from '@forreal/infrastructure-typeorm';
+import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
+import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { BankAccountRepository } from '@forreal/infrastructure-typeorm';
+import { BrokerageAccountRepository } from '@forreal/infrastructure-typeorm';
+import { BankTransactionRepository } from '@forreal/infrastructure-typeorm';
+import { InitiateTransferUseCase } from '@forreal/application';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)

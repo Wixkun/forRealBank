@@ -3,36 +3,36 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
-import { AdvisorClientEntity } from '@forreal/infrastructure-typeorm/entities/AdvisorClientEntity';
-import { ConversationEntity } from '@forreal/infrastructure-typeorm/entities/ConversationEntity';
-import { ConversationParticipantEntity } from '@forreal/infrastructure-typeorm/entities/ConversationParticipantEntity';
-import { MessageEntity } from '@forreal/infrastructure-typeorm/entities/MessageEntity';
-import { UserEntity } from '@forreal/infrastructure-typeorm/entities/UserEntity';
-import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
+import { AdvisorClientEntity } from '@forreal/infrastructure-typeorm';
+import { ConversationEntity } from '@forreal/infrastructure-typeorm';
+import { ConversationParticipantEntity } from '@forreal/infrastructure-typeorm';
+import { MessageEntity } from '@forreal/infrastructure-typeorm';
+import { UserEntity } from '@forreal/infrastructure-typeorm';
+import { RoleEntity } from '@forreal/infrastructure-typeorm';
 
-import { IConversationRepository } from '@forreal/domain/chat/ports/IConversationRepository';
-import { IMessageRepository } from '@forreal/domain/chat/ports/IMessageRepository';
-import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
-import { IAdvisorClientRepository } from '@forreal/domain/chat/ports/IAdvisorClientRepository';
+import { IConversationRepository } from '@forreal/domain';
+import { IMessageRepository } from '@forreal/domain';
+import { IConversationParticipantRepository } from '@forreal/domain';
+import { IAdvisorClientRepository } from '@forreal/domain';
 
-import { ConversationRepository } from '@forreal/infrastructure-typeorm/repositories/ConversationRepository';
-import { MessageRepository } from '@forreal/infrastructure-typeorm/repositories/MessageRepository';
-import { ConversationParticipantRepository } from '@forreal/infrastructure-typeorm/repositories/ConversationParticipantRepository';
-import { AdvisorClientRepository } from '@forreal/infrastructure-typeorm/repositories/AdvisorClientRepository';
+import { ConversationRepository } from '@forreal/infrastructure-typeorm';
+import { MessageRepository } from '@forreal/infrastructure-typeorm';
+import { ConversationParticipantRepository } from '@forreal/infrastructure-typeorm';
+import { AdvisorClientRepository } from '@forreal/infrastructure-typeorm';
 
-import { CreateConversationUseCase } from '@forreal/application/chat/usecases/CreateConversationUseCase';
-import { AddConversationParticipantUseCase } from '@forreal/application/chat/usecases/AddConversationParticipantUseCase';
-import { SendMessageUseCase } from '@forreal/application/chat/usecases/SendMessageUseCase';
-import { ListMessagesUseCase } from '@forreal/application/chat/usecases/ListMessagesUseCase';
-import { MarkMessageReadUseCase } from '@forreal/application/chat/usecases/MarkMessageReadUseCase';
-import { LinkAdvisorClientUseCase } from '@forreal/application/chat/usecases/LinkAdvisorClientUseCase';
-import { ListConversationsByUserUseCase } from '@forreal/application/chat/usecases/ListConversationsByUserUseCase';
-import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application/chat/usecases/ListParticipantsDetailsByConversationUseCase';
-import { ListClientsOfAdvisorUseCase } from '@forreal/application/chat/usecases/ListClientsOfAdvisorUseCase';
-import { FindAdvisorOfClientUseCase } from '@forreal/application/chat/usecases/FindAdvisorOfClientUseCase';
-import { ListUsersByRoleUseCase } from '@forreal/application/user/usecases/ListUsersByRoleUseCase';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
+import { CreateConversationUseCase } from '@forreal/application';
+import { AddConversationParticipantUseCase } from '@forreal/application';
+import { SendMessageUseCase } from '@forreal/application';
+import { ListMessagesUseCase } from '@forreal/application';
+import { MarkMessageReadUseCase } from '@forreal/application';
+import { LinkAdvisorClientUseCase } from '@forreal/application';
+import { ListConversationsByUserUseCase } from '@forreal/application';
+import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application';
+import { ListClientsOfAdvisorUseCase } from '@forreal/application';
+import { FindAdvisorOfClientUseCase } from '@forreal/application';
+import { ListUsersByRoleUseCase } from '@forreal/application';
+import { IUserRepository } from '@forreal/domain';
+import { UserRepository } from '@forreal/infrastructure-typeorm';
 
 @Module({
   imports: [

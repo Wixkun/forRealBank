@@ -1,6 +1,6 @@
 import { Repository } from 'typeorm';
-import { ITransactionRepository } from '@forreal/domain/transactions/ports/ITransactionRepository';
-import { TransactionType } from '@forreal/domain/transactions/ports/ITransactionRepository';
+import { ITransactionRepository } from '@forreal/domain';
+import { TransactionType } from '@forreal/domain';
 import { BankTransactionEntity } from '../entities/BankTransactionEntity';
 
 export class BankTransactionRepository implements ITransactionRepository {
