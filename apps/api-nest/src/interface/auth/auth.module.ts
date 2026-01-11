@@ -11,7 +11,9 @@ import {
   IPasswordHasher,
   ITokenService,
   IUserIdGenerator,
+  ISessionIdGenerator,
   USER_ID_GENERATOR,
+  SESSION_ID_GENERATOR,
 } from '@forreal/domain';
 
 import {
@@ -22,7 +24,10 @@ import {
 
 import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt';
 import { JwtTokenService } from '@forreal/infrastructure-jwt-nest';
-import { UserUuidGenerator } from '@forreal/infrastructure-uuid-node';
+import {
+  UserUuidGenerator,
+  SessionUuidGenerator,
+} from '@forreal/infrastructure-uuid-node';
 
 import {
   RegisterUserUseCase,
@@ -34,9 +39,8 @@ const registerUserProvider: Provider = {
   useFactory: (
     users: IUserRepository,
     hasher: IPasswordHasher,
-    idGenerator: IUserIdGenerator,
-  ) =>
-    new RegisterUserUseCase(users, hasher, idGenerator),
+    userIdGenerator: IUserIdGenerator,
+  ) => new RegisterUserUseCase(users, hasher, userIdGenerator),
   inject: [IUserRepository, IPasswordHasher, USER_ID_GENERATOR],
 };
 
@@ -46,23 +50,39 @@ const loginUserProvider: Provider = {
     users: IUserRepository,
     hasher: IPasswordHasher,
     tokens: ITokenService,
+    sessionIdGenerator: ISessionIdGenerator,
   ) =>
-    new LoginUserUseCase(users, hasher, tokens),
-  inject: [IUserRepository, IPasswordHasher, ITokenService],
+    new LoginUserUseCase(
+      users,
+      hasher,
+      tokens,
+      sessionIdGenerator,
+    ),
+  inject: [
+    IUserRepository,
+    IPasswordHasher,
+    ITokenService,
+    SESSION_ID_GENERATOR,
+  ],
 };
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, RoleEntity]),
-    PassportModule.register({ defaultStrategy: 'jwt', session: false }),
+    PassportModule.register({
+      defaultStrategy: 'jwt',
+      session: false,
+    }),
   ],
   controllers: [AuthController],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
+
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
 
     { provide: USER_ID_GENERATOR, useClass: UserUuidGenerator },
+    { provide: SESSION_ID_GENERATOR, useClass: SessionUuidGenerator },
 
     JwtStrategy,
     JwtAuthGuard,
