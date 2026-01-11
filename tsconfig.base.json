@@ -17,7 +17,8 @@
       "@forreal/application/*": ["packages/application/src/*"],
       "@forreal/infrastructure-typeorm/*": ["packages/infrastructure/typeorm/src/*"],
       "@forreal/infrastructure-crypto-bcrypt/*": ["packages/infrastructure/crypto-bcrypt/src/*"],
-      "@forreal/infrastructure-jwt-nest/*": ["packages/infrastructure/jwt-nest/src/*"]
+      "@forreal/infrastructure-jwt-nest/*": ["packages/infrastructure/jwt-nest/src/*"],
+      "@forreal/infrastructure-mongodb/*": ["packages/infrastructure/mongodb/src/*"]
     }
   }
 }
