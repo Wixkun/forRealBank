@@ -27,6 +27,7 @@ export class LoginUserUseCase {
     await this.userRepository.save(user);
 
     const sessionId = this.sessionIdGenerator.generate();
+    console.log('[LOGIN] sessionId =', sessionId);
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + 15 * 60 * 1000);
 
