@@ -9,11 +9,6 @@ export class AdvisorClientMapper {
   }
 
   static toDomain(entity: AdvisorClientEntity): AdvisorClient {
-    return new AdvisorClient(
-      entity.id,
-      entity.advisor.id,
-      entity.client.id,
-      entity.createdAt,
-    );
+    return new AdvisorClient(entity.id, entity.advisor.id, entity.client.id, entity.createdAt);
   }
 }

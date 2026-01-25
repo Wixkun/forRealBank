@@ -13,7 +13,7 @@ export function useSSE<T = unknown>({ url, enabled = true, onMessage, onError }:
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<Event | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  
+
   const onMessageRef = useRef(onMessage);
   const onErrorRef = useRef(onError);
 
@@ -57,4 +57,3 @@ export function useSSE<T = unknown>({ url, enabled = true, onMessage, onError }:
 
   return { data, error, isConnected };
 }
-

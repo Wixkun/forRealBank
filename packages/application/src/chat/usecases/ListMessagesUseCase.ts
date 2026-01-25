@@ -8,7 +8,7 @@ export class ListMessagesUseCase {
       limit: input.limit,
       offset: input.offset,
     });
-    return messages.map(m => ({
+    return messages.map((m) => ({
       id: m.id,
       conversationId: m.conversationId,
       senderId: m.senderId,

@@ -28,7 +28,7 @@ export default function AdvisorNotificationsPage() {
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || 'Échec de l\'envoi');
+        throw new Error(data.message || "Échec de l'envoi");
       }
       setMessage('Notification envoyée');
       setTitle('');
@@ -62,9 +62,7 @@ export default function AdvisorNotificationsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-6">
         <h1 className="text-2xl font-semibold mb-4">Envoyer une notification</h1>
-        {message && (
-          <div className="mb-4 text-sm p-3 rounded border bg-white">{message}</div>
-        )}
+        {message && <div className="mb-4 text-sm p-3 rounded border bg-white">{message}</div>}
         <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">
           <div>
             <label className="block text-sm font-medium mb-1">ID du client</label>

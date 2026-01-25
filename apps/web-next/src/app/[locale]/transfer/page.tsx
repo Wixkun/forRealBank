@@ -57,23 +57,23 @@ function TransferPageContent() {
       try {
         const res = await fetch(`/api/proxy/accounts`);
         const data: AccountsResponse = await res.json();
-        const bank: AccountItemWithIban[] = (data.bankAccounts || []).map((acc) => ({ 
-          id: acc.id, 
-          name: acc.name, 
-          balance: Number(acc.balance), 
+        const bank: AccountItemWithIban[] = (data.bankAccounts || []).map((acc) => ({
+          id: acc.id,
+          name: acc.name,
+          balance: Number(acc.balance),
           type: acc.type,
-          iban: acc.iban 
+          iban: acc.iban,
         }));
-        const broker: AccountItemWithIban[] = (data.brokerageAccounts || []).map((acc) => ({ 
-          id: acc.id, 
-          name: acc.name, 
-          balance: Number(acc.balance), 
+        const broker: AccountItemWithIban[] = (data.brokerageAccounts || []).map((acc) => ({
+          id: acc.id,
+          name: acc.name,
+          balance: Number(acc.balance),
           type: 'brokerage',
-          iban: acc.iban 
+          iban: acc.iban,
         }));
         const list: AccountItemWithIban[] = [...bank, ...broker];
         setAccounts(list);
-        const defaultSrc = list.find(a => a.type === 'checking') || list[0];
+        const defaultSrc = list.find((a) => a.type === 'checking') || list[0];
         if (defaultSrc) setSourceAccountId(defaultSrc.id);
       } catch {
         setStatus(common('errorLoadingAccount'));
@@ -91,7 +91,11 @@ function TransferPageContent() {
     description?: string;
   };
 
-  const handleSubmit = async (data: { amount: string; recipient?: string; description?: string }) => {
+  const handleSubmit = async (data: {
+    amount: string;
+    recipient?: string;
+    description?: string;
+  }) => {
     if (!sourceAccountId) {
       setError(common('error'));
       setSuccess('');
@@ -103,7 +107,10 @@ function TransferPageContent() {
     try {
       const amount = Number(data.amount);
       const body: TransferPayload = {
-        sourceType: accounts.find(a => a.id === sourceAccountId)?.type === 'brokerage' ? 'brokerage' : 'bank',
+        sourceType:
+          accounts.find((a) => a.id === sourceAccountId)?.type === 'brokerage'
+            ? 'brokerage'
+            : 'bank',
         sourceAccountId,
         amount,
         description: data.description || 'Transfer',
@@ -127,69 +134,82 @@ function TransferPageContent() {
         setError('');
         setStatus('');
       }
-    } catch (err) {
+    } catch {
       setError('Transfer failed');
       setSuccess('');
     }
   };
 
   const getValidDestinations = () => {
-    const source = accounts.find(a => a.id === sourceAccountId);
+    const source = accounts.find((a) => a.id === sourceAccountId);
     if (!source) return [];
-    
-    return accounts.filter(acc => {
+
+    return accounts.filter((acc) => {
       if (acc.id === sourceAccountId) return false;
-      if (source.type === 'savings' && acc.type === 'savings') return false;
-      return true;
+      return !(source.type === 'savings' && acc.type === 'savings');
     });
   };
 
   const validDestinations = getValidDestinations();
 
   return (
-    <div className={`min-h-screen transition-colors ${
-      currentTheme === 'dark'
-        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900'
-        : 'bg-gradient-to-br from-gray-50 via-white to-gray-100'
-    }`}>
+    <div
+      className={`min-h-screen transition-colors ${
+        currentTheme === 'dark'
+          ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+          : 'bg-linear-to-br from-gray-50 via-white to-gray-100'
+      }`}
+    >
       <DashboardHeader />
       <div className="max-w-3xl mx-auto px-6 py-10 mt-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className={`text-2xl font-semibold ${
-            currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-          }`}>
+          <h1
+            className={`text-2xl font-semibold ${
+              currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}
+          >
             {t('quickActions.send')}
           </h1>
         </div>
 
         {error && (
-          <div className={`px-4 py-3 rounded-lg mb-6 ${
-            currentTheme === 'dark'
-              ? 'bg-red-500/20 border border-red-500/50 text-red-200'
-              : 'bg-red-100 border border-red-300 text-red-800'
-          }`}>
+          <div
+            className={`px-4 py-3 rounded-lg mb-6 ${
+              currentTheme === 'dark'
+                ? 'bg-red-500/20 border border-red-500/50 text-red-200'
+                : 'bg-red-100 border border-red-300 text-red-800'
+            }`}
+          >
             {error}
           </div>
         )}
 
         {success && (
-          <div className={`px-4 py-3 rounded-lg mb-6 ${
-            currentTheme === 'dark'
-              ? 'bg-green-500/20 border border-green-500/50 text-green-200'
-              : 'bg-green-100 border border-green-300 text-green-800'
-          }`}>
+          <div
+            className={`px-4 py-3 rounded-lg mb-6 ${
+              currentTheme === 'dark'
+                ? 'bg-green-500/20 border border-green-500/50 text-green-200'
+                : 'bg-green-100 border border-green-300 text-green-800'
+            }`}
+          >
             {success}
           </div>
         )}
 
-        <div className={`rounded-2xl p-6 mb-6 ${
-          currentTheme === 'dark'
-            ? 'bg-gray-800/60 border border-gray-700'
-            : 'bg-white border border-gray-300'
-        }`}>
-          <label className={`block text-sm mb-2 ${
-            currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-          }`}>Source account</label>
+        <div
+          className={`rounded-2xl p-6 mb-6 ${
+            currentTheme === 'dark'
+              ? 'bg-gray-800/60 border border-gray-700'
+              : 'bg-white border border-gray-300'
+          }`}
+        >
+          <label
+            className={`block text-sm mb-2 ${
+              currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            Source account
+          </label>
           <select
             className={`w-full p-3 rounded-md border transition-colors ${
               currentTheme === 'dark'
@@ -199,22 +219,31 @@ function TransferPageContent() {
             value={sourceAccountId}
             onChange={(e) => setSourceAccountId(e.target.value)}
           >
-            {accounts.map(a => (
+            {accounts.map((a) => (
               <option key={a.id} value={a.id}>
-                {a.name} • {a.type} • {new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(a.balance)}
+                {a.name} • {a.type} •{' '}
+                {new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(
+                  a.balance,
+                )}
               </option>
             ))}
           </select>
         </div>
 
-        <div className={`rounded-2xl p-6 mb-6 ${
-          currentTheme === 'dark'
-            ? 'bg-gray-800/60 border border-gray-700'
-            : 'bg-white border border-gray-300'
-        }`}>
-          <label className={`block text-sm mb-2 ${
-            currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-          }`}>Or select one of your accounts</label>
+        <div
+          className={`rounded-2xl p-6 mb-6 ${
+            currentTheme === 'dark'
+              ? 'bg-gray-800/60 border border-gray-700'
+              : 'bg-white border border-gray-300'
+          }`}
+        >
+          <label
+            className={`block text-sm mb-2 ${
+              currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            Or select one of your accounts
+          </label>
           <select
             className={`w-full p-3 rounded-md border transition-colors ${
               currentTheme === 'dark'
@@ -226,7 +255,7 @@ function TransferPageContent() {
               const val = e.target.value;
               setDestinationAccountId(val);
               if (val && val !== 'external') {
-                const acc = accounts.find(a => a.id === val);
+                const acc = accounts.find((a) => a.id === val);
                 setDestinationIban(acc?.iban || '');
               } else {
                 setDestinationIban('');
@@ -234,7 +263,7 @@ function TransferPageContent() {
             }}
           >
             <option value="external">Externe</option>
-            {validDestinations.map(a => (
+            {validDestinations.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name} • {a.type}
               </option>
@@ -242,14 +271,20 @@ function TransferPageContent() {
           </select>
         </div>
 
-        <div className={`rounded-2xl p-6 mb-6 ${
-          currentTheme === 'dark'
-            ? 'bg-gray-800/60 border border-gray-700'
-            : 'bg-white border border-gray-300'
-        }`}>
-          <label className={`block text-sm mb-2 ${
-            currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-          }`}>IBAN</label>
+        <div
+          className={`rounded-2xl p-6 mb-6 ${
+            currentTheme === 'dark'
+              ? 'bg-gray-800/60 border border-gray-700'
+              : 'bg-white border border-gray-300'
+          }`}
+        >
+          <label
+            className={`block text-sm mb-2 ${
+              currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}
+          >
+            IBAN
+          </label>
           <input
             type="text"
             className={`w-full p-3 rounded-md border transition-colors ${
@@ -260,34 +295,36 @@ function TransferPageContent() {
             value={destinationIban}
             onChange={(e) => setDestinationIban(e.target.value)}
             readOnly={destinationAccountId !== 'external' && destinationAccountId !== ''}
-            placeholder={destinationAccountId === 'external' || !destinationAccountId ? 'FR76 XXXX XXXX XXXX XXXX XXXX XXX' : ''}
+            placeholder={
+              destinationAccountId === 'external' || !destinationAccountId
+                ? 'FR76 XXXX XXXX XXXX XXXX XXXX XXX'
+                : ''
+            }
           />
         </div>
 
-          <TransferFormCard
-            onSubmit={handleSubmit}
-            hideRecipient={true}
-            labels={{
-              title: tAccount('quickTransfer'),
-              amount: tAccount('transferAmount'),
-              recipient: tAccount('transferTo'),
-              description: tAccount('transferDescription'),
-              submit: tAccount('transferButton'),
-            }}
-          />
+        <TransferFormCard
+          onSubmit={handleSubmit}
+          hideRecipient={true}
+          labels={{
+            title: tAccount('quickTransfer'),
+            amount: tAccount('transferAmount'),
+            recipient: tAccount('transferTo'),
+            description: tAccount('transferDescription'),
+            submit: tAccount('transferButton'),
+          }}
+        />
 
-          {status && (
-            <div className="mt-4 text-sm text-gray-200">{status}
-            </div>
-          )}
-        </div>
-      </div> 
+        {status && <div className="mt-4 text-sm text-gray-200">{status}</div>}
+      </div>
+    </div>
   );
 }
 
 export default function TransferPage() {
   return (
     <ThemeProvider>
-      <TransferPageContent />    </ThemeProvider>
+      <TransferPageContent />{' '}
+    </ThemeProvider>
   );
 }

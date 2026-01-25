@@ -10,8 +10,10 @@ import { LinkAdvisorClientUseCase } from '@forreal/application';
 @Injectable()
 export class ChatService {
   constructor(
-    @Inject(CreateConversationUseCase) private readonly createConversation: CreateConversationUseCase,
-    @Inject(AddConversationParticipantUseCase) private readonly addParticipant: AddConversationParticipantUseCase,
+    @Inject(CreateConversationUseCase)
+    private readonly createConversation: CreateConversationUseCase,
+    @Inject(AddConversationParticipantUseCase)
+    private readonly addParticipant: AddConversationParticipantUseCase,
     @Inject(SendMessageUseCase) private readonly sendMessageUC: SendMessageUseCase,
     @Inject(ListMessagesUseCase) private readonly listMessagesUC: ListMessagesUseCase,
     @Inject(MarkMessageReadUseCase) private readonly markReadUC: MarkMessageReadUseCase,

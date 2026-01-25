@@ -14,18 +14,16 @@ export function CTASection({ title, description, buttonText, locale }: CTASectio
         <div className="relative overflow-hidden bg-gradient-to-br from-teal-900/40 via-cyan-900/30 to-teal-950/40 backdrop-blur-sm rounded-3xl border border-teal-500/30 p-12 lg:p-16">
           <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl" />
-          
+
           <div className="relative z-10 text-center space-y-6">
             <h2 className="text-4xl lg:text-5xl font-serif font-bold">
               <span className="bg-gradient-to-r from-white via-teal-100 to-cyan-200 bg-clip-text text-transparent">
                 {title}
               </span>
             </h2>
-            
-            <p className="text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed">
-              {description}
-            </p>
-            
+
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto leading-relaxed">{description}</p>
+
             <div className="pt-4">
               <Link
                 href={`/${locale}/register`}

@@ -30,9 +30,7 @@ export function useClientAdvisor(clientId: string | undefined) {
         const data = await res.json();
         setAdvisor(data || null);
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Impossible de récupérer le conseiller'
-        );
+        setError(err instanceof Error ? err.message : 'Impossible de récupérer le conseiller');
       } finally {
         setIsLoading(false);
       }
@@ -66,11 +64,7 @@ export function useAdvisorClients(advisorId: string | undefined) {
         const data = await res.json();
         setClients(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Impossible de récupérer vos clients'
-        );
+        setError(err instanceof Error ? err.message : 'Impossible de récupérer vos clients');
       } finally {
         setIsLoading(false);
       }
@@ -104,11 +98,7 @@ export function useUsersByRole(role: 'CLIENT' | 'ADVISOR' | 'DIRECTOR' | null) {
         const data = await res.json();
         setUsers(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Impossible de récupérer les utilisateurs'
-        );
+        setError(err instanceof Error ? err.message : 'Impossible de récupérer les utilisateurs');
       } finally {
         setIsLoading(false);
       }

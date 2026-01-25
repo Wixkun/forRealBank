@@ -47,12 +47,18 @@ export class AdvisorClientRepository implements IAdvisorClientRepository {
   }
 
   async listClientsOf(advisorId: string): Promise<AdvisorClient[]> {
-    const entities = await this.repo.find({ where: { advisor: { id: advisorId } as any }, relations: ['advisor', 'client'] });
+    const entities = await this.repo.find({
+      where: { advisor: { id: advisorId } as any },
+      relations: ['advisor', 'client'],
+    });
     return entities.map(AdvisorClientMapper.toDomain);
   }
 
   async findAdvisorOf(clientId: string): Promise<AdvisorClient | null> {
-    const entity = await this.repo.findOne({ where: { client: { id: clientId } as any }, relations: ['advisor', 'client'] });
+    const entity = await this.repo.findOne({
+      where: { client: { id: clientId } as any },
+      relations: ['advisor', 'client'],
+    });
     return entity ? AdvisorClientMapper.toDomain(entity) : null;
   }
 }

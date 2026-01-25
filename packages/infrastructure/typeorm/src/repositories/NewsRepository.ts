@@ -40,7 +40,12 @@ export class NewsRepository implements INewsRepository {
 
   async list(params?: { limit?: number; offset?: number }): Promise<News[]> {
     const { limit = 20, offset = 0 } = params ?? {};
-    const entities = await this.repo.find({ order: { createdAt: 'DESC' }, take: limit, skip: offset, relations: ['author'] });
+    const entities = await this.repo.find({
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: offset,
+      relations: ['author'],
+    });
     return entities.map(NewsMapper.toDomain);
   }
 

@@ -16,23 +16,13 @@ import {
   SESSION_ID_GENERATOR,
 } from '@forreal/domain';
 
-import {
-  UserEntity,
-  RoleEntity,
-  UserRepository,
-} from '@forreal/infrastructure-typeorm';
+import { UserEntity, RoleEntity, UserRepository } from '@forreal/infrastructure-typeorm';
 
 import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt';
 import { JwtTokenService } from '@forreal/infrastructure-jwt-nest';
-import {
-  UserUuidGenerator,
-  SessionUuidGenerator,
-} from '@forreal/infrastructure-uuid-node';
+import { UserUuidGenerator, SessionUuidGenerator } from '@forreal/infrastructure-uuid-node';
 
-import {
-  RegisterUserUseCase,
-  LoginUserUseCase,
-} from '@forreal/application';
+import { RegisterUserUseCase, LoginUserUseCase } from '@forreal/application';
 
 const registerUserProvider: Provider = {
   provide: RegisterUserUseCase,
@@ -51,19 +41,8 @@ const loginUserProvider: Provider = {
     hasher: IPasswordHasher,
     tokens: ITokenService,
     sessionIdGenerator: ISessionIdGenerator,
-  ) =>
-    new LoginUserUseCase(
-      users,
-      hasher,
-      tokens,
-      sessionIdGenerator,
-    ),
-  inject: [
-    IUserRepository,
-    IPasswordHasher,
-    ITokenService,
-    SESSION_ID_GENERATOR,
-  ],
+  ) => new LoginUserUseCase(users, hasher, tokens, sessionIdGenerator),
+  inject: [IUserRepository, IPasswordHasher, ITokenService, SESSION_ID_GENERATOR],
 };
 
 @Module({

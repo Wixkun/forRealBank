@@ -80,7 +80,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
           {
             credentials: 'include',
             next: { revalidate: 30 },
-          }
+          },
         );
 
         if (transactionsResponse.ok) {

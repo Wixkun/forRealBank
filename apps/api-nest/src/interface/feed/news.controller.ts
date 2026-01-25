@@ -4,9 +4,7 @@ import { NewsService } from './news.service';
 
 @Controller('news')
 export class NewsController {
-  constructor(
-    @Inject(NewsService) private readonly newsService: NewsService,
-  ) {}
+  constructor(@Inject(NewsService) private readonly newsService: NewsService) {}
 
   @Post()
   async create(@Body() body: { authorId: string; title: string; content: string }) {
@@ -27,11 +25,7 @@ export class NewsController {
   stream(): Observable<MessageEvent> {
     return merge(
       this.newsService.getNewsChangeObservable(),
-      interval(5000).pipe(
-        switchMap(async () => this.newsService.listNews(10, 0)),
-      ),
-    ).pipe(
-      map((news) => ({ data: news } as MessageEvent)),
-    );
+      interval(5000).pipe(switchMap(async () => this.newsService.listNews(10, 0))),
+    ).pipe(map((news) => ({ data: news }) as MessageEvent));
   }
 }

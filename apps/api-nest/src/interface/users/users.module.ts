@@ -60,10 +60,7 @@ const unbanUserProvider: Provider = {
 };
 
 @Module({
-  imports: [
-    AuthModule,
-    TypeOrmModule.forFeature([UserEntity, RoleEntity]),
-  ],
+  imports: [AuthModule, TypeOrmModule.forFeature([UserEntity, RoleEntity])],
   controllers: [UsersController],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },

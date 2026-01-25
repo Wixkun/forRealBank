@@ -15,7 +15,6 @@ interface User {
 }
 
 interface ChatPagePresenterProps {
-  locale: string;
   isLoading: boolean;
   user: User | null;
   conversations: ConversationData[];
@@ -34,7 +33,6 @@ interface ChatPagePresenterProps {
 }
 
 export default function ChatPagePresenter({
-  locale,
   isLoading,
   user,
   conversations,
@@ -59,8 +57,8 @@ export default function ChatPagePresenter({
       <div
         className={`min-h-screen flex items-center justify-center ${
           theme === 'dark'
-            ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900'
-            : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
+            ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+            : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
         <div className="text-center">
@@ -78,8 +76,8 @@ export default function ChatPagePresenter({
       <div
         className={`min-h-screen flex items-center justify-center ${
           theme === 'dark'
-            ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900'
-            : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
+            ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+            : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
         <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
@@ -93,11 +91,11 @@ export default function ChatPagePresenter({
     <div
       className={`min-h-screen flex flex-col ${
         theme === 'dark'
-          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900'
-          : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
+          ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+          : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
       }`}
     >
-      <ChatHeader userName={user.firstName} />
+      <ChatHeader />
 
       <main className="flex-1 px-6 py-6 overflow-hidden">
         <div
@@ -106,10 +104,8 @@ export default function ChatPagePresenter({
           }`}
         >
           <div
-            className={`w-80 flex-shrink-0 border-r ${
-              theme === 'dark'
-                ? 'bg-gray-900 border-gray-700'
-                : 'bg-gray-50 border-gray-200'
+            className={`w-80 shrink-0 border-r ${
+              theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-50 border-gray-200'
             }`}
           >
             <ConversationsList
@@ -120,17 +116,11 @@ export default function ChatPagePresenter({
             />
           </div>
 
-          <div
-            className={`flex-1 flex flex-col ${
-              theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-            }`}
-          >
+          <div className={`flex-1 flex flex-col ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
             {(isAdvisor || isDirector) && (
               <div
                 className={`p-4 border-b flex flex-col gap-2 ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 border-gray-600'
-                    : 'bg-gray-50 border-gray-200'
+                  theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -143,9 +133,7 @@ export default function ChatPagePresenter({
                       {isDirector ? t('directorSectionTitle') : t('advisorSectionTitle')}
                     </p>
                     <p
-                      className={`text-xs ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                      }`}
+                      className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
                     >
                       {t('createPrivateHint')}
                     </p>
@@ -181,11 +169,7 @@ export default function ChatPagePresenter({
                   })}
                   {clientsList.length === 0 && (
                     <span
-                      className={`text-sm ${
-                        theme === 'dark'
-                          ? 'text-gray-400'
-                          : 'text-gray-500'
-                      }`}
+                      className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
                     >
                       {t('noneAvailable')}
                     </span>
@@ -197,9 +181,7 @@ export default function ChatPagePresenter({
             {isClient && advisor && !hasPrivateConversationWith(advisor.id) && (
               <div
                 className={`p-4 border-b ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 border-gray-600'
-                    : 'bg-gray-50 border-gray-200'
+                  theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
                 }`}
               >
                 <button
@@ -209,9 +191,7 @@ export default function ChatPagePresenter({
                 >
                   {isSubmitting ? t('creating') : t('contactAdvisor')}
                 </button>
-                {createError && (
-                  <p className="text-sm text-red-500 mt-2">{createError}</p>
-                )}
+                {createError && <p className="text-sm text-red-500 mt-2">{createError}</p>}
               </div>
             )}
 
@@ -224,9 +204,7 @@ export default function ChatPagePresenter({
             ) : conversations.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div
-                  className={`text-center ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                  }`}
+                  className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
                 >
                   <svg
                     className={`mx-auto h-12 w-12 mb-3 ${
@@ -250,11 +228,7 @@ export default function ChatPagePresenter({
                   >
                     {t('noConversationsTitle')}
                   </h3>
-                  <p
-                    className={`text-sm ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                    }`}
-                  >
+                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                     {t('noConversationsDescription')}
                   </p>
                 </div>
@@ -262,9 +236,7 @@ export default function ChatPagePresenter({
             ) : (
               <div className="flex items-center justify-center h-full">
                 <div
-                  className={`text-center ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                  }`}
+                  className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
                 >
                   <svg
                     className={`mx-auto h-12 w-12 mb-3 ${

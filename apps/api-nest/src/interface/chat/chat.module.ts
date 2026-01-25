@@ -9,16 +9,19 @@ import { ConversationParticipantEntity } from '@forreal/infrastructure-typeorm';
 import { MessageEntity } from '@forreal/infrastructure-typeorm';
 import { UserEntity } from '@forreal/infrastructure-typeorm';
 import { RoleEntity } from '@forreal/infrastructure-typeorm';
+import { NotificationEntity } from '@forreal/infrastructure-typeorm';
 
 import { IConversationRepository } from '@forreal/domain';
 import { IMessageRepository } from '@forreal/domain';
 import { IConversationParticipantRepository } from '@forreal/domain';
 import { IAdvisorClientRepository } from '@forreal/domain';
+import { INotificationRepository } from '@forreal/domain';
 
 import { ConversationRepository } from '@forreal/infrastructure-typeorm';
 import { MessageRepository } from '@forreal/infrastructure-typeorm';
 import { ConversationParticipantRepository } from '@forreal/infrastructure-typeorm';
 import { AdvisorClientRepository } from '@forreal/infrastructure-typeorm';
+import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 
 import { CreateConversationUseCase } from '@forreal/application';
 import { AddConversationParticipantUseCase } from '@forreal/application';
@@ -43,6 +46,7 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
       MessageEntity,
       UserEntity,
       RoleEntity,
+      NotificationEntity,
     ]),
   ],
   controllers: [ChatController],
@@ -54,6 +58,7 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
     { provide: IConversationParticipantRepository, useClass: ConversationParticipantRepository },
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAdvisorClientRepository, useClass: AdvisorClientRepository },
+    { provide: INotificationRepository, useClass: NotificationRepository },
     {
       provide: CreateConversationUseCase,
       useFactory: (repo: IConversationRepository) => new CreateConversationUseCase(repo),
@@ -61,15 +66,18 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
     },
     {
       provide: AddConversationParticipantUseCase,
-      useFactory: (
-        repo: IConversationParticipantRepository,
-      ) => new AddConversationParticipantUseCase(repo),
+      useFactory: (repo: IConversationParticipantRepository) =>
+        new AddConversationParticipantUseCase(repo),
       inject: [IConversationParticipantRepository],
     },
     {
       provide: SendMessageUseCase,
-      useFactory: (repo: IMessageRepository) => new SendMessageUseCase(repo),
-      inject: [IMessageRepository],
+      useFactory: (
+        messageRepo: IMessageRepository,
+        participantRepo: IConversationParticipantRepository,
+        notifRepo: INotificationRepository,
+      ) => new SendMessageUseCase(messageRepo, participantRepo, notifRepo),
+      inject: [IMessageRepository, IConversationParticipantRepository, INotificationRepository],
     },
     {
       provide: ListMessagesUseCase,
@@ -105,18 +113,14 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
     },
     {
       provide: ListClientsOfAdvisorUseCase,
-      useFactory: (
-        advisorClientRepo: IAdvisorClientRepository,
-        userRepo: IUserRepository,
-      ) => new ListClientsOfAdvisorUseCase(advisorClientRepo, userRepo),
+      useFactory: (advisorClientRepo: IAdvisorClientRepository, userRepo: IUserRepository) =>
+        new ListClientsOfAdvisorUseCase(advisorClientRepo, userRepo),
       inject: [IAdvisorClientRepository, IUserRepository],
     },
     {
       provide: FindAdvisorOfClientUseCase,
-      useFactory: (
-        advisorClientRepo: IAdvisorClientRepository,
-        userRepo: IUserRepository,
-      ) => new FindAdvisorOfClientUseCase(advisorClientRepo, userRepo),
+      useFactory: (advisorClientRepo: IAdvisorClientRepository, userRepo: IUserRepository) =>
+        new FindAdvisorOfClientUseCase(advisorClientRepo, userRepo),
       inject: [IAdvisorClientRepository, IUserRepository],
     },
     {

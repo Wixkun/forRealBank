@@ -16,16 +16,23 @@ import { RoleName } from '@forreal/domain';
 @Controller('chat')
 export class ChatController {
   constructor(
-    @Inject(CreateConversationUseCase) private readonly createConversationUseCase: CreateConversationUseCase,
+    @Inject(CreateConversationUseCase)
+    private readonly createConversationUseCase: CreateConversationUseCase,
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
     @Inject(ListMessagesUseCase) private readonly listMessagesUseCase: ListMessagesUseCase,
     @Inject(MarkMessageReadUseCase) private readonly markMessageReadUseCase: MarkMessageReadUseCase,
-    @Inject(LinkAdvisorClientUseCase) private readonly linkAdvisorClientUseCase: LinkAdvisorClientUseCase,
-    @Inject(ListConversationsByUserUseCase) private readonly listConversationsByUserUseCase: ListConversationsByUserUseCase,
-    @Inject(ListParticipantsDetailsByConversationUseCase) private readonly listParticipantsDetails: ListParticipantsDetailsByConversationUseCase,
-    @Inject(AddConversationParticipantUseCase) private readonly addConversationParticipant: AddConversationParticipantUseCase,
-    @Inject(ListClientsOfAdvisorUseCase) private readonly listClientsOfAdvisor: ListClientsOfAdvisorUseCase,
-    @Inject(FindAdvisorOfClientUseCase) private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
+    @Inject(LinkAdvisorClientUseCase)
+    private readonly linkAdvisorClientUseCase: LinkAdvisorClientUseCase,
+    @Inject(ListConversationsByUserUseCase)
+    private readonly listConversationsByUserUseCase: ListConversationsByUserUseCase,
+    @Inject(ListParticipantsDetailsByConversationUseCase)
+    private readonly listParticipantsDetails: ListParticipantsDetailsByConversationUseCase,
+    @Inject(AddConversationParticipantUseCase)
+    private readonly addConversationParticipant: AddConversationParticipantUseCase,
+    @Inject(ListClientsOfAdvisorUseCase)
+    private readonly listClientsOfAdvisor: ListClientsOfAdvisorUseCase,
+    @Inject(FindAdvisorOfClientUseCase)
+    private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
     @Inject(ListUsersByRoleUseCase) private readonly listUsersByRole: ListUsersByRoleUseCase,
   ) {}
 
@@ -93,10 +100,7 @@ export class ChatController {
   }
 
   @Post('conversations/:id/participants')
-  async addParticipant(
-    @Param('id') conversationId: string,
-    @Body() body: { userId: string },
-  ) {
+  async addParticipant(@Param('id') conversationId: string, @Body() body: { userId: string }) {
     return this.addConversationParticipant.execute({ conversationId, userId: body.userId });
   }
 

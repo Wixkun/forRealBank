@@ -65,10 +65,10 @@ export default function BrokeragePage() {
         const posRes = await fetch(`/api/proxy/trading/positions/${accountId}`);
         if (posRes.ok) {
           const positionsData: TradingPosition[] = await posRes.json();
-          
-          const symbols = positionsData.map(p => p.symbol).join(',');
+
+          const symbols = positionsData.map((p) => p.symbol).join(',');
           const pricesRes = await fetch(`/api/market-data?symbols=${symbols}`);
-          const priceMap: Record<string, { price: number }> = pricesRes.ok 
+          const priceMap: Record<string, { price: number }> = pricesRes.ok
             ? (await pricesRes.json()).data || {}
             : {};
 
@@ -76,10 +76,12 @@ export default function BrokeragePage() {
             const live = priceMap[pos.symbol];
             const currentPrice = live?.price ?? pos.avgPurchasePrice;
             const totalValueNum = currentPrice * pos.quantity;
-            const gainLossNum = totalValueNum - (pos.avgPurchasePrice * pos.quantity);
+            const gainLossNum = totalValueNum - pos.avgPurchasePrice * pos.quantity;
             const gainLossPercentNum = (gainLossNum / (pos.avgPurchasePrice * pos.quantity)) * 100;
 
-            console.log(`[${pos.symbol}] avg: ${pos.avgPurchasePrice}, current: ${currentPrice}, qty: ${pos.quantity}, gain: ${gainLossNum}`);
+            console.log(
+              `[${pos.symbol}] avg: ${pos.avgPurchasePrice}, current: ${currentPrice}, qty: ${pos.quantity}, gain: ${gainLossNum}`,
+            );
 
             const formatCurrency = (value: number) =>
               new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value);

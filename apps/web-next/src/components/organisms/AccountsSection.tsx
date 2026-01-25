@@ -24,7 +24,11 @@ export function AccountsSection({ title, accounts, locale }: AccountsSectionProp
 
   return (
     <div className="mb-8">
-      <h3 className={`text-xl font-semibold mb-4 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+      <h3
+        className={`text-xl font-semibold mb-4 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+      >
+        {title}
+      </h3>
       <div className="space-y-3">
         {accounts.map((account) => (
           <AccountCard

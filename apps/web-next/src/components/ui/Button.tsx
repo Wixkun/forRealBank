@@ -1,6 +1,4 @@
-export function Button(
-  props: React.ButtonHTMLAttributes<HTMLButtonElement>
-) {
+export function Button(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <button
       {...props}

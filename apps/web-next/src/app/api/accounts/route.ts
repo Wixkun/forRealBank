@@ -5,9 +5,9 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('access_token')?.value;
-    
+
     console.log('[API Routes] /api/accounts - Token:', token ? '***' : 'NO TOKEN');
-    
+
     if (!token) {
       console.warn('[API Routes] /api/accounts - No auth token found');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
@@ -17,7 +17,7 @@ export async function GET() {
     const response = await fetch('http://forrealbank-api:3001/api/accounts', {
       method: 'GET',
       headers: {
-        'Cookie': `access_token=${token}`,
+        Cookie: `access_token=${token}`,
         'Content-Type': 'application/json',
       },
       cache: 'no-store',
@@ -28,10 +28,7 @@ export async function GET() {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('[API Routes] /api/accounts - Error response:', errorText);
-      return NextResponse.json(
-        { error: 'Failed to fetch accounts' },
-        { status: response.status }
-      );
+      return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: response.status });
     }
 
     const data = await response.json();
@@ -39,9 +36,6 @@ export async function GET() {
     return NextResponse.json(data);
   } catch (error) {
     console.error('[API Routes] GET /api/accounts error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

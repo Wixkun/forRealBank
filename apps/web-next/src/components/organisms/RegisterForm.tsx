@@ -29,14 +29,13 @@ export function RegisterForm() {
             'Content-Type': 'application/json',
           },
         });
-        
+
         if (response.ok) {
           router.push(`/${locale}/dashboard`);
         }
-      } catch {
-      }
+      } catch {}
     };
-    
+
     checkAuth();
   }, [router, locale]);
 
@@ -77,7 +76,7 @@ export function RegisterForm() {
           {error}
         </div>
       )}
-      
+
       <div className="flex gap-4">
         <FormField
           label={t('firstName')}
@@ -111,7 +110,7 @@ export function RegisterForm() {
 
       <div className="text-center text-sm mt-4">
         <span className="text-gray-400">{tCommon('alreadyHaveAccount')} </span>
-        <Link 
+        <Link
           href={`/${locale}/login`}
           className="text-teal-400 hover:text-teal-300 transition font-medium"
         >

@@ -1,12 +1,12 @@
 'use client';
-import Link from "next/link";
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LanguageSwitcher } from '@/components/organisms/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 
 export default function Header() {
-    const t = useTranslations('common');
+  const t = useTranslations('common');
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'en';
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -51,7 +51,7 @@ export default function Header() {
       <div className="px-6 py-4 flex items-center justify-end">
         <div className="flex items-center gap-3">
           <LanguageSwitcher theme="dark" />
-          
+
           {isAuthenticated === null ? (
             <div className="w-24 h-10 bg-gray-700/30 rounded-md animate-pulse" />
           ) : isAuthenticated ? (

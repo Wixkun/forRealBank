@@ -5,11 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/organisms/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 
-type ChatHeaderProps = {
-  userName?: string;
-};
-
-export function ChatHeader({ userName }: ChatHeaderProps) {
+export function ChatHeader() {
   const t = useTranslations('common');
   const { theme, toggleTheme, mounted } = useTheme();
   const pathname = usePathname();
@@ -43,7 +39,7 @@ export function ChatHeader({ userName }: ChatHeaderProps) {
           <div className="flex items-center justify-between">
             <button
               onClick={handleDashboard}
-              className="text-2xl font-semibold bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
+              className="text-2xl font-semibold bg-linear-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
             >
               Avenir
             </button>
@@ -54,26 +50,24 @@ export function ChatHeader({ userName }: ChatHeaderProps) {
   }
 
   return (
-    <header className={`border-b sticky top-0 z-50 shadow-xl backdrop-blur-lg ${
-      theme === 'dark' 
-        ? 'border-gray-700/50 bg-black/40' 
-        : 'border-gray-200 bg-white/80'
-    }`}>
+    <header
+      className={`border-b sticky top-0 z-50 shadow-xl backdrop-blur-lg ${
+        theme === 'dark' ? 'border-gray-700/50 bg-black/40' : 'border-gray-200 bg-white/80'
+      }`}
+    >
       <div className="px-6 py-4">
         <div className="flex items-center justify-between">
           <button
             onClick={handleDashboard}
-            className={`text-2xl font-semibold bg-gradient-to-r ${
-              theme === 'dark'
-                ? 'from-teal-400 to-cyan-300'
-                : 'from-teal-600 to-cyan-600'
+            className={`text-2xl font-semibold bg-linear-to-r ${
+              theme === 'dark' ? 'from-teal-400 to-cyan-300' : 'from-teal-600 to-cyan-600'
             } bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer`}
           >
             Avenir
           </button>
           <div className="flex items-center gap-4">
             <LanguageSwitcher theme={theme} />
-            
+
             <button
               onClick={toggleTheme}
               className={`w-10 h-10 rounded-full flex items-center justify-center transition shadow-lg ${
@@ -85,7 +79,7 @@ export function ChatHeader({ userName }: ChatHeaderProps) {
             >
               <span className="text-xl">{theme === 'dark' ? '☀️' : '🌙'}</span>
             </button>
-            
+
             <button
               onClick={handleLogout}
               className={`px-4 py-2 rounded-lg font-medium transition shadow-lg ${

@@ -23,6 +23,7 @@ export * from './feed/ports/INewsRepository';
 
 // notifications
 export * from './notifications/Notification';
+export * from './notifications/NotificationType';
 export * from './notifications/ports/INotificationRepository';
 
 // transactions

@@ -24,22 +24,16 @@ export const getCachedConversations = unstable_cache(
     }
 
     try {
-      const response = await fetch(
-        `${apiUrl}/chat/conversations/by-user/${userId}`,
-        {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          next: { revalidate: 300, tags: ['conversations'] }, 
-        }
-      );
+      const response = await fetch(`${apiUrl}/chat/conversations/by-user/${userId}`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        next: { revalidate: 300, tags: ['conversations'] },
+      });
 
       if (!response.ok) {
-        console.error(
-          `Failed to fetch conversations: ${response.status}`,
-          await response.text()
-        );
+        console.error(`Failed to fetch conversations: ${response.status}`, await response.text());
         return [];
       }
 
@@ -50,8 +44,8 @@ export const getCachedConversations = unstable_cache(
       return [];
     }
   },
-  ['conversations'], 
-  { revalidate: 300, tags: ['conversations'] } 
+  ['conversations'],
+  { revalidate: 300, tags: ['conversations'] },
 );
 
 export const getCachedAdvisor = unstable_cache(
@@ -80,7 +74,7 @@ export const getCachedAdvisor = unstable_cache(
     }
   },
   ['advisor'],
-  { revalidate: 600, tags: ['advisor'] }
+  { revalidate: 600, tags: ['advisor'] },
 );
 
 export const getCachedAdvisorClients = unstable_cache(
@@ -90,16 +84,13 @@ export const getCachedAdvisorClients = unstable_cache(
     }
 
     try {
-      const response = await fetch(
-        `${apiUrl}/chat/advisor/${advisorId}/clients`,
-        {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          next: { revalidate: 600, tags: ['advisor-clients'] }, 
-        }
-      );
+      const response = await fetch(`${apiUrl}/chat/advisor/${advisorId}/clients`, {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        next: { revalidate: 600, tags: ['advisor-clients'] },
+      });
 
       if (!response.ok) {
         return [];
@@ -113,7 +104,7 @@ export const getCachedAdvisorClients = unstable_cache(
     }
   },
   ['advisor-clients'],
-  { revalidate: 600, tags: ['advisor-clients'] }
+  { revalidate: 600, tags: ['advisor-clients'] },
 );
 
 export const getCachedUsersByRole = unstable_cache(
@@ -124,7 +115,7 @@ export const getCachedUsersByRole = unstable_cache(
         headers: {
           'Content-Type': 'application/json',
         },
-        next: { revalidate: 1800, tags: ['users-by-role'] }, 
+        next: { revalidate: 1800, tags: ['users-by-role'] },
       });
 
       if (!response.ok) {
@@ -139,5 +130,5 @@ export const getCachedUsersByRole = unstable_cache(
     }
   },
   ['users-by-role'],
-  { revalidate: 1800, tags: ['users-by-role'] }
+  { revalidate: 1800, tags: ['users-by-role'] },
 );

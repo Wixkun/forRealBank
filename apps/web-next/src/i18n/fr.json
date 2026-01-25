@@ -249,8 +249,7 @@
       "description": "Rejoignez plus de 500 000 clients qui font confiance à AvenirBank pour gérer leur argent intelligemment. Ouverture de compte en 5 minutes, 100% en ligne.",
       "button": "Commencer maintenant"
     }
-  }
-  ,
+  },
   "chat": {
     "loadingConversations": "Chargement de vos conversations...",
     "loginRequired": "Veuillez vous connecter pour accéder à la messagerie.",
@@ -277,8 +276,7 @@
         "hoursAgo": "Il y a {count}h",
         "yesterday": "Hier"
       }
-    }
-    ,
+    },
     "display": {
       "advisorDefaultName": "Votre conseiller",
       "advisorDefaultRole": "Conseiller financier",

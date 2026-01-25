@@ -8,6 +8,9 @@ COPY . .
 
 RUN pnpm install --frozen-lockfile
 
+RUN find . -name "*.tsbuildinfo" -delete
+
+
 RUN pnpm --filter @forreal/domain build \
  && pnpm --filter @forreal/application build \
  && pnpm --filter @forreal/infrastructure-* build

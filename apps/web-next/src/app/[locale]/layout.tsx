@@ -6,7 +6,7 @@ import { locales } from '../../i18n/config';
 
 export default async function LocaleLayout({
   children,
-  params
+  params,
 }: {
   children: ReactNode;
   params: Promise<{ locale: string }>;

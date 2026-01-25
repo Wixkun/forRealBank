@@ -8,7 +8,7 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards, Inject } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { SendMessageUseCase } from '@forreal/application';
 import { AddConversationParticipantUseCase } from '@forreal/application';
 
@@ -24,7 +24,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
-    @Inject(AddConversationParticipantUseCase) private readonly addConversationParticipantUseCase: AddConversationParticipantUseCase,
+    @Inject(AddConversationParticipantUseCase)
+    private readonly addConversationParticipantUseCase: AddConversationParticipantUseCase,
   ) {}
 
   handleConnection(client: Socket) {
@@ -61,37 +62,55 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string; userId: string },
   ) {
-    console.log('[WS] join_conversation', { socketId: client.id, conversationId: data.conversationId, userId: data.userId });
-    client.join(`conversation:${data.conversationId}`);
+    const roomName = `conversation:${data.conversationId}`;
+
     let socketSet = this.socketRooms.get(client.id);
     if (!socketSet) {
       socketSet = new Set<string>();
       this.socketRooms.set(client.id, socketSet);
     }
+
+    if (socketSet.has(data.conversationId)) {
+      return { success: true, alreadyJoined: true };
+    }
+
+    console.log('[WS] join_conversation', {
+      socketId: client.id,
+      conversationId: data.conversationId,
+      userId: data.userId,
+    });
+
+    void client.join(roomName);
     socketSet.add(data.conversationId);
+
     let members = this.roomMembers.get(data.conversationId);
     if (!members) {
       members = new Set<string>();
       this.roomMembers.set(data.conversationId, members);
     }
+
     members.add(data.userId);
-    this.broadcastPresence(data.conversationId);
+
     try {
-      await this.addConversationParticipantUseCase.execute({
+      const result = await this.addConversationParticipantUseCase.execute({
         conversationId: data.conversationId,
         userId: data.userId,
       });
+
+     if (result.inserted) {
+        this.broadcastPresence(data.conversationId);
+        this.server.to(roomName).emit('user_joined', {
+          conversationId: data.conversationId,
+          userId: data.userId,
+        });
+      }
+
+      return { success: true, inserted: result.inserted };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      if (!message?.toLowerCase?.().includes('already')) {
-        console.error('[WS][ERROR] join_conversation', { socketId: client.id, error: message });
-      }
+      console.error('[WS][ERROR] join_conversation', { socketId: client.id, error: message });
+      return { success: false, error: message };
     }
-    this.server.to(`conversation:${data.conversationId}`).emit('user_joined', {
-      conversationId: data.conversationId,
-      userId: data.userId,
-    });
-    return { success: true };
   }
 
   @SubscribeMessage('send_message')
@@ -100,13 +119,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { conversationId: string; senderId: string; content: string },
   ) {
     try {
-      console.log('[WS] send_message', { socketId: client.id, conversationId: data.conversationId, senderId: data.senderId, contentLen: data.content?.length ?? 0 });
+      console.log('[WS] send_message', {
+        socketId: client.id,
+        conversationId: data.conversationId,
+        senderId: data.senderId,
+        contentLen: data.content?.length ?? 0,
+      });
       const messageResult = await this.sendMessageUseCase.execute({
         conversationId: data.conversationId,
         senderId: data.senderId,
         content: data.content,
       });
-
 
       this.server.to(`conversation:${data.conversationId}`).emit('new_message', {
         messageId: messageResult.messageId,
@@ -131,7 +154,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string; userId: string },
   ) {
-    console.log('[WS] typing_start', { socketId: client.id, conversationId: data.conversationId, userId: data.userId });
+    console.log('[WS] typing_start', {
+      socketId: client.id,
+      conversationId: data.conversationId,
+      userId: data.userId,
+    });
     let typingUserIds = this.typingUsers.get(data.conversationId);
     if (!typingUserIds) {
       typingUserIds = new Set<string>();
@@ -152,7 +179,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string; userId: string },
   ) {
-    console.log('[WS] typing_stop', { socketId: client.id, conversationId: data.conversationId, userId: data.userId });
+    console.log('[WS] typing_stop', {
+      socketId: client.id,
+      conversationId: data.conversationId,
+      userId: data.userId,
+    });
     this.clearTyping(data.conversationId, data.userId);
     return { success: true };
   }
@@ -173,7 +204,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { conversationId: string },
   ) {
-    client.leave(`conversation:${data.conversationId}`);
+    void client.leave(`conversation:${data.conversationId}`);
     const user = this.connectedUsers.get(client.id);
     if (user) {
       const rooms = this.socketRooms.get(client.id);

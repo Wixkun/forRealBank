@@ -46,7 +46,15 @@ export default function ChatDisplay({
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'en';
 
-  const { messages, typingUsers, isConnected, presentUserIds, sendMessage, startTyping, stopTyping } = useChat({
+  const {
+    messages,
+    typingUsers,
+    isConnected,
+    presentUserIds,
+    sendMessage,
+    startTyping,
+    stopTyping,
+  } = useChat({
     conversationId,
     userId,
   });
@@ -110,37 +118,50 @@ export default function ChatDisplay({
 
   return (
     <div className={`flex flex-col h-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-      <div className={`flex items-center justify-between px-6 py-4 border-b ${
-        theme === 'dark'
-          ? 'border-gray-700 bg-gray-700'
-          : 'border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50'
-      }`}>
+      <div
+        className={`flex items-center justify-between px-6 py-4 border-b ${
+          theme === 'dark'
+            ? 'border-gray-700 bg-gray-700'
+            : 'border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50'
+        }`}
+      >
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-white font-semibold">
             {firstLetter}
           </div>
           <div>
-            <h3 className={`font-semibold text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{displayName}</h3>
+            <h3
+              className={`font-semibold text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
+            >
+              {displayName}
+            </h3>
             <div className="flex items-center gap-2">
-              {!isGroupChat && <div className={`h-2 w-2 rounded-full ${isUserOnline ? 'bg-green-500' : 'bg-gray-400'}`} />}
+              {!isGroupChat && (
+                <div
+                  className={`h-2 w-2 rounded-full ${isUserOnline ? 'bg-green-500' : 'bg-gray-400'}`}
+                />
+              )}
               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                {displayRole} {!isGroupChat && `• ${isUserOnline ? t('display.online') : t('display.offline')}`}
+                {displayRole}{' '}
+                {!isGroupChat && `• ${isUserOnline ? t('display.online') : t('display.offline')}`}
               </p>
             </div>
           </div>
         </div>
         {!isConnected && (
-          <div className={`text-sm px-3 py-1 rounded-full ${
-            theme === 'dark'
-              ? 'text-yellow-400 bg-yellow-900/30'
-              : 'text-yellow-600 bg-yellow-50'
-          }`}>
+          <div
+            className={`text-sm px-3 py-1 rounded-full ${
+              theme === 'dark' ? 'text-yellow-400 bg-yellow-900/30' : 'text-yellow-600 bg-yellow-50'
+            }`}
+          >
             {t('display.reconnecting')}
           </div>
         )}
       </div>
 
-      <div className={`flex-1 overflow-y-auto p-6 space-y-4 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}>
+      <div
+        className={`flex-1 overflow-y-auto p-6 space-y-4 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}
+      >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -157,8 +178,12 @@ export default function ChatDisplay({
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : ''}`}>{t('display.empty.title')}</p>
-              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>{t('display.empty.subtitle')}</p>
+              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : ''}`}>
+                {t('display.empty.title')}
+              </p>
+              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                {t('display.empty.subtitle')}
+              </p>
             </div>
           </div>
         ) : (
@@ -169,10 +194,15 @@ export default function ChatDisplay({
               const isOwnMessage = msg.senderId === userId;
 
               return (
-                <div key={msg.messageId} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  key={msg.messageId}
+                  className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                >
                   <div>
                     {isGroupChat && !isOwnMessage && senderName && (
-                      <p className={`text-xs font-semibold mb-1 ml-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <p
+                        className={`text-xs font-semibold mb-1 ml-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
+                      >
                         {senderName} {isDirector && '👑'}
                       </p>
                     )}
@@ -190,7 +220,11 @@ export default function ChatDisplay({
                       <p className="text-sm">{msg.content}</p>
                       <p
                         className={`text-xs ${
-                          isOwnMessage || isDirector ? 'text-opacity-75' : theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                          isOwnMessage || isDirector
+                            ? 'text-opacity-75'
+                            : theme === 'dark'
+                              ? 'text-gray-400'
+                              : 'text-gray-500'
                         } mt-1`}
                       >
                         {new Date(msg.createdAt).toLocaleTimeString(locale, {
@@ -205,15 +239,25 @@ export default function ChatDisplay({
             })}
             {typingUsers.length > 0 && typingUsers[0] !== userId && (
               <div className="flex justify-start">
-                <div className={`px-4 py-3 rounded-lg rounded-bl-none ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 text-gray-100 border border-gray-600'
-                    : 'bg-white text-gray-900 border border-gray-200'
-                }`}>
+                <div
+                  className={`px-4 py-3 rounded-lg rounded-bl-none ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 text-gray-100 border border-gray-600'
+                      : 'bg-white text-gray-900 border border-gray-200'
+                  }`}
+                >
                   <div className="flex gap-2">
-                    <div className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`} />
-                    <div className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`} style={{ animationDelay: '0.1s' }} />
-                    <div className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`} style={{ animationDelay: '0.2s' }} />
+                    <div
+                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`}
+                    />
+                    <div
+                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`}
+                      style={{ animationDelay: '0.1s' }}
+                    />
+                    <div
+                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`}
+                      style={{ animationDelay: '0.2s' }}
+                    />
                   </div>
                 </div>
               </div>
@@ -223,11 +267,12 @@ export default function ChatDisplay({
         )}
       </div>
 
-      <form onSubmit={handleSend} className={`px-6 py-4 border-t ${
-        theme === 'dark'
-          ? 'border-gray-700 bg-gray-800'
-          : 'border-gray-200 bg-white'
-      }`}>
+      <form
+        onSubmit={handleSend}
+        className={`px-6 py-4 border-t ${
+          theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'
+        }`}
+      >
         <div className="flex gap-2">
           <input
             type="text"

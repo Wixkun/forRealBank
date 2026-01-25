@@ -21,7 +21,15 @@ export default function PrivateConversation({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { messages, typingUsers, isConnected, presentUserIds, sendMessage, startTyping, stopTyping } = useChat({
+  const {
+    messages,
+    typingUsers,
+    isConnected,
+    presentUserIds,
+    sendMessage,
+    startTyping,
+    stopTyping,
+  } = useChat({
     conversationId,
     userId,
   });
@@ -79,9 +87,7 @@ export default function PrivateConversation({
           >
             <div
               className={`max-w-xs px-4 py-2 rounded-lg ${
-                msg.senderId === userId
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-900'
+                msg.senderId === userId ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-900'
               }`}
             >
               <p className="text-sm">{msg.content}</p>

@@ -6,6 +6,10 @@ export class CreateConversationUseCase {
 
   async execute(input: { type: ConversationType }) {
     const conversation = await this.conversationRepository.create(input.type);
-    return { conversationId: conversation.id, type: conversation.type, createdAt: conversation.createdAt };
+    return {
+      conversationId: conversation.id,
+      type: conversation.type,
+      createdAt: conversation.createdAt,
+    };
   }
 }

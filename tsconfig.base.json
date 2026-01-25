@@ -14,12 +14,14 @@
 
     "baseUrl": ".",
     "paths": {
-      "@forreal/domain": ["packages/domain/src"],
-      "@forreal/application": ["packages/application/src"],
-      "@forreal/infrastructure-typeorm": ["packages/infrastructure/typeorm/src"],
-      "@forreal/infrastructure-crypto-bcrypt": ["packages/infrastructure/crypto-bcrypt/src"],
-      "@forreal/infrastructure-jwt-nest": ["packages/infrastructure/jwt-nest/src"],
-      "@forreal/infrastructure-uuid-node": ["packages/infrastructure/uuid-node/src"]
+      "@forreal/domain": ["packages/domain/src/index.ts"],
+      "@forreal/application": ["packages/application/src/index.ts"],
+      "@forreal/infrastructure-typeorm": ["packages/infrastructure/typeorm/src/index.ts"],
+      "@forreal/infrastructure-crypto-bcrypt": [
+        "packages/infrastructure/crypto-bcrypt/src/index.ts"
+      ],
+      "@forreal/infrastructure-jwt-nest": ["packages/infrastructure/jwt-nest/src/index.ts"],
+      "@forreal/infrastructure-uuid-node": ["packages/infrastructure/uuid-node/src/index.ts"]
     }
   }
 }

@@ -59,17 +59,17 @@ export default function ConversationsList({
   };
 
   return (
-    <div className={`flex flex-col h-full border-r ${
-      theme === 'dark'
-        ? 'bg-gray-900 border-gray-700'
-        : 'bg-white border-gray-200'
-    }`}>
-      <div className={`p-4 border-b ${
-        theme === 'dark'
-          ? 'border-gray-700'
-          : 'border-gray-200'
-      }`}>
-        <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}>{t('list.title')}</h2>
+    <div
+      className={`flex flex-col h-full border-r ${
+        theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+      }`}
+    >
+      <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+        <h2
+          className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
+        >
+          {t('list.title')}
+        </h2>
         <div className="relative">
           <svg
             className={`absolute left-3 top-3 h-5 w-5 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}
@@ -103,15 +103,17 @@ export default function ConversationsList({
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-2"></div>
-              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{t('list.loading')}</p>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                {t('list.loading')}
+              </p>
             </div>
           </div>
         ) : filteredConversations.length === 0 ? (
-          <div className={`flex items-center justify-center h-full text-center p-4 ${
-            theme === 'dark'
-              ? 'text-gray-400'
-              : 'text-gray-500'
-          }`}>
+          <div
+            className={`flex items-center justify-center h-full text-center p-4 ${
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+            }`}
+          >
             <div>
               <svg
                 className={`mx-auto h-12 w-12 mb-3 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}
@@ -144,11 +146,7 @@ export default function ConversationsList({
             </div>
           </div>
         ) : (
-          <nav className={`divide-y ${
-            theme === 'dark'
-              ? 'divide-gray-700'
-              : 'divide-gray-200'
-          }`}>
+          <nav className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
             {filteredConversations.map((conversation) => (
               <button
                 key={conversation.id}
@@ -165,38 +163,38 @@ export default function ConversationsList({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className={`font-medium truncate text-sm ${
-                      theme === 'dark'
-                        ? 'text-gray-100'
-                        : 'text-gray-900'
-                    }`}>
+                    <h3
+                      className={`font-medium truncate text-sm ${
+                        theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                      }`}
+                    >
                       {conversation.name}
                     </h3>
                     {conversation.description && (
-                      <p className={`text-xs truncate mt-1 ${
-                        theme === 'dark'
-                          ? 'text-gray-400'
-                          : 'text-gray-600'
-                      }`}>
+                      <p
+                        className={`text-xs truncate mt-1 ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}
+                      >
                         {conversation.description}
                       </p>
                     )}
                     {conversation.lastMessage && (
-                      <p className={`text-xs truncate mt-1 ${
-                        theme === 'dark'
-                          ? 'text-gray-500'
-                          : 'text-gray-500'
-                      }`}>
+                      <p
+                        className={`text-xs truncate mt-1 ${
+                          theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                        }`}
+                      >
                         {conversation.lastMessage}
                       </p>
                     )}
                   </div>
                   {conversation.lastMessageDate && (
-                    <span className={`text-xs whitespace-nowrap flex-shrink-0 ${
-                      theme === 'dark'
-                        ? 'text-gray-500'
-                        : 'text-gray-500'
-                    }`}>
+                    <span
+                      className={`text-xs whitespace-nowrap flex-shrink-0 ${
+                        theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                      }`}
+                    >
                       {formatDate(conversation.lastMessageDate)}
                     </span>
                   )}

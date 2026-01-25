@@ -5,9 +5,7 @@ import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
 import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([BankAccountEntity, BrokerageAccountEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([BankAccountEntity, BrokerageAccountEntity])],
   controllers: [AccountsController],
 })
 export class AccountsModule {}

@@ -5,6 +5,11 @@ export class LinkAdvisorClientUseCase {
 
   async execute(input: { advisorId: string; clientId: string }) {
     const link = await this.advisorClientRepository.link(input.advisorId, input.clientId);
-    return { linkId: link.id, advisorId: link.advisorId, clientId: link.clientId, createdAt: link.createdAt };
+    return {
+      linkId: link.id,
+      advisorId: link.advisorId,
+      clientId: link.clientId,
+      createdAt: link.createdAt,
+    };
   }
 }

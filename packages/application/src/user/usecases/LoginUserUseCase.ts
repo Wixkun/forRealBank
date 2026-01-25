@@ -17,17 +17,13 @@ export class LoginUserUseCase {
     const user = await this.userRepository.findByEmail(input.email);
     if (!user) throw new Error('INVALID_CREDENTIALS');
 
-    const valid = await this.passwordHasher.compare(
-      input.password,
-      user.passwordHash,
-    );
+    const valid = await this.passwordHasher.compare(input.password, user.passwordHash);
     if (!valid) throw new Error('INVALID_CREDENTIALS');
 
     user.markLogin();
     await this.userRepository.save(user);
 
     const sessionId = this.sessionIdGenerator.generate();
-    console.log('[LOGIN] sessionId =', sessionId);
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + 15 * 60 * 1000);
 

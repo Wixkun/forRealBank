@@ -16,9 +16,9 @@ export function ServiceCard({ icon, title, description, features }: ServiceCardP
         </div>
         <h3 className="text-2xl font-bold text-white">{title}</h3>
       </div>
-      
+
       <p className="text-gray-300 mb-6 leading-relaxed">{description}</p>
-      
+
       <ul className="space-y-3">
         {features.map((feature, index) => (
           <li key={index} className="flex items-start gap-3">

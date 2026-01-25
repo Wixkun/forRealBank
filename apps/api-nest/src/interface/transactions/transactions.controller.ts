@@ -6,9 +6,12 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BankTransactionEntity } from '@forreal/infrastructure-typeorm';
 import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
 import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { NotificationEntity } from '@forreal/infrastructure-typeorm';
+import { UserEntity } from '@forreal/infrastructure-typeorm';
 import { BankAccountRepository } from '@forreal/infrastructure-typeorm';
 import { BrokerageAccountRepository } from '@forreal/infrastructure-typeorm';
 import { BankTransactionRepository } from '@forreal/infrastructure-typeorm';
+import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import { InitiateTransferUseCase } from '@forreal/application';
 
 @Controller('transactions')
@@ -21,6 +24,10 @@ export class TransactionsController {
     private readonly accountRepo: Repository<BankAccountEntity>,
     @InjectRepository(BrokerageAccountEntity)
     private readonly brokerageRepo: Repository<BrokerageAccountEntity>,
+    @InjectRepository(NotificationEntity)
+    private readonly notificationRepo: Repository<NotificationEntity>,
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
   ) {}
 
   @Get('account/:accountId')
@@ -31,7 +38,7 @@ export class TransactionsController {
     @Query('type') type?: string,
   ) {
     const userId = (req.user as any).id;
-    
+
     const account = await this.accountRepo.findOne({
       where: { id: accountId, userId },
     });
@@ -51,28 +58,28 @@ export class TransactionsController {
 
     const transactions = await queryBuilder.getMany();
 
-    return transactions.map(t => ({
+    return transactions.map((t) => ({
       id: t.id,
       type: t.type,
       description: t.description,
       date: t.createdAt.toISOString().split('T')[0],
-      amount: t.type === 'credit' ? parseFloat(t.amount.toString()) : -Math.abs(parseFloat(t.amount.toString())),
+      amount:
+        t.type === 'credit'
+          ? parseFloat(t.amount.toString())
+          : -Math.abs(parseFloat(t.amount.toString())),
       balance: parseFloat(t.balanceAfter.toString()),
     }));
   }
 
   @Get('recent')
-  async getRecentTransactions(
-    @Query('limit') limit: string = '10',
-    @Req() req: Request,
-  ) {
+  async getRecentTransactions(@Query('limit') limit: string = '10', @Req() req: Request) {
     const userId = (req.user as any).id;
 
     const accounts = await this.accountRepo.find({
       where: { userId },
       select: ['id'],
     });
-    const accountIds = accounts.map(a => a.id);
+    const accountIds = accounts.map((a) => a.id);
 
     if (accountIds.length === 0) {
       return [];
@@ -85,7 +92,7 @@ export class TransactionsController {
       .limit(parseInt(limit))
       .getMany();
 
-    return transactions.map(t => ({
+    return transactions.map((t) => ({
       id: t.id,
       type: t.type,
       description: t.description,
@@ -97,7 +104,8 @@ export class TransactionsController {
   @Post('transfer')
   async initiateTransfer(
     @Req() req: Request,
-    @Body() body: {
+    @Body()
+    body: {
       sourceType: 'bank' | 'brokerage';
       sourceAccountId: string;
       destinationAccountId?: string;
@@ -111,6 +119,7 @@ export class TransactionsController {
       new BankAccountRepository(this.accountRepo),
       new BrokerageAccountRepository(this.brokerageRepo),
       new BankTransactionRepository(this.transactionRepo),
+      new NotificationRepository(this.notificationRepo, this.userRepo),
     );
 
     const result = await usecase.execute({

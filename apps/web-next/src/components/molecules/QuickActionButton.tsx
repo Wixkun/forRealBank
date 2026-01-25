@@ -43,12 +43,22 @@ export function QuickActionButton({ icon, label, variant, onClick, href }: Quick
 
   const content = (
     <>
-      <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${styles.iconBg} flex items-center justify-center mb-2 transition shadow-md ${
-        currentTheme === 'dark' ? 'from-gray-700 to-gray-800' : 'from-gray-200 to-gray-300'
-      }`}>
-        <span className={`text-lg group-hover:scale-110 transition ${currentTheme === 'dark' ? 'text-gray-400 group-hover:text-white' : 'text-gray-600 group-hover:text-white'}`}>{icon}</span>
+      <div
+        className={`w-12 h-12 rounded-full bg-gradient-to-br ${styles.iconBg} flex items-center justify-center mb-2 transition shadow-md ${
+          currentTheme === 'dark' ? 'from-gray-700 to-gray-800' : 'from-gray-200 to-gray-300'
+        }`}
+      >
+        <span
+          className={`text-lg group-hover:scale-110 transition ${currentTheme === 'dark' ? 'text-gray-400 group-hover:text-white' : 'text-gray-600 group-hover:text-white'}`}
+        >
+          {icon}
+        </span>
       </div>
-      <span className={`text-sm font-medium ${styles.text} ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>{label}</span>
+      <span
+        className={`text-sm font-medium ${styles.text} ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
+      >
+        {label}
+      </span>
     </>
   );
 
@@ -61,10 +71,7 @@ export function QuickActionButton({ icon, label, variant, onClick, href }: Quick
   }
 
   return (
-    <button 
-      onClick={onClick}
-      className={className}
-    >
+    <button onClick={onClick} className={className}>
       {content}
     </button>
   );

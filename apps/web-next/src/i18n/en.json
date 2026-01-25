@@ -249,8 +249,7 @@
       "description": "Join over 500,000 customers who trust AvenirBank to manage their money smartly. Open an account in 5 minutes, 100% online.",
       "button": "Get started now"
     }
-  }
-  ,
+  },
   "chat": {
     "loadingConversations": "Loading your conversations...",
     "loginRequired": "Please log in to access messaging.",
@@ -277,8 +276,7 @@
         "hoursAgo": "{count}h ago",
         "yesterday": "Yesterday"
       }
-    }
-    ,
+    },
     "display": {
       "advisorDefaultName": "Your advisor",
       "advisorDefaultRole": "Financial Advisor",

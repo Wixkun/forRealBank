@@ -13,9 +13,9 @@ export async function getAuthToken(): Promise<string | null> {
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const urlObj = new URL(url);
   const path = urlObj.pathname.replace('/api/', '') + (urlObj.search ? urlObj.search : '');
-  
+
   const proxyUrl = `${PROXY_URL}/api/proxy/${path}`;
-  
+
   console.log('[Server-API] Using proxy:', proxyUrl, 'Original:', url);
 
   const response = await fetch(proxyUrl, {
@@ -44,9 +44,10 @@ export async function getRecentTransactions(limit: number = 5) {
 }
 
 export async function getAccountTransactions(accountId: string, limit: number = 50, type?: string) {
-  const url = type && type !== 'all'
-    ? `${API_URL}/transactions/account/${accountId}?limit=${limit}&type=${type}`
-    : `${API_URL}/transactions/account/${accountId}?limit=${limit}`;
+  const url =
+    type && type !== 'all'
+      ? `${API_URL}/transactions/account/${accountId}?limit=${limit}&type=${type}`
+      : `${API_URL}/transactions/account/${accountId}?limit=${limit}`;
   return fetchWithAuth(url);
 }
 

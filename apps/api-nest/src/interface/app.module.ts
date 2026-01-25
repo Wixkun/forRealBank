@@ -23,9 +23,7 @@ import { TradingModule } from './trading/trading.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true,
-      envFilePath: ['../../env/api.env'],
-    }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../../env/api.env'] }),
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,

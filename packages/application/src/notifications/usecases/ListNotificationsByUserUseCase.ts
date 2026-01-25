@@ -8,7 +8,7 @@ export class ListNotificationsByUserUseCase {
       limit: input.limit,
       offset: input.offset,
     });
-    return notifications.map(n => ({
+    return notifications.map((n) => ({
       id: n.id,
       userId: n.userId,
       title: n.title,

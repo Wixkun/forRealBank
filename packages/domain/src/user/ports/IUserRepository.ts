@@ -13,7 +13,11 @@ export interface IUserRepository {
 
   deleteById(id: string): Promise<void>;
 
-  list(params?: { limit?: number; offset?: number; search?: string }): Promise<import('../User').User[]>;
+  list(params?: {
+    limit?: number;
+    offset?: number;
+    search?: string;
+  }): Promise<import('../User').User[]>;
 
   count(params?: { search?: string }): Promise<number>;
 }

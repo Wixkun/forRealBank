@@ -14,11 +14,11 @@ export function LanguageSwitcher({ theme = 'dark' }: LanguageSwitcherProps) {
 
   const handleLanguageChange = (newLocale: string) => {
     if (newLocale === locale) return;
-    
+
     const segments = pathname.split('/');
     segments[1] = newLocale;
     const newPathname = segments.join('/');
-    
+
     router.push(newPathname);
   };
 

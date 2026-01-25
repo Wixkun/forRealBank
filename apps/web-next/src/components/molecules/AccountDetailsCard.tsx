@@ -30,9 +30,7 @@ export function AccountDetailsCard({
   return (
     <div
       className={`p-6 rounded-2xl border transition-colors ${
-        currentTheme === 'dark'
-          ? 'bg-gray-900/50 border-gray-800'
-          : 'bg-white border-gray-200'
+        currentTheme === 'dark' ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'
       }`}
     >
       <h3
@@ -46,9 +44,7 @@ export function AccountDetailsCard({
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            }`}
+            className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
           >
             {labels.accountNumber}
           </span>
@@ -63,9 +59,7 @@ export function AccountDetailsCard({
 
         <div className="flex justify-between items-center">
           <span
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            }`}
+            className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
           >
             {labels.iban}
           </span>
@@ -80,16 +74,12 @@ export function AccountDetailsCard({
 
         <div className="flex justify-between items-center">
           <span
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            }`}
+            className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
           >
             {labels.openedOn}
           </span>
           <span
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-800'
-            }`}
+            className={`text-sm ${currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-800'}`}
           >
             {openedOn}
           </span>
@@ -97,9 +87,7 @@ export function AccountDetailsCard({
 
         <div className="flex justify-between items-center">
           <span
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            }`}
+            className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
           >
             {labels.status}
           </span>

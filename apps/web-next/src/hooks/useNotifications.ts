@@ -18,7 +18,10 @@ interface UseNotificationsOptions {
   apiUrl?: string;
 }
 
-export function useNotifications({ userId, apiUrl = 'http://localhost:3001/api' }: UseNotificationsOptions) {
+export function useNotifications({
+  userId,
+  apiUrl = 'http://localhost:3001/api',
+}: UseNotificationsOptions) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const { isConnected } = useSSE<Notification[]>({

@@ -28,7 +28,7 @@ export class UserPresenter {
   }
 
   static toListDTO(users: User[]): UserResponseDTO[] {
-    return users.map(user => this.toDTO(user));
+    return users.map((user) => this.toDTO(user));
   }
 
   static toDetailDTO(user: User): UserResponseDTO {

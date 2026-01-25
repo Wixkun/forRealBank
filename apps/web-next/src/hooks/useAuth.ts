@@ -25,7 +25,7 @@ export function useAuth() {
       try {
         setIsLoading(true);
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-        
+
         const response = await fetch(`${apiUrl}/auth/me`, {
           method: 'GET',
           credentials: 'include',
@@ -40,12 +40,14 @@ export function useAuth() {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
-          
-          if (pathname.includes('/dashboard') || 
-              pathname.includes('/account') || 
-              pathname.includes('/brokerage') ||
-              pathname.includes('/trading') ||
-              pathname.includes('/chat')) {
+
+          if (
+            pathname.includes('/dashboard') ||
+            pathname.includes('/account') ||
+            pathname.includes('/brokerage') ||
+            pathname.includes('/trading') ||
+            pathname.includes('/chat')
+          ) {
             const locale = pathname.split('/')[1] || 'en';
             router.push(`/${locale}/login`);
           }
@@ -53,12 +55,14 @@ export function useAuth() {
       } catch (error) {
         console.error('Auth check failed:', error);
         setIsAuthenticated(false);
-        
-        if (pathname.includes('/dashboard') || 
-            pathname.includes('/account') || 
-            pathname.includes('/brokerage') ||
-            pathname.includes('/trading') ||
-            pathname.includes('/chat')) {
+
+        if (
+          pathname.includes('/dashboard') ||
+          pathname.includes('/account') ||
+          pathname.includes('/brokerage') ||
+          pathname.includes('/trading') ||
+          pathname.includes('/chat')
+        ) {
           const locale = pathname.split('/')[1] || 'en';
           router.push(`/${locale}/login`);
         }

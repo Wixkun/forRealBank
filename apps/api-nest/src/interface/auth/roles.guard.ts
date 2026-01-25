@@ -37,7 +37,7 @@ export class RolesGuard implements CanActivate {
     if (user.isBanned) throw new ForbiddenException('Account banned');
 
     const userRoles = Array.from(user.roles);
-    (req as any).auth = {
+    (req).auth = {
       userId: user.id,
       roles: userRoles,
       issuedAt: decoded.issuedAt,

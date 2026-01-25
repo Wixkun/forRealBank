@@ -10,10 +10,6 @@ export class ConversationMapper {
   }
 
   static toDomain(entity: ConversationEntity): Conversation {
-    return new Conversation(
-      entity.id,
-      entity.type as ConversationType,
-      entity.createdAt,
-    );
+    return new Conversation(entity.id, entity.type as ConversationType, entity.createdAt);
   }
 }

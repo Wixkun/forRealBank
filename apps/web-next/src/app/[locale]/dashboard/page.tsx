@@ -56,10 +56,7 @@ export default function DashboardPage() {
     },
   };
 
-  const totalBalance = accountData.accounts.reduce(
-    (sum, acc) => sum + (acc.balance || 0),
-    0
-  );
+  const totalBalance = accountData.accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
 
   return (
     <DashboardWrapper

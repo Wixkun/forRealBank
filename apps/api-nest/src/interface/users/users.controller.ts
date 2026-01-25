@@ -4,7 +4,8 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode, Inject,
+  HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Patch,
@@ -47,18 +48,18 @@ export class UsersController {
   ) {}
 
   @HttpCode(200)
-    @Get('me')
-    async getMe(@Req() req: Request) {
-      const auth = (req as any).auth;
-      if (!auth?.userId) throw new BadRequestException('Missing auth context');
+  @Get('me')
+  async getMe(@Req() req: Request) {
+    const auth = (req as any).auth;
+    if (!auth?.userId) throw new BadRequestException('Missing auth context');
 
-      const user = await this.users.findById(auth.userId);
-      if (!user) throw new NotFoundException('User not found');
+    const user = await this.users.findById(auth.userId);
+    if (!user) throw new NotFoundException('User not found');
 
-      return UserPresenter.toDTO(user);
-    }
+    return UserPresenter.toDTO(user);
+  }
 
-    @HttpCode(200)
+  @HttpCode(200)
   @Patch('me')
   async updateMe(@Body() dto: UpdateProfileDto, @Req() req: Request) {
     try {
@@ -131,7 +132,8 @@ export class UsersController {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === 'USER_NOT_FOUND') throw new NotFoundException('User not found');
-        if (error.message === 'FORBIDDEN_OPERATION') throw new BadRequestException('Cannot remove your own ADMIN role');
+        if (error.message === 'FORBIDDEN_OPERATION')
+          throw new BadRequestException('Cannot remove your own ADMIN role');
         if (error.message === 'INVALID_ROLE') throw new BadRequestException('Invalid roles');
       }
       throw error;

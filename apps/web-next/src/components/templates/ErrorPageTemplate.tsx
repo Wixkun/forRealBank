@@ -93,9 +93,7 @@ export function ErrorPageTemplate({
                 : 'bg-white border-teal-400'
             }`}
           >
-            <span className="text-5xl">
-              {errorCode === '404' ? '🔍' : '⚠️'}
-            </span>
+            <span className="text-5xl">{errorCode === '404' ? '🔍' : '⚠️'}</span>
           </div>
         </div>
 

@@ -4,7 +4,11 @@ import { RoleName } from '@forreal/domain';
 export class UpdateUserRolesUseCase {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async execute(input: { targetUserId: string; roles: RoleName[]; actingUserId: string }): Promise<void> {
+  async execute(input: {
+    targetUserId: string;
+    roles: RoleName[];
+    actingUserId: string;
+  }): Promise<void> {
     const targetUser = await this.userRepository.findById(input.targetUserId);
     if (!targetUser) throw new Error('USER_NOT_FOUND');
 

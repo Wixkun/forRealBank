@@ -8,7 +8,8 @@ export class NotificationsService {
   constructor(
     @Inject(SendNotificationUseCase) private readonly sendNotifUC: SendNotificationUseCase,
     @Inject(MarkNotificationReadUseCase) private readonly markReadUC: MarkNotificationReadUseCase,
-    @Inject(ListNotificationsByUserUseCase) private readonly listByUserUC: ListNotificationsByUserUseCase,
+    @Inject(ListNotificationsByUserUseCase)
+    private readonly listByUserUC: ListNotificationsByUserUseCase,
   ) {}
 
   async send(userId: string, title: string, content: string, type: string) {

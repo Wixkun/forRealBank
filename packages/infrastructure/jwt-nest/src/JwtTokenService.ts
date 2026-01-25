@@ -12,7 +12,7 @@ export class JwtTokenService implements ITokenService {
       throw new Error('[JwtTokenService] Missing JWT_SECRET in environment variables');
     }
 
-    this.signOpts = {}
+    this.signOpts = {};
     this.verifyOpts = { algorithms: ['HS256'] };
   }
 

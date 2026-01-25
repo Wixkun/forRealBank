@@ -43,44 +43,27 @@ export function TransactionListItem({
         >
           <Icon
             name={iconName}
-            className={`${iconRotation} ${
-              isCredit ? 'text-teal-400' : 'text-gray-400'
-            }`}
+            className={`${iconRotation} ${isCredit ? 'text-teal-400' : 'text-gray-400'}`}
           />
         </div>
 
         <div className="flex-1">
-          <p
-            className={`font-medium ${
-              currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-            }`}
-          >
+          <p className={`font-medium ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {description}
           </p>
-          <p
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-            }`}
-          >
+          <p className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
             {date}
           </p>
         </div>
       </div>
 
       <div className="text-right">
-        <p
-          className={`font-semibold text-lg ${
-            isCredit ? 'text-teal-400' : 'text-gray-400'
-          }`}
-        >
-          {isCredit ? '+' : '-'} {Math.abs(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+        <p className={`font-semibold text-lg ${isCredit ? 'text-teal-400' : 'text-gray-400'}`}>
+          {isCredit ? '+' : '-'}{' '}
+          {Math.abs(amount).toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
         </p>
         {balance && (
-          <p
-            className={`text-sm ${
-              currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-            }`}
-          >
+          <p className={`text-sm ${currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
             {balance}
           </p>
         )}

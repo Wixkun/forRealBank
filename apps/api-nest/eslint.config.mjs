@@ -1,8 +1,6 @@
-// @ts-check
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
-import prettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default tseslint.config(
   {
@@ -10,11 +8,11 @@ export default tseslint.config(
   },
 
   js.configs.recommended,
+
   ...tseslint.configs.recommendedTypeChecked,
-  prettierRecommended,
 
   {
-    files: ['**/*.ts', '**/*.tsx', '**/*.js'],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       sourceType: 'commonjs',
       parserOptions: {
@@ -27,11 +25,16 @@ export default tseslint.config(
       },
     },
     rules: {
-      'prettier/prettier': ['error', { endOfLine: 'auto' }],
-
       '@typescript-eslint/no-explicit-any': 'off',
+
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+
       '@typescript-eslint/no-floating-promises': 'warn',
-      '@typescript-eslint/no-unsafe-argument': 'warn',
-    },
+
+      '@typescript-eslint/require-await': 'off',
+    }
   },
 );

@@ -18,15 +18,21 @@ interface UseChatOptions {
   wsUrl?: string;
 }
 
-export function useChat({ conversationId, userId, apiUrl = 'http://localhost:3001/api', wsUrl }: UseChatOptions) {
+export function useChat({
+  conversationId,
+  userId,
+  apiUrl = 'http://localhost:3001/api',
+  wsUrl,
+}: UseChatOptions) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [presentUserIds, setPresentUserIds] = useState<string[]>([]);
 
-  const derivedWsUrl = wsUrl
-    || (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_WS_URL)
-    || `${apiUrl.replace(/\/$/, '').replace(/\/api$/, '')}/chat`;
+  const derivedWsUrl =
+    wsUrl ||
+    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_WS_URL) ||
+    `${apiUrl.replace(/\/$/, '').replace(/\/api$/, '')}/chat`;
 
   const { emit, on, off, isConnected } = useWebSocket({ url: derivedWsUrl, userId });
 
@@ -63,7 +69,10 @@ export function useChat({ conversationId, userId, apiUrl = 'http://localhost:300
         setMessages((prev) => {
           const alreadySameId = prev.some((m) => m.messageId === incoming.messageId);
           const alreadySameContent = prev.some(
-            (m) => m.senderId === incoming.senderId && m.content === incoming.content && m.createdAt === incoming.createdAt
+            (m) =>
+              m.senderId === incoming.senderId &&
+              m.content === incoming.content &&
+              m.createdAt === incoming.createdAt,
           );
           if (alreadySameId || alreadySameContent) {
             return prev;

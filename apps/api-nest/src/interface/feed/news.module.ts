@@ -4,12 +4,15 @@ import { NewsService } from './news.service';
 import { NewsController } from './news.controller';
 import { NewsEntity } from '@forreal/infrastructure-typeorm';
 import { UserEntity } from '@forreal/infrastructure-typeorm';
+import { NotificationEntity } from '@forreal/infrastructure-typeorm';
 
 import { INewsRepository } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
+import { INotificationRepository } from '@forreal/domain';
 
 import { NewsRepository } from '@forreal/infrastructure-typeorm';
 import { UserRepository } from '@forreal/infrastructure-typeorm';
+import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import { RoleEntity } from '@forreal/infrastructure-typeorm';
 
 import { CreateNewsUseCase } from '@forreal/application';
@@ -17,16 +20,18 @@ import { ListNewsUseCase } from '@forreal/application';
 import { DeleteNewsUseCase } from '@forreal/application';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity])],
+  imports: [TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity, NotificationEntity])],
   controllers: [NewsController],
   providers: [
     NewsService,
     { provide: INewsRepository, useClass: NewsRepository },
     { provide: IUserRepository, useClass: UserRepository },
+    { provide: INotificationRepository, useClass: NotificationRepository },
     {
       provide: CreateNewsUseCase,
-      useFactory: (newsRepo, userRepo) => new CreateNewsUseCase(newsRepo, userRepo),
-      inject: [INewsRepository, IUserRepository],
+      useFactory: (newsRepo, userRepo, notifRepo) =>
+        new CreateNewsUseCase(newsRepo, userRepo, notifRepo),
+      inject: [INewsRepository, IUserRepository, INotificationRepository],
     },
     {
       provide: ListNewsUseCase,

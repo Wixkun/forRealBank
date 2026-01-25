@@ -74,10 +74,15 @@ export class AccountsController {
       where: { userId },
       order: { createdAt: 'ASC' },
     });
-    console.log('[AccountsController] getAllAccounts - bank:', bankAccounts.length, 'brokerage:', brokerageAccounts.length);
+    console.log(
+      '[AccountsController] getAllAccounts - bank:',
+      bankAccounts.length,
+      'brokerage:',
+      brokerageAccounts.length,
+    );
 
     return {
-      bankAccounts: bankAccounts.map(acc => ({
+      bankAccounts: bankAccounts.map((acc) => ({
         id: acc.id,
         name: acc.name,
         balance: parseFloat(acc.balance.toString()),
@@ -85,7 +90,7 @@ export class AccountsController {
         type: acc.accountType,
         accountType: 'banking',
       })),
-      brokerageAccounts: brokerageAccounts.map(acc => ({
+      brokerageAccounts: brokerageAccounts.map((acc) => ({
         id: acc.id,
         name: acc.name,
         balance: parseFloat(acc.balance.toString()),

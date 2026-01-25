@@ -1,6 +1,16 @@
-import { Controller, Get, Post, Body, Param, Query, Inject, Sse, MessageEvent } from '@nestjs/common';
-import { Observable, interval } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Inject,
+  Sse,
+  MessageEvent,
+} from '@nestjs/common';
+import { Observable, interval, from, map } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { SendNotificationUseCase } from '@forreal/application';
 import { MarkNotificationReadUseCase } from '@forreal/application';
 import { ListNotificationsByUserUseCase } from '@forreal/application';
@@ -8,9 +18,12 @@ import { ListNotificationsByUserUseCase } from '@forreal/application';
 @Controller('notifications')
 export class NotificationsController {
   constructor(
-    @Inject(SendNotificationUseCase) private readonly sendNotificationUseCase: SendNotificationUseCase,
-    @Inject(MarkNotificationReadUseCase) private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
-    @Inject(ListNotificationsByUserUseCase) private readonly listNotificationsByUserUseCase: ListNotificationsByUserUseCase,
+    @Inject(SendNotificationUseCase)
+    private readonly sendNotificationUseCase: SendNotificationUseCase,
+    @Inject(MarkNotificationReadUseCase)
+    private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
+    @Inject(ListNotificationsByUserUseCase)
+    private readonly listNotificationsByUserUseCase: ListNotificationsByUserUseCase,
   ) {}
 
   @Post()
@@ -39,10 +52,16 @@ export class NotificationsController {
   @Sse('stream/:userId')
   stream(@Param('userId') userId: string): Observable<MessageEvent> {
     return interval(3000).pipe(
-      switchMap(async () => {
-        const notifications = await this.listNotificationsByUserUseCase.execute({ userId, limit: 10, offset: 0 });
-        return { data: notifications };
-      }),
+      switchMap(() =>
+        from(
+          this.listNotificationsByUserUseCase.execute({
+            userId,
+            limit: 10,
+            offset: 0,
+          }),
+        ),
+      ),
+      map((notifications) => ({ data: notifications })),
     );
   }
 }

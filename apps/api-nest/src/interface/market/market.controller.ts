@@ -23,7 +23,7 @@ export class MarketController {
 
     const assets = await queryBuilder.getMany();
 
-    return assets.map(asset => ({
+    return assets.map((asset) => ({
       id: asset.id,
       symbol: asset.symbol,
       name: asset.name,

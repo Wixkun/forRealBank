@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 const intlMiddleware = createMiddleware({
   locales,
   defaultLocale,
-  localePrefix: 'always' 
+  localePrefix: 'always',
 });
 
 export function middleware(request: NextRequest) {
@@ -13,5 +13,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+  matcher: ['/((?!api|_next|.*\\..*).*)'],
 };

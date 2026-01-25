@@ -10,7 +10,10 @@ interface NotificationCenterProps {
 
 export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, unreadCount, isConnected, markAsRead } = useNotifications({ userId, apiUrl });
+  const { notifications, unreadCount, isConnected, markAsRead } = useNotifications({
+    userId,
+    apiUrl,
+  });
 
   const handleNotificationClick = (notificationId: string) => {
     markAsRead(notificationId);
@@ -57,9 +60,7 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 && (
-              <div className="p-8 text-center text-gray-500">
-                Aucune notification
-              </div>
+              <div className="p-8 text-center text-gray-500">Aucune notification</div>
             )}
             {notifications.map((notif) => (
               <div
@@ -85,9 +86,7 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                       </span>
                     </div>
                   </div>
-                  {!notif.readAt && (
-                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-1" />
-                  )}
+                  {!notif.readAt && <div className="w-2 h-2 bg-blue-500 rounded-full mt-1" />}
                 </div>
               </div>
             ))}

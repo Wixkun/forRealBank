@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
 
     const path = pathMatch[1];
     const searchParams = request.nextUrl.searchParams.toString();
-    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiUrl =
+      process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const fullUrl = `${apiUrl}/${path}${searchParams ? '?' + searchParams : ''}`;
 
     console.log('[Proxy] GET request to:', fullUrl);
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
     console.error('[Proxy] Error:', error);
     return NextResponse.json(
       { error: 'Proxy request failed', details: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -52,7 +53,8 @@ export async function POST(request: NextRequest) {
     }
 
     const path = pathMatch[1];
-    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    const apiUrl =
+      process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
     const fullUrl = `${apiUrl}/${path}`;
 
     console.log('[Proxy] POST request to:', fullUrl);
@@ -77,7 +79,7 @@ export async function POST(request: NextRequest) {
     console.error('[Proxy] Error:', error);
     return NextResponse.json(
       { error: 'Proxy request failed', details: String(error) },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

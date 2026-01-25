@@ -4,9 +4,7 @@ import { MarketController } from './market.controller';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([MarketAssetEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([MarketAssetEntity])],
   controllers: [MarketController],
 })
 export class MarketModule {}

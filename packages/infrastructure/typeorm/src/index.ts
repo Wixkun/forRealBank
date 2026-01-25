@@ -26,6 +26,6 @@ export * from './repositories/MessageRepository';
 export * from './repositories/NotificationRepository';
 export * from './repositories/NewsRepository';
 
-// mappers (si utilisés depuis Nest)
+// mappers
 export * from './mappers/UserMapper';
 export * from './mappers/ConversationMapper';

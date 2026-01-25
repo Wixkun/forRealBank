@@ -29,7 +29,12 @@ export class NotificationRepository implements INotificationRepository {
     await this.repo.save(entity);
   }
 
-  async create(userId: string, title: string, content: string, type: string): Promise<Notification> {
+  async create(
+    userId: string,
+    title: string,
+    content: string,
+    type: string,
+  ): Promise<Notification> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('user not found');
     const entity = this.repo.create({ id: uuidv4(), user, title, content, type });
@@ -37,7 +42,10 @@ export class NotificationRepository implements INotificationRepository {
     return NotificationMapper.toDomain(saved);
   }
 
-  async listByUser(userId: string, params?: { limit?: number; offset?: number }): Promise<Notification[]> {
+  async listByUser(
+    userId: string,
+    params?: { limit?: number; offset?: number },
+  ): Promise<Notification[]> {
     const { limit = 50, offset = 0 } = params ?? {};
     const entities = await this.repo.find({
       where: { user: { id: userId } as any },

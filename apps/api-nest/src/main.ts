@@ -28,18 +28,27 @@ async function bootstrap() {
     expressApp.set('trust proxy', 1);
   }
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    transformOptions: { enableImplicitConversion: true },
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
 
   app.enableShutdownHooks();
 
   await app.listen(port);
   Logger.log(`API up: http://localhost:${port}/api`, 'Bootstrap');
-  Logger.log(`CORS origin: ${origin} | NODE_ENV=${isProd ? 'production' : 'development'}`, 'Bootstrap');
+  Logger.log(
+    `CORS origin: ${origin} | NODE_ENV=${isProd ? 'production' : 'development'}`,
+    'Bootstrap',
+  );
 }
 
-bootstrap();
+void bootstrap().catch((err) => {
+  const message = err instanceof Error ? err.stack ?? err.message : String(err);
+  Logger.error(message, undefined, 'Bootstrap');
+  process.exit(1);
+});

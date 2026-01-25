@@ -17,7 +17,10 @@ export default function GroupConversation({
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { messages, presentUserIds, isConnected, sendMessage } = useChat({ conversationId, userId });
+  const { messages, presentUserIds, isConnected, sendMessage } = useChat({
+    conversationId,
+    userId,
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -60,13 +63,17 @@ export default function GroupConversation({
       <div className="p-4 border-b">
         <h3 className="font-semibold text-lg">Discussion de groupe</h3>
         <p className="text-sm text-gray-500">
-          {participants.length} participant{participants.length > 1 ? 's' : ''} · {presentUserIds.filter((id) => id !== userId).length > 0 ? 'En ligne' : 'Hors ligne'}
+          {participants.length} participant{participants.length > 1 ? 's' : ''} ·{' '}
+          {presentUserIds.filter((id) => id !== userId).length > 0 ? 'En ligne' : 'Hors ligne'}
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg) => (
-          <div key={msg.messageId} className={`flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}>
+          <div
+            key={msg.messageId}
+            className={`flex ${msg.senderId === userId ? 'justify-end' : 'justify-start'}`}
+          >
             <div className="max-w-md">
               {msg.senderId !== userId && (
                 <p className="text-xs font-semibold mb-1 px-2">
