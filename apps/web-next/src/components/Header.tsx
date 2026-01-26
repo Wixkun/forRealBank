@@ -47,7 +47,7 @@ export default function Header() {
   };
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 bg-transparent">
+    <header className="sticky top-0 left-0 right-0 z-50 bg-linear-to-br from-teal-950/90 via-teal-900/75 to-cyan-800/75 backdrop-blur border-b border-white/10">
       <div className="px-6 py-4 flex items-center justify-end">
         <div className="flex items-center gap-3">
           <LanguageSwitcher theme="dark" />
@@ -71,7 +71,7 @@ export default function Header() {
               </Link>
               <Link
                 href={`/${locale}/register`}
-                className="px-4 py-2 rounded-md bg-gradient-to-r from-teal-400 to-cyan-500 text-gray-900 font-semibold hover:from-teal-300 hover:to-cyan-400 transition"
+                className="px-4 py-2 rounded-md bg-linear-to-r from-teal-400 to-cyan-500 text-gray-900 font-semibold hover:from-teal-300 hover:to-cyan-400 transition"
               >
                 {t('register')}
               </Link>

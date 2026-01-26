@@ -70,7 +70,6 @@ export class ConversationParticipantRepository implements IConversationParticipa
       return { participant: ConversationParticipantMapper.toDomain(insertedEntity), inserted: true };
     }
 
-    // Conflit: déjà présent -> 1 SELECT pour renvoyer l'existant
     const existing = await this.repo.findOne({
       where: {
         conversation: { id: conversationId } as any,

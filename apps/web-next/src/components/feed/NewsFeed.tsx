@@ -77,7 +77,6 @@ export default function NewsFeed({
         return;
       }
 
-      // Optimiste: la SSE rafraîchira aussi, mais on enlève tout de suite pour l’UX.
       setNews((prev) => prev.filter((n) => n.id !== id));
     } catch (err) {
       console.error('Failed to delete news:', err);
@@ -115,7 +114,6 @@ export default function NewsFeed({
         return;
       }
 
-      // Optimiste: la SSE rafraîchira aussi.
       setNews((prev) =>
         prev.map((n) => (n.id === id ? { ...n, title: editTitle, content: editContent } : n)),
       );

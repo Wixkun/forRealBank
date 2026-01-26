@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function AdvisorChatOpenPage() {
+export default function ChatManagePage() {
   const { user, isLoading } = useAuth();
   const [conversationId, setConversationId] = useState('');
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function AdvisorChatOpenPage() {
     router.push(`/${locale}/chat?conversationId=${encodeURIComponent(conversationId)}`);
   };
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Chargement...</div>
@@ -24,18 +24,10 @@ export default function AdvisorChatOpenPage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Veuillez vous connecter en tant que conseiller.</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-xl mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-4">Ouvrir une conversation client</h1>
+        <h1 className="text-2xl font-semibold mb-4">Gérer le chat</h1>
         <div className="bg-white p-4 rounded shadow space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">ID de la conversation</label>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
-export default function AdvisorNotificationsPage() {
+export default function NotificationsPage() {
   const { user, isLoading } = useAuth();
   const [targetUserId, setTargetUserId] = useState('');
   const [title, setTitle] = useState('');
@@ -17,8 +17,10 @@ export default function AdvisorNotificationsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
     setSubmitting(true);
     setMessage(null);
+
     try {
       const res = await fetch(`${apiUrl}/notifications`, {
         method: 'POST',
@@ -26,10 +28,13 @@ export default function AdvisorNotificationsPage() {
         credentials: 'include',
         body: JSON.stringify({ userId: targetUserId, title, content, type }),
       });
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Échec de l'envoi");
+        setMessage(data.message || "Échec de l'envoi");
+        return;
       }
+
       setMessage('Notification envoyée');
       setTitle('');
       setContent('');
@@ -42,7 +47,7 @@ export default function AdvisorNotificationsPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div>Chargement...</div>
@@ -50,18 +55,10 @@ export default function AdvisorNotificationsPage() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div>Veuillez vous connecter en tant que conseiller.</div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-2xl mx-auto p-6">
-        <h1 className="text-2xl font-semibold mb-4">Envoyer une notification</h1>
+        <h1 className="text-2xl font-semibold mb-4">Notifications</h1>
         {message && <div className="mb-4 text-sm p-3 rounded border bg-white">{message}</div>}
         <form onSubmit={handleSubmit} className="space-y-4 bg-white p-4 rounded shadow">
           <div>
@@ -100,7 +97,7 @@ export default function AdvisorNotificationsPage() {
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full border rounded px-3 py-2 min-h-[120px]"
+              className="w-full border rounded px-3 py-2 min-h-30"
               required
             />
           </div>
