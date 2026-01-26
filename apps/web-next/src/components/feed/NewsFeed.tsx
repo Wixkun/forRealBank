@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useSSE } from '@/hooks/useSSE';
-import Link from 'next/link';
+import { CreateNewsInlineForm } from '@/components/feed/CreateNewsInlineForm';
 
 interface NewsItem {
   id: string;
@@ -14,13 +14,11 @@ interface NewsItem {
 
 interface NewsFeedProps {
   apiUrl?: string;
-  locale?: string;
   userRoles?: string[] | null;
 }
 
 export default function NewsFeed({
   apiUrl = 'http://localhost:3001/api',
-  locale = 'en',
   userRoles = null,
 }: NewsFeedProps) {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -130,25 +128,33 @@ export default function NewsFeed({
       <div className="flex items-center justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold">Actualités de la banque</h2>
         <div className="flex items-center gap-3">
-          {canPublish && (
-            <Link
-              href={`/${locale}/news/create`}
-              className="px-3 py-2 rounded bg-teal-600 text-white hover:bg-teal-700 text-sm"
-            >
-              Créer une actualité
-            </Link>
-          )}
+          {/* Le formulaire de création est maintenant inline dans le feed */}
           <div className="flex items-center gap-2">
             <div
               className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
               title={isConnected ? 'Connecté' : 'Déconnecté'}
             />
-            <span className="text-sm text-gray-600">
-              {isConnected ? 'En temps réel' : 'Hors ligne'}
-            </span>
+            <span className="text-sm text-gray-600">{isConnected ? 'En temps réel' : 'Hors ligne'}</span>
           </div>
         </div>
       </div>
+
+      {canPublish && (
+        <div className="mb-6">
+          <CreateNewsInlineForm
+            apiUrl={apiUrl}
+            onCreated={() => {
+              // Petit fallback: si le SSE est offline, on recharge.
+              if (!isConnected) {
+                fetch(`${apiUrl}/news`)
+                  .then((r) => r.json())
+                  .then((data) => setNews(data))
+                  .catch(() => undefined);
+              }
+            }}
+          />
+        </div>
+      )}
 
       <div className="space-y-4">
         {news.length === 0 && (

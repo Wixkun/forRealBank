@@ -128,7 +128,7 @@ export function DashboardContent({
         <QuickActionsSection actions={quickActions} />
 
         <div className="mt-10">
-          <NewsFeed locale={locale} userRoles={user?.roles ?? null} />
+          <NewsFeed userRoles={user?.roles ?? null} />
         </div>
       </main>
     </div>

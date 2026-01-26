@@ -46,9 +46,7 @@ export function useAuth() {
             pathname.includes('/account') ||
             pathname.includes('/brokerage') ||
             pathname.includes('/trading') ||
-            pathname.includes('/chat') ||
-            pathname.includes('/news') ||
-            pathname.includes('/notifications')
+            pathname.includes('/chat')
           ) {
             const locale = pathname.split('/')[1] || 'en';
             router.push(`/${locale}/login`);
@@ -63,9 +61,7 @@ export function useAuth() {
           pathname.includes('/account') ||
           pathname.includes('/brokerage') ||
           pathname.includes('/trading') ||
-          pathname.includes('/chat') ||
-          pathname.includes('/news') ||
-          pathname.includes('/notifications')
+          pathname.includes('/chat')
         ) {
           const locale = pathname.split('/')[1] || 'en';
           router.push(`/${locale}/login`);
