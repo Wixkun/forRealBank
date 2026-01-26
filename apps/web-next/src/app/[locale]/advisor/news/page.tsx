@@ -32,11 +32,12 @@ export default function AdvisorNewsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ authorId: user.id, title, content }),
+        body: JSON.stringify({ title, content }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Échec de la création de l'actualité");
+        setMessage(data.message || "Échec de la création de l'actualité");
+        return;
       }
       setMessage('Actualité créée avec succès');
       setTitle('');
@@ -72,7 +73,7 @@ export default function AdvisorNewsPage() {
           <h1 className="text-2xl font-semibold">Actualités</h1>
           {canPublish && (
             <Link
-              href={`/${locale}/advisor/news/create`}
+              href={`/${locale}/news/create`}
               className="px-4 py-2 rounded bg-teal-600 text-white hover:bg-teal-700"
             >
               Créer une actualité
@@ -98,7 +99,7 @@ export default function AdvisorNewsPage() {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                className="w-full border rounded px-3 py-2 min-h-[120px]"
+                className="w-full border rounded px-3 py-2 min-h-30"
                 required
               />
             </div>

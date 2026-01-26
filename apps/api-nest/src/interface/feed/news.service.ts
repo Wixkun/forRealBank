@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 import { CreateNewsUseCase } from '@forreal/application';
 import { ListNewsUseCase } from '@forreal/application';
 import { DeleteNewsUseCase } from '@forreal/application';
+import { UpdateNewsUseCase } from '@forreal/application';
 
 @Injectable()
 export class NewsService {
@@ -12,6 +13,7 @@ export class NewsService {
     @Inject(CreateNewsUseCase) private readonly createNewsUC: CreateNewsUseCase,
     @Inject(ListNewsUseCase) private readonly listNewsUC: ListNewsUseCase,
     @Inject(DeleteNewsUseCase) private readonly deleteNewsUC: DeleteNewsUseCase,
+    @Inject(UpdateNewsUseCase) private readonly updateNewsUC: UpdateNewsUseCase,
   ) {}
 
   async createNews(authorId: string, title: string, content: string) {
@@ -27,6 +29,13 @@ export class NewsService {
 
   async deleteNews(id: string) {
     const result = await this.deleteNewsUC.execute({ newsId: id });
+    const allNews = await this.listNewsUC.execute({ limit: 10, offset: 0 });
+    this.newsChangeSubject.next(allNews);
+    return result;
+  }
+
+  async updateNews(id: string, input: { title?: string; content?: string }) {
+    const result = await this.updateNewsUC.execute({ newsId: id, ...input });
     const allNews = await this.listNewsUC.execute({ limit: 10, offset: 0 });
     this.newsChangeSubject.next(allNews);
     return result;

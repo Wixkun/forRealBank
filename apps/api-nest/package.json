@@ -5,7 +5,7 @@
   "type": "commonjs",
   "scripts": {
     "start:dev": "ts-node -r tsconfig-paths/register src/main.ts",
-    "start": "node dist/main.js",
+    "start": "node dist/apps/api-nest/src/main.js",
     "build": "nest build",
     "dev": "pnpm start:dev",
     "lint": "eslint \"src/**/*.ts\" --fix",
@@ -17,6 +17,7 @@
     "@forreal/infrastructure-crypto-bcrypt": "workspace:*",
     "@forreal/infrastructure-jwt-nest": "workspace:*",
     "@forreal/infrastructure-typeorm": "workspace:*",
+    "@forreal/infrastructure-uuid-node": "workspace:*",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.6",

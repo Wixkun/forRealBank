@@ -26,6 +26,7 @@ export * from './chat/usecases/ListClientsOfAdvisorUseCase';
 export * from './feed/usecases/CreateNewsUseCase';
 export * from './feed/usecases/DeleteNewsUseCase';
 export * from './feed/usecases/ListNewsUseCase';
+export * from './feed/usecases/UpdateNewsUseCase';
 
 // notifications
 export * from './notifications/usecases/ListNotificationsByUserUseCase';

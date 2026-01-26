@@ -2,8 +2,8 @@ export class News {
   constructor(
     private readonly _id: string,
     private readonly _authorId: string | null,
-    private readonly _title: string,
-    private readonly _content: string,
+    private _title: string,
+    private _content: string,
     private readonly _createdAt: Date,
   ) {}
 
@@ -21,6 +21,15 @@ export class News {
 
   get content() {
     return this._content;
+  }
+
+  // N’autorise que les champs modifiables.
+  updateTitle(title: string) {
+    this._title = title;
+  }
+
+  updateContent(content: string) {
+    this._content = content;
   }
 
   get createdAt() {

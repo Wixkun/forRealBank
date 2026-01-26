@@ -35,19 +35,20 @@ export default function AdvisorCreateNewsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ authorId: user.id, title, content }),
+        body: JSON.stringify({ title, content }),
       });
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Échec de la création de l'actualité");
+        setMessage(data.message || "Échec de la création de l'actualité");
+        return;
       }
 
       setMessage('Actualité créée avec succès');
       setTitle('');
       setContent('');
 
-      setTimeout(() => router.push(`/${locale}/advisor/news`), 600);
+      setTimeout(() => router.push(`/${locale}/dashboard`), 600);
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Erreur inconnue';
       setMessage(msg);
@@ -113,7 +114,7 @@ export default function AdvisorCreateNewsPage() {
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full border rounded px-3 py-2 min-h-[140px]"
+              className="w-full border rounded px-3 py-2 min-h-35"
               required
               maxLength={2000}
             />

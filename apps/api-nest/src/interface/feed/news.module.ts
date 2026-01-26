@@ -15,15 +15,16 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import { RoleEntity } from '@forreal/infrastructure-typeorm';
 
-import { CreateNewsUseCase } from '@forreal/application';
-import { ListNewsUseCase } from '@forreal/application';
-import { DeleteNewsUseCase } from '@forreal/application';
+import { CreateNewsUseCase, ListNewsUseCase, DeleteNewsUseCase, UpdateNewsUseCase } from '@forreal/application';
+import { AuthModule } from '../auth/auth.module';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity, NotificationEntity])],
+  imports: [AuthModule, TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity, NotificationEntity])],
   controllers: [NewsController],
   providers: [
     NewsService,
+    RolesGuard,
     { provide: INewsRepository, useClass: NewsRepository },
     { provide: IUserRepository, useClass: UserRepository },
     { provide: INotificationRepository, useClass: NotificationRepository },
@@ -41,6 +42,11 @@ import { DeleteNewsUseCase } from '@forreal/application';
     {
       provide: DeleteNewsUseCase,
       useFactory: (repo) => new DeleteNewsUseCase(repo),
+      inject: [INewsRepository],
+    },
+    {
+      provide: UpdateNewsUseCase,
+      useFactory: (repo) => new UpdateNewsUseCase(repo),
       inject: [INewsRepository],
     },
   ],
