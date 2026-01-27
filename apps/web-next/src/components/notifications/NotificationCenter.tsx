@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useLocale, useTranslations } from 'next-intl';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface NotificationCenterProps {
   userId: string;
@@ -18,6 +19,8 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
     });
   const t = useTranslations('notifications');
   const locale = useLocale();
+  const { theme, mounted } = useTheme();
+  const currentTheme = mounted ? theme : 'dark';
 
   const { unreadNotifications } = useMemo(() => {
     const unread: typeof notifications = [];
@@ -37,11 +40,13 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-full hover:bg-gray-100 transition"
+        className={`relative p-2 rounded-full transition ${
+          currentTheme === 'dark' ? 'hover:bg-gray-800/60' : 'hover:bg-gray-100'
+        }`}
         aria-label={t('ariaLabel')}
       >
         <svg
-          className="w-6 h-6 text-gray-700"
+          className={`w-6 h-6 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -59,17 +64,33 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
           </span>
         )}
         {isConnected && (
-          <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+          <span
+            className={`absolute bottom-0 right-0 w-3 h-3 border-2 rounded-full ${
+              currentTheme === 'dark'
+                ? 'bg-green-500 border-gray-900'
+                : 'bg-green-500 border-white'
+            }`}
+          />
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border z-50">
-          <div className="p-4 border-b">
+        <div
+          className={`absolute right-0 mt-2 w-96 rounded-lg shadow-xl border z-50 ${
+            currentTheme === 'dark'
+              ? 'bg-gray-950 border-gray-800'
+              : 'bg-white border-gray-200'
+          }`}
+        >
+          <div className={`p-4 border-b ${currentTheme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-semibold text-lg">{t('title')}</h3>
-                <p className="text-sm text-gray-500">{t('unreadCount', { count: unreadCount })}</p>
+                <h3 className={`font-semibold text-lg ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {t('title')}
+                </h3>
+                <p className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  {t('unreadCount', { count: unreadCount })}
+                </p>
               </div>
 
               <button
@@ -77,10 +98,14 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                 onClick={() => markAllAsRead()}
                 disabled={unreadCount === 0 || isMarkAllLoading}
                 className={
-                  'text-sm px-3 py-1 rounded border transition ' +
+                  `text-sm px-3 py-1 rounded border transition ` +
                   (unreadCount === 0 || isMarkAllLoading
-                    ? 'text-gray-400 border-gray-200 cursor-not-allowed'
-                    : 'text-gray-700 border-gray-300 hover:bg-gray-50')
+                    ? currentTheme === 'dark'
+                      ? 'text-gray-500 border-gray-800 cursor-not-allowed'
+                      : 'text-gray-400 border-gray-200 cursor-not-allowed'
+                    : currentTheme === 'dark'
+                      ? 'text-gray-200 border-gray-700 hover:bg-gray-800/60'
+                      : 'text-gray-700 border-gray-300 hover:bg-gray-50')
                 }
               >
                 {isMarkAllLoading ? t('markAllLoading') : t('markAllRead')}
@@ -90,11 +115,15 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 && (
-              <div className="p-8 text-center text-gray-500">{t('empty')}</div>
+              <div className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                {t('empty')}
+              </div>
             )}
 
             {notifications.length > 0 && unreadNotifications.length === 0 && (
-              <div className="p-8 text-center text-gray-500">{t('emptyUnread')}</div>
+              <div className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                {t('emptyUnread')}
+              </div>
             )}
 
             {unreadNotifications.length > 0 && (
@@ -103,14 +132,28 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                   <div
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif.id)}
-                    className="p-4 border-b hover:bg-gray-50 cursor-pointer transition bg-blue-50"
+                    className={`p-4 border-b cursor-pointer transition ${
+                      currentTheme === 'dark'
+                        ? 'border-gray-800 hover:bg-gray-900/50 bg-blue-950/20'
+                        : 'border-gray-200 hover:bg-gray-50 bg-blue-50'
+                    }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-sm mb-1">{notif.title}</h4>
-                        <p className="text-sm text-gray-700 mb-2">{notif.content}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <span className="px-2 py-1 bg-gray-200 rounded">{notif.type}</span>
+                        <h4 className={`font-semibold text-sm mb-1 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {notif.title}
+                        </h4>
+                        <p className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                          {notif.content}
+                        </p>
+                        <div className={`flex items-center gap-2 text-xs ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                          <span
+                            className={`px-2 py-1 rounded ${
+                              currentTheme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-200'
+                            }`}
+                          >
+                            {notif.type}
+                          </span>
                           <span>
                             {new Date(notif.createdAt).toLocaleString(locale, {
                               day: 'numeric',
@@ -121,7 +164,7 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                           </span>
                         </div>
                       </div>
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-1" />
+                      <div className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'}`} />
                     </div>
                   </div>
                 ))}
