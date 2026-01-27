@@ -48,6 +48,7 @@ export default function DashboardPage() {
       send: t('quickActions.send'),
       receive: t('quickActions.receive'),
       chat: t('quickActions.chat'),
+      director: t('quickActions.director'),
       more: t('quickActions.more'),
     },
     accountTypes: {

@@ -96,7 +96,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async list(@Query() query: ListUsersQueryDto) {
     const res = await this.listUsers.execute(query);
     return {
@@ -107,7 +107,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async getById(@Param('id') id: string) {
     const user = await this.users.findById(id);
     if (!user) throw new NotFoundException('User not found');
@@ -142,7 +142,7 @@ export class UsersController {
 
   @HttpCode(200)
   @Patch(':id/ban')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async ban(@Param('id') id: string, @Body() body: { reason?: string }) {
     await this.banUser.execute({ targetUserId: id, reason: body?.reason });
     return { success: true, message: 'User banned' };
@@ -150,7 +150,7 @@ export class UsersController {
 
   @HttpCode(200)
   @Patch(':id/unban')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async unban(@Param('id') id: string) {
     await this.unbanUser.execute({ targetUserId: id });
     return { success: true, message: 'User unbanned' };
@@ -158,7 +158,7 @@ export class UsersController {
 
   @HttpCode(204)
   @Delete(':id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async deleteById(@Param('id') id: string, @Req() req: Request) {
     const auth = (req as any).auth;
     await this.deleteByAdmin.execute({ targetUserId: id, actingUserId: auth.userId });

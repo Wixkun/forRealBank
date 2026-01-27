@@ -78,6 +78,7 @@
       "send": "Envoyer",
       "receive": "Recevoir",
       "chat": "Chat",
+      "director": "Directeur",
       "stats": "Stats",
       "more": "Plus"
     },
@@ -398,5 +399,32 @@
     "markAllLoading": "...",
     "empty": "Aucune notification",
     "emptyUnread": "Aucune nouvelle notification"
+  },
+  "director": {
+    "title": "Directeur · Gestion clients",
+    "subtitle": "Actions disponibles : lister, consulter, bannir/débannir, supprimer.",
+    "searchPlaceholder": "Recherche (email, nom...)",
+    "searchButton": "Rechercher",
+    "total": "Total : {count}",
+    "table": {
+      "email": "Email",
+      "name": "Nom",
+      "roles": "Rôles",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "loading": "Chargement...",
+    "empty": "Aucun résultat.",
+    "statusValues": {
+      "active": "Actif",
+      "banned": "Banni"
+    },
+    "actions": {
+      "ban": "Bannir",
+      "unban": "Débannir",
+      "delete": "Supprimer"
+    },
+    "confirmDelete": "Supprimer ce client ?",
+    "errorPrefix": "Erreur :"
   }
 }

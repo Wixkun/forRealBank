@@ -78,6 +78,7 @@
       "send": "Send",
       "receive": "Receive",
       "chat": "Chat",
+      "director": "Director",
       "stats": "Stats",
       "more": "More"
     },
@@ -397,5 +398,32 @@
     "markAllLoading": "...",
     "empty": "No notifications",
     "emptyUnread": "No new notifications"
+  },
+  "director": {
+    "title": "Director · Customer management",
+    "subtitle": "Available actions: list, view, ban/unban, delete.",
+    "searchPlaceholder": "Search (email, name...)",
+    "searchButton": "Search",
+    "total": "Total: {count}",
+    "table": {
+      "email": "Email",
+      "name": "Name",
+      "roles": "Roles",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "loading": "Loading...",
+    "empty": "No results.",
+    "statusValues": {
+      "active": "Active",
+      "banned": "Banned"
+    },
+    "actions": {
+      "ban": "Ban",
+      "unban": "Unban",
+      "delete": "Delete"
+    },
+    "confirmDelete": "Delete this customer?",
+    "errorPrefix": "Error:"
   }
 }

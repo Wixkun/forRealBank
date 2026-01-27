@@ -19,6 +19,7 @@ type DashboardContentProps = {
       send: string;
       receive: string;
       chat: string;
+      director: string;
       more: string;
     };
     accountTypes: {
@@ -61,6 +62,8 @@ export function DashboardContent({
   const { theme, mounted } = useTheme();
   const { user } = useAuth();
 
+  const isDirector = user?.roles?.includes('DIRECTOR') ?? false;
+
   if (!mounted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900">
@@ -84,6 +87,16 @@ export function DashboardContent({
       variant: 'cyan' as const,
       href: `/${locale}/chat`,
     },
+    ...(isDirector
+      ? [
+          {
+            icon: '🎬',
+            label: translations.quickActions.director,
+            variant: 'gray' as const,
+            href: `/${locale}/director`,
+          },
+        ]
+      : []),
   ];
 
   return (
