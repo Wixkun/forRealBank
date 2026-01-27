@@ -2,14 +2,17 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type Props = {
   apiUrl?: string;
-  onCreated?: () => void;
+  onCreatedAction?: () => void;
 };
 
-export function CreateNewsInlineForm({ apiUrl = 'http://localhost:3001/api', onCreated }: Props) {
+export function CreateNewsInlineForm({ apiUrl = 'http://localhost:3001/api', onCreatedAction }: Props) {
   const t = useTranslations('feed.create');
+  const { theme, mounted } = useTheme();
+  const currentTheme = mounted ? theme : 'dark';
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -39,7 +42,7 @@ export function CreateNewsInlineForm({ apiUrl = 'http://localhost:3001/api', onC
       setMessage(t('messages.created'));
       setTitle('');
       setContent('');
-      onCreated?.();
+      onCreatedAction?.();
     } catch (e) {
       const msg = e instanceof Error ? e.message : t('messages.unknownError');
       setMessage(msg);
@@ -49,31 +52,59 @@ export function CreateNewsInlineForm({ apiUrl = 'http://localhost:3001/api', onC
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div
+      className={`rounded-lg shadow-md p-4 border ${
+        currentTheme === 'dark' ? 'bg-gray-900/40 border-gray-700/50' : 'bg-white border-gray-200'
+      }`}
+    >
       <div className="flex items-center justify-between gap-4 mb-3">
-        <h3 className="text-lg font-semibold">{t('title')}</h3>
+        <h3 className={`text-lg font-semibold ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          {t('title')}
+        </h3>
       </div>
 
-      {message && <div className="mb-3 text-sm p-3 rounded border bg-white">{message}</div>}
+      {message && (
+        <div
+          className={`mb-3 text-sm p-3 rounded border ${
+            currentTheme === 'dark'
+              ? 'bg-gray-950/40 border-gray-700 text-gray-100'
+              : 'bg-white border-gray-200 text-gray-800'
+          }`}
+        >
+          {message}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-sm font-medium mb-1">{t('fields.title')}</label>
+          <label className={`block text-sm font-medium mb-1 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+            {t('fields.title')}
+          </label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full border rounded px-3 py-2"
+            className={`w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+              currentTheme === 'dark'
+                ? 'bg-gray-950/60 border-gray-700 text-gray-100 placeholder:text-gray-500'
+                : 'bg-white border-gray-300 text-gray-900'
+            }`}
             required
             maxLength={120}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">{t('fields.content')}</label>
+          <label className={`block text-sm font-medium mb-1 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+            {t('fields.content')}
+          </label>
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="w-full border rounded px-3 py-2 min-h-30"
+            className={`w-full border rounded px-3 py-2 min-h-30 focus:outline-none focus:ring-2 focus:ring-teal-500 ${
+              currentTheme === 'dark'
+                ? 'bg-gray-950/60 border-gray-700 text-gray-100 placeholder:text-gray-500'
+                : 'bg-white border-gray-300 text-gray-900'
+            }`}
             required
             maxLength={2000}
           />

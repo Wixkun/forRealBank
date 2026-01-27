@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/organisms/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import Link from 'next/link';
 
 type DashboardHeaderProps = {
   userName?: string;
@@ -40,7 +41,7 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-semibold bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent">
-              Avenir
+              <Link href={`/${locale}/dashboard`}>Avenir</Link>
             </h1>
           </div>
         </div>
