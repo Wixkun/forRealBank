@@ -31,6 +31,7 @@ export default function GlobalError({
               text: t('backHome'),
               href: '/fr',
             }}
+            preferredAuthenticatedHomeHref={'/fr/dashboard'}
             secondaryButton={{
               text: t('tryAgain'),
               onClick: reset,
