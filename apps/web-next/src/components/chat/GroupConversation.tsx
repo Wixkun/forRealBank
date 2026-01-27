@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '@/hooks/useChat';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface GroupConversationProps {
   conversationId: string;
@@ -14,6 +15,10 @@ export default function GroupConversation({
   userId,
   participants,
 }: GroupConversationProps) {
+  const groupT = useTranslations('chat.groupConversation');
+  const displayT = useTranslations('chat.display');
+  const locale = useLocale();
+
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -44,7 +49,7 @@ export default function GroupConversation({
 
   const getSenderName = (senderId: string) => {
     const participant = participants.find((p) => p.id === senderId);
-    return participant?.name || 'Utilisateur';
+    return participant?.name || groupT('unknownUser');
   };
 
   const getMessageStyle = (senderId: string) => {
@@ -61,10 +66,12 @@ export default function GroupConversation({
   return (
     <div className="flex flex-col h-full bg-white rounded-lg shadow">
       <div className="p-4 border-b">
-        <h3 className="font-semibold text-lg">Discussion de groupe</h3>
+        <h3 className="font-semibold text-lg">{groupT('title')}</h3>
         <p className="text-sm text-gray-500">
-          {participants.length} participant{participants.length > 1 ? 's' : ''} ·{' '}
-          {presentUserIds.filter((id) => id !== userId).length > 0 ? 'En ligne' : 'Hors ligne'}
+          {groupT('participantsCount', { count: participants.length })} ·{' '}
+          {presentUserIds.filter((id) => id !== userId).length > 0
+            ? displayT('online')
+            : displayT('offline')}
         </p>
       </div>
 
@@ -84,7 +91,7 @@ export default function GroupConversation({
               <div className={`px-4 py-2 rounded-lg ${getMessageStyle(msg.senderId)}`}>
                 <p className="text-sm">{msg.content}</p>
                 <p className="text-xs opacity-75 mt-1">
-                  {new Date(msg.createdAt).toLocaleTimeString('fr-FR', {
+                  {new Date(msg.createdAt).toLocaleTimeString(locale, {
                     hour: '2-digit',
                     minute: '2-digit',
                   })}
@@ -102,7 +109,7 @@ export default function GroupConversation({
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Tapez votre message..."
+            placeholder={displayT('input.placeholder')}
             className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
@@ -110,7 +117,7 @@ export default function GroupConversation({
             disabled={!input.trim() || !isConnected}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Envoyer
+            {displayT('send')}
           </button>
         </div>
       </form>

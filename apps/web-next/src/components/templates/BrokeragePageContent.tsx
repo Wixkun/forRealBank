@@ -61,6 +61,8 @@ type BrokeragePageContentProps = {
       limit: string;
       stop: string;
     };
+    updating?: string;
+    orderFailed?: string;
   };
 };
 
@@ -161,13 +163,13 @@ export function BrokeragePageContent({
     const dayChangePercent = (dayChangeValue / totalValue) * 100;
 
     return {
-      totalValue: `€${totalValue.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
-      totalGain: `${totalGain >= 0 ? '+' : ''}€${Math.abs(totalGain).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
+      totalValue: formatCurrency(totalValue),
+      totalGain: formatSignedCurrency(totalGain),
       totalGainPercent: `${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%`,
-      dayChange: `${dayChangeValue >= 0 ? '+' : ''}€${Math.abs(dayChangeValue).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
+      dayChange: formatSignedCurrency(dayChangeValue),
       dayChangePercent: `${dayChangePercent >= 0 ? '+' : ''}${dayChangePercent.toFixed(2)}%`,
     };
-  }, [updatedPositions, marketData]);
+  }, [updatedPositions, marketData, formatCurrency, formatSignedCurrency]);
 
   const handleTrade = useCallback(
     async (data: {
@@ -192,10 +194,10 @@ export function BrokeragePageContent({
         setBasePositions(mapped);
       } catch (error) {
         console.error('Trade failed', error);
-        alert('Order failed. Please try again.');
+        alert(translations.orderFailed ?? translations.placeOrder);
       }
     },
-    [accountData.id, mapPosition],
+    [accountData.id, mapPosition, translations],
   );
 
   if (!mounted) {
@@ -224,7 +226,7 @@ export function BrokeragePageContent({
         <div className="mb-8 relative">
           {loading && (
             <div className="absolute top-2 right-2 text-xs text-teal-400 animate-pulse">
-              Updating...
+              {translations.updating ?? ''}
             </div>
           )}
           <PortfolioSummaryCard

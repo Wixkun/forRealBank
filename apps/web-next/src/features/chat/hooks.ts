@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 interface User {
@@ -9,6 +11,8 @@ interface User {
 }
 
 export function useClientAdvisor(clientId: string | undefined) {
+  const t = useTranslations('chat.errors');
+
   const [advisor, setAdvisor] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,19 +34,21 @@ export function useClientAdvisor(clientId: string | undefined) {
         const data = await res.json();
         setAdvisor(data || null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Impossible de récupérer le conseiller');
+        setError(err instanceof Error ? err.message : t('fetchAdvisor'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchAdvisor();
-  }, [clientId]);
+  }, [clientId, t]);
 
   return { advisor, isLoading, error };
 }
 
 export function useAdvisorClients(advisorId: string | undefined) {
+  const t = useTranslations('chat.errors');
+
   const [clients, setClients] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,19 +70,21 @@ export function useAdvisorClients(advisorId: string | undefined) {
         const data = await res.json();
         setClients(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Impossible de récupérer vos clients');
+        setError(err instanceof Error ? err.message : t('fetchClients'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchClients();
-  }, [advisorId]);
+  }, [advisorId, t]);
 
   return { clients, isLoading, error };
 }
 
 export function useUsersByRole(role: 'CLIENT' | 'ADVISOR' | 'DIRECTOR' | null) {
+  const t = useTranslations('chat.errors');
+
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,14 +106,14 @@ export function useUsersByRole(role: 'CLIENT' | 'ADVISOR' | 'DIRECTOR' | null) {
         const data = await res.json();
         setUsers(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Impossible de récupérer les utilisateurs');
+        setError(err instanceof Error ? err.message : t('fetchUsers'));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchUsers();
-  }, [role]);
+  }, [role, t]);
 
   return { users, isLoading, error };
 }

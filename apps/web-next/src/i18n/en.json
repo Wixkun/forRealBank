@@ -8,7 +8,41 @@
     "error": "Error",
     "errorLoadingAccount": "Error loading account",
     "alreadyHaveAccount": "Already have an account?",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "footer": {
+      "ourBank": {
+        "title": "Our Bank",
+        "about": "About us",
+        "commitments": "Our commitments",
+        "careers": "Careers",
+        "press": "Press"
+      },
+      "products": {
+        "title": "Products & Services",
+        "bankAccounts": "Bank accounts",
+        "cardsPayments": "Cards & Payments",
+        "savingsInvestments": "Savings & Investments",
+        "loansCredits": "Loans & Credit",
+        "insurance": "Insurance"
+      },
+      "help": {
+        "title": "Help & Support",
+        "center": "Help center",
+        "contactAdvisor": "Contact an advisor",
+        "faq": "FAQ",
+        "accessibility": "Accessibility"
+      },
+      "security": {
+        "title": "Security & Legal",
+        "accountSecurity": "Account security",
+        "dataProtection": "Data protection",
+        "terms": "Terms & conditions",
+        "legal": "Legal notice"
+      },
+      "copyrightSuffix": ". All rights reserved."
+    },
+    "authChecking": "Checking authentication...",
+    "accessDenied": "Access denied."
   },
   "auth": {
     "login": {
@@ -89,7 +123,6 @@
     "title": "Brokerage Account",
     "portfolio": "Portfolio",
     "totalValue": "Total Value",
-    "totalGain": "Total Gain/Loss",
     "dayChange": "Today's Change",
     "positions": "Positions",
     "noPositions": "No positions yet",
@@ -97,7 +130,6 @@
     "quantity": "Quantity",
     "avgPrice": "Avg Price",
     "currentPrice": "Current Price",
-    "totalValue": "Total Value",
     "gainLoss": "Gain/Loss",
     "trade": "Trade",
     "buy": "Buy",
@@ -291,7 +323,79 @@
         "placeholder": "Type your message..."
       },
       "send": "Send",
-      "groupMembers": "{count} members"
+      "groupMembers": "{count} members",
+      "typing": "{name} is typing..."
+    },
+    "group": {
+      "loading": "Loading group conversation...",
+      "title": "Group chat",
+      "subtitle": "Collaborate in real time. The director is visually highlighted.",
+      "empty": {
+        "title": "No group conversation",
+        "description": "You are not participating in a group conversation yet."
+      }
+    },
+    "manage": {
+      "title": "Manage chat",
+      "conversationIdLabel": "Conversation ID",
+      "conversationIdPlaceholder": "Conversation UUID",
+      "open": "Open"
+    },
+    "groupConversation": {
+      "title": "Group conversation",
+      "unknownUser": "User",
+      "participantsCount": "{count} participant{count, plural, one {} other {s}}"
+    },
+    "errors": {
+      "fetchAdvisor": "Unable to fetch the advisor",
+      "fetchClients": "Unable to fetch your clients",
+      "fetchUsers": "Unable to fetch users"
     }
+  },
+  "feed": {
+    "title": "Bank news",
+    "confirmDelete": "Delete this news item?",
+    "empty": "No news yet",
+    "connection": {
+      "connected": "Connected",
+      "disconnected": "Disconnected",
+      "realtime": "Real-time",
+      "offline": "Offline"
+    },
+    "edit": {
+      "titleLabel": "Title",
+      "contentLabel": "Content",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleting": "Deleting…"
+    },
+    "create": {
+      "title": "Publish a news item",
+      "fields": {
+        "title": "Title",
+        "content": "Content"
+      },
+      "submit": "Publish",
+      "submitLoading": "Sending…",
+      "messages": {
+        "created": "News item created",
+        "createFailed": "Failed to create the news item",
+        "unknownError": "Unknown error"
+      }
+    }
+  },
+  "notifications": {
+    "ariaLabel": "Notifications",
+    "title": "Notifications",
+    "unreadCount": "{count} new notification{count, plural, one {} other {s}}",
+    "markAllRead": "Mark all as read",
+    "markAllLoading": "...",
+    "empty": "No notifications",
+    "emptyUnread": "No new notifications"
   }
 }

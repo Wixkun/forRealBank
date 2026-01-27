@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ErrorPageTemplate } from '@/components/templates/ErrorPageTemplate';
+import { useTranslations } from 'next-intl';
 
 export default function GlobalError({
   error,
@@ -11,6 +12,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors.500');
+
   useEffect(() => {
     console.error('Global Error:', error);
   }, [error]);
@@ -21,15 +24,15 @@ export default function GlobalError({
         <ThemeProvider>
           <ErrorPageTemplate
             errorCode="500"
-            title="500"
-            subtitle="Erreur serveur"
-            description="Une erreur inattendue s'est produite. Notre équipe a été notifiée et travaille dessus."
+            title={t('title')}
+            subtitle={t('subtitle')}
+            description={t('description')}
             primaryButton={{
-              text: "Retour à l'accueil",
+              text: t('backHome'),
               href: '/fr',
             }}
             secondaryButton={{
-              text: 'Réessayer',
+              text: t('tryAgain'),
               onClick: reset,
             }}
             locale="fr"

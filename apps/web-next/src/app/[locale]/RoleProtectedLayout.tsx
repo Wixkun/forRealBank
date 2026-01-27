@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslations } from 'next-intl';
 
 type RoleProtectedLayoutProps = {
   children: ReactNode;
@@ -11,6 +12,8 @@ type RoleProtectedLayoutProps = {
 };
 
 export function RoleProtectedLayout({ children, allowedRoles }: RoleProtectedLayoutProps) {
+  const t = useTranslations('common');
+
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -31,7 +34,7 @@ export function RoleProtectedLayout({ children, allowedRoles }: RoleProtectedLay
   if (isLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-teal-950 via-teal-900 to-cyan-800">
-        <div className="text-white text-lg">Vérification d&apos;authentification...</div>
+        <div className="text-white text-lg">{t('authChecking')}</div>
       </div>
     );
   }
@@ -39,7 +42,7 @@ export function RoleProtectedLayout({ children, allowedRoles }: RoleProtectedLay
   if (!hasRole) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div>Accès refusé.</div>
+        <div>{t('accessDenied')}</div>
       </div>
     );
   }

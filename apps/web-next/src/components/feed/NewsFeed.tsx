@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSSE } from '@/hooks/useSSE';
 import { CreateNewsInlineForm } from '@/components/feed/CreateNewsInlineForm';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface NewsItem {
   id: string;
@@ -21,6 +22,9 @@ export default function NewsFeed({
   apiUrl = 'http://localhost:3001/api',
   userRoles = null,
 }: NewsFeedProps) {
+  const t = useTranslations('feed');
+  const locale = useLocale();
+
   const [news, setNews] = useState<NewsItem[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -60,7 +64,7 @@ export default function NewsFeed({
 
   const handleDelete = async (id: string) => {
     if (!canPublish) return;
-    const ok = typeof window !== 'undefined' ? window.confirm('Supprimer cette actualité ?') : false;
+    const ok = typeof window !== 'undefined' ? window.confirm(t('confirmDelete')) : false;
     if (!ok) return;
 
     try {
@@ -126,15 +130,16 @@ export default function NewsFeed({
   return (
     <div className="w-full max-w-4xl mx-auto p-4">
       <div className="flex items-center justify-between mb-6 gap-4">
-        <h2 className="text-2xl font-bold">Actualités de la banque</h2>
+        <h2 className="text-2xl font-bold">{t('title')}</h2>
         <div className="flex items-center gap-3">
-          {/* Le formulaire de création est maintenant inline dans le feed */}
           <div className="flex items-center gap-2">
             <div
               className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
-              title={isConnected ? 'Connecté' : 'Déconnecté'}
+              title={isConnected ? t('connection.connected') : t('connection.disconnected')}
             />
-            <span className="text-sm text-gray-600">{isConnected ? 'En temps réel' : 'Hors ligne'}</span>
+            <span className="text-sm text-gray-600">
+              {isConnected ? t('connection.realtime') : t('connection.offline')}
+            </span>
           </div>
         </div>
       </div>
@@ -157,7 +162,7 @@ export default function NewsFeed({
 
       <div className="space-y-4">
         {news.length === 0 && (
-          <div className="text-center py-12 text-gray-500">Aucune actualité pour le moment</div>
+          <div className="text-center py-12 text-gray-500">{t('empty')}</div>
         )}
         {news.map((item) => (
           <div
@@ -169,7 +174,7 @@ export default function NewsFeed({
                 {editingId === item.id ? (
                   <div className="space-y-3">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Titre</label>
+                      <label className="block text-sm font-medium mb-1">{t('edit.titleLabel')}</label>
                       <input
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
@@ -179,7 +184,7 @@ export default function NewsFeed({
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">Contenu</label>
+                      <label className="block text-sm font-medium mb-1">{t('edit.contentLabel')}</label>
                       <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
@@ -195,7 +200,7 @@ export default function NewsFeed({
                         disabled={savingId === item.id}
                         className="px-3 py-2 rounded bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50"
                       >
-                        {savingId === item.id ? 'Enregistrement…' : 'Enregistrer'}
+                        {savingId === item.id ? t('edit.saving') : t('edit.save')}
                       </button>
                       <button
                         type="button"
@@ -203,7 +208,7 @@ export default function NewsFeed({
                         disabled={savingId === item.id}
                         className="px-3 py-2 rounded border bg-white hover:bg-gray-50 disabled:opacity-50"
                       >
-                        Annuler
+                        {t('edit.cancel')}
                       </button>
                     </div>
                   </div>
@@ -214,7 +219,7 @@ export default function NewsFeed({
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span>
                         📅{' '}
-                        {new Date(item.createdAt).toLocaleDateString('fr-FR', {
+                        {new Date(item.createdAt).toLocaleDateString(locale, {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric',
@@ -222,7 +227,7 @@ export default function NewsFeed({
                       </span>
                       <span>
                         🕐{' '}
-                        {new Date(item.createdAt).toLocaleTimeString('fr-FR', {
+                        {new Date(item.createdAt).toLocaleTimeString(locale, {
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
@@ -239,7 +244,7 @@ export default function NewsFeed({
                     onClick={() => startEdit(item)}
                     className="px-3 py-2 rounded border border-gray-200 text-gray-800 hover:bg-gray-50"
                   >
-                    Modifier
+                    {t('actions.edit')}
                   </button>
                   <button
                     type="button"
@@ -247,7 +252,7 @@ export default function NewsFeed({
                     disabled={deletingId === item.id}
                     className="px-3 py-2 rounded border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50"
                   >
-                    {deletingId === item.id ? 'Suppression…' : 'Supprimer'}
+                    {deletingId === item.id ? t('actions.deleting') : t('actions.delete')}
                   </button>
                 </div>
               )}

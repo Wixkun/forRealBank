@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface NotificationCenterProps {
   userId: string;
@@ -15,6 +16,8 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
       userId,
       apiUrl,
     });
+  const t = useTranslations('notifications');
+  const locale = useLocale();
 
   const { unreadNotifications } = useMemo(() => {
     const unread: typeof notifications = [];
@@ -35,7 +38,7 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-full hover:bg-gray-100 transition"
-        aria-label="Notifications"
+        aria-label={t('ariaLabel')}
       >
         <svg
           className="w-6 h-6 text-gray-700"
@@ -65,10 +68,8 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
           <div className="p-4 border-b">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-semibold text-lg">Notifications</h3>
-                <p className="text-sm text-gray-500">
-                  {unreadCount} nouvelle{unreadCount > 1 ? 's' : ''}
-                </p>
+                <h3 className="font-semibold text-lg">{t('title')}</h3>
+                <p className="text-sm text-gray-500">{t('unreadCount', { count: unreadCount })}</p>
               </div>
 
               <button
@@ -82,18 +83,18 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                     : 'text-gray-700 border-gray-300 hover:bg-gray-50')
                 }
               >
-                {isMarkAllLoading ? '...' : 'Tout lire'}
+                {isMarkAllLoading ? t('markAllLoading') : t('markAllRead')}
               </button>
             </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 && (
-              <div className="p-8 text-center text-gray-500">Aucune notification</div>
+              <div className="p-8 text-center text-gray-500">{t('empty')}</div>
             )}
 
             {notifications.length > 0 && unreadNotifications.length === 0 && (
-              <div className="p-8 text-center text-gray-500">Aucune nouvelle notification</div>
+              <div className="p-8 text-center text-gray-500">{t('emptyUnread')}</div>
             )}
 
             {unreadNotifications.length > 0 && (
@@ -111,7 +112,7 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                           <span className="px-2 py-1 bg-gray-200 rounded">{notif.type}</span>
                           <span>
-                            {new Date(notif.createdAt).toLocaleString('fr-FR', {
+                            {new Date(notif.createdAt).toLocaleString(locale, {
                               day: 'numeric',
                               month: 'short',
                               hour: '2-digit',

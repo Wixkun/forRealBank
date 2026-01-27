@@ -1,6 +1,7 @@
 'use client';
 
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLocale } from 'next-intl';
 
 type BalanceCardProps = {
   label: string;
@@ -10,8 +11,16 @@ type BalanceCardProps = {
 
 export function BalanceCard({ label, amount, growthText }: BalanceCardProps) {
   const { theme, mounted } = useTheme();
+  const locale = useLocale();
 
   const currentTheme = mounted ? theme : 'dark';
+
+  const formattedAmount = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount);
 
   return (
     <div
@@ -44,7 +53,7 @@ export function BalanceCard({ label, amount, growthText }: BalanceCardProps) {
               : 'text-white'
           }`}
         >
-          {amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
+          {formattedAmount}
         </p>
         {growthText && (
           <div

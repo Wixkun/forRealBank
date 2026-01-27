@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/contexts/ThemeContext';
 import Link from 'next/link';
+import { useMemo } from 'react';
 
 type AccountCardProps = {
   id: string;
@@ -25,6 +26,11 @@ export function AccountCard({
   const { theme, mounted } = useTheme();
 
   const currentTheme = mounted ? theme : 'dark';
+
+  const formatCurrency = useMemo(
+    () => new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }),
+    [locale],
+  );
 
   const href =
     accountType === 'brokerage' ? `/${locale}/brokerage/${id}` : `/${locale}/account/${id}`;
@@ -62,7 +68,7 @@ export function AccountCard({
           <p
             className={`text-2xl font-semibold ${currentTheme === 'dark' ? 'bg-gradient-to-r from-teal-300 to-cyan-300 bg-clip-text text-transparent' : 'text-teal-600'}`}
           >
-            {balance.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+            {formatCurrency.format(balance)}
           </p>
         </div>
       </div>

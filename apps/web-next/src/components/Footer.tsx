@@ -1,33 +1,36 @@
 'use client';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+  const t = useTranslations('common.footer');
+
   return (
     <footer className="bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800 text-gray-300 border-t border-white/10">
       <div className=" px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Notre Banque
+            {t('ourBank.title')}
           </h3>
           <ul className="space-y-2 text-sm">
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Qui sommes-nous
+                {t('ourBank.about')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Nos engagements
+                {t('ourBank.commitments')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Carrières
+                {t('ourBank.careers')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Presse
+                {t('ourBank.press')}
               </a>
             </li>
           </ul>
@@ -35,32 +38,32 @@ export default function Footer() {
 
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Produits & Services
+            {t('products.title')}
           </h3>
           <ul className="space-y-2 text-sm">
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Comptes bancaires
+                {t('products.bankAccounts')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Cartes & Paiements
+                {t('products.cardsPayments')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Épargne & Placements
+                {t('products.savingsInvestments')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Crédits & Prêts
+                {t('products.loansCredits')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Assurances
+                {t('products.insurance')}
               </a>
             </li>
           </ul>
@@ -68,27 +71,27 @@ export default function Footer() {
 
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Aide & Support
+            {t('help.title')}
           </h3>
           <ul className="space-y-2 text-sm">
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Centre d’aide
+                {t('help.center')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Contacter un conseiller
+                {t('help.contactAdvisor')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                FAQ
+                {t('help.faq')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Accessibilité
+                {t('help.accessibility')}
               </a>
             </li>
           </ul>
@@ -96,27 +99,27 @@ export default function Footer() {
 
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Sécurité & Légal
+            {t('security.title')}
           </h3>
           <ul className="space-y-2 text-sm">
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Sécurité des comptes
+                {t('security.accountSecurity')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Protection des données
+                {t('security.dataProtection')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Conditions générales
+                {t('security.terms')}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-teal-300 transition">
-                Mentions légales
+                {t('security.legal')}
               </a>
             </li>
           </ul>
@@ -131,7 +134,7 @@ export default function Footer() {
           <span className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold">
             Avenir
           </span>
-          . Tous droits réservés.
+          {t('copyrightSuffix')}
         </div>
 
         <div className="flex space-x-4 text-gray-400">

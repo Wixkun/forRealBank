@@ -4,8 +4,12 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import GroupConversation from '@/components/chat/GroupConversation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslations } from 'next-intl';
 
 export default function GroupChatPage() {
+  const t = useTranslations('chat.group');
+  const chatT = useTranslations('chat');
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -71,7 +75,7 @@ export default function GroupChatPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement de la discussion de groupe...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -80,9 +84,7 @@ export default function GroupChatPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-gray-700">
-          Veuillez vous connecter pour accéder à la messagerie.
-        </div>
+        <div className="text-center text-gray-700">{chatT('loginRequired')}</div>
       </div>
     );
   }
@@ -104,10 +106,8 @@ export default function GroupChatPage() {
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune conversation de groupe</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Vous n&apos;êtes pas participant d&apos;une discussion de groupe pour l&apos;instant.
-          </p>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty.title')}</h3>
+          <p className="mt-1 text-sm text-gray-500">{t('empty.description')}</p>
         </div>
       </div>
     );
@@ -117,10 +117,8 @@ export default function GroupChatPage() {
     <div className="min-h-screen bg-gray-50">
       <div className=" py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Discussion de groupe</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Collaborez en temps réel. Le directeur est visuellement mis en avant.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
+          <p className="mt-2 text-sm text-gray-600">{t('subtitle')}</p>
         </div>
 
         <div

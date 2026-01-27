@@ -1,6 +1,7 @@
 'use client';
 
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLocale } from 'next-intl';
 
 type TransactionItemProps = {
   description: string;
@@ -18,8 +19,15 @@ export function TransactionItem({
   isLast = false,
 }: TransactionItemProps) {
   const { theme, mounted } = useTheme();
+  const locale = useLocale();
 
   const currentTheme = mounted ? theme : 'dark';
+
+  const formattedAmount = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 2,
+  }).format(amount);
 
   return (
     <div
@@ -62,7 +70,7 @@ export function TransactionItem({
         }`}
       >
         {amount > 0 ? '+' : ''}
-        {amount.toLocaleString('fr-FR', { minimumFractionDigits: 2 })} €
+        {formattedAmount}
       </p>
     </div>
   );
