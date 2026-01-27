@@ -10,6 +10,7 @@ import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 
 import { SendNotificationUseCase } from '@forreal/application';
 import { MarkNotificationReadUseCase } from '@forreal/application';
+import { MarkAllNotificationsReadUseCase } from '@forreal/application';
 import { ListNotificationsByUserUseCase } from '@forreal/application';
 
 @Module({
@@ -26,6 +27,11 @@ import { ListNotificationsByUserUseCase } from '@forreal/application';
     {
       provide: MarkNotificationReadUseCase,
       useFactory: (repo) => new MarkNotificationReadUseCase(repo),
+      inject: [INotificationRepository],
+    },
+    {
+      provide: MarkAllNotificationsReadUseCase,
+      useFactory: (repo) => new MarkAllNotificationsReadUseCase(repo),
       inject: [INotificationRepository],
     },
     {

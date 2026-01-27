@@ -31,6 +31,7 @@ export * from './feed/usecases/UpdateNewsUseCase';
 // notifications
 export * from './notifications/usecases/ListNotificationsByUserUseCase';
 export * from './notifications/usecases/MarkNotificationReadUseCase';
+export * from './notifications/usecases/MarkAllNotificationsReadUseCase';
 export * from './notifications/usecases/SendNotificationUseCase';
 
 // transactions

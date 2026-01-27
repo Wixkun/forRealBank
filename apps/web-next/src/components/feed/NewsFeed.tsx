@@ -144,7 +144,6 @@ export default function NewsFeed({
           <CreateNewsInlineForm
             apiUrl={apiUrl}
             onCreated={() => {
-              // Petit fallback: si le SSE est offline, on recharge.
               if (!isConnected) {
                 fetch(`${apiUrl}/news`)
                   .then((r) => r.json())

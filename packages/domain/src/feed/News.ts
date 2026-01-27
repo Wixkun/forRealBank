@@ -23,7 +23,6 @@ export class News {
     return this._content;
   }
 
-  // N’autorise que les champs modifiables.
   updateTitle(title: string) {
     this._title = title;
   }

@@ -9,7 +9,6 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      // Bloque les pages news/notifications (le dashboard affiche déjà les infos)
       {
         source: '/:locale(fr|en)/news',
         destination: '/:locale/dashboard',

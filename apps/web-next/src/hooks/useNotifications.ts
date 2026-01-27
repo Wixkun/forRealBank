@@ -23,6 +23,7 @@ export function useNotifications({
   apiUrl = 'http://localhost:3001/api',
 }: UseNotificationsOptions) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isMarkAllLoading, setIsMarkAllLoading] = useState(false);
 
   const { isConnected } = useSSE<Notification[]>({
     url: `${apiUrl}/notifications/stream/${userId}`,
@@ -42,6 +43,19 @@ export function useNotifications({
     }
   };
 
+  const markAllAsRead = async () => {
+    setIsMarkAllLoading(true);
+    try {
+      await fetch(`${apiUrl}/notifications/user/${userId}/read-all`, { method: 'POST' });
+      const nowIso = new Date().toISOString();
+      setNotifications((prev) => prev.map((n) => (n.readAt ? n : { ...n, readAt: nowIso })));
+    } catch (err) {
+      console.error('Failed to mark all notifications as read:', err);
+    } finally {
+      setIsMarkAllLoading(false);
+    }
+  };
+
   const unreadCount = notifications.filter((n) => !n.readAt).length;
 
   return {
@@ -49,5 +63,7 @@ export function useNotifications({
     unreadCount,
     isConnected,
     markAsRead,
+    markAllAsRead,
+    isMarkAllLoading,
   };
 }

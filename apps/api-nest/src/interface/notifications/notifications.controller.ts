@@ -13,6 +13,7 @@ import { Observable, interval, from, map } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { SendNotificationUseCase } from '@forreal/application';
 import { MarkNotificationReadUseCase } from '@forreal/application';
+import { MarkAllNotificationsReadUseCase } from '@forreal/application';
 import { ListNotificationsByUserUseCase } from '@forreal/application';
 
 @Controller('notifications')
@@ -22,6 +23,8 @@ export class NotificationsController {
     private readonly sendNotificationUseCase: SendNotificationUseCase,
     @Inject(MarkNotificationReadUseCase)
     private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
+    @Inject(MarkAllNotificationsReadUseCase)
+    private readonly markAllNotificationsReadUseCase: MarkAllNotificationsReadUseCase,
     @Inject(ListNotificationsByUserUseCase)
     private readonly listNotificationsByUserUseCase: ListNotificationsByUserUseCase,
   ) {}
@@ -34,6 +37,13 @@ export class NotificationsController {
   @Post(':id/read')
   async markRead(@Param('id') id: string) {
     return this.markNotificationReadUseCase.execute({ notificationId: id });
+  }
+
+  @Post('user/:userId/read-all')
+  async markAllRead(@Param('userId') userId: string) {
+    return (this.markAllNotificationsReadUseCase as unknown as {
+      execute(input: { userId: string }): Promise<{ success: boolean; updatedCount: number }>;
+    }).execute({ userId });
   }
 
   @Get('user/:userId')

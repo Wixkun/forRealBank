@@ -13,7 +13,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = pathname.split('/')[1] || defaultLocale;
 
-  // Bloque les routes dédiées (le dashboard affiche déjà ces infos)
   if (
     pathname === `/${locale}/news` ||
     pathname.startsWith(`/${locale}/news/manage`) ||
