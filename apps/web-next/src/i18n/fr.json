@@ -78,7 +78,7 @@
       "send": "Envoyer",
       "receive": "Recevoir",
       "chat": "Chat",
-      "director": "Directeur",
+      "director": "Gestion",
       "stats": "Stats",
       "more": "Plus"
     },
@@ -426,5 +426,11 @@
     },
     "confirmDelete": "Supprimer ce client ?",
     "errorPrefix": "Erreur :"
+  },
+  "banned": {
+    "code": "BANNI",
+    "subtitle": "Votre compte est banni",
+    "description": "Votre accès a été suspendu. Contactez le support si vous pensez qu’il s’agit d’une erreur.",
+    "primaryCta": "Retour à la connexion"
   }
 }

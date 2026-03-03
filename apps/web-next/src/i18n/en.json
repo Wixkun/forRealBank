@@ -78,7 +78,7 @@
       "send": "Send",
       "receive": "Receive",
       "chat": "Chat",
-      "director": "Director",
+      "director": "Management",
       "stats": "Stats",
       "more": "More"
     },
@@ -425,5 +425,11 @@
     },
     "confirmDelete": "Delete this customer?",
     "errorPrefix": "Error:"
+  },
+  "banned": {
+    "code": "BANNED",
+    "subtitle": "Your account is banned",
+    "description": "Your access has been suspended. Please contact support if you think this is a mistake.",
+    "primaryCta": "Back to login"
   }
 }

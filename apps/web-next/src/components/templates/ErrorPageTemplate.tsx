@@ -28,7 +28,6 @@ export function ErrorPageTemplate({
   description,
   primaryButton,
   secondaryButton,
-  locale,
   preferredAuthenticatedHomeHref,
 }: ErrorPageTemplateProps) {
   const { theme, mounted } = useTheme();

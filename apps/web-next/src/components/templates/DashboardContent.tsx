@@ -84,7 +84,7 @@ export function DashboardContent({
     {
       icon: '💬',
       label: translations.quickActions.chat,
-      variant: 'cyan' as const,
+      variant: 'teal' as const,
       href: `/${locale}/chat`,
     },
     ...(isDirector
@@ -92,7 +92,7 @@ export function DashboardContent({
           {
             icon: '🎬',
             label: translations.quickActions.director,
-            variant: 'gray' as const,
+            variant: 'teal' as const,
             href: `/${locale}/director`,
           },
         ]

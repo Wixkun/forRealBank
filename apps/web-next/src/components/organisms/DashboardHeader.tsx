@@ -1,11 +1,10 @@
 'use client';
 
 import { useTheme } from '@/contexts/ThemeContext';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/organisms/LanguageSwitcher';
-import { useTranslations } from 'next-intl';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
-import Link from 'next/link';
 
 type DashboardHeaderProps = {
   userName?: string;
@@ -15,9 +14,8 @@ type DashboardHeaderProps = {
 export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
   const t = useTranslations('common');
   const { theme, toggleTheme, mounted } = useTheme();
-  const pathname = usePathname();
   const router = useRouter();
-  const locale = pathname.split('/')[1] || 'en';
+  const locale = useLocale();
 
   const handleLogout = async () => {
     try {
@@ -35,13 +33,24 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
     }
   };
 
+  const handleDashboard = () => {
+    router.push(`/${locale}/dashboard`);
+  };
+
   if (!mounted) {
     return (
       <header className="border-b border-gray-700/50 bg-black/40 backdrop-blur-lg sticky top-0 z-50 shadow-xl">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-semibold bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent">
-              <Link href={`/${locale}/dashboard`}>Avenir</Link>
+              <button
+                type="button"
+                onClick={handleDashboard}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+                aria-label="Go to dashboard"
+              >
+                Avenir
+              </button>
             </h1>
           </div>
         </div>
@@ -62,7 +71,14 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
               theme === 'dark' ? 'from-teal-400 to-cyan-300' : 'from-teal-600 to-cyan-600'
             } bg-clip-text text-transparent`}
           >
-            Avenir
+            <button
+              type="button"
+              onClick={handleDashboard}
+              className="hover:opacity-80 transition-opacity cursor-pointer"
+              aria-label="Go to dashboard"
+            >
+              Avenir
+            </button>
           </h1>
           <div className="flex items-center gap-4">
             {userId && <NotificationCenter userId={userId} />}

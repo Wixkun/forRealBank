@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/contexts/ThemeContext';
+import { DashboardHeader } from '@/components/organisms/DashboardHeader';
+import { useAuth } from '@/hooks/useAuth';
+import { apiFetch, ApiError } from '@/lib/api-client';
 
 type UserRow = {
   id: string;
@@ -20,56 +23,47 @@ type UsersListResponse = {
   items: UserRow[];
 };
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
-async function apiFetch<T>(endpoint: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${apiUrl}${endpoint}`, {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers || {}),
-    },
-    ...init,
-  });
-
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-
-  if (!res.ok) {
-    const message = data?.message || data?.error || `HTTP ${res.status}`;
-    throw new Error(message);
-  }
-
-  return data as T;
-}
-
 export default function DirectorPage() {
   const pathname = usePathname();
   const locale = useMemo(() => pathname.split('/')[1] || 'en', [pathname]);
 
   const t = useTranslations('director');
   const { theme, mounted } = useTheme();
+  const { user } = useAuth();
 
   const [q, setQ] = useState('');
+  const [serverItems, setServerItems] = useState<UserRow[]>([]);
   const [items, setItems] = useState<UserRow[]>([]);
-  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const load = async () => {
+  const debounceRef = useRef<number | null>(null);
+  const banRedirectedRef = useRef(false);
+
+  const load = async (search?: string) => {
     setIsLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (q.trim()) params.set('q', q.trim());
+      const term = (search ?? q).trim();
+      if (term) params.set('q', term);
       const qs = params.toString();
       const res = await apiFetch<UsersListResponse>(`/users${qs ? `?${qs}` : ''}`);
-      setItems(res.items || []);
-      setTotal(res.total || 0);
+      const nextItems = res.items || [];
+      setServerItems(nextItems);
+      // total affiché = items.length (filtre front), donc pas besoin de stocker un total séparé.
     } catch (e) {
+      if (e instanceof ApiError && e.kind === 'BANNED') {
+        // on redirige une seule fois
+        if (!banRedirectedRef.current) {
+          banRedirectedRef.current = true;
+          window.location.href = `/${locale}/banned`;
+        }
+        return;
+      }
       setError(e instanceof Error ? e.message : String(e));
+      setServerItems([]);
       setItems([]);
-      setTotal(0);
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +73,24 @@ export default function DirectorPage() {
     void load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Filtre côté front : email + prénom + nom (insensible à la casse).
+  useEffect(() => {
+    const term = q.trim().toLowerCase();
+    if (!term) {
+      setItems(serverItems);
+      return;
+    }
+
+    const filtered = serverItems.filter((u) => {
+      const email = (u.email || '').toLowerCase();
+      const first = (u.firstName || '').toLowerCase();
+      const last = (u.lastName || '').toLowerCase();
+      const full = `${first} ${last}`.trim();
+      return email.includes(term) || first.includes(term) || last.includes(term) || full.includes(term);
+    });
+    setItems(filtered);
+  }, [q, serverItems]);
 
   if (!mounted) {
     return (
@@ -90,6 +102,14 @@ export default function DirectorPage() {
     );
   }
 
+  const scheduleSearch = (next: string) => {
+    // debounce ~300ms pour éviter de spam l’API.
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      void load(next);
+    }, 300);
+  };
+
   const ban = async (id: string) => {
     setError(null);
     try {
@@ -99,6 +119,10 @@ export default function DirectorPage() {
       });
       await load();
     } catch (e) {
+      if (e instanceof ApiError && e.kind === 'BANNED') {
+        window.location.href = `/${locale}/banned`;
+        return;
+      }
       setError(e instanceof Error ? e.message : String(e));
     }
   };
@@ -109,6 +133,10 @@ export default function DirectorPage() {
       await apiFetch(`/users/${encodeURIComponent(id)}/unban`, { method: 'PATCH' });
       await load();
     } catch (e) {
+      if (e instanceof ApiError && e.kind === 'BANNED') {
+        window.location.href = `/${locale}/banned`;
+        return;
+      }
       setError(e instanceof Error ? e.message : String(e));
     }
   };
@@ -120,6 +148,10 @@ export default function DirectorPage() {
       await apiFetch(`/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
       await load();
     } catch (e) {
+      if (e instanceof ApiError && e.kind === 'BANNED') {
+        window.location.href = `/${locale}/banned`;
+        return;
+      }
       setError(e instanceof Error ? e.message : String(e));
     }
   };
@@ -132,6 +164,8 @@ export default function DirectorPage() {
           : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900'
       }`}
     >
+      <DashboardHeader userId={user?.id} userName={user?.firstName} />
+
       <div className="p-6 max-w-5xl mx-auto">
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div>
@@ -155,7 +189,11 @@ export default function DirectorPage() {
             }`}
             placeholder={t('searchPlaceholder')}
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onInput={(e) => {
+              const next = (e.target as HTMLInputElement).value;
+              setQ(next);
+              scheduleSearch(next);
+            }}
           />
           <button
             className={`border rounded px-3 py-2 ${
@@ -177,7 +215,7 @@ export default function DirectorPage() {
         )}
 
         <div className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          {t('total', { count: total })}
+          {t('total', { count: items.length || 0 })}
         </div>
 
         <div

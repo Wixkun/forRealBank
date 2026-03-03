@@ -7,6 +7,7 @@ import {
   UseGuards,
   HttpCode,
   UnauthorizedException,
+  ForbiddenException,
   Req,
   Inject,
 } from '@nestjs/common';
@@ -57,6 +58,12 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     try {
+      // Blocage immédiat si l'utilisateur est banni
+      const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
+      if (candidate?.isBanned) {
+        throw new ForbiddenException('Account banned');
+      }
+
       const { accessToken } = await this.loginUserUseCase.execute(dto);
 
       res.cookie('access_token', accessToken, {
@@ -99,6 +106,11 @@ export class AuthController {
 
       if (!user) {
         throw new UnauthorizedException('User not found');
+      }
+
+      // Si l'utilisateur est banni, on renvoie 403 (même message que RolesGuard)
+      if (user.isBanned) {
+        throw new ForbiddenException('Account banned');
       }
 
       return {

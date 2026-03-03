@@ -33,6 +33,8 @@ import { UpdateRolesDto } from './dto/update-roles.dto';
 import { IUserRepository } from '@forreal/domain';
 import { UserPresenter } from './user.presenter';
 
+type ListUsersQueryWithAlias = ListUsersQueryDto & { q?: string };
+
 @Controller('/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
@@ -97,8 +99,12 @@ export class UsersController {
 
   @Get()
   @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
-  async list(@Query() query: ListUsersQueryDto) {
-    const res = await this.listUsers.execute(query);
+  async list(@Query() query: ListUsersQueryWithAlias) {
+    const search = (query.search ?? query.q) as string | undefined;
+    const res = await this.listUsers.execute({
+      ...query,
+      search,
+    });
     return {
       success: true,
       total: res.total,

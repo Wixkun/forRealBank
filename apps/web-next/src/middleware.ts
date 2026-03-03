@@ -13,6 +13,18 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const locale = pathname.split('/')[1] || defaultLocale;
 
+  const isBanned = request.cookies.get('is_banned')?.value === '1';
+  if (isBanned) {
+    const isAllowed =
+      pathname === `/${locale}` ||
+      pathname === `/${locale}/` ||
+      pathname.startsWith(`/${locale}/banned`);
+
+    if (!isAllowed) {
+      return NextResponse.redirect(new URL(`/${locale}/banned`, request.url));
+    }
+  }
+
   if (
     pathname === `/${locale}/news` ||
     pathname.startsWith(`/${locale}/news/manage`) ||

@@ -64,6 +64,14 @@ function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
+        const message = (data?.message || data?.error || '').toString();
+        if (response.status === 403 && message.toLowerCase().includes('banned')) {
+          if (typeof document !== 'undefined') {
+            document.cookie = `is_banned=1; path=/; max-age=86400`;
+          }
+          router.replace(`/${locale}/banned`);
+          return;
+        }
         throw new Error(data.message || t('loginFailed'));
       }
 
@@ -74,7 +82,7 @@ function LoginForm() {
         router.push(`/${locale}/dashboard`);
       }, 500);
     } catch (err: unknown) {
-      console.error('❌ Login error:', err);
+      console.error('Login error:', err);
       setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);
