@@ -25,10 +25,15 @@ export function useNotifications({
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMarkAllLoading, setIsMarkAllLoading] = useState(false);
 
-  const { isConnected } = useSSE<Notification[]>({
+  type NotificationsSSEPayload = Notification[] | { data: Notification[] };
+
+  const { isConnected } = useSSE<NotificationsSSEPayload>({
     url: `${apiUrl}/notifications/stream/${userId}`,
-    onMessage: (newData) => {
-      setNotifications(newData);
+    onMessage: (payload) => {
+      const arr = Array.isArray(payload)
+        ? payload
+        : (payload as { data?: Notification[] })?.data ?? [];
+      setNotifications(arr);
     },
   });
 

@@ -46,7 +46,7 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
               <button
                 type="button"
                 onClick={handleDashboard}
-                className="hover:opacity-80 transition-opacity cursor-pointer"
+                className="cursor-pointer"
                 aria-label="Go to dashboard"
               >
                 Avenir
@@ -74,7 +74,7 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
             <button
               type="button"
               onClick={handleDashboard}
-              className="hover:opacity-80 transition-opacity cursor-pointer"
+              className="cursor-pointer"
               aria-label="Go to dashboard"
             >
               Avenir

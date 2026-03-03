@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:poll": "cross-env WATCHPACK_POLLING=true WATCHPACK_POLLING_INTERVAL=200 next dev",
+    "dev:webpack": "next dev --no-turbopack",
+    "dev:poll:webpack": "cross-env WATCHPACK_POLLING=true WATCHPACK_POLLING_INTERVAL=200 next dev --no-turbopack",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint"
@@ -24,6 +27,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.4",
     "tailwindcss": "^4",

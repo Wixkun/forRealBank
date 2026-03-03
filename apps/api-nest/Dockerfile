@@ -20,4 +20,4 @@ RUN pnpm --filter api-nest build
 WORKDIR /usr/src/app/apps/api-nest
 
 EXPOSE 3001
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/apps/api-nest/src/main.js"]
