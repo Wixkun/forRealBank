@@ -10,7 +10,6 @@ COPY apps/web-next/package.json apps/web-next/package.json
 
 RUN pnpm install --frozen-lockfile
 
-# Force rebuild by adding timestamp
 RUN echo "Build time: $(date)" > /tmp/buildinfo.txt
 
 COPY . .
