@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { BROWSER_API_BASE, buildApiUrl } from '@/lib/env';
+
+const API_URL = buildApiUrl(BROWSER_API_BASE, '');
 
 interface FetchOptions extends Omit<RequestInit, 'cache'> {
   cache?: RequestCache;

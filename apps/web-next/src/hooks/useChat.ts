@@ -18,10 +18,26 @@ interface UseChatOptions {
   wsUrl?: string;
 }
 
+function defaultWsUrl(): string {
+  // En dev, Socket.IO est hébergé par l'API Nest (port 3001), namespace `/chat`.
+  // Si NEXT_PUBLIC_WS_URL est fourni, on le respecte.
+  if (typeof window === 'undefined') return 'http://localhost:3001/chat';
+
+  const envUrl = (process.env.NEXT_PUBLIC_WS_URL || '').trim();
+  if (envUrl) return envUrl.replace(/\/$/, '');
+
+  const current = new URL(window.location.href);
+  current.port = '3001';
+  current.pathname = '/chat';
+  current.search = '';
+  current.hash = '';
+  return current.toString();
+}
+
 export function useChat({
   conversationId,
   userId,
-  apiUrl = 'http://localhost:3001/api',
+  apiUrl = '/api/proxy',
   wsUrl,
 }: UseChatOptions) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -29,10 +45,7 @@ export function useChat({
   const [isLoading, setIsLoading] = useState(false);
   const [presentUserIds, setPresentUserIds] = useState<string[]>([]);
 
-  const derivedWsUrl =
-    wsUrl ||
-    (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_WS_URL) ||
-    `${apiUrl.replace(/\/$/, '').replace(/\/api$/, '')}/chat`;
+  const derivedWsUrl = wsUrl || defaultWsUrl();
 
   const { emit, on, off, isConnected } = useWebSocket({ url: derivedWsUrl, userId });
 
@@ -40,7 +53,9 @@ export function useChat({
     const loadMessages = async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`${apiUrl}/chat/conversations/${conversationId}/messages`);
+        const res = await fetch(`${apiUrl}/chat/conversations/${conversationId}/messages`, {
+          credentials: 'include',
+        });
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -118,30 +133,19 @@ export function useChat({
     };
   }, [on, off]);
 
-  const sendMessage = useCallback(
-    (content: string) => {
-      if (!content.trim()) return;
-      emit('send_message', { conversationId, senderId: userId, content });
-    },
-    [emit, conversationId, userId],
-  );
-
-  const startTyping = useCallback(() => {
-    emit('typing_start', { conversationId, userId });
-  }, [emit, conversationId, userId]);
-
-  const stopTyping = useCallback(() => {
-    emit('typing_stop', { conversationId, userId });
-  }, [emit, conversationId, userId]);
-
   return {
     messages,
     typingUsers: Array.from(typingUsers),
+    presentUserIds,
     isLoading,
     isConnected,
-    presentUserIds,
-    sendMessage,
-    startTyping,
-    stopTyping,
+    sendMessage: useCallback(
+      (content: string) => {
+        emit('send_message', { conversationId, senderId: userId, content });
+      },
+      [emit, conversationId, userId],
+    ),
+    startTyping: useCallback(() => emit('typing_start', { conversationId, userId }), [emit, conversationId, userId]),
+    stopTyping: useCallback(() => emit('typing_stop', { conversationId, userId }), [emit, conversationId, userId]),
   };
 }

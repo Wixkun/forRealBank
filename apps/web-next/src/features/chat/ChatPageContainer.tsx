@@ -54,13 +54,10 @@ export default function ChatPageContainer({
     if (!user?.id) return;
     const loadConversations = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/chat/conversations/by-user/${user.id}`,
-          {
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-          },
-        );
+        const res = await fetch(`/api/proxy/chat/conversations/by-user/${user.id}`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
         if (res.ok) {
           const list = await res.json();
           updateConversations(Array.isArray(list) ? list : []);
@@ -95,10 +92,9 @@ export default function ChatPageContainer({
     async (targetUserId: string) => {
       const convId = await createPrivateConversation(targetUserId, user?.id || '');
       if (convId) {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/chat/conversations/by-user/${user?.id}`,
-          { credentials: 'include' },
-        );
+        const res = await fetch(`/api/proxy/chat/conversations/by-user/${user?.id}`, {
+          credentials: 'include',
+        });
         if (res.ok) {
           const newConversations = await res.json();
           updateConversations(Array.isArray(newConversations) ? newConversations : []);

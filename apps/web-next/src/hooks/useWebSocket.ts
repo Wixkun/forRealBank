@@ -11,6 +11,8 @@ interface UseWebSocketOptions {
 
 type SocketListener = (...args: unknown[]) => void;
 
+type ForRealWindow = Window & { __forreal_sockets__?: Set<Socket> };
+
 export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOptions) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -24,6 +26,12 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
       query: { userId },
       transports: ['websocket'],
     });
+
+    if (typeof window !== 'undefined') {
+      const w = window as ForRealWindow;
+      w.__forreal_sockets__ = w.__forreal_sockets__ || new Set();
+      w.__forreal_sockets__.add(newSocket);
+    }
 
     newSocket.on('connect', () => {
       setIsConnected(true);
@@ -47,6 +55,12 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
       listenersSnapshot.forEach((handlers, event) => {
         handlers.forEach((handler) => newSocket.off(event, handler));
       });
+
+      if (typeof window !== 'undefined') {
+        const w = window as ForRealWindow;
+        w.__forreal_sockets__?.delete(newSocket);
+      }
+
       newSocket.close();
     };
   }, [url, userId, autoConnect]);

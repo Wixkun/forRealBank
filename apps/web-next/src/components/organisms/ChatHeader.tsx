@@ -14,14 +14,24 @@ export function ChatHeader() {
 
   const handleLogout = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-      await fetch(`${apiUrl}/auth/logout`, {
+      await fetch(`/api/proxy/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
+
+      // Couper les sockets côté client (sinon socket.io va tenter de se reconnecter)
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
+        document.cookie = 'is_banned=0; path=/; max-age=0';
+
+        // Déconnecte toutes les sockets éventuellement actives
+        try {
+          (window as any).__forreal_sockets__?.forEach((s: any) => s?.disconnect?.());
+        } catch {
+          // ignore
+        }
       }
+
       router.push(`/${locale}/login`);
     } catch (error) {
       console.error('Logout failed:', error);

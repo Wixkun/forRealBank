@@ -20,7 +20,7 @@ interface NewsFeedProps {
 }
 
 export default function NewsFeed({
-  apiUrl = 'http://localhost:3001/api',
+  apiUrl = '/api/proxy',
   userRoles = null,
 }: NewsFeedProps) {
   const t = useTranslations('feed');
@@ -50,12 +50,13 @@ export default function NewsFeed({
         : ((payload as { data?: NewsItem[] })?.data ?? []);
       setNews(arr as NewsItem[]);
     },
+    withCredentials: true,
   });
 
   useEffect(() => {
     const loadNews = async () => {
       try {
-        const res = await fetch(`${apiUrl}/news`);
+        const res = await fetch(`${apiUrl}/news`, { credentials: 'include' });
         const data = await res.json();
         setNews(data);
       } catch (err) {

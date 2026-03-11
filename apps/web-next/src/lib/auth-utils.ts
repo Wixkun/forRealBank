@@ -8,8 +8,9 @@ export const AUTH_CONFIG = {
 } as const;
 
 export function extractLocaleFromPathname(pathname: string): string {
-  const locale = pathname.split('/')[1];
-  return locale || 'en';
+  const seg = (pathname || '').split('/')[1];
+  if (seg === 'fr' || seg === 'en') return seg;
+  return 'en';
 }
 
 export async function performAuthCheck(

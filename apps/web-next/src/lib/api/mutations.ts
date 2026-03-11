@@ -2,7 +2,7 @@
 
 import { revalidateTag } from 'next/cache';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE || '/api/proxy';
 
 export async function createConversation(type: 'PRIVATE' | 'GROUP') {
   try {

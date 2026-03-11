@@ -21,8 +21,7 @@ export function RegisterForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-        const response = await fetch(`${apiUrl}/auth/me`, {
+        const response = await fetch(`/api/proxy/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -50,8 +49,7 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
-      const response = await fetch(`${apiUrl}/auth/register`, {
+      const response = await fetch(`/api/proxy/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -63,7 +61,7 @@ export function RegisterForm() {
         throw new Error(errorData.message || 'Registration failed');
       }
 
-      router.push('/login?registered=true');
+      router.push(`/${locale}/login?registered=true`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during registration');
     }

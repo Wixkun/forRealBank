@@ -100,7 +100,7 @@ export class UsersController {
   @Get()
   @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async list(@Query() query: ListUsersQueryWithAlias) {
-    const search = (query.search ?? query.q) as string | undefined;
+    const search = (query.search ?? query.q);
     const res = await this.listUsers.execute({
       ...query,
       search,

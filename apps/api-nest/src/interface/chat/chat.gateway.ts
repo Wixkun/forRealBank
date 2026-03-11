@@ -71,6 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     if (socketSet.has(data.conversationId)) {
+      this.broadcastPresence(data.conversationId);
       return { success: true, alreadyJoined: true };
     }
 
@@ -91,14 +92,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     members.add(data.userId);
 
+    // Toujours broadcast, même si l'UC dit "déjà participant": la présence est un état runtime.
+    this.broadcastPresence(data.conversationId);
+
     try {
       const result = await this.addConversationParticipantUseCase.execute({
         conversationId: data.conversationId,
         userId: data.userId,
       });
 
-     if (result.inserted) {
-        this.broadcastPresence(data.conversationId);
+      if (result.inserted) {
         this.server.to(roomName).emit('user_joined', {
           conversationId: data.conversationId,
           userId: data.userId,

@@ -20,8 +20,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
+        const apiUrl = '/api/proxy';
         try {
           const isAuthorized = await performAuthCheck(apiUrl);
 

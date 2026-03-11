@@ -1,3 +1,5 @@
+import { BROWSER_API_BASE, buildApiUrl } from '@/lib/env';
+
 export type ApiKind = 'UNAUTHORIZED' | 'FORBIDDEN' | 'BANNED' | 'UNKNOWN';
 
 export class ApiError extends Error {
@@ -12,7 +14,7 @@ export class ApiError extends Error {
   }
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_URL = buildApiUrl(BROWSER_API_BASE, '');
 
 function classify(kindStatus: number, message?: string): ApiKind {
   const msg = (message || '').toLowerCase();

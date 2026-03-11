@@ -6,18 +6,35 @@ import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
 
+function parseOrigins(raw: string | undefined, fallback: string[]): string[] {
+  const value = (raw ?? '').trim();
+  if (!value) return fallback;
+
+  const origins = value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  return origins.length ? origins : fallback;
+}
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const config = app.get(ConfigService);
 
-  const port = config.get<number>('PORT', 3001);
-  const origin = config.get<string>('FRONTEND_ORIGIN', 'http://localhost:3000');
+  const portRaw = config.get<string>('PORT') ?? '3001';
+  const port = Number(portRaw);
+  if (!Number.isFinite(port) || port <= 0) {
+    throw new Error(`Invalid PORT value: ${JSON.stringify(portRaw)}`);
+  }
+
+  const origins = parseOrigins(config.get<string>('FRONTEND_ORIGIN'), ['http://localhost:3000']);
   const isProd = (config.get<string>('NODE_ENV') ?? 'development') === 'production';
 
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin,
+    origin: origins,
     credentials: true,
   });
 
@@ -42,7 +59,7 @@ async function bootstrap() {
   await app.listen(port);
   Logger.log(`API up: http://localhost:${port}/api`, 'Bootstrap');
   Logger.log(
-    `CORS origin: ${origin} | NODE_ENV=${isProd ? 'production' : 'development'}`,
+    `CORS origins: ${origins.join(', ')} | NODE_ENV=${isProd ? 'production' : 'development'}`,
     'Bootstrap',
   );
 }

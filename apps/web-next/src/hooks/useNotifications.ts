@@ -20,7 +20,7 @@ interface UseNotificationsOptions {
 
 export function useNotifications({
   userId,
-  apiUrl = 'http://localhost:3001/api',
+  apiUrl = '/api/proxy',
 }: UseNotificationsOptions) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMarkAllLoading, setIsMarkAllLoading] = useState(false);
@@ -35,11 +35,15 @@ export function useNotifications({
         : (payload as { data?: Notification[] })?.data ?? [];
       setNotifications(arr);
     },
+    withCredentials: true,
   });
 
   const markAsRead = async (notificationId: string) => {
     try {
-      await fetch(`${apiUrl}/notifications/${notificationId}/read`, { method: 'POST' });
+      await fetch(`${apiUrl}/notifications/${notificationId}/read`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, readAt: new Date().toISOString() } : n)),
       );
@@ -51,7 +55,10 @@ export function useNotifications({
   const markAllAsRead = async () => {
     setIsMarkAllLoading(true);
     try {
-      await fetch(`${apiUrl}/notifications/user/${userId}/read-all`, { method: 'POST' });
+      await fetch(`${apiUrl}/notifications/user/${userId}/read-all`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       const nowIso = new Date().toISOString();
       setNotifications((prev) => prev.map((n) => (n.readAt ? n : { ...n, readAt: nowIso })));
     } catch (err) {

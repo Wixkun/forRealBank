@@ -31,7 +31,39 @@ services:
         condition: service_healthy
     user: '0'
 
+  api:
+    build:
+      context: .
+      dockerfile: apps/api-nest/Dockerfile
+    container_name: forrealbank-api-dev
+    restart: unless-stopped
+    env_file:
+      - ./env/api.dev.env
+    ports:
+      - '3001:3001'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001/api
+        NEXT_PUBLIC_API_BASE: /api/proxy
+    container_name: forrealbank-web-dev
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_started
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+      - NEXT_PUBLIC_API_BASE=/api/proxy
+      - API_URL=http://forrealbank-api-dev:3001/api
+
 volumes:
   dbdata:
   pgadmin_data:
-

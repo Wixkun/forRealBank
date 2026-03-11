@@ -108,8 +108,12 @@ export default function ChatDisplay({
     stopTyping();
   };
 
-  const isUserOnline = presentUserIds.some((id) => id !== userId);
   const isGroupChat = conversation?.type === 'GROUP';
+  const isUserOnline = isConnected
+    ? true
+    : isGroupChat
+      ? presentUserIds.filter((id) => id !== userId).length > 0
+      : presentUserIds.includes(userId) && presentUserIds.length > 0;
   const displayName = conversation?.name || advisorName || t('display.advisorDefaultName');
   const displayRole = isGroupChat
     ? t('display.groupMembers', { count: conversation?.participants?.length || 0 })
@@ -188,16 +192,17 @@ export default function ChatDisplay({
           </div>
         ) : (
           <>
-            {messages.map((msg) => {
+            {messages.map((msg, idx) => {
               const isDirector = senderRoles[msg.senderId] === 'DIRECTOR';
               const senderName = senderNames[msg.senderId];
               const isOwnMessage = msg.senderId === userId;
 
+              const key =
+                msg.messageId ||
+                `${msg.conversationId}:${msg.senderId}:${msg.createdAt ?? 'no-date'}:${idx}`;
+
               return (
-                <div
-                  key={msg.messageId}
-                  className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
-                >
+                <div key={key} className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
                   <div>
                     {isGroupChat && !isOwnMessage && senderName && (
                       <p

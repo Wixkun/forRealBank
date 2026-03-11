@@ -19,8 +19,7 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
 
   const handleLogout = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-      await fetch(`${apiUrl}/auth/logout`, {
+      await fetch(`/api/proxy/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
