@@ -124,7 +124,7 @@ export class TradingController {
 
     if (body.orderType === 'market') {
       order.status = 'executed';
-      order.executedPrice = body.price || 0; // Price should come from frontend or external API
+      order.executedPrice = body.price || 0;
       order.executedAt = new Date();
       await this.orderRepo.save(order);
 
