@@ -26,7 +26,10 @@ export function ChatHeader() {
 
         // Déconnecte toutes les sockets éventuellement actives
         try {
-          (window as any).__forreal_sockets__?.forEach((s: any) => s?.disconnect?.());
+          const sockets = (window as Window & {
+            __forreal_sockets__?: Array<{ disconnect?: () => void }>;
+          }).__forreal_sockets__;
+          sockets?.forEach((s) => s?.disconnect?.());
         } catch {
           // ignore
         }

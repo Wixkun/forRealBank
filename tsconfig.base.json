@@ -21,6 +21,7 @@
         "packages/infrastructure/crypto-bcrypt/src/index.ts"
       ],
       "@forreal/infrastructure-jwt-nest": ["packages/infrastructure/jwt-nest/src/index.ts"],
+      "@forreal/infrastructure-mongodb": ["packages/infrastructure/mongodb/src/index.ts"],
       "@forreal/infrastructure-uuid-node": ["packages/infrastructure/uuid-node/src/index.ts"]
     }
   }

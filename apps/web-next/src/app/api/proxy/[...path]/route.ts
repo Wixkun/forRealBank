@@ -19,8 +19,10 @@ function getTargetUrl(request: NextRequest) {
 
 function mergeSetCookieHeaders(from: Response, to: Headers) {
   // Node/undici expose parfois `getSetCookie()`.
-  // @ts-expect-error - compat runtime
-  const getSetCookie = (from.headers as any).getSetCookie?.bind(from.headers);
+  const headersWithGetSetCookie = from.headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+  const getSetCookie = headersWithGetSetCookie.getSetCookie?.bind(from.headers);
   if (typeof getSetCookie === 'function') {
     const values: string[] = getSetCookie();
     values.forEach((v) => to.append('Set-Cookie', v));

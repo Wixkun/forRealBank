@@ -1,9 +1,15 @@
 import { Collection, Db, MongoClient, WithId } from 'mongodb';
-import { BankAccount, BankAccountStatus, BankAccountType } from '@forreal/domain/accounts/BankAccount';
-import { IAccountRepository } from '@forreal/domain/accounts/ports/IAccountRepository';
-import { BrokerageAccount, BrokerageAccountStatus } from '@forreal/domain/brokerage/BrokerageAccount';
-import { IBrokerageRepository } from '@forreal/domain/brokerage/ports/IBrokerageRepository';
-import { ITransactionRepository, TransactionType } from '@forreal/domain/transactions/ports/ITransactionRepository';
+import {
+  BankAccount,
+  BankAccountStatus,
+  BankAccountType,
+  IAccountRepository,
+  BrokerageAccount,
+  BrokerageAccountStatus,
+  IBrokerageRepository,
+  ITransactionRepository,
+  TransactionType,
+} from '@forreal/domain';
 
 export type BankAccountDocument = {
   _id: string;

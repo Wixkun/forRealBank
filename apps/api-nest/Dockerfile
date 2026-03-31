@@ -10,6 +10,7 @@ COPY packages/domain/package.json packages/domain/package.json
 COPY packages/application/package.json packages/application/package.json
 COPY packages/infrastructure/crypto-bcrypt/package.json packages/infrastructure/crypto-bcrypt/package.json
 COPY packages/infrastructure/jwt-nest/package.json packages/infrastructure/jwt-nest/package.json
+COPY packages/infrastructure/mongodb/package.json packages/infrastructure/mongodb/package.json
 COPY packages/infrastructure/typeorm/package.json packages/infrastructure/typeorm/package.json
 COPY packages/infrastructure/uuid-node/package.json packages/infrastructure/uuid-node/package.json
 

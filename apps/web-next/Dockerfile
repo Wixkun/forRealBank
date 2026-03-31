@@ -15,7 +15,6 @@ RUN echo "Build time: $(date)" > /tmp/buildinfo.txt
 COPY . .
 
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_LINT_ON_BUILD=false
 
 RUN pnpm --filter web-next... build
