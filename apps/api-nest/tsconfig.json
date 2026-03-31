@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
+    "module": "Node16",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "dist"
