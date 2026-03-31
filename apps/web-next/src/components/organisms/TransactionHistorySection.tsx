@@ -36,8 +36,7 @@ export function TransactionHistorySection({
 
   const filteredTransactions = transactions.filter((t) => {
     if (filter === 'all') return true;
-    if (filter === 'credits')
-      return t.type === 'credit' || t.type === 'deposit';
+    if (filter === 'credits') return t.type === 'credit' || t.type === 'deposit';
     if (filter === 'debits')
       return t.type === 'debit' || t.type === 'withdrawal' || t.type === 'payment';
     return true;
@@ -63,8 +62,8 @@ export function TransactionHistorySection({
                 filter === filterType
                   ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white'
                   : currentTheme === 'dark'
-                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {labels.filters[filterType]}

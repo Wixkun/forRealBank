@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IMessageRepository } from '@forreal/domain/chat/ports/IMessageRepository';
-import { Message } from '@forreal/domain/chat/Message';
+import { IMessageRepository } from '@forreal/domain';
+import { Message } from '@forreal/domain';
 import { MessageEntity } from '../entities/MessageEntity';
 import { ConversationEntity } from '../entities/ConversationEntity';
 import { UserEntity } from '../entities/UserEntity';
@@ -21,12 +21,18 @@ export class MessageRepository implements IMessageRepository {
   ) {}
 
   async findById(id: string): Promise<Message | null> {
-    const entity = await this.repo.findOne({ where: { id }, relations: ['conversation', 'sender'] });
+    const entity = await this.repo.findOne({
+      where: { id },
+      relations: ['conversation', 'sender'],
+    });
     return entity ? MessageMapper.toDomain(entity) : null;
   }
 
   async save(message: Message): Promise<void> {
-    const entity = await this.repo.findOne({ where: { id: message.id }, relations: ['conversation', 'sender'] });
+    const entity = await this.repo.findOne({
+      where: { id: message.id },
+      relations: ['conversation', 'sender'],
+    });
     if (!entity) throw new NotFoundException('message not found');
     entity.readAt = message.readAt;
     await this.repo.save(entity);
@@ -42,7 +48,10 @@ export class MessageRepository implements IMessageRepository {
     return MessageMapper.toDomain(saved);
   }
 
-  async listByConversation(conversationId: string, params?: { limit?: number; offset?: number }): Promise<Message[]> {
+  async listByConversation(
+    conversationId: string,
+    params?: { limit?: number; offset?: number },
+  ): Promise<Message[]> {
     const { limit = 50, offset = 0 } = params ?? {};
     const entities = await this.repo.find({
       where: { conversation: { id: conversationId } as any },

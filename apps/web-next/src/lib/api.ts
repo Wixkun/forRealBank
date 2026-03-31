@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+import { BROWSER_API_BASE, buildApiUrl } from '@/lib/env';
+
+const API_URL = buildApiUrl(BROWSER_API_BASE, '');
 
 interface FetchOptions extends Omit<RequestInit, 'cache'> {
   cache?: RequestCache;
@@ -7,7 +9,7 @@ interface FetchOptions extends Omit<RequestInit, 'cache'> {
 async function apiCall<T>(
   endpoint: string,
   options: FetchOptions = {},
-  errorMessage: string = 'API request failed'
+  errorMessage: string = 'API request failed',
 ): Promise<T> {
   const response = await fetch(`${API_URL}${endpoint}`, {
     cache: 'no-store',
@@ -26,11 +28,11 @@ async function apiCallWithAuth<T>(
   token: string,
   method: 'GET' | 'POST' = 'GET',
   body?: unknown,
-  errorMessage: string = 'API request failed'
+  errorMessage: string = 'API request failed',
 ): Promise<T> {
   const options: FetchOptions = {
     method,
-    headers: { 'Authorization': `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` },
   };
 
   if (body) {
@@ -43,12 +45,14 @@ async function apiCallWithAuth<T>(
 
 export async function fetchMarketAssets(type?: string) {
   const endpoint = `/market/assets${type && type !== 'all' ? `?type=${type}` : ''}`;
-  return apiCall<Array<{
-    symbol: string;
-    name: string;
-    assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
-    initialPrice: string;
-  }>>(endpoint, {}, 'Failed to fetch market assets');
+  return apiCall<
+    Array<{
+      symbol: string;
+      name: string;
+      assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
+      initialPrice: string;
+    }>
+  >(endpoint, {}, 'Failed to fetch market assets');
 }
 
 export async function fetchAccountsData(token: string) {
@@ -61,7 +65,7 @@ export async function fetchRecentTransactions(token: string, limit: number = 5) 
     token,
     'GET',
     undefined,
-    'Failed to fetch transactions'
+    'Failed to fetch transactions',
   );
 }
 
@@ -69,10 +73,16 @@ export async function fetchAccountTransactions(
   accountId: string,
   token: string,
   limit: number = 50,
-  type?: string
+  type?: string,
 ) {
   const endpoint = `/transactions/account/${accountId}?limit=${limit}${type && type !== 'all' ? `&type=${type}` : ''}`;
-  return apiCallWithAuth<unknown>(endpoint, token, 'GET', undefined, 'Failed to fetch account transactions');
+  return apiCallWithAuth<unknown>(
+    endpoint,
+    token,
+    'GET',
+    undefined,
+    'Failed to fetch account transactions',
+  );
 }
 
 export async function fetchTradingPositions(accountId: string, token: string) {
@@ -81,7 +91,7 @@ export async function fetchTradingPositions(accountId: string, token: string) {
     token,
     'GET',
     undefined,
-    'Failed to fetch trading positions'
+    'Failed to fetch trading positions',
   );
 }
 
@@ -91,7 +101,7 @@ export async function fetchBankAccount(accountId: string, token: string) {
     token,
     'GET',
     undefined,
-    'Failed to fetch bank account'
+    'Failed to fetch bank account',
   );
 }
 
@@ -101,22 +111,24 @@ export async function fetchBrokerageAccount(accountId: string, token: string) {
     token,
     'GET',
     undefined,
-    'Failed to fetch brokerage account'
+    'Failed to fetch brokerage account',
   );
 }
 
 export async function fetchTradingPositionsClient(accountId: string) {
-  return apiCall<Array<{
-    id: string;
-    symbol: string;
-    name: string;
-    assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
-    quantity: number;
-    avgPurchasePrice: number;
-  }>>(
+  return apiCall<
+    Array<{
+      id: string;
+      symbol: string;
+      name: string;
+      assetType: 'stock' | 'crypto' | 'etf' | 'commodity';
+      quantity: number;
+      avgPurchasePrice: number;
+    }>
+  >(
     `/trading/positions/${accountId}`,
     { credentials: 'include' },
-    'Failed to fetch trading positions'
+    'Failed to fetch trading positions',
   );
 }
 
@@ -136,6 +148,6 @@ export async function placeTradingOrder(body: {
       credentials: 'include',
       body: JSON.stringify(body),
     },
-    'Failed to place order'
+    'Failed to place order',
   );
 }

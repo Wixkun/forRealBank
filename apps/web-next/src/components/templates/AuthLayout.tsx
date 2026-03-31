@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import type { ReactNode } from 'react';
 import { LanguageSwitcher } from '@/components/organisms/LanguageSwitcher';
@@ -10,7 +10,6 @@ type AuthLayoutProps = {
 };
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
-
   return (
     <div
       className="min-h-screen flex items-center justify-center 
@@ -36,9 +35,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           )}
 
           {subtitle ? (
-            <div className="mt-2 text-center text-sm text-gray-200">
-              {subtitle}
-            </div>
+            <div className="mt-2 text-center text-sm text-gray-200">{subtitle}</div>
           ) : null}
         </div>
 

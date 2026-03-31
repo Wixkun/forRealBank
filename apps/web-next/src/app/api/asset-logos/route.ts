@@ -51,7 +51,7 @@ const stockDomains: Record<string, string> = {
   WMT: 'walmart.com',
   HD: 'homedepot.com',
   XOM: 'exxon.com',
-  CVX: 'chevron.com'
+  CVX: 'chevron.com',
 };
 
 const etfDomains: Record<string, string> = {
@@ -65,7 +65,7 @@ const etfDomains: Record<string, string> = {
   XLF: 'spdrs.com',
   XLK: 'spdrs.com',
   XLE: 'spdrs.com',
-  XLY: 'spdrs.com'
+  XLY: 'spdrs.com',
 };
 
 async function resolveCrypto(symbol: string): Promise<string | undefined> {
@@ -75,7 +75,9 @@ async function resolveCrypto(symbol: string): Promise<string | undefined> {
     return `https://unavatar.io/${domain}`;
   }
   try {
-    const resp = await fetch(`https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(s)}`);
+    const resp = await fetch(
+      `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(s)}`,
+    );
     const json = await resp.json();
     const thumb = json?.coins?.[0]?.thumb as string | undefined;
     return thumb || undefined;

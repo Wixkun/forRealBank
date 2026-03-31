@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { ApiError, apiFetch } from '@/lib/api-client';
 
 interface User {
   id: string;
@@ -20,55 +21,56 @@ export function useAuth() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const locale = useMemo(() => pathname.split('/')[1] || 'en', [pathname]);
+  const didRedirectRef = useRef(false);
+
+  const setBannedCookie = (value: '1' | '0') => {
+    // cookie lisible côté middleware (pas httpOnly)
+    document.cookie = `is_banned=${value}; path=/; max-age=${value === '1' ? 86400 : 0}`;
+  };
+
+  const isPublicAllowedWhenBanned = useMemo(() => {
+    // Mode strict: seule la landing + la page /banned restent accessibles.
+    const p = pathname || '';
+    return (
+      p === `/${locale}` ||
+      p === `/${locale}/` ||
+      p.startsWith(`/${locale}/banned`)
+    );
+  }, [pathname, locale]);
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-        
-        const response = await fetch(`${apiUrl}/auth/me`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user || null);
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-          
-          if (pathname.includes('/dashboard') || 
-              pathname.includes('/account') || 
-              pathname.includes('/brokerage') ||
-              pathname.includes('/trading') ||
-              pathname.includes('/chat')) {
-            const locale = pathname.split('/')[1] || 'en';
-            router.push(`/${locale}/login`);
-          }
-        }
+        const data = await apiFetch<{ success: boolean; user: User }>(`/auth/me`, { method: 'GET' });
+        setUser(data.user || null);
+        setIsAuthenticated(true);
+        setBannedCookie('0');
       } catch (error) {
-        console.error('Auth check failed:', error);
-        setIsAuthenticated(false);
-        
-        if (pathname.includes('/dashboard') || 
-            pathname.includes('/account') || 
-            pathname.includes('/brokerage') ||
-            pathname.includes('/trading') ||
-            pathname.includes('/chat')) {
-          const locale = pathname.split('/')[1] || 'en';
-          router.push(`/${locale}/login`);
+        // Cas spécial: banni -> redirection globale
+        if (error instanceof ApiError && error.kind === 'BANNED') {
+          setUser(null);
+          setIsAuthenticated(false);
+          setBannedCookie('1');
+          if (!isPublicAllowedWhenBanned && !didRedirectRef.current) {
+            didRedirectRef.current = true;
+            router.replace(`/${locale}/banned`);
+          }
+          return;
         }
+
+        // Non authentifié
+        setUser(null);
+        setIsAuthenticated(false);
+        setBannedCookie('0');
       } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, [pathname, router]);
+  }, [pathname, router, locale, isPublicAllowedWhenBanned]);
 
   return { isAuthenticated, isLoading, user };
 }

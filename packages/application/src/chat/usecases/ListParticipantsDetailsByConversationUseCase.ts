@@ -1,6 +1,6 @@
-import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { IConversationParticipantRepository } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 
 export class ListParticipantsDetailsByConversationUseCase {
   constructor(

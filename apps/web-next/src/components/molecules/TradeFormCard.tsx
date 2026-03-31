@@ -72,9 +72,7 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
   return (
     <div
       className={`p-6 rounded-2xl border transition-colors ${
-        currentTheme === 'dark'
-          ? 'bg-gray-900/50 border-gray-800'
-          : 'bg-white border-gray-200'
+        currentTheme === 'dark' ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'
       }`}
     >
       <h3
@@ -93,8 +91,8 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
             action === 'buy'
               ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white'
               : currentTheme === 'dark'
-              ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
           {labels.buy}
@@ -106,8 +104,8 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
             action === 'sell'
               ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
               : currentTheme === 'dark'
-              ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
           {labels.sell}
@@ -132,14 +130,12 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
               errors.symbol
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 : currentTheme === 'dark'
-                ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
-                : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
+                  ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
+                  : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="AAPL, BTC, etc."
           />
-          {errors.symbol && (
-            <p className="mt-1 text-sm text-red-500">{errors.symbol.message}</p>
-          )}
+          {errors.symbol && <p className="mt-1 text-sm text-red-500">{errors.symbol.message}</p>}
         </div>
 
         <div>
@@ -160,8 +156,8 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
               errors.quantity
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 : currentTheme === 'dark'
-                ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
-                : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
+                  ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
+                  : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="1"
           />
@@ -186,16 +182,11 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
                   orderType === type
                     ? 'bg-teal-500 text-white'
                     : currentTheme === 'dark'
-                    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                <input
-                  type="radio"
-                  value={type}
-                  {...register('orderType')}
-                  className="sr-only"
-                />
+                <input type="radio" value={type} {...register('orderType')} className="sr-only" />
                 {labels.orderTypes[type]}
               </label>
             ))}
@@ -224,14 +215,12 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
                 errors.price
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                   : currentTheme === 'dark'
-                  ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
-                  : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
+                    ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
+                    : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
               } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
               placeholder="0.00"
             />
-            {errors.price && (
-              <p className="mt-1 text-sm text-red-500">{errors.price.message}</p>
-            )}
+            {errors.price && <p className="mt-1 text-sm text-red-500">{errors.price.message}</p>}
           </div>
         )}
 

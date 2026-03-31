@@ -1,4 +1,4 @@
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IUserRepository } from '@forreal/domain';
 
 export class UnbanUserUseCase {
   constructor(private readonly userRepository: IUserRepository) {}

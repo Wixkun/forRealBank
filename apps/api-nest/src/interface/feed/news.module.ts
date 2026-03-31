@@ -2,31 +2,37 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsService } from './news.service';
 import { NewsController } from './news.controller';
-import { NewsEntity } from '@forreal/infrastructure-typeorm/entities/NewsEntity';
-import { UserEntity } from '@forreal/infrastructure-typeorm/entities/UserEntity';
+import { NewsEntity } from '@forreal/infrastructure-typeorm';
+import { UserEntity } from '@forreal/infrastructure-typeorm';
+import { NotificationEntity } from '@forreal/infrastructure-typeorm';
 
-import { INewsRepository } from '@forreal/domain/feed/ports/INewsRepository';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { INewsRepository } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
+import { INotificationRepository } from '@forreal/domain';
 
-import { NewsRepository } from '@forreal/infrastructure-typeorm/repositories/NewsRepository';
-import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
-import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
+import { NewsRepository } from '@forreal/infrastructure-typeorm';
+import { UserRepository } from '@forreal/infrastructure-typeorm';
+import { NotificationRepository } from '@forreal/infrastructure-typeorm';
+import { RoleEntity } from '@forreal/infrastructure-typeorm';
 
-import { CreateNewsUseCase } from '@forreal/application/feed/usecases/CreateNewsUseCase';
-import { ListNewsUseCase } from '@forreal/application/feed/usecases/ListNewsUseCase';
-import { DeleteNewsUseCase } from '@forreal/application/feed/usecases/DeleteNewsUseCase';
+import { CreateNewsUseCase, ListNewsUseCase, DeleteNewsUseCase, UpdateNewsUseCase } from '@forreal/application';
+import { AuthModule } from '../auth/auth.module';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity])],
+  imports: [AuthModule, TypeOrmModule.forFeature([NewsEntity, UserEntity, RoleEntity, NotificationEntity])],
   controllers: [NewsController],
   providers: [
     NewsService,
+    RolesGuard,
     { provide: INewsRepository, useClass: NewsRepository },
     { provide: IUserRepository, useClass: UserRepository },
+    { provide: INotificationRepository, useClass: NotificationRepository },
     {
       provide: CreateNewsUseCase,
-      useFactory: (newsRepo, userRepo) => new CreateNewsUseCase(newsRepo, userRepo),
-      inject: [INewsRepository, IUserRepository],
+      useFactory: (newsRepo, userRepo, notifRepo) =>
+        new CreateNewsUseCase(newsRepo, userRepo, notifRepo),
+      inject: [INewsRepository, IUserRepository, INotificationRepository],
     },
     {
       provide: ListNewsUseCase,
@@ -36,6 +42,11 @@ import { DeleteNewsUseCase } from '@forreal/application/feed/usecases/DeleteNews
     {
       provide: DeleteNewsUseCase,
       useFactory: (repo) => new DeleteNewsUseCase(repo),
+      inject: [INewsRepository],
+    },
+    {
+      provide: UpdateNewsUseCase,
+      useFactory: (repo) => new UpdateNewsUseCase(repo),
       inject: [INewsRepository],
     },
   ],

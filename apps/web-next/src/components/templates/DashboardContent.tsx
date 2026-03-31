@@ -19,6 +19,7 @@ type DashboardContentProps = {
       send: string;
       receive: string;
       chat: string;
+      director: string;
       more: string;
     };
     accountTypes: {
@@ -52,9 +53,16 @@ type DashboardContentProps = {
   locale: string;
 };
 
-export function DashboardContent({ translations, accountData, totalBalance, locale }: DashboardContentProps) {
+export function DashboardContent({
+  translations,
+  accountData,
+  totalBalance,
+  locale,
+}: DashboardContentProps) {
   const { theme, mounted } = useTheme();
   const { user } = useAuth();
+
+  const isDirector = user?.roles?.includes('DIRECTOR') ?? false;
 
   if (!mounted) {
     return (
@@ -67,16 +75,38 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
   }
 
   const quickActions = [
-    { icon: '↗', label: translations.quickActions.send, variant: 'teal' as const, href: `/${locale}/transfer` },
-    { icon: '💬', label: translations.quickActions.chat, variant: 'cyan' as const, href: `/${locale}/chat` },
+    {
+      icon: '↗',
+      label: translations.quickActions.send,
+      variant: 'teal' as const,
+      href: `/${locale}/transfer`,
+    },
+    {
+      icon: '💬',
+      label: translations.quickActions.chat,
+      variant: 'teal' as const,
+      href: `/${locale}/chat`,
+    },
+    ...(isDirector
+      ? [
+          {
+            icon: '🎬',
+            label: translations.quickActions.director,
+            variant: 'teal' as const,
+            href: `/${locale}/director`,
+          },
+        ]
+      : []),
   ];
 
   return (
-    <div className={`min-h-screen transition-colors ${
-      theme === 'dark' 
-        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900' 
-        : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
-    }`}>
+    <div
+      className={`min-h-screen transition-colors ${
+        theme === 'dark'
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900'
+          : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
+      }`}
+    >
       <DashboardHeader userName={accountData.user.firstName} userId={user?.id} />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
@@ -84,19 +114,18 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
           <p className={`text-base mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
             {translations.greeting}
           </p>
-          <h2 className={`text-3xl font-semibold ${
-            theme === 'dark'
-              ? 'bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent'
-              : 'text-gray-900'
-          }`}>
+          <h2
+            className={`text-3xl font-semibold ${
+              theme === 'dark'
+                ? 'bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent'
+                : 'text-gray-900'
+            }`}
+          >
             {accountData.user.firstName}
           </h2>
         </div>
 
-        <BalanceCard
-          label={translations.totalBalance}
-          amount={totalBalance}
-        />
+        <BalanceCard label={translations.totalBalance} amount={totalBalance} />
 
         <AccountsSection
           title={translations.accounts}
@@ -112,7 +141,7 @@ export function DashboardContent({ translations, accountData, totalBalance, loca
         <QuickActionsSection actions={quickActions} />
 
         <div className="mt-10">
-          <NewsFeed />
+          <NewsFeed userRoles={user?.roles ?? null} />
         </div>
       </main>
     </div>

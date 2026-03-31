@@ -1,15 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { INotificationRepository } from '@forreal/domain/notifications/ports/INotificationRepository';
-import { Notification } from '@forreal/domain/notifications/Notification';
+import { Notification } from '@forreal/domain';
 import { NotificationEntity } from '../entities/NotificationEntity';
 import { UserEntity } from '../entities/UserEntity';
 import { NotificationMapper } from '../mappers/NotificationMapper';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
-export class NotificationRepository implements INotificationRepository {
+export class NotificationRepository {
   constructor(
     @InjectRepository(NotificationEntity)
     private readonly repo: Repository<NotificationEntity>,
@@ -29,7 +28,12 @@ export class NotificationRepository implements INotificationRepository {
     await this.repo.save(entity);
   }
 
-  async create(userId: string, title: string, content: string, type: string): Promise<Notification> {
+  async create(
+    userId: string,
+    title: string,
+    content: string,
+    type: string,
+  ): Promise<Notification> {
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('user not found');
     const entity = this.repo.create({ id: uuidv4(), user, title, content, type });
@@ -37,7 +41,10 @@ export class NotificationRepository implements INotificationRepository {
     return NotificationMapper.toDomain(saved);
   }
 
-  async listByUser(userId: string, params?: { limit?: number; offset?: number }): Promise<Notification[]> {
+  async listByUser(
+    userId: string,
+    params?: { limit?: number; offset?: number },
+  ): Promise<Notification[]> {
     const { limit = 50, offset = 0 } = params ?? {};
     const entities = await this.repo.find({
       where: { user: { id: userId } as any },
@@ -51,5 +58,19 @@ export class NotificationRepository implements INotificationRepository {
 
   async deleteById(id: string): Promise<void> {
     await this.repo.delete({ id });
+  }
+
+  async markAllReadByUser(userId: string): Promise<number> {
+    const now = new Date();
+
+    const result = await this.repo
+      .createQueryBuilder()
+      .update(NotificationEntity)
+      .set({ readAt: now })
+      .where('user_id = :userId', { userId })
+      .andWhere('read_at IS NULL')
+      .execute();
+
+    return result.affected ?? 0;
   }
 }

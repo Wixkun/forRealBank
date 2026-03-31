@@ -1,57 +1,127 @@
 'use client';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+  const t = useTranslations('common.footer');
+
   return (
     <footer className="bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800 text-gray-300 border-t border-white/10">
       <div className=" px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-10">
-
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Notre Banque
+            {t('ourBank.title')}
           </h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-teal-300 transition">Qui sommes-nous</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Nos engagements</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Carrières</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Presse</a></li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('ourBank.about')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('ourBank.commitments')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('ourBank.careers')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('ourBank.press')}
+              </a>
+            </li>
           </ul>
         </div>
 
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Produits & Services
+            {t('products.title')}
           </h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-teal-300 transition">Comptes bancaires</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Cartes & Paiements</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Épargne & Placements</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Crédits & Prêts</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Assurances</a></li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('products.bankAccounts')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('products.cardsPayments')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('products.savingsInvestments')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('products.loansCredits')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('products.insurance')}
+              </a>
+            </li>
           </ul>
         </div>
 
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Aide & Support
+            {t('help.title')}
           </h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-teal-300 transition">Centre d’aide</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Contacter un conseiller</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">FAQ</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Accessibilité</a></li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('help.center')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('help.contactAdvisor')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('help.faq')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('help.accessibility')}
+              </a>
+            </li>
           </ul>
         </div>
 
         <div>
           <h3 className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold text-lg mb-4">
-            Sécurité & Légal
+            {t('security.title')}
           </h3>
           <ul className="space-y-2 text-sm">
-            <li><a href="#" className="hover:text-teal-300 transition">Sécurité des comptes</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Protection des données</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Conditions générales</a></li>
-            <li><a href="#" className="hover:text-teal-300 transition">Mentions légales</a></li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('security.accountSecurity')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('security.dataProtection')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('security.terms')}
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-teal-300 transition">
+                {t('security.legal')}
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -63,14 +133,23 @@ export default function Footer() {
           © {new Date().getFullYear()}{' '}
           <span className="bg-gradient-to-r from-teal-300 via-cyan-400 to-teal-500 bg-clip-text text-transparent font-semibold">
             Avenir
-          </span>. Tous droits réservés.
+          </span>
+          {t('copyrightSuffix')}
         </div>
 
         <div className="flex space-x-4 text-gray-400">
-          <a href="#" className="hover:text-teal-300 transition"><FaFacebook /></a>
-          <a href="#" className="hover:text-teal-300 transition"><FaTwitter /></a>
-          <a href="#" className="hover:text-teal-300 transition"><FaLinkedin /></a>
-          <a href="#" className="hover:text-teal-300 transition"><FaInstagram /></a>
+          <a href="#" className="hover:text-teal-300 transition">
+            <FaFacebook />
+          </a>
+          <a href="#" className="hover:text-teal-300 transition">
+            <FaTwitter />
+          </a>
+          <a href="#" className="hover:text-teal-300 transition">
+            <FaLinkedin />
+          </a>
+          <a href="#" className="hover:text-teal-300 transition">
+            <FaInstagram />
+          </a>
         </div>
       </div>
     </footer>

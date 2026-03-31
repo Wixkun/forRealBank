@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/hooks/useAuth';
 
 type ErrorPageTemplateProps = {
   errorCode: '404' | '500';
@@ -17,6 +18,7 @@ type ErrorPageTemplateProps = {
     onClick?: () => void;
   };
   locale: string;
+  preferredAuthenticatedHomeHref?: string;
 };
 
 export function ErrorPageTemplate({
@@ -26,10 +28,16 @@ export function ErrorPageTemplate({
   description,
   primaryButton,
   secondaryButton,
-  locale,
+  preferredAuthenticatedHomeHref,
 }: ErrorPageTemplateProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
+  const { isAuthenticated } = useAuth();
+
+  const effectivePrimaryHref =
+    isAuthenticated && preferredAuthenticatedHomeHref
+      ? preferredAuthenticatedHomeHref
+      : primaryButton.href;
 
   return (
     <div
@@ -93,15 +101,13 @@ export function ErrorPageTemplate({
                 : 'bg-white border-teal-400'
             }`}
           >
-            <span className="text-5xl">
-              {errorCode === '404' ? '🔍' : '⚠️'}
-            </span>
+            <span className="text-5xl">{errorCode === '404' ? '🔍' : '⚠️'}</span>
           </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link
-            href={primaryButton.href}
+            href={effectivePrimaryHref}
             className={`px-8 py-3 rounded-full font-medium transition-all shadow-lg ${
               currentTheme === 'dark'
                 ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-white'
@@ -123,19 +129,6 @@ export function ErrorPageTemplate({
               {secondaryButton.text}
             </button>
           )}
-        </div>
-
-        <div className="mt-16">
-          <Link
-            href={`/${locale}`}
-            className={`text-2xl font-semibold inline-block ${
-              currentTheme === 'dark'
-                ? 'bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent'
-                : 'bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent'
-            }`}
-          >
-            Avenir
-          </Link>
         </div>
       </div>
     </div>

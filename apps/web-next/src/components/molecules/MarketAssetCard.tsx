@@ -79,7 +79,7 @@ export function MarketAssetCard({
 
   return (
     <div
-          className={`p-5 rounded-2xl border transition-all hover:scale-[1.01] animate-row-enter ${
+      className={`p-5 rounded-2xl border transition-all hover:scale-[1.01] animate-row-enter ${
         currentTheme === 'dark'
           ? 'bg-gray-900/60 border-gray-800 hover:border-teal-500/50'
           : 'bg-white border-gray-200 hover:border-teal-500/50'
@@ -152,11 +152,7 @@ export function MarketAssetCard({
         </div>
       </div>
 
-      {volume && (
-        <div className="mt-3 mb-4 text-xs text-gray-500">
-          24h Vol: {volume}
-        </div>
-      )}
+      {volume && <div className="mt-3 mb-4 text-xs text-gray-500">24h Vol: {volume}</div>}
 
       <button
         onClick={() => onTrade(symbol)}

@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, ILike } from 'typeorm';
 
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { User } from '@forreal/domain/user/User';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { IUserRepository } from '@forreal/domain';
+import { User } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 import { UserEntity } from '../entities/UserEntity';
 import { RoleEntity } from '../entities/RoleEntity';
 import { UserMapper } from '../mappers/UserMapper';
@@ -24,7 +24,10 @@ export class UserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const userEntity = await this.userRepository.findOne({ where: { email }, relations: ['roles'] });
+    const userEntity = await this.userRepository.findOne({
+      where: { email },
+      relations: ['roles'],
+    });
     return userEntity ? UserMapper.toDomain(userEntity) : null;
   }
 
@@ -37,31 +40,33 @@ export class UserRepository implements IUserRepository {
     if (!roleNames.length) return [];
     const uniqueRoleNames = Array.from(new Set(roleNames));
     const existingRoles = await this.roleRepository.find({ where: { name: In(uniqueRoleNames) } });
-    const existingNames = new Set(existingRoles.map(r => r.name));
-    const missing = uniqueRoleNames.filter(n => !existingNames.has(n));
+    const existingNames = new Set(existingRoles.map((r) => r.name));
+    const missing = uniqueRoleNames.filter((n) => !existingNames.has(n));
     if (missing.length) {
-      const toSave = missing.map(n => Object.assign(new RoleEntity(), { name: n }));
+      const toSave = missing.map((n) => Object.assign(new RoleEntity(), { name: n }));
       await this.roleRepository.save(toSave);
     }
     return this.roleRepository.find({ where: { name: In(uniqueRoleNames) } });
   }
 
   async save(user: User): Promise<void> {
-    const userRecord  = UserMapper.toPersistence(user);
-    const roleNames: RoleName[] = Array.from((user as any).roles ?? new Set<RoleName>()) as RoleName[];
+    const userRecord = UserMapper.toPersistence(user);
+    const roleNames: RoleName[] = Array.from(
+      (user as any).roles ?? new Set<RoleName>(),
+    ) as RoleName[];
     const effectiveRoleNames = roleNames.length ? roleNames : [RoleName.CLIENT];
     const roles = await this.resolveRoles(effectiveRoleNames);
 
     const entity = this.userRepository.create({
-      id: userRecord .id,
-      email: userRecord .email,
-      passwordHash: userRecord .passwordHash,
-      firstName: userRecord .firstName,
-      lastName: userRecord .lastName,
-      lastLoginAt: userRecord .lastLoginAt ?? null,
-      isBanned: userRecord .isBanned ?? false,
-      bannedAt: userRecord .bannedAt ?? null,
-      banReason: userRecord .banReason ?? null,
+      id: userRecord.id,
+      email: userRecord.email,
+      passwordHash: userRecord.passwordHash,
+      firstName: userRecord.firstName,
+      lastName: userRecord.lastName,
+      lastLoginAt: userRecord.lastLoginAt ?? null,
+      isBanned: userRecord.isBanned ?? false,
+      bannedAt: userRecord.bannedAt ?? null,
+      banReason: userRecord.banReason ?? null,
       roles,
     });
 
@@ -76,10 +81,10 @@ export class UserRepository implements IUserRepository {
     const { limit = 20, offset = 0, search } = params;
     const where = search
       ? [
-        { email: ILike(`%${search}%`) },
-        { firstName: ILike(`%${search}%`) },
-        { lastName: ILike(`%${search}%`) },
-      ]
+          { email: ILike(`%${search}%`) },
+          { firstName: ILike(`%${search}%`) },
+          { lastName: ILike(`%${search}%`) },
+        ]
       : {};
     const entities = await this.userRepository.find({
       where,
@@ -95,10 +100,10 @@ export class UserRepository implements IUserRepository {
     const { search } = params;
     const where = search
       ? [
-        { email: ILike(`%${search}%`) },
-        { firstName: ILike(`%${search}%`) },
-        { lastName: ILike(`%${search}%`) },
-      ]
+          { email: ILike(`%${search}%`) },
+          { firstName: ILike(`%${search}%`) },
+          { lastName: ILike(`%${search}%`) },
+        ]
       : {};
     return this.userRepository.count({ where });
   }

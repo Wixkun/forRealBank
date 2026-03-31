@@ -8,7 +8,41 @@
     "error": "Erreur",
     "errorLoadingAccount": "Erreur de chargement du compte",
     "alreadyHaveAccount": "Vous avez déjà un compte ?",
-    "signIn": "Se connecter"
+    "signIn": "Se connecter",
+    "footer": {
+      "ourBank": {
+        "title": "Notre Banque",
+        "about": "Qui sommes-nous",
+        "commitments": "Nos engagements",
+        "careers": "Carrières",
+        "press": "Presse"
+      },
+      "products": {
+        "title": "Produits & Services",
+        "bankAccounts": "Comptes bancaires",
+        "cardsPayments": "Cartes & Paiements",
+        "savingsInvestments": "Épargne & Placements",
+        "loansCredits": "Crédits & Prêts",
+        "insurance": "Assurances"
+      },
+      "help": {
+        "title": "Aide & Support",
+        "center": "Centre d’aide",
+        "contactAdvisor": "Contacter un conseiller",
+        "faq": "FAQ",
+        "accessibility": "Accessibilité"
+      },
+      "security": {
+        "title": "Sécurité & Légal",
+        "accountSecurity": "Sécurité des comptes",
+        "dataProtection": "Protection des données",
+        "terms": "Conditions générales",
+        "legal": "Mentions légales"
+      },
+      "copyrightSuffix": ". Tous droits réservés."
+    },
+    "authChecking": "Vérification d'authentification...",
+    "accessDenied": "Accès refusé."
   },
   "auth": {
     "login": {
@@ -44,6 +78,7 @@
       "send": "Envoyer",
       "receive": "Recevoir",
       "chat": "Chat",
+      "director": "Gestion",
       "stats": "Stats",
       "more": "Plus"
     },
@@ -97,7 +132,6 @@
     "quantity": "Quantité",
     "avgPrice": "Prix moyen",
     "currentPrice": "Prix actuel",
-    "totalValue": "Valeur totale",
     "gainLoss": "Gain/Perte",
     "trade": "Trader",
     "buy": "Acheter",
@@ -249,8 +283,7 @@
       "description": "Rejoignez plus de 500 000 clients qui font confiance à AvenirBank pour gérer leur argent intelligemment. Ouverture de compte en 5 minutes, 100% en ligne.",
       "button": "Commencer maintenant"
     }
-  }
-  ,
+  },
   "chat": {
     "loadingConversations": "Chargement de vos conversations...",
     "loginRequired": "Veuillez vous connecter pour accéder à la messagerie.",
@@ -277,8 +310,7 @@
         "hoursAgo": "Il y a {count}h",
         "yesterday": "Hier"
       }
-    }
-    ,
+    },
     "display": {
       "advisorDefaultName": "Votre conseiller",
       "advisorDefaultRole": "Conseiller financier",
@@ -293,7 +325,112 @@
         "placeholder": "Tapez votre message..."
       },
       "send": "Envoyer",
-      "groupMembers": "{count} membres"
+      "groupMembers": "{count} membres",
+      "typing": "{name} est en train d'écrire..."
+    },
+    "group": {
+      "loading": "Chargement de la discussion de groupe...",
+      "title": "Discussion de groupe",
+      "subtitle": "Collaborez en temps réel. Le directeur est visuellement mis en avant.",
+      "empty": {
+        "title": "Aucune conversation de groupe",
+        "description": "Vous n'êtes pas participant d'une discussion de groupe pour l'instant."
+      }
+    },
+    "manage": {
+      "title": "Gérer le chat",
+      "conversationIdLabel": "ID de la conversation",
+      "conversationIdPlaceholder": "UUID de la conversation",
+      "open": "Ouvrir"
+    },
+    "errors": {
+      "fetchAdvisor": "Impossible de récupérer le conseiller",
+      "fetchClients": "Impossible de récupérer vos clients",
+      "fetchUsers": "Impossible de récupérer les utilisateurs"
+    },
+    "groupConversation": {
+      "title": "Discussion de groupe",
+      "unknownUser": "Utilisateur",
+      "participantsCount": "{count} participant{count, plural, one {} other {s}}"
     }
+  },
+  "feed": {
+    "title": "Actualités de la banque",
+    "confirmDelete": "Supprimer cette actualité ?",
+    "empty": "Aucune actualité pour le moment",
+    "connection": {
+      "connected": "Connecté",
+      "disconnected": "Déconnecté",
+      "realtime": "En temps réel",
+      "offline": "Hors ligne"
+    },
+    "edit": {
+      "titleLabel": "Titre",
+      "contentLabel": "Contenu",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "cancel": "Annuler"
+    },
+    "actions": {
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleting": "Suppression…"
+    },
+    "create": {
+      "title": "Publier une actualité",
+      "fields": {
+        "title": "Titre",
+        "content": "Contenu"
+      },
+      "submit": "Publier",
+      "submitLoading": "Envoi…",
+      "messages": {
+        "created": "Actualité créée",
+        "createFailed": "Échec de la création de l'actualité",
+        "unknownError": "Erreur inconnue"
+      }
+    }
+  },
+  "notifications": {
+    "ariaLabel": "Notifications",
+    "title": "Notifications",
+    "unreadCount": "{count} nouvelle{count, plural, one {} other {s}}",
+    "markAllRead": "Tout lire",
+    "markAllLoading": "...",
+    "empty": "Aucune notification",
+    "emptyUnread": "Aucune nouvelle notification"
+  },
+  "director": {
+    "title": "Directeur · Gestion clients",
+    "subtitle": "Actions disponibles : lister, consulter, bannir/débannir, supprimer.",
+    "searchPlaceholder": "Recherche (email, nom...)",
+    "searchButton": "Rechercher",
+    "total": "Total : {count}",
+    "table": {
+      "email": "Email",
+      "name": "Nom",
+      "roles": "Rôles",
+      "status": "Statut",
+      "actions": "Actions"
+    },
+    "loading": "Chargement...",
+    "empty": "Aucun résultat.",
+    "statusValues": {
+      "active": "Actif",
+      "banned": "Banni"
+    },
+    "actions": {
+      "ban": "Bannir",
+      "unban": "Débannir",
+      "delete": "Supprimer"
+    },
+    "confirmDelete": "Supprimer ce client ?",
+    "errorPrefix": "Erreur :"
+  },
+  "banned": {
+    "code": "BANNI",
+    "subtitle": "Votre compte est banni",
+    "description": "Votre accès a été suspendu. Contactez le support si vous pensez qu’il s’agit d’une erreur.",
+    "primaryCta": "Retour à la connexion"
   }
 }

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { IConversationRepository } from '@forreal/domain/chat/ports/IConversationRepository';
-import { Conversation, ConversationType } from '@forreal/domain/chat/Conversation';
+import { IConversationRepository } from '@forreal/domain';
+import { Conversation, ConversationType } from '@forreal/domain';
 import { ConversationEntity } from '../entities/ConversationEntity';
 import { ConversationMapper } from '../mappers/ConversationMapper';
 import { v4 as uuidv4 } from 'uuid';

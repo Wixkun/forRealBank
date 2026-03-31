@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { INewsRepository } from '@forreal/domain/feed/ports/INewsRepository';
-import { News } from '@forreal/domain/feed/News';
+import { INewsRepository } from '@forreal/domain';
+import { News } from '@forreal/domain';
 import { NewsEntity } from '../entities/NewsEntity';
 import { UserEntity } from '../entities/UserEntity';
 import { NewsMapper } from '../mappers/NewsMapper';
@@ -40,7 +40,12 @@ export class NewsRepository implements INewsRepository {
 
   async list(params?: { limit?: number; offset?: number }): Promise<News[]> {
     const { limit = 20, offset = 0 } = params ?? {};
-    const entities = await this.repo.find({ order: { createdAt: 'DESC' }, take: limit, skip: offset, relations: ['author'] });
+    const entities = await this.repo.find({
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: offset,
+      relations: ['author'],
+    });
     return entities.map(NewsMapper.toDomain);
   }
 

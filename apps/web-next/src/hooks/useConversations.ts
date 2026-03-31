@@ -18,7 +18,9 @@ interface UseConversationsOptions {
   apiUrl?: string;
 }
 
-export function useConversations({ apiUrl = 'http://localhost:3001/api' }: UseConversationsOptions = {}) {
+export function useConversations({
+  apiUrl = '/api/proxy',
+}: UseConversationsOptions = {}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -30,7 +30,7 @@ export default function AccountPage() {
   const locale = (params?.locale as string) || 'en';
   const accountId = params?.accountId as string;
   const t = useTranslations('account');
-    const tCommon = useTranslations('common');
+  const tCommon = useTranslations('common');
   const dashboardT = useTranslations('dashboard');
 
   const [account, setAccount] = useState<BankAccount | null>(null);
@@ -42,7 +42,7 @@ export default function AccountPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+
         const accountRes = await fetch(`/api/proxy/accounts/bank/${accountId}`);
         if (!accountRes.ok) {
           throw new Error(`Failed to fetch account: ${accountRes.status}`);
@@ -91,9 +91,10 @@ export default function AccountPage() {
     );
   }
 
-  const accountTypeLabel = account.accountType === 'savings'
-    ? dashboardT('accountTypes.savings')
-    : dashboardT('accountTypes.checking');
+  const accountTypeLabel =
+    account.accountType === 'savings'
+      ? dashboardT('accountTypes.savings')
+      : dashboardT('accountTypes.checking');
 
   const accountData = {
     id: account.id,
@@ -111,7 +112,7 @@ export default function AccountPage() {
     type: txn.type,
     description: txn.description,
     date: new Date(txn.date).toLocaleDateString(locale),
-    amount: txn.amount, 
+    amount: txn.amount,
     balance: txn.balance !== undefined ? formatCurrency(txn.balance) : undefined,
   }));
 

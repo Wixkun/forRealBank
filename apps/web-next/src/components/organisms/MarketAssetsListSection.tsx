@@ -31,11 +31,7 @@ type MarketAssetsListSectionProps = {
   };
 };
 
-export function MarketAssetsListSection({
-  assets,
-  onTrade,
-  labels,
-}: MarketAssetsListSectionProps) {
+export function MarketAssetsListSection({ assets, onTrade, labels }: MarketAssetsListSectionProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
   const [filter, setFilter] = useState<'all' | 'stock' | 'crypto' | 'etf' | 'commodity'>('all');
@@ -65,8 +61,8 @@ export function MarketAssetsListSection({
                 filter === filterType
                   ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white'
                   : currentTheme === 'dark'
-                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
               {filterType === 'all' && labels.filters.all}

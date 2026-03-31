@@ -4,7 +4,8 @@ import {
   Controller,
   Delete,
   Get,
-  HttpCode, Inject,
+  HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Patch,
@@ -16,21 +17,23 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { RoleName } from '@forreal/domain';
 
-import { UpdateUserProfileUseCase } from '@forreal/application/user/usecases/UpdateUserProfileUseCase';
-import { DeleteOwnAccountUseCase } from '@forreal/application/user/usecases/DeleteOwnAccountUseCase';
-import { ListUsersUseCase } from '@forreal/application/user/usecases/ListUsersUseCase';
-import { UpdateUserRolesUseCase } from '@forreal/application/user/usecases/UpdateUserRolesUseCase';
-import { DeleteUserByAdminUseCase } from '@forreal/application/user/usecases/DeleteUserByAdminUseCase';
-import { BanUserUseCase } from '@forreal/application/user/usecases/BanUserUseCase';
-import { UnbanUserUseCase } from '@forreal/application/user/usecases/UnbanUserUseCase';
+import { UpdateUserProfileUseCase } from '@forreal/application';
+import { DeleteOwnAccountUseCase } from '@forreal/application';
+import { ListUsersUseCase } from '@forreal/application';
+import { UpdateUserRolesUseCase } from '@forreal/application';
+import { DeleteUserByAdminUseCase } from '@forreal/application';
+import { BanUserUseCase } from '@forreal/application';
+import { UnbanUserUseCase } from '@forreal/application';
 
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ListUsersQueryDto } from './dto/list-users.dto';
 import { UpdateRolesDto } from './dto/update-roles.dto';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
+import { IUserRepository } from '@forreal/domain';
 import { UserPresenter } from './user.presenter';
+
+type ListUsersQueryWithAlias = ListUsersQueryDto & { q?: string };
 
 @Controller('/users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,18 +50,18 @@ export class UsersController {
   ) {}
 
   @HttpCode(200)
-    @Get('me')
-    async getMe(@Req() req: Request) {
-      const auth = (req as any).auth;
-      if (!auth?.userId) throw new BadRequestException('Missing auth context');
+  @Get('me')
+  async getMe(@Req() req: Request) {
+    const auth = (req as any).auth;
+    if (!auth?.userId) throw new BadRequestException('Missing auth context');
 
-      const user = await this.users.findById(auth.userId);
-      if (!user) throw new NotFoundException('User not found');
+    const user = await this.users.findById(auth.userId);
+    if (!user) throw new NotFoundException('User not found');
 
-      return UserPresenter.toDTO(user);
-    }
+    return UserPresenter.toDTO(user);
+  }
 
-    @HttpCode(200)
+  @HttpCode(200)
   @Patch('me')
   async updateMe(@Body() dto: UpdateProfileDto, @Req() req: Request) {
     try {
@@ -95,9 +98,13 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(RoleName.ADMIN)
-  async list(@Query() query: ListUsersQueryDto) {
-    const res = await this.listUsers.execute(query);
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
+  async list(@Query() query: ListUsersQueryWithAlias) {
+    const search = (query.search ?? query.q);
+    const res = await this.listUsers.execute({
+      ...query,
+      search,
+    });
     return {
       success: true,
       total: res.total,
@@ -106,7 +113,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async getById(@Param('id') id: string) {
     const user = await this.users.findById(id);
     if (!user) throw new NotFoundException('User not found');
@@ -131,7 +138,8 @@ export class UsersController {
     } catch (error) {
       if (error instanceof Error) {
         if (error.message === 'USER_NOT_FOUND') throw new NotFoundException('User not found');
-        if (error.message === 'FORBIDDEN_OPERATION') throw new BadRequestException('Cannot remove your own ADMIN role');
+        if (error.message === 'FORBIDDEN_OPERATION')
+          throw new BadRequestException('Cannot remove your own ADMIN role');
         if (error.message === 'INVALID_ROLE') throw new BadRequestException('Invalid roles');
       }
       throw error;
@@ -140,7 +148,7 @@ export class UsersController {
 
   @HttpCode(200)
   @Patch(':id/ban')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async ban(@Param('id') id: string, @Body() body: { reason?: string }) {
     await this.banUser.execute({ targetUserId: id, reason: body?.reason });
     return { success: true, message: 'User banned' };
@@ -148,7 +156,7 @@ export class UsersController {
 
   @HttpCode(200)
   @Patch(':id/unban')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async unban(@Param('id') id: string) {
     await this.unbanUser.execute({ targetUserId: id });
     return { success: true, message: 'User unbanned' };
@@ -156,7 +164,7 @@ export class UsersController {
 
   @HttpCode(204)
   @Delete(':id')
-  @Roles(RoleName.ADMIN)
+  @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
   async deleteById(@Param('id') id: string, @Req() req: Request) {
     const auth = (req as any).auth;
     await this.deleteByAdmin.execute({ targetUserId: id, actingUserId: auth.userId });

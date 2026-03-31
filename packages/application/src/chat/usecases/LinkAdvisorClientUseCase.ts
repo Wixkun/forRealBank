@@ -1,10 +1,15 @@
-import { IAdvisorClientRepository } from '@forreal/domain/chat/ports/IAdvisorClientRepository';
+import { IAdvisorClientRepository } from '@forreal/domain';
 
 export class LinkAdvisorClientUseCase {
   constructor(private readonly advisorClientRepository: IAdvisorClientRepository) {}
 
   async execute(input: { advisorId: string; clientId: string }) {
     const link = await this.advisorClientRepository.link(input.advisorId, input.clientId);
-    return { linkId: link.id, advisorId: link.advisorId, clientId: link.clientId, createdAt: link.createdAt };
+    return {
+      linkId: link.id,
+      advisorId: link.advisorId,
+      clientId: link.clientId,
+      createdAt: link.createdAt,
+    };
   }
 }

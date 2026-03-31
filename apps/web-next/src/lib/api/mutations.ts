@@ -2,7 +2,7 @@
 
 import { revalidateTag } from 'next/cache';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const apiUrl = process.env.NEXT_PUBLIC_API_BASE || '/api/proxy';
 
 export async function createConversation(type: 'PRIVATE' | 'GROUP') {
   try {
@@ -18,9 +18,9 @@ export async function createConversation(type: 'PRIVATE' | 'GROUP') {
     }
 
     const data = await response.json();
-    
+
     revalidateTag('conversations');
-    
+
     return data;
   } catch (error) {
     console.error('Failed to create conversation:', error);
@@ -28,20 +28,14 @@ export async function createConversation(type: 'PRIVATE' | 'GROUP') {
   }
 }
 
-export async function addParticipantToConversation(
-  conversationId: string,
-  userId: string
-) {
+export async function addParticipantToConversation(conversationId: string, userId: string) {
   try {
-    const response = await fetch(
-      `${apiUrl}/chat/conversations/${conversationId}/participants`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ userId }),
-      }
-    );
+    const response = await fetch(`${apiUrl}/chat/conversations/${conversationId}/participants`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ userId }),
+    });
 
     if (!response.ok) {
       throw new Error(`Adding participant failed (${response.status})`);
@@ -56,21 +50,14 @@ export async function addParticipantToConversation(
   }
 }
 
-export async function sendMessage(
-  conversationId: string,
-  content: string,
-  userId: string
-) {
+export async function sendMessage(conversationId: string, content: string, userId: string) {
   try {
-    const response = await fetch(
-      `${apiUrl}/chat/conversations/${conversationId}/messages`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ content, userId }),
-      }
-    );
+    const response = await fetch(`${apiUrl}/chat/conversations/${conversationId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ content, userId }),
+    });
 
     if (!response.ok) {
       throw new Error(`Message send failed (${response.status})`);

@@ -11,7 +11,7 @@ interface UseCreateConversationOptions {
 export function useCreateConversation(options?: UseCreateConversationOptions) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  const API_URL = '/api/proxy';
 
   const createPrivateConversation = useCallback(
     async (targetUserId: string, currentUserId: string) => {
@@ -33,33 +33,26 @@ export function useCreateConversation(options?: UseCreateConversationOptions) {
         const created = await createRes.json();
         const convId: string = created.conversationId || created.id;
 
-        const addCurrentRes = await fetch(
-          `${API_URL}/chat/conversations/${convId}/participants`,
-          {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: currentUserId }),
-          }
-        );
+        const addCurrentRes = await fetch(`${API_URL}/chat/conversations/${convId}/participants`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUserId }),
+        });
         if (!addCurrentRes.ok) throw new Error(`HTTP ${addCurrentRes.status}`);
 
-        const addTargetRes = await fetch(
-          `${API_URL}/chat/conversations/${convId}/participants`,
-          {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: targetUserId.trim() }),
-          }
-        );
+        const addTargetRes = await fetch(`${API_URL}/chat/conversations/${convId}/participants`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: targetUserId.trim() }),
+        });
         if (!addTargetRes.ok) throw new Error(`HTTP ${addTargetRes.status}`);
 
         options?.onSuccess?.(convId);
         return convId;
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : 'Erreur inattendue';
+        const errorMessage = err instanceof Error ? err.message : 'Erreur inattendue';
         setError(errorMessage);
         options?.onError?.(errorMessage);
         return null;
@@ -67,7 +60,7 @@ export function useCreateConversation(options?: UseCreateConversationOptions) {
         setIsSubmitting(false);
       }
     },
-    [options]
+    [API_URL, options],
   );
 
   return {
@@ -78,43 +71,35 @@ export function useCreateConversation(options?: UseCreateConversationOptions) {
 }
 
 export function useConversationsList(initialConversations: ConversationData[]) {
-  const [conversations, setConversations] = useState<ConversationData[]>(
-    initialConversations
-  );
-  const [isLoading, setIsLoading] = useState(false);
+  const [conversations, setConversations] = useState<ConversationData[]>(initialConversations);
 
   const hasPrivateConversationWith = useCallback(
     (targetUserId: string) =>
       conversations.some(
         (conv: ConversationData) =>
-          conv.type === 'PRIVATE' &&
-          conv.participants?.some((p) => p.id === targetUserId)
+          conv.type === 'PRIVATE' && conv.participants?.some((p) => p.id === targetUserId),
       ),
-    [conversations]
+    [conversations],
   );
 
   const openConversationWith = useCallback(
     (targetUserId: string) => {
       const existing = conversations.find(
         (conv: ConversationData) =>
-          conv.type === 'PRIVATE' &&
-          conv.participants?.some((p) => p.id === targetUserId)
+          conv.type === 'PRIVATE' && conv.participants?.some((p) => p.id === targetUserId),
       );
       return existing?.id || null;
     },
-    [conversations]
+    [conversations],
   );
 
-  const updateConversations = useCallback(
-    (newConversations: ConversationData[]) => {
-      setConversations(newConversations);
-    },
-    []
-  );
+  const updateConversations = useCallback((newConversations: ConversationData[]) => {
+    setConversations(newConversations);
+  }, []);
 
   return {
     conversations,
-    isLoading,
+    isLoading: false,
     hasPrivateConversationWith,
     openConversationWith,
     updateConversations,

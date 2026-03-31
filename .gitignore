@@ -15,11 +15,17 @@ pnpm-debug.log*
 lerna-debug.log*
 .DS_Store
 Thumbs.db
+*.tsbuildinfo
 
 env/
 .env.*
 .env.local
 apps/**/.env
+
+# Dev env (local) - ne pas commiter les secrets
+env/api.dev.env
+# Exemple versionné
+!env/api.dev.env.example
 
 .idea/
 .vscode/*

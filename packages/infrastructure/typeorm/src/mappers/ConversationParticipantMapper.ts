@@ -1,4 +1,4 @@
-import { ConversationParticipant } from '@forreal/domain/chat/ConversationParticipant';
+import { ConversationParticipant } from '@forreal/domain';
 import { ConversationParticipantEntity } from '../entities/ConversationParticipantEntity';
 
 export class ConversationParticipantMapper {

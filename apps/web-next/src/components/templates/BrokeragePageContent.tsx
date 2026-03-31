@@ -61,6 +61,8 @@ type BrokeragePageContentProps = {
       limit: string;
       stop: string;
     };
+    updating?: string;
+    orderFailed?: string;
   };
 };
 
@@ -74,8 +76,9 @@ export function BrokeragePageContent({
   const currentTheme = mounted ? theme : 'dark';
 
   const formatCurrency = useCallback(
-    (value: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value),
-    [locale]
+    (value: number) =>
+      new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(value),
+    [locale],
   );
 
   const formatSignedCurrency = useCallback(
@@ -85,14 +88,14 @@ export function BrokeragePageContent({
       if (value < 0) return `-${formatted}`;
       return `+${formatted}`;
     },
-    [formatCurrency]
+    [formatCurrency],
   );
 
   const mapPosition = useCallback(
     (pos: RawPosition): PositionView => {
       const currentPrice = pos.avgPurchasePrice;
       const totalValueNum = currentPrice * pos.quantity;
-      const gainLossNum = totalValueNum - (pos.avgPurchasePrice * pos.quantity);
+      const gainLossNum = totalValueNum - pos.avgPurchasePrice * pos.quantity;
       const gainLossPercentNum = (gainLossNum / (pos.avgPurchasePrice * pos.quantity)) * 100;
 
       return {
@@ -108,24 +111,24 @@ export function BrokeragePageContent({
         gainLossPercent: `${gainLossPercentNum >= 0 ? '+' : ''}${gainLossPercentNum.toFixed(2)}%`,
       };
     },
-    [formatCurrency, formatSignedCurrency]
+    [formatCurrency, formatSignedCurrency],
   );
 
   const [basePositions, setBasePositions] = useState<PositionView[]>(initialPositions);
 
-  const symbols = useMemo(() => basePositions.map(p => p.symbol), [basePositions]);
+  const symbols = useMemo(() => basePositions.map((p) => p.symbol), [basePositions]);
   const { data: marketData, loading } = useMarketData(symbols, 30000);
 
   const updatedPositions = useMemo(() => {
-    return basePositions.map(position => {
+    return basePositions.map((position) => {
       const liveData = marketData[position.symbol];
       if (!liveData) return position;
 
       const avgPriceNum = parseFloat(position.avgPrice.replace(/[€\s]/g, '').replace(',', '.'));
       const currentPrice = liveData.price;
       const totalValue = currentPrice * position.quantity;
-      const gainLoss = totalValue - (avgPriceNum * position.quantity);
-      const gainLossPercent = ((gainLoss / (avgPriceNum * position.quantity)) * 100);
+      const gainLoss = totalValue - avgPriceNum * position.quantity;
+      const gainLossPercent = (gainLoss / (avgPriceNum * position.quantity)) * 100;
 
       return {
         ...position,
@@ -144,55 +147,58 @@ export function BrokeragePageContent({
 
     const totalCost = updatedPositions.reduce((sum, p) => {
       const avgPrice = parseFloat(p.avgPrice.replace(/[€\s]/g, '').replace(',', '.'));
-      return sum + (avgPrice * p.quantity);
+      return sum + avgPrice * p.quantity;
     }, 0);
 
     const totalGain = totalValue - totalCost;
-    const totalGainPercent = ((totalGain / totalCost) * 100);
+    const totalGainPercent = (totalGain / totalCost) * 100;
 
     const dayChangeValue = updatedPositions.reduce((sum, p) => {
       const liveData = marketData[p.symbol];
       if (!liveData) return sum;
       const currentValue = parseFloat(p.totalValue.replace(/[€\s]/g, '').replace(',', '.'));
-      return sum + (currentValue * (liveData.change24h / 100));
+      return sum + currentValue * (liveData.change24h / 100);
     }, 0);
 
     const dayChangePercent = (dayChangeValue / totalValue) * 100;
 
     return {
-      totalValue: `€${totalValue.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
-      totalGain: `${totalGain >= 0 ? '+' : ''}€${Math.abs(totalGain).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
+      totalValue: formatCurrency(totalValue),
+      totalGain: formatSignedCurrency(totalGain),
       totalGainPercent: `${totalGainPercent >= 0 ? '+' : ''}${totalGainPercent.toFixed(2)}%`,
-      dayChange: `${dayChangeValue >= 0 ? '+' : ''}€${Math.abs(dayChangeValue).toLocaleString('fr-FR', { minimumFractionDigits: 2 })}`,
+      dayChange: formatSignedCurrency(dayChangeValue),
       dayChangePercent: `${dayChangePercent >= 0 ? '+' : ''}${dayChangePercent.toFixed(2)}%`,
     };
-  }, [updatedPositions, marketData]);
+  }, [updatedPositions, marketData, formatCurrency, formatSignedCurrency]);
 
-  const handleTrade = useCallback(async (data: {
-    action: 'buy' | 'sell';
-    symbol: string;
-    quantity: number;
-    orderType: 'market' | 'limit' | 'stop';
-    price?: number;
-  }) => {
-    try {
-      await placeTradingOrder({
-        accountId: accountData.id,
-        symbol: data.symbol.toUpperCase(),
-        side: data.action,
-        quantity: data.quantity,
-        orderType: data.orderType,
-        price: data.price,
-      });
+  const handleTrade = useCallback(
+    async (data: {
+      action: 'buy' | 'sell';
+      symbol: string;
+      quantity: number;
+      orderType: 'market' | 'limit' | 'stop';
+      price?: number;
+    }) => {
+      try {
+        await placeTradingOrder({
+          accountId: accountData.id,
+          symbol: data.symbol.toUpperCase(),
+          side: data.action,
+          quantity: data.quantity,
+          orderType: data.orderType,
+          price: data.price,
+        });
 
-      const fresh: RawPosition[] = await fetchTradingPositionsClient(accountData.id);
-      const mapped = fresh.map((pos) => mapPosition(pos));
-      setBasePositions(mapped);
-    } catch (error) {
-      console.error('Trade failed', error);
-      alert('Order failed. Please try again.');
-    }
-  }, [accountData.id, mapPosition]);
+        const fresh: RawPosition[] = await fetchTradingPositionsClient(accountData.id);
+        const mapped = fresh.map((pos) => mapPosition(pos));
+        setBasePositions(mapped);
+      } catch (error) {
+        console.error('Trade failed', error);
+        alert(translations.orderFailed ?? translations.placeOrder);
+      }
+    },
+    [accountData.id, mapPosition, translations],
+  );
 
   if (!mounted) {
     return (
@@ -220,7 +226,7 @@ export function BrokeragePageContent({
         <div className="mb-8 relative">
           {loading && (
             <div className="absolute top-2 right-2 text-xs text-teal-400 animate-pulse">
-              Updating...
+              {translations.updating ?? ''}
             </div>
           )}
           <PortfolioSummaryCard

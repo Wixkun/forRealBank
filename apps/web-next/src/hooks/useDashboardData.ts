@@ -38,7 +38,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
       setError(null);
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+        const apiUrl = '/api/proxy';
 
         const userResponse = await fetch(`${apiUrl}/auth/me`, {
           method: 'GET',
@@ -80,7 +80,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
           {
             credentials: 'include',
             next: { revalidate: 30 },
-          }
+          },
         );
 
         if (transactionsResponse.ok) {

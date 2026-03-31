@@ -52,10 +52,7 @@ type BrokeragePageWrapperProps = {
 export function BrokeragePageWrapper(props: BrokeragePageWrapperProps) {
   return (
     <ThemeProvider>
-      <BrokeragePageContent 
-        {...props} 
-        initialPositions={props.positions}
-      />
+      <BrokeragePageContent {...props} initialPositions={props.positions} />
     </ThemeProvider>
   );
 }

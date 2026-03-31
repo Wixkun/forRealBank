@@ -26,9 +26,7 @@ export function AccountPageHeader({
   return (
     <header
       className={`border-b transition-colors ${
-        currentTheme === 'dark'
-          ? 'bg-gray-900/80 border-gray-800'
-          : 'bg-white border-gray-200'
+        currentTheme === 'dark' ? 'bg-gray-900/80 border-gray-800' : 'bg-white border-gray-200'
       } backdrop-blur-sm sticky top-0 z-50`}
     >
       <div className="max-w-6xl mx-auto px-6 py-4">
@@ -43,9 +41,7 @@ export function AccountPageHeader({
 
             <div className="flex items-center gap-3">
               <div
-                className={`h-8 w-px ${
-                  currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'
-                }`}
+                className={`h-8 w-px ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}
               />
               <div>
                 <h1
@@ -69,9 +65,7 @@ export function AccountPageHeader({
           <div className="flex items-center gap-6">
             <div className="text-right">
               <p
-                className={`text-sm ${
-                  currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}
+                className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
               >
                 {labels.balance}
               </p>

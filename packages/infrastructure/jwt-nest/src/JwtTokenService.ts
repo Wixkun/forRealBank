@@ -1,5 +1,5 @@
 import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
-import { JwtPayload, ITokenService } from '@forreal/domain/user/ports/ITokenService';
+import { JwtPayload, ITokenService } from '@forreal/domain';
 
 export class JwtTokenService implements ITokenService {
   private readonly secret: string;
@@ -12,7 +12,7 @@ export class JwtTokenService implements ITokenService {
       throw new Error('[JwtTokenService] Missing JWT_SECRET in environment variables');
     }
 
-    this.signOpts = {}
+    this.signOpts = {};
     this.verifyOpts = { algorithms: ['HS256'] };
   }
 

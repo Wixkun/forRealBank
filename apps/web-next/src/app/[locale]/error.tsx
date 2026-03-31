@@ -33,6 +33,7 @@ export default function Error({
           text: t('backHome'),
           href: `/${locale}`,
         }}
+        preferredAuthenticatedHomeHref={`/${locale}/dashboard`}
         secondaryButton={{
           text: t('tryAgain'),
           onClick: () => {

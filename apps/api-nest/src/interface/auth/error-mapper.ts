@@ -13,9 +13,16 @@ export enum AuthErrorCode {
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
 }
 
-type HttpException = BadRequestException | ConflictException | UnauthorizedException | InternalServerErrorException;
+type HttpException =
+  | BadRequestException
+  | ConflictException
+  | UnauthorizedException
+  | InternalServerErrorException;
 
-const ERROR_EXCEPTION_MAP: Record<AuthErrorCode, [typeof BadRequestException | typeof ConflictException | typeof UnauthorizedException, string]> = {
+const ERROR_EXCEPTION_MAP: Record<
+  AuthErrorCode,
+  [typeof BadRequestException | typeof ConflictException | typeof UnauthorizedException, string]
+> = {
   [AuthErrorCode.EMAIL_ALREADY_REGISTERED]: [ConflictException, 'Email already registered'],
   [AuthErrorCode.EMAIL_TAKEN]: [ConflictException, 'Email already registered'],
   [AuthErrorCode.INVALID_FULL_NAME]: [BadRequestException, 'First and last name are required'],
@@ -30,7 +37,10 @@ export class AuthErrorMapper {
     }
 
     const errorMessage = error.message as AuthErrorCode;
-    const [ExceptionClass, message] = ERROR_EXCEPTION_MAP[errorMessage] || [InternalServerErrorException, error.message];
+    const [ExceptionClass, message] = ERROR_EXCEPTION_MAP[errorMessage] || [
+      InternalServerErrorException,
+      error.message,
+    ];
 
     return new ExceptionClass(message);
   }

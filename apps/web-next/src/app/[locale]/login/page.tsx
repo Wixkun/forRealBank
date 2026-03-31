@@ -32,12 +32,11 @@ function LoginForm() {
         if (response.ok) {
           router.push(`/${locale}/dashboard`);
         }
-      } catch {
-      }
+      } catch {}
     };
-    
+
     checkAuth();
-    
+
     if (searchParams?.get('registered') === 'true') {
       setSuccessMessage(t('registrationSuccess'));
     }
@@ -65,6 +64,14 @@ function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
+        const message = (data?.message || data?.error || '').toString();
+        if (response.status === 403 && message.toLowerCase().includes('banned')) {
+          if (typeof document !== 'undefined') {
+            document.cookie = `is_banned=1; path=/; max-age=86400`;
+          }
+          router.replace(`/${locale}/banned`);
+          return;
+        }
         throw new Error(data.message || t('loginFailed'));
       }
 
@@ -84,74 +91,75 @@ function LoginForm() {
 
   return (
     <AuthLayout title={t('title')}>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {successMessage && (
-            <div className="bg-green-500/20 border border-green-500/50 text-green-200 px-4 py-2 rounded-lg text-sm">
-              {successMessage}
-            </div>
-          )}
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm mb-1 text-gray-200">{t('email')}</label>
-            <input
-              type="email"
-              placeholder={t('emailPlaceholder')}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-teal-400"
-              required
-            />
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {successMessage && (
+          <div className="bg-green-500/20 border border-green-500/50 text-green-200 px-4 py-2 rounded-lg text-sm">
+            {successMessage}
           </div>
-
-          <div>
-            <label className="block text-sm mb-1 text-gray-200">{t('password')}</label>
-            <input
-              type="password"
-              placeholder={t('passwordPlaceholder')}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-teal-400"
-              required
-            />
+        )}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-2 rounded-lg text-sm">
+            {error}
           </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 
+        <div>
+          <label className="block text-sm mb-1 text-gray-200">{t('email')}</label>
+          <input
+            type="email"
+            placeholder={t('emailPlaceholder')}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
+              focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm mb-1 text-gray-200">{t('password')}</label>
+          <input
+            type="password"
+            placeholder={t('passwordPlaceholder')}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
+              focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 
             hover:from-teal-400 hover:to-cyan-500 transition 
             text-white font-semibold py-2 rounded-lg shadow-lg
             disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? t('loading') : t('submit')}
-          </button>
+        >
+          {loading ? t('loading') : t('submit')}
+        </button>
 
-          <p className="text-center text-sm text-gray-300 mt-4">
-            {tCommon('alreadyHaveAccount')} {' '}
-            <Link href={`/${locale}/register`} className="text-teal-400 hover:underline">
-              {tCommon('register')}
-            </Link>
-          </p>
-        </form>
+        <p className="text-center text-sm text-gray-300 mt-4">
+          {tCommon('alreadyHaveAccount')}{' '}
+          <Link href={`/${locale}/register`} className="text-teal-400 hover:underline">
+            {tCommon('register')}
+          </Link>
+        </p>
+      </form>
     </AuthLayout>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
-        <div className="text-white">Loading...</div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+          <div className="text-white">Loading...</div>
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

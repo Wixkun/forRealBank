@@ -21,6 +21,7 @@ export default function NotFound() {
           text: t('backHome'),
           href: `/${locale}`,
         }}
+        preferredAuthenticatedHomeHref={`/${locale}/dashboard`}
         secondaryButton={{
           text: t('backDashboard'),
           onClick: () => (window.location.href = `/${locale}/dashboard`),

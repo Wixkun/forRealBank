@@ -8,7 +8,7 @@ type Transaction = {
   type: 'credit' | 'debit' | 'transfer' | 'payment' | 'deposit' | 'withdrawal';
   description: string;
   date: string;
-  amount: number; 
+  amount: number;
   balance?: string;
 };
 

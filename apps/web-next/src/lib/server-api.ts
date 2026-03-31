@@ -1,8 +1,9 @@
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-const PROXY_URL = process.env.NEXT_PUBLIC_WEB_URL || 'http://localhost:3000';
-const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL || 'http://forrealbank-web:3000';
+const API_URL = process.env.API_URL || 'http://localhost:3001/api';
+
+// En server-side Next, utiliser un chemin relatif évite les soucis de port (3000 vs 3002).
+const PROXY_BASE = '/api/proxy';
 
 export async function getAuthToken(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -13,9 +14,9 @@ export async function getAuthToken(): Promise<string | null> {
 export async function fetchWithAuth(url: string, options: RequestInit = {}) {
   const urlObj = new URL(url);
   const path = urlObj.pathname.replace('/api/', '') + (urlObj.search ? urlObj.search : '');
-  
-  const proxyUrl = `${PROXY_URL}/api/proxy/${path}`;
-  
+
+  const proxyUrl = `${PROXY_BASE}/${path}`;
+
   console.log('[Server-API] Using proxy:', proxyUrl, 'Original:', url);
 
   const response = await fetch(proxyUrl, {
@@ -44,9 +45,10 @@ export async function getRecentTransactions(limit: number = 5) {
 }
 
 export async function getAccountTransactions(accountId: string, limit: number = 50, type?: string) {
-  const url = type && type !== 'all'
-    ? `${API_URL}/transactions/account/${accountId}?limit=${limit}&type=${type}`
-    : `${API_URL}/transactions/account/${accountId}?limit=${limit}`;
+  const url =
+    type && type !== 'all'
+      ? `${API_URL}/transactions/account/${accountId}?limit=${limit}&type=${type}`
+      : `${API_URL}/transactions/account/${accountId}?limit=${limit}`;
   return fetchWithAuth(url);
 }
 
@@ -69,7 +71,7 @@ export async function getCurrentUser() {
 export async function getMarketPrices(symbols: string[]) {
   if (!symbols.length) return {};
   const params = symbols.join(',');
-  const res = await fetch(`${WEB_URL}/api/market-data?symbols=${params}`, {
+  const res = await fetch(`/api/market-data?symbols=${params}`, {
     next: { revalidate: 60 },
   });
   if (!res.ok) {
@@ -87,7 +89,7 @@ export async function postTransfer(payload: {
   amount: number;
   description?: string;
 }) {
-  const url = `${PROXY_URL}/api/proxy/transactions/transfer`;
+  const url = `${PROXY_BASE}/transactions/transfer`;
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -1,5 +1,5 @@
-import { User } from '@forreal/domain/user/User';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { User } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 import { UserEntity } from '../entities/UserEntity';
 
 function isValidRoleName(name: string): name is RoleName {
@@ -14,10 +14,8 @@ export class UserMapper {
     entity.email = user.email;
     entity.passwordHash = user.passwordHash;
 
-    const firstName =
-      (user as any)._firstName ?? (user as any).firstName ?? '';
-    const lastName =
-      (user as any)._lastName ?? (user as any).lastName ?? '';
+    const firstName = (user as any)._firstName ?? (user as any).firstName ?? '';
+    const lastName = (user as any)._lastName ?? (user as any).lastName ?? '';
 
     if (!String(firstName).trim() || !String(lastName).trim()) {
       throw new Error('[UserMapper.toPersistence] Le prénom et le nom sont obligatoires.');
@@ -35,9 +33,7 @@ export class UserMapper {
   }
 
   static toDomain(entity: UserEntity): User {
-    const roles: RoleName[] = (entity.roles ?? [])
-      .map(role => role.name)
-      .filter(isValidRoleName);
+    const roles: RoleName[] = (entity.roles ?? []).map((role) => role.name).filter(isValidRoleName);
 
     const user = new User(
       entity.id,
@@ -58,5 +54,4 @@ export class UserMapper {
 
     return user;
   }
-
 }

@@ -1,8 +1,9 @@
-import { IAccountRepository } from '@forreal/domain/accounts/ports/IAccountRepository';
-import { IBrokerageRepository } from '@forreal/domain/brokerage/ports/IBrokerageRepository';
-import { ITransactionRepository } from '@forreal/domain/transactions/ports/ITransactionRepository';
-import { BankAccount } from '@forreal/domain/accounts/BankAccount';
-import { BrokerageAccount } from '@forreal/domain/brokerage/BrokerageAccount';
+import { IAccountRepository } from '@forreal/domain';
+import { IBrokerageRepository } from '@forreal/domain';
+import { ITransactionRepository } from '@forreal/domain';
+import { INotificationRepository, NotificationType } from '@forreal/domain';
+import { BankAccount } from '@forreal/domain';
+import { BrokerageAccount } from '@forreal/domain';
 
 export type TransferRequest = {
   userId: string;
@@ -26,6 +27,7 @@ export class InitiateTransferUseCase {
     private readonly accountRepo: IAccountRepository,
     private readonly brokerageRepo: IBrokerageRepository,
     private readonly transactionRepo: ITransactionRepository,
+    private readonly notificationRepo: INotificationRepository,
   ) {}
 
   async execute(req: TransferRequest): Promise<TransferResult> {
@@ -102,6 +104,13 @@ export class InitiateTransferUseCase {
           balanceAfter: newDestBalance,
         });
         destinationBalanceUpdated = newDestBalance;
+
+        await this.notificationRepo.create(
+          destinationBank.userId,
+          'Virement reçu',
+          `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
+          NotificationType.TRANSFER_RECEIVED,
+        );
       } else if (destinationBrokerage) {
         const newDestBalance = Number((destinationBrokerage.balance + amount).toFixed(2));
         await this.brokerageRepo.updateCashBalance(destinationBrokerage.id, newDestBalance);
@@ -134,7 +143,9 @@ export class InitiateTransferUseCase {
     }
 
     const destinationBank = await this.accountRepo.findBankAccountById(req.destinationAccountId);
-    const destinationBrokerage = destinationBank ? null : await this.brokerageRepo.findById(req.destinationAccountId);
+    const destinationBrokerage = destinationBank
+      ? null
+      : await this.brokerageRepo.findById(req.destinationAccountId);
 
     if (destinationBank && destinationBank.userId !== req.userId) {
       return { success: false, message: 'Destination not owned by user' };
@@ -162,6 +173,13 @@ export class InitiateTransferUseCase {
         balanceAfter: newDestBalance,
       });
       destinationBalanceUpdated = newDestBalance;
+
+      await this.notificationRepo.create(
+        destinationBank.userId,
+        'Virement reçu',
+        `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
+        NotificationType.TRANSFER_RECEIVED,
+      );
     } else if (destinationBrokerage) {
       const newDestBalance = Number((destinationBrokerage.balance + amount).toFixed(2));
       await this.brokerageRepo.updateCashBalance(destinationBrokerage.id, newDestBalance);

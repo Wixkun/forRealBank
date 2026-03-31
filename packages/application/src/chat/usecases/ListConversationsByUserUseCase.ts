@@ -1,7 +1,7 @@
-import { IConversationParticipantRepository } from '@forreal/domain/chat/ports/IConversationParticipantRepository';
-import { IConversationRepository } from '@forreal/domain/chat/ports/IConversationRepository';
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { IConversationParticipantRepository } from '@forreal/domain';
+import { IConversationRepository } from '@forreal/domain';
+import { IUserRepository } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 
 export class ListConversationsByUserUseCase {
   constructor(
@@ -12,10 +12,10 @@ export class ListConversationsByUserUseCase {
 
   async execute(input: { userId: string; type?: 'PRIVATE' | 'GROUP' }) {
     const participants = await this.participantRepository.listByUser(input.userId);
-    const conversationIds = Array.from(new Set(participants.map(p => p.conversationId)));
-    
+    const conversationIds = Array.from(new Set(participants.map((p) => p.conversationId)));
+
     if (!this.conversationRepository || !this.userRepository) {
-      return conversationIds.map(id => ({ id }));
+      return conversationIds.map((id) => ({ id }));
     }
 
     const conversations = await Promise.all(
@@ -30,20 +30,20 @@ export class ListConversationsByUserUseCase {
           convParticipants.map(async (p) => {
             const user = await this.userRepository!.findById(p.userId);
             const roles = user?.roles ? Array.from(user.roles) : [];
-            const role = roles.includes(RoleName.DIRECTOR) ? RoleName.DIRECTOR : (roles[0] || '');
-            
+            const role = roles.includes(RoleName.DIRECTOR) ? RoleName.DIRECTOR : roles[0] || '';
+
             return {
               id: p.userId,
               firstName: user?.firstName || 'Unknown',
               lastName: user?.lastName || 'User',
               role: role,
             };
-          })
+          }),
         );
 
         let name = '';
         if (conversation.type === 'PRIVATE') {
-          const otherParticipant = participantDetails.find(p => p.id !== input.userId);
+          const otherParticipant = participantDetails.find((p) => p.id !== input.userId);
           name = otherParticipant
             ? `${otherParticipant.firstName} ${otherParticipant.lastName}`
             : 'Private Conversation';
@@ -58,7 +58,7 @@ export class ListConversationsByUserUseCase {
           participants: participantDetails,
           createdAt: conversation.createdAt,
         };
-      })
+      }),
     );
 
     return conversations.filter((c) => c !== null);

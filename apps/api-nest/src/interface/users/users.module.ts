@@ -3,19 +3,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { UsersController } from './users.controller';
 
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { UserEntity } from '@forreal/infrastructure-typeorm/entities/UserEntity';
-import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
-import { UserRepository } from '@forreal/infrastructure-typeorm/repositories/UserRepository';
+import { IUserRepository } from '@forreal/domain';
+import { UserEntity } from '@forreal/infrastructure-typeorm';
+import { RoleEntity } from '@forreal/infrastructure-typeorm';
+import { UserRepository } from '@forreal/infrastructure-typeorm';
 
 import { RolesGuard } from '../auth/roles.guard';
-import { UpdateUserProfileUseCase } from '@forreal/application/user/usecases/UpdateUserProfileUseCase';
-import { DeleteOwnAccountUseCase } from '@forreal/application/user/usecases/DeleteOwnAccountUseCase';
-import { ListUsersUseCase } from '@forreal/application/user/usecases/ListUsersUseCase';
-import { UpdateUserRolesUseCase } from '@forreal/application/user/usecases/UpdateUserRolesUseCase';
-import { DeleteUserByAdminUseCase } from '@forreal/application/user/usecases/DeleteUserByAdminUseCase';
-import { BanUserUseCase } from '@forreal/application/user/usecases/BanUserUseCase';
-import { UnbanUserUseCase } from '@forreal/application/user/usecases/UnbanUserUseCase';
+import { UpdateUserProfileUseCase } from '@forreal/application';
+import { DeleteOwnAccountUseCase } from '@forreal/application';
+import { ListUsersUseCase } from '@forreal/application';
+import { UpdateUserRolesUseCase } from '@forreal/application';
+import { DeleteUserByAdminUseCase } from '@forreal/application';
+import { BanUserUseCase } from '@forreal/application';
+import { UnbanUserUseCase } from '@forreal/application';
 
 const updateProfileProvider: Provider = {
   provide: UpdateUserProfileUseCase,
@@ -60,10 +60,7 @@ const unbanUserProvider: Provider = {
 };
 
 @Module({
-  imports: [
-    AuthModule,
-    TypeOrmModule.forFeature([UserEntity, RoleEntity]),
-  ],
+  imports: [AuthModule, TypeOrmModule.forFeature([UserEntity, RoleEntity])],
   controllers: [UsersController],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },

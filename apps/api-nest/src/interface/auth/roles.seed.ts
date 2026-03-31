@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, In } from 'typeorm';
-import { RoleEntity } from '@forreal/infrastructure-typeorm/entities/RoleEntity';
+import { RoleEntity } from '@forreal/infrastructure-typeorm';
 
 const DEFAULT_ROLES = ['CLIENT', 'ADVISOR', 'DIRECTOR', 'ADMIN'] as const;
 

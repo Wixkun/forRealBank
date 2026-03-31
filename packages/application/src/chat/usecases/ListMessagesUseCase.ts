@@ -1,4 +1,4 @@
-import { IMessageRepository } from '@forreal/domain/chat/ports/IMessageRepository';
+import { IMessageRepository } from '@forreal/domain';
 
 export class ListMessagesUseCase {
   constructor(private readonly messageRepository: IMessageRepository) {}
@@ -8,7 +8,7 @@ export class ListMessagesUseCase {
       limit: input.limit,
       offset: input.offset,
     });
-    return messages.map(m => ({
+    return messages.map((m) => ({
       id: m.id,
       conversationId: m.conversationId,
       senderId: m.senderId,

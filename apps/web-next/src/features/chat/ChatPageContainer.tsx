@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useTransition } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreateConversation, useConversationsList } from '@/features/chat/use-cases';
@@ -9,46 +9,40 @@ import { ConversationData } from '@/lib/cache/conversations';
 import ChatPagePresenter from './ChatPagePresenter';
 
 interface ChatPageContainerProps {
-  locale: string;
   initialConversations: ConversationData[];
 }
 
-
 export default function ChatPageContainer({
-  locale,
   initialConversations,
 }: ChatPageContainerProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, isLoading: userLoading } = useAuth();
 
+  const { conversations, hasPrivateConversationWith, openConversationWith, updateConversations } =
+    useConversationsList(initialConversations);
+
   const {
-    conversations,
-    hasPrivateConversationWith,
-    openConversationWith,
-    updateConversations,
-  } = useConversationsList(initialConversations);
+    createPrivateConversation,
+    isSubmitting,
+    error: createError,
+  } = useCreateConversation({
+    onSuccess: (conversationId) => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('conversationId', conversationId);
+      router.replace(url.pathname + '?' + url.searchParams.toString());
+    },
+  });
 
-  const { createPrivateConversation, isSubmitting, error: createError } =
-    useCreateConversation({
-      onSuccess: (conversationId) => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('conversationId', conversationId);
-        router.replace(url.pathname + '?' + url.searchParams.toString());
-      },
-    });
-
-  const { advisor } = useClientAdvisor(
-    user?.roles?.includes('CLIENT') ? user?.id : undefined
-  );
+  const { advisor } = useClientAdvisor(user?.roles?.includes('CLIENT') ? user?.id : undefined);
   const { clients: advisorClients } = useAdvisorClients(
-    user?.roles?.includes('ADVISOR') ? user?.id : undefined
+    user?.roles?.includes('ADVISOR') ? user?.id : undefined,
   );
   const { users: directorUsers } = useUsersByRole(
-    user?.roles?.includes('DIRECTOR') ? ('CLIENT' as const) : null
+    user?.roles?.includes('DIRECTOR') ? ('CLIENT' as const) : null,
   );
   const { users: directorAdvisors } = useUsersByRole(
-    user?.roles?.includes('DIRECTOR') ? ('ADVISOR' as const) : null
+    user?.roles?.includes('DIRECTOR') ? ('ADVISOR' as const) : null,
   );
 
   const conversationId = searchParams.get('conversationId') || '';
@@ -60,13 +54,10 @@ export default function ChatPageContainer({
     if (!user?.id) return;
     const loadConversations = async () => {
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/chat/conversations/by-user/${user.id}`,
-          {
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
+        const res = await fetch(`/api/proxy/chat/conversations/by-user/${user.id}`, {
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
         if (res.ok) {
           const list = await res.json();
           updateConversations(Array.isArray(list) ? list : []);
@@ -94,39 +85,37 @@ export default function ChatPageContainer({
       url.searchParams.set('conversationId', id);
       router.replace(url.pathname + '?' + url.searchParams.toString());
     },
-    [router]
+    [router],
   );
 
   const handleCreateConversation = useCallback(
     async (targetUserId: string) => {
       const convId = await createPrivateConversation(targetUserId, user?.id || '');
       if (convId) {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/chat/conversations/by-user/${user?.id}`,
-          { credentials: 'include' }
-        );
+        const res = await fetch(`/api/proxy/chat/conversations/by-user/${user?.id}`, {
+          credentials: 'include',
+        });
         if (res.ok) {
           const newConversations = await res.json();
           updateConversations(Array.isArray(newConversations) ? newConversations : []);
         }
       }
     },
-    [createPrivateConversation, user?.id, updateConversations]
+    [createPrivateConversation, user?.id, updateConversations],
   );
 
   const clientsList = isDirector
-    ? [...(Array.isArray(directorUsers) ? directorUsers : []),
-       ...(Array.isArray(directorAdvisors) ? directorAdvisors : [])]
+    ? [
+        ...(Array.isArray(directorUsers) ? directorUsers : []),
+        ...(Array.isArray(directorAdvisors) ? directorAdvisors : []),
+      ]
     : isAdvisor
       ? advisorClients
       : [];
 
-  const isLoading = userLoading;
-
   return (
     <ChatPagePresenter
-      locale={locale}
-      isLoading={isLoading}
+      isLoading={userLoading}
       user={user}
       conversations={conversations}
       conversationId={conversationId}

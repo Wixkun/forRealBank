@@ -1,4 +1,4 @@
-import { Notification } from '@forreal/domain/notifications/Notification';
+import { Notification } from '@forreal/domain';
 import { NotificationEntity } from '../entities/NotificationEntity';
 
 export class NotificationMapper {

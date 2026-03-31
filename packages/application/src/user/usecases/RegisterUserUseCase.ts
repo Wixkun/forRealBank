@@ -1,13 +1,14 @@
-import { IUserRepository } from '@forreal/domain/user/ports/IUserRepository';
-import { IPasswordHasher } from '@forreal/domain/user/ports/IPasswordHasher';
-import { User } from '@forreal/domain/user/User';
-import { RoleName } from '@forreal/domain/user/RoleName';
-import { randomUUID } from 'crypto';
+import { IUserRepository } from '@forreal/domain';
+import { IPasswordHasher } from '@forreal/domain';
+import { User } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
+import { IUserIdGenerator } from '@forreal/domain';
 
 export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasher,
+    private readonly userIdGenerator: IUserIdGenerator,
   ) {}
 
   async execute(input: { email: string; password: string; firstName: string; lastName: string }) {
@@ -18,7 +19,7 @@ export class RegisterUserUseCase {
     const lastName = (input.lastName ?? '').replace(/\s+/g, ' ').trim();
     if (!firstName || !lastName) throw new Error('INVALID_FULL_NAME');
 
-    const userId = randomUUID();
+    const userId = this.userIdGenerator.generate();
     const creationDate = new Date();
     const hashedPassword = await this.passwordHasher.hash(input.password);
 

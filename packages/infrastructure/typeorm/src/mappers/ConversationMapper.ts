@@ -1,4 +1,4 @@
-import { Conversation, ConversationType } from '@forreal/domain/chat/Conversation';
+import { Conversation, ConversationType } from '@forreal/domain';
 import { ConversationEntity } from '../entities/ConversationEntity';
 
 export class ConversationMapper {
@@ -10,10 +10,6 @@ export class ConversationMapper {
   }
 
   static toDomain(entity: ConversationEntity): Conversation {
-    return new Conversation(
-      entity.id,
-      entity.type as ConversationType,
-      entity.createdAt,
-    );
+    return new Conversation(entity.id, entity.type as ConversationType, entity.createdAt);
   }
 }

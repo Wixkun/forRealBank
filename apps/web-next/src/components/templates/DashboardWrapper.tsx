@@ -13,6 +13,7 @@ type DashboardWrapperProps = {
       send: string;
       receive: string;
       chat: string;
+      director: string;
       more: string;
     };
     accountTypes: {

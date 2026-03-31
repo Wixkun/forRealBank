@@ -5,14 +5,13 @@ import ChatPage from '@/app/[locale]/chat/ChatContent';
 import { ConversationData } from '@/lib/cache/conversations';
 
 type ChatWrapperProps = {
-  locale: string;
   initialConversations?: ConversationData[];
 };
 
-export function ChatWrapper({ locale, initialConversations = [] }: ChatWrapperProps) {
+export function ChatWrapper({ initialConversations = [] }: ChatWrapperProps) {
   return (
     <ThemeProvider>
-      <ChatPage locale={locale} initialConversations={initialConversations} />
+      <ChatPage initialConversations={initialConversations} />
     </ThemeProvider>
   );
 }

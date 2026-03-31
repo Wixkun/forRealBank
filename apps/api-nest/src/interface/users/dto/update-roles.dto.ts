@@ -1,5 +1,5 @@
 import { ArrayNotEmpty, IsArray, IsEnum } from 'class-validator';
-import { RoleName } from '@forreal/domain/user/RoleName';
+import { RoleName } from '@forreal/domain';
 
 export class UpdateRolesDto {
   @IsArray()

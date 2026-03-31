@@ -1,10 +1,15 @@
-import { INotificationRepository } from '@forreal/domain/notifications/ports/INotificationRepository';
+import { INotificationRepository } from '@forreal/domain';
 
 export class SendNotificationUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
   async execute(input: { userId: string; title: string; content: string; type: string }) {
-    const notification = await this.notificationRepository.create(input.userId, input.title, input.content, input.type);
+    const notification = await this.notificationRepository.create(
+      input.userId,
+      input.title,
+      input.content,
+      input.type,
+    );
     return {
       notificationId: notification.id,
       userId: notification.userId,

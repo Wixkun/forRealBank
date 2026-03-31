@@ -1,4 +1,4 @@
-import { Message } from '@forreal/domain/chat/Message';
+import { Message } from '@forreal/domain';
 import { MessageEntity } from '../entities/MessageEntity';
 
 export class MessageMapper {

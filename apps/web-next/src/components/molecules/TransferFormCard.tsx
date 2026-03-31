@@ -18,7 +18,11 @@ type TransferFormCardProps = {
   hideRecipient?: boolean;
 };
 
-export function TransferFormCard({ onSubmit, labels, hideRecipient = false }: TransferFormCardProps) {
+export function TransferFormCard({
+  onSubmit,
+  labels,
+  hideRecipient = false,
+}: TransferFormCardProps) {
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
 
@@ -41,9 +45,7 @@ export function TransferFormCard({ onSubmit, labels, hideRecipient = false }: Tr
   return (
     <div
       className={`p-6 rounded-2xl border transition-colors ${
-        currentTheme === 'dark'
-          ? 'bg-gray-900/50 border-gray-800'
-          : 'bg-white border-gray-200'
+        currentTheme === 'dark' ? 'bg-gray-900/50 border-gray-800' : 'bg-white border-gray-200'
       }`}
     >
       <h3
@@ -73,43 +75,41 @@ export function TransferFormCard({ onSubmit, labels, hideRecipient = false }: Tr
               errors.amount
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 : currentTheme === 'dark'
-                ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
-                : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
+                  ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
+                  : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="0.00"
           />
-          {errors.amount && (
-            <p className="mt-1 text-sm text-red-500">{errors.amount.message}</p>
-          )}
+          {errors.amount && <p className="mt-1 text-sm text-red-500">{errors.amount.message}</p>}
         </div>
 
         {!hideRecipient && (
-        <div>
-          <label
-            htmlFor="recipient"
-            className={`block text-sm font-medium mb-2 ${
-              currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-            }`}
-          >
-            {labels.recipient}
-          </label>
-          <input
-            type="text"
-            id="recipient"
-            {...register('recipient')}
-            className={`w-full px-4 py-3 rounded-xl border transition-colors ${
-              errors.recipient
-                ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                : currentTheme === 'dark'
-                ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
-                : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
-            } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
-            placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
-          />
-          {errors.recipient && (
-            <p className="mt-1 text-sm text-red-500">{errors.recipient.message}</p>
-          )}
-        </div>
+          <div>
+            <label
+              htmlFor="recipient"
+              className={`block text-sm font-medium mb-2 ${
+                currentTheme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}
+            >
+              {labels.recipient}
+            </label>
+            <input
+              type="text"
+              id="recipient"
+              {...register('recipient')}
+              className={`w-full px-4 py-3 rounded-xl border transition-colors ${
+                errors.recipient
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                  : currentTheme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
+                    : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
+              } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
+              placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
+            />
+            {errors.recipient && (
+              <p className="mt-1 text-sm text-red-500">{errors.recipient.message}</p>
+            )}
+          </div>
         )}
 
         <div>
@@ -129,8 +129,8 @@ export function TransferFormCard({ onSubmit, labels, hideRecipient = false }: Tr
               errors.description
                 ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                 : currentTheme === 'dark'
-                ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
-                : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
+                  ? 'bg-gray-800 border-gray-700 text-white focus:border-teal-500'
+                  : 'bg-white border-gray-300 text-gray-900 focus:border-teal-500'
             } focus:outline-none focus:ring-2 focus:ring-teal-500/20`}
             placeholder="Optional description..."
           />

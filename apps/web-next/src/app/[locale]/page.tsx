@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({
-  params
+  params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
@@ -31,11 +31,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function HomePage({
-  params
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
 
   const t = await getTranslations({ locale, namespace: 'home' });
@@ -115,19 +111,19 @@ export default async function HomePage({
       <Header />
       <main className="relative min-h-screen bg-[#0d0f14] text-white overflow-hidden">
         <HeroSection />
-        
+
         <FeaturesSection
           title={t('features.title')}
           subtitle={t('features.subtitle')}
           features={features}
         />
-        
+
         <ServicesSection
           title={t('services.title')}
           subtitle={t('services.subtitle')}
           services={services}
         />
-        
+
         <CTASection
           title={t('cta.title')}
           description={t('cta.description')}

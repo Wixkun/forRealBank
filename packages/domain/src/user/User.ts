@@ -16,18 +16,42 @@ export class User {
     private _banReason?: string,
   ) {}
 
-  get id() { return this._id; }
-  get email() { return this._email; }
-  get passwordHash() { return this._passwordHash; }
-  get roles(): Set<RoleName> { return new Set<RoleName>(this._roles ?? new Set<RoleName>());}
-  get createdAt() { return this._createdAt; }
-  get updatedAt() { return this._updatedAt; }
-  get firstName() { return this._firstName; }
-  get lastName() { return this._lastName; }
-  get lastLoginAt() { return this._lastLoginAt; }
-  get isBanned() { return this._isBanned; }
-  get bannedAt() { return this._bannedAt; }
-  get banReason() { return this._banReason; }
+  get id() {
+    return this._id;
+  }
+  get email() {
+    return this._email;
+  }
+  get passwordHash() {
+    return this._passwordHash;
+  }
+  get roles(): Set<RoleName> {
+    return new Set<RoleName>(this._roles ?? new Set<RoleName>());
+  }
+  get createdAt() {
+    return this._createdAt;
+  }
+  get updatedAt() {
+    return this._updatedAt;
+  }
+  get firstName() {
+    return this._firstName;
+  }
+  get lastName() {
+    return this._lastName;
+  }
+  get lastLoginAt() {
+    return this._lastLoginAt;
+  }
+  get isBanned() {
+    return this._isBanned;
+  }
+  get bannedAt() {
+    return this._bannedAt;
+  }
+  get banReason() {
+    return this._banReason;
+  }
 
   setNames(first: string, last: string) {
     this._firstName = first;
@@ -35,8 +59,23 @@ export class User {
     this.touch();
   }
 
-  markLogin(at = new Date()) { this._lastLoginAt = at; this.touch(at); }
-  ban(reason?: string, at = new Date()) { this._isBanned = true; this._bannedAt = at; this._banReason = reason; this.touch(at); }
-  unban() { this._isBanned = false; this._bannedAt = undefined; this._banReason = undefined; this.touch(); }
-  touch(at = new Date()) { this._updatedAt = at; }
+  markLogin(at = new Date()) {
+    this._lastLoginAt = at;
+    this.touch(at);
+  }
+  ban(reason?: string, at = new Date()) {
+    this._isBanned = true;
+    this._bannedAt = at;
+    this._banReason = reason;
+    this.touch(at);
+  }
+  unban() {
+    this._isBanned = false;
+    this._bannedAt = undefined;
+    this._banReason = undefined;
+    this.touch();
+  }
+  touch(at = new Date()) {
+    this._updatedAt = at;
+  }
 }

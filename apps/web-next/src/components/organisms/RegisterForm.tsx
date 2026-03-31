@@ -21,22 +21,20 @@ export function RegisterForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-        const response = await fetch(`${apiUrl}/auth/me`, {
+        const response = await fetch(`/api/proxy/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-        
+
         if (response.ok) {
           router.push(`/${locale}/dashboard`);
         }
-      } catch {
-      }
+      } catch {}
     };
-    
+
     checkAuth();
   }, [router, locale]);
 
@@ -51,8 +49,7 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL!;
-      const response = await fetch(`${apiUrl}/auth/register`, {
+      const response = await fetch(`/api/proxy/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -64,7 +61,7 @@ export function RegisterForm() {
         throw new Error(errorData.message || 'Registration failed');
       }
 
-      router.push('/login?registered=true');
+      router.push(`/${locale}/login?registered=true`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during registration');
     }
@@ -77,7 +74,7 @@ export function RegisterForm() {
           {error}
         </div>
       )}
-      
+
       <div className="flex gap-4">
         <FormField
           label={t('firstName')}
@@ -111,7 +108,7 @@ export function RegisterForm() {
 
       <div className="text-center text-sm mt-4">
         <span className="text-gray-400">{tCommon('alreadyHaveAccount')} </span>
-        <Link 
+        <Link
           href={`/${locale}/login`}
           className="text-teal-400 hover:text-teal-300 transition font-medium"
         >

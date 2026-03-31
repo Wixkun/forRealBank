@@ -8,13 +8,14 @@ export const AUTH_CONFIG = {
 } as const;
 
 export function extractLocaleFromPathname(pathname: string): string {
-  const locale = pathname.split('/')[1];
-  return locale || 'en';
+  const seg = (pathname || '').split('/')[1];
+  if (seg === 'fr' || seg === 'en') return seg;
+  return 'en';
 }
 
 export async function performAuthCheck(
   apiUrl: string,
-  maxRetries: number = AUTH_CONFIG.MAX_AUTH_RETRY_ATTEMPTS
+  maxRetries: number = AUTH_CONFIG.MAX_AUTH_RETRY_ATTEMPTS,
 ): Promise<boolean> {
   let lastError: Error | null = null;
 
@@ -40,7 +41,7 @@ export async function performAuthCheck(
       const isLastAttempt = attempt === maxRetries - 1;
 
       if (!isLastAttempt) {
-        await new Promise(resolve => setTimeout(resolve, AUTH_CONFIG.AUTH_RETRY_DELAY_MS));
+        await new Promise((resolve) => setTimeout(resolve, AUTH_CONFIG.AUTH_RETRY_DELAY_MS));
       }
     }
   }

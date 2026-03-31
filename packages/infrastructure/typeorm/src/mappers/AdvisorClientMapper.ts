@@ -1,4 +1,4 @@
-import { AdvisorClient } from '@forreal/domain/chat/AdvisorClient';
+import { AdvisorClient } from '@forreal/domain';
 import { AdvisorClientEntity } from '../entities/AdvisorClientEntity';
 
 export class AdvisorClientMapper {
@@ -9,11 +9,6 @@ export class AdvisorClientMapper {
   }
 
   static toDomain(entity: AdvisorClientEntity): AdvisorClient {
-    return new AdvisorClient(
-      entity.id,
-      entity.advisor.id,
-      entity.client.id,
-      entity.createdAt,
-    );
+    return new AdvisorClient(entity.id, entity.advisor.id, entity.client.id, entity.createdAt);
   }
 }

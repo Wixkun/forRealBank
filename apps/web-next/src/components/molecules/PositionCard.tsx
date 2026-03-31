@@ -74,11 +74,7 @@ export function PositionCard({
             >
               {symbol}
             </h3>
-            <p
-              className={`text-sm ${
-                currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}
-            >
+            <p className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
               {name}
             </p>
           </div>
@@ -92,11 +88,7 @@ export function PositionCard({
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p
-            className={`text-xs ${
-              currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-            }`}
-          >
+          <p className={`text-xs ${currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
             {labels.quantity}
           </p>
           <p
@@ -109,11 +101,7 @@ export function PositionCard({
         </div>
 
         <div>
-          <p
-            className={`text-xs ${
-              currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-            }`}
-          >
+          <p className={`text-xs ${currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
             {labels.avgPrice}
           </p>
           <p
@@ -126,11 +114,7 @@ export function PositionCard({
         </div>
 
         <div>
-          <p
-            className={`text-xs ${
-              currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-            }`}
-          >
+          <p className={`text-xs ${currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
             {labels.currentPrice}
           </p>
           <p
@@ -143,11 +127,7 @@ export function PositionCard({
         </div>
 
         <div>
-          <p
-            className={`text-xs ${
-              currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'
-            }`}
-          >
+          <p className={`text-xs ${currentTheme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
             {labels.totalValue}
           </p>
           <p className="text-sm font-semibold text-teal-400">{totalValue}</p>

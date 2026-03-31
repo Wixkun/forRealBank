@@ -48,6 +48,7 @@ export default function DashboardPage() {
       send: t('quickActions.send'),
       receive: t('quickActions.receive'),
       chat: t('quickActions.chat'),
+      director: t('quickActions.director'),
       more: t('quickActions.more'),
     },
     accountTypes: {
@@ -56,10 +57,7 @@ export default function DashboardPage() {
     },
   };
 
-  const totalBalance = accountData.accounts.reduce(
-    (sum, acc) => sum + (acc.balance || 0),
-    0
-  );
+  const totalBalance = accountData.accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
 
   return (
     <DashboardWrapper

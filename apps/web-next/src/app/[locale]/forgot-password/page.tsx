@@ -20,7 +20,6 @@ export default function ForgotPasswordPage() {
       <div className="absolute inset-0 bg-black/30" />
 
       <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 text-white">
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm mb-1 text-gray-200">Email</label>

@@ -3,10 +3,10 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { TradingPositionEntity } from '@forreal/infrastructure-typeorm/entities/TradingPositionEntity';
-import { TradingOrderEntity } from '@forreal/infrastructure-typeorm/entities/TradingOrderEntity';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm/entities/BrokerageAccountEntity';
-import { MarketAssetEntity } from '@forreal/infrastructure-typeorm/entities/MarketAssetEntity';
+import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
+import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
+import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('trading')
 @UseGuards(JwtAuthGuard)
@@ -39,7 +39,7 @@ export class TradingController {
       order: { quantity: 'DESC' },
     });
 
-    return positions.map(pos => ({
+    return positions.map((pos) => ({
       id: pos.id,
       symbol: pos.asset.symbol,
       name: pos.asset.name,
@@ -66,7 +66,7 @@ export class TradingController {
       order: { createdAt: 'DESC' },
     });
 
-    return orders.map(order => ({
+    return orders.map((order) => ({
       id: order.id,
       symbol: order.asset.symbol,
       name: order.asset.name,
@@ -82,14 +82,18 @@ export class TradingController {
   }
 
   @Post('orders')
-  async createOrder(@Body() body: {
-    accountId: string;
-    symbol: string;
-    side: 'buy' | 'sell';
-    quantity: number;
-    orderType: 'market' | 'limit' | 'stop';
-    price?: number;
-  }, @Req() req: Request) {
+  async createOrder(
+    @Body()
+    body: {
+      accountId: string;
+      symbol: string;
+      side: 'buy' | 'sell';
+      quantity: number;
+      orderType: 'market' | 'limit' | 'stop';
+      price?: number;
+    },
+    @Req() req: Request,
+  ) {
     const userId = (req.user as any).id;
 
     const account = await this.brokerageRepo.findOne({
@@ -124,13 +128,20 @@ export class TradingController {
       order.executedAt = new Date();
       await this.orderRepo.save(order);
 
-      await this.updatePosition(body.accountId, asset.id, body.side, body.quantity, order.executedPrice);
+      await this.updatePosition(
+        body.accountId,
+        asset.id,
+        body.side,
+        body.quantity,
+        order.executedPrice,
+      );
     }
 
     return {
       id: order.id,
       status: order.status,
-      message: order.status === 'executed' ? 'Order executed successfully' : 'Order placed successfully',
+      message:
+        order.status === 'executed' ? 'Order executed successfully' : 'Order placed successfully',
     };
   }
 
@@ -148,7 +159,10 @@ export class TradingController {
 
     if (side === 'buy') {
       if (position) {
-        const totalCost = parseFloat(position.avgPurchasePrice.toString()) * parseFloat(position.quantity.toString()) + price * quantity;
+        const totalCost =
+          parseFloat(position.avgPurchasePrice.toString()) *
+            parseFloat(position.quantity.toString()) +
+          price * quantity;
         const newQuantity = parseFloat(position.quantity.toString()) + quantity;
         position.quantity = newQuantity;
         position.avgPurchasePrice = totalCost / newQuantity;

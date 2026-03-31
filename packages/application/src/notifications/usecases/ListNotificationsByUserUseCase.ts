@@ -1,4 +1,4 @@
-import { INotificationRepository } from '@forreal/domain/notifications/ports/INotificationRepository';
+import { INotificationRepository } from '@forreal/domain';
 
 export class ListNotificationsByUserUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
@@ -8,7 +8,7 @@ export class ListNotificationsByUserUseCase {
       limit: input.limit,
       offset: input.offset,
     });
-    return notifications.map(n => ({
+    return notifications.map((n) => ({
       id: n.id,
       userId: n.userId,
       title: n.title,
