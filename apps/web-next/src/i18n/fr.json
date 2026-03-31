@@ -54,6 +54,8 @@
       "emailPlaceholder": "exemple@banque.com",
       "passwordPlaceholder": "********",
       "registrationSuccess": "Inscription réussie ! Connectez-vous.",
+      "accountLocked": "Trop de tentatives échouées. Votre compte est temporairement verrouillé. Veuillez réessayer plus tard.",
+      "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
       "loginFailed": "La connexion a échoué",
       "genericError": "Une erreur est survenue lors de la connexion"
     },

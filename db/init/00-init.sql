@@ -25,8 +25,18 @@ CREATE TABLE IF NOT EXISTS users (
     last_login_at timestamptz NULL,
     is_banned boolean NOT NULL DEFAULT false,
     banned_at timestamptz NULL,
-    ban_reason text NULL
+    ban_reason text NULL,
+    failed_login_count int NOT NULL DEFAULT 0,
+    lock_until timestamptz NULL
 );
+
+-- Migration légère (idempotente) pour les bases déjà initialisées dans un volume docker.
+-- Postgres n'exécute les scripts /docker-entrypoint-initdb.d que lors de la 1ère init du volume.
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS failed_login_count int NOT NULL DEFAULT 0;
+
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS lock_until timestamptz NULL;
 
 -- Roles table
 CREATE TABLE IF NOT EXISTS roles (

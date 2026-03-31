@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, Length } from 'class-validator';
+import { IsEmail, IsString, MinLength, Length, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class RegisterDto {
@@ -7,7 +7,11 @@ export class RegisterDto {
   email!: string;
 
   @IsString()
-  @MinLength(8)
+  @MinLength(12)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/, {
+    message:
+      'Password must contain at least one uppercase letter, one lowercase letter, one number and one symbol',
+  })
   password!: string;
 
   @IsString()

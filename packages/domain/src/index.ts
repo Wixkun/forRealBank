@@ -33,6 +33,8 @@ export * from './transactions/ports/ITransactionRepository';
 export * from './user/User';
 export * from './user/RoleName';
 
+export * from './user/PasswordPolicy';
+
 export * from './user/ports/IUserRepository';
 export * from './user/ports/IPasswordHasher';
 export * from './user/ports/ITokenService';

@@ -47,4 +47,10 @@ export class UserEntity {
 
   @Column({ type: 'text', name: 'ban_reason', nullable: true })
   banReason!: string | null;
+
+  @Column({ type: 'int', name: 'failed_login_count', default: 0 })
+  failedLoginCount!: number;
+
+  @Column({ type: 'timestamptz', name: 'lock_until', nullable: true })
+  lockUntil!: Date | null;
 }
