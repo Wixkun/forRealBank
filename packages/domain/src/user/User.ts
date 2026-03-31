@@ -14,6 +14,10 @@ export class User {
     private _isBanned: boolean = false,
     private _bannedAt?: Date,
     private _banReason?: string,
+
+    // sécurité auth (anti brute-force)
+    private _failedLoginCount: number = 0,
+    private _lockUntil?: Date,
   ) {}
 
   get id() {
@@ -53,6 +57,33 @@ export class User {
     return this._banReason;
   }
 
+  get failedLoginCount() {
+    return this._failedLoginCount ?? 0;
+  }
+  get lockUntil() {
+    return this._lockUntil;
+  }
+
+  isLocked(at = new Date()): boolean {
+    return !!this._lockUntil && this._lockUntil.getTime() > at.getTime();
+  }
+
+  recordFailedLogin(maxAttempts: number, lockMs: number, at = new Date()) {
+    const current = this._failedLoginCount ?? 0;
+    const next = current + 1;
+    this._failedLoginCount = next;
+    if (next >= maxAttempts) {
+      this._lockUntil = new Date(at.getTime() + lockMs);
+    }
+    this.touch(at);
+  }
+
+  resetLoginFailures(at = new Date()) {
+    this._failedLoginCount = 0;
+    this._lockUntil = undefined;
+    this.touch(at);
+  }
+
   setNames(first: string, last: string) {
     this._firstName = first;
     this._lastName = last;
@@ -61,6 +92,9 @@ export class User {
 
   markLogin(at = new Date()) {
     this._lastLoginAt = at;
+    // reset anti brute-force state on successful login
+    this._failedLoginCount = 0;
+    this._lockUntil = undefined;
     this.touch(at);
   }
   ban(reason?: string, at = new Date()) {

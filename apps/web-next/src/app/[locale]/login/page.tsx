@@ -72,6 +72,12 @@ function LoginForm() {
           router.replace(`/${locale}/banned`);
           return;
         }
+        if (response.status === 423) {
+          throw new Error(t('accountLocked'));
+        }
+        if (response.status === 429) {
+          throw new Error(t('tooManyAttempts'));
+        }
         throw new Error(data.message || t('loginFailed'));
       }
 

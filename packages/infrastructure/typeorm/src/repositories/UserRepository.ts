@@ -40,7 +40,7 @@ export class UserRepository implements IUserRepository {
     if (!roleNames.length) return [];
     const uniqueRoleNames = Array.from(new Set(roleNames));
     const existingRoles = await this.roleRepository.find({ where: { name: In(uniqueRoleNames) } });
-    const existingNames = new Set(existingRoles.map((r) => r.name));
+    const existingNames = new Set(existingRoles.map((r: RoleEntity) => r.name));
     const missing = uniqueRoleNames.filter((n) => !existingNames.has(n));
     if (missing.length) {
       const toSave = missing.map((n) => Object.assign(new RoleEntity(), { name: n }));
@@ -67,6 +67,8 @@ export class UserRepository implements IUserRepository {
       isBanned: userRecord.isBanned ?? false,
       bannedAt: userRecord.bannedAt ?? null,
       banReason: userRecord.banReason ?? null,
+      failedLoginCount: (userRecord as any).failedLoginCount ?? (user as any).failedLoginCount ?? 0,
+      lockUntil: (userRecord as any).lockUntil ?? (user as any).lockUntil ?? null,
       roles,
     });
 

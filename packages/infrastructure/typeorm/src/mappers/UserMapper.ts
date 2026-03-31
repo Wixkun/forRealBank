@@ -29,6 +29,9 @@ export class UserMapper {
     entity.bannedAt = (user as any).bannedAt ?? null;
     entity.banReason = (user as any).banReason ?? null;
 
+    entity.failedLoginCount = (user as any).failedLoginCount ?? 0;
+    entity.lockUntil = (user as any).lockUntil ?? null;
+
     return entity;
   }
 
@@ -48,6 +51,9 @@ export class UserMapper {
       entity.isBanned ?? false,
       entity.bannedAt ?? undefined,
       entity.banReason ?? undefined,
+
+      entity.failedLoginCount ?? 0,
+      entity.lockUntil ?? undefined,
     );
 
     Object.setPrototypeOf(user, User.prototype);

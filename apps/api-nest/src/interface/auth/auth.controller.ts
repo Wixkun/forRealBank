@@ -10,6 +10,7 @@ import {
   ForbiddenException,
   Req,
   Inject,
+  HttpException,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RegisterDto } from './dto/register.dto';
@@ -23,6 +24,33 @@ import { AuthErrorMapper } from './error-mapper';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const TOKEN_EXPIRY_MS = 15 * 60 * 1000;
+
+// Rate limit simple en mémoire (par IP) pour /auth/login.
+// Note: si tu scales sur plusieurs instances, remplace par Redis.
+const LOGIN_RATE_LIMIT = { windowMs: 60_000, max: 10 } as const;
+type RateRec = { count: number; resetAt: number };
+const loginAttemptsByIp = new Map<string, RateRec>();
+
+function getRequestIp(req: Request): string {
+  // trust proxy peut être activé en prod (main.ts). On check x-forwarded-for.
+  const xff = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim();
+  return xff || req.ip || (req.socket?.remoteAddress ?? 'unknown');
+}
+
+function enforceLoginRateLimit(req: Request) {
+  const ip = getRequestIp(req);
+  const now = Date.now();
+  const rec = loginAttemptsByIp.get(ip);
+  if (!rec || rec.resetAt <= now) {
+    loginAttemptsByIp.set(ip, { count: 1, resetAt: now + LOGIN_RATE_LIMIT.windowMs });
+    return;
+  }
+  rec.count += 1;
+  if (rec.count > LOGIN_RATE_LIMIT.max) {
+    const retrySeconds = Math.max(1, Math.ceil((rec.resetAt - now) / 1000));
+    throw new HttpException(`Too many attempts, retry in ${retrySeconds}s`, 429);
+  }
+}
 
 @Controller('/auth')
 export class AuthController {
@@ -56,8 +84,14 @@ export class AuthController {
 
   @HttpCode(200)
   @Post('login')
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     try {
+      enforceLoginRateLimit(req);
+
       // Blocage immédiat si l'utilisateur est banni
       const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
       if (candidate?.isBanned) {

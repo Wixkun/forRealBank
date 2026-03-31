@@ -54,6 +54,8 @@
       "emailPlaceholder": "example@bank.com",
       "passwordPlaceholder": "********",
       "registrationSuccess": "Registration successful! Please login.",
+      "accountLocked": "Too many failed attempts. Your account is temporarily locked. Please try again later.",
+      "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
       "loginFailed": "Login failed",
       "genericError": "An error occurred during login"
     },

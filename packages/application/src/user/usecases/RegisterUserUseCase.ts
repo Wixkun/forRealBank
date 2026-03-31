@@ -3,6 +3,7 @@ import { IPasswordHasher } from '@forreal/domain';
 import { User } from '@forreal/domain';
 import { RoleName } from '@forreal/domain';
 import { IUserIdGenerator } from '@forreal/domain';
+import { isStrongPassword } from '@forreal/domain';
 
 export class RegisterUserUseCase {
   constructor(
@@ -14,6 +15,8 @@ export class RegisterUserUseCase {
   async execute(input: { email: string; password: string; firstName: string; lastName: string }) {
     const emailAlreadyUsed = await this.userRepository.existsByEmail(input.email);
     if (emailAlreadyUsed) throw new Error('EMAIL_ALREADY_REGISTERED');
+
+    if (!isStrongPassword(input.password)) throw new Error('WEAK_PASSWORD');
 
     const firstName = (input.firstName ?? '').replace(/\s+/g, ' ').trim();
     const lastName = (input.lastName ?? '').replace(/\s+/g, ' ').trim();
