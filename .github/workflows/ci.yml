@@ -334,11 +334,11 @@ jobs:
             
             # Accept 2xx or 3xx as successful for web (redirects are ok)
             WEB_OK="no"
-            if [[ "$WEB_CODE" =~ ^[23][0-9]{2}$ ]]; then
+            if [ "$WEB_CODE" -ge 200 ] && [ "$WEB_CODE" -lt 400 ]; then
               WEB_OK="ok"
             fi
             
-            if [ "$DB_OK" = "ok" ] && [ "$API_CODE" == "200" ] && [ "$WEB_OK" = "ok" ]; then
+            if [ "$DB_OK" = "ok" ] && [ "$API_CODE" = "200" ] && [ "$WEB_OK" = "ok" ]; then
               echo "All services ready"
               exit 0
             fi
