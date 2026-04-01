@@ -244,13 +244,13 @@ jobs:
           # Test register
           REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3001/api/auth/register \
             -H "Content-Type: application/json" \
-            -d '{"email":"test-ci@forreal.bank","password":"Test@123","firstName":"CI","lastName":"Test"}')
+            -d '{"email":"test-ci@forreal.bank","password":"TestPassword@123","firstName":"CI","lastName":"Test"}')
           echo "Register: $REGISTER_RESPONSE"
           
           # Test login
           LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3001/api/auth/login \
             -H "Content-Type: application/json" \
-            -d '{"email":"test-ci@forreal.bank","password":"Test@123"}')
+            -d '{"email":"test-ci@forreal.bank","password":"TestPassword@123"}')
           echo "Login: $LOGIN_RESPONSE"
           
           # Verify both returned success
