@@ -183,6 +183,29 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
+      - name: "Create .env file from GitHub Secrets"
+        run: |
+          cat > .env <<'EOF'
+          # Database
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          
+          # PgAdmin
+          PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_EMAIL }}
+          PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_PASSWORD }}
+          
+          # API
+          PORT=3001
+          NODE_ENV=development
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN=15m
+          JWT_ISSUER=forrealbank.auth
+          JWT_AUDIENCE=forrealbank.api
+          JWT_ALGO=HS256
+          EOF
+
       - name: Start docker-compose
         run: docker compose up -d --build
 
@@ -254,6 +277,29 @@ jobs:
 
       - name: Install Playwright browsers
         run: pnpm --filter web-next exec playwright install --with-deps
+
+      - name: "Create .env file from GitHub Secrets"
+        run: |
+          cat > .env <<'EOF'
+          # Database
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          
+          # PgAdmin
+          PGADMIN_DEFAULT_EMAIL=${{ secrets.PGADMIN_EMAIL }}
+          PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_PASSWORD }}
+          
+          # API
+          PORT=3001
+          NODE_ENV=development
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN=15m
+          JWT_ISSUER=forrealbank.auth
+          JWT_AUDIENCE=forrealbank.api
+          JWT_ALGO=HS256
+          EOF
 
       - name: Start docker-compose
         run: docker compose up -d --build
