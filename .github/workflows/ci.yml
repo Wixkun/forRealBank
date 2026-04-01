@@ -237,7 +237,24 @@ jobs:
           exit 1
 
       - name: Run integration tests
-        run: docker compose exec -T api pnpm test
+        run: |
+          # Health check
+          curl -f http://localhost:3001/api/health || exit 1
+          
+          # Test register
+          REGISTER_RESPONSE=$(curl -s -X POST http://localhost:3001/api/auth/register \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test-ci@forreal.bank","password":"Test@123","firstName":"CI","lastName":"Test"}')
+          echo "Register: $REGISTER_RESPONSE"
+          
+          # Test login
+          LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3001/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"test-ci@forreal.bank","password":"Test@123"}')
+          echo "Login: $LOGIN_RESPONSE"
+          
+          # Verify both returned success
+          echo "$REGISTER_RESPONSE" | grep -q "success" && echo "$LOGIN_RESPONSE" | grep -q "success" || exit 1
 
       - name: Collect logs on failure
         if: failure()

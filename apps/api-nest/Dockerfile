@@ -32,6 +32,8 @@ RUN pnpm deploy --filter api-nest --prod --legacy /prod
 
 FROM node:20-alpine AS runtime
 
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
+
 ENV NODE_ENV=production
 WORKDIR /usr/src/app
 
