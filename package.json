@@ -18,7 +18,8 @@
     "bootstrap": "pnpm install --force && pnpm -r build",
     "dk:up": "docker compose up --build",
     "docker:dev": "docker compose -f docker-compose.dev.yml up --build",
-    "docker:prod": "docker compose -f docker-compose.yml up --build"
+    "docker:prod": "docker compose -f docker-compose.yml up --build",
+    "test": "pnpm -r test"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
