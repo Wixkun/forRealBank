@@ -328,7 +328,13 @@ jobs:
           echo "Waiting for services..."
           
           for i in {1..30}; do
-            DB_OK=$(docker compose exec -T db pg_isready -U forreal -d forrealbank 2>/dev/null && echo "ok" || echo "no")
+
+            if docker compose exec -T db pg_isready -U forreal -d forrealbank >/dev/null 2>&1; then
+              DB_OK="ok"
+            else
+              DB_OK="no"
+            fi
+
             API_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/api/health 2>/dev/null || echo "000")
             WEB_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
             
