@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { AppController } from '../app.controller';
+import { AppService } from '../app.service';
 
 import { IUserRepository } from '@forreal/domain';
 import { IPasswordHasher } from '@forreal/domain';
@@ -47,7 +49,9 @@ import { TradingModule } from './trading/trading.module';
     MarketModule,
     TradingModule,
   ],
+  controllers: [AppController],
   providers: [
+    AppService,
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
