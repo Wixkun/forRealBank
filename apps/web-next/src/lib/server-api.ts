@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-const API_URL = process.env.API_URL || 'http://localhost:3001/api';
+const API_URL = process.env.API_URL || 'http://api:3001/api';
 
 // En server-side Next, utiliser un chemin relatif évite les soucis de port (3000 vs 3002).
 const PROXY_BASE = '/api/proxy';

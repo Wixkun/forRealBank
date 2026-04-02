@@ -4,6 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtStrategy } from './jwt.strategy';
+import { MetricsModule } from '../../metrics/metrics.module';
 
 import {
   IUserRepository,
@@ -51,6 +52,7 @@ const loginUserProvider: Provider = {
       defaultStrategy: 'jwt',
       session: false,
     }),
+    MetricsModule,
   ],
   controllers: [AuthController],
   providers: [

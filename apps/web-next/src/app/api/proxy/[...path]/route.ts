@@ -11,7 +11,7 @@ function getTargetUrl(request: NextRequest) {
   const path = pathMatch[1];
   const searchParams = request.nextUrl.searchParams.toString();
   const apiUrl =
-    process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+    process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
 
   const fullUrl = `${apiUrl}/${path}${searchParams ? '?' + searchParams : ''}`;
   return { fullUrl };

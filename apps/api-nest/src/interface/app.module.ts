@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from '../app.controller';
 import { AppService } from '../app.service';
+import { MetricsModule } from '../metrics/metrics.module';
+import { MonitoringMiddleware } from '../metrics/monitoring.middleware';
 
 import { IUserRepository } from '@forreal/domain';
 import { IPasswordHasher } from '@forreal/domain';
@@ -48,6 +50,7 @@ import { TradingModule } from './trading/trading.module';
     TransactionsModule,
     MarketModule,
     TradingModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -58,4 +61,8 @@ import { TradingModule } from './trading/trading.module';
   ],
   exports: [IUserRepository, IPasswordHasher, ITokenService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MonitoringMiddleware).forRoutes('*');
+  }
+}

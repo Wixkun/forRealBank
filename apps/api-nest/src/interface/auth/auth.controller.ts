@@ -21,6 +21,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
 import { AuthErrorMapper } from './error-mapper';
+import { MonitoringService } from '../../metrics/monitoring.service';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const TOKEN_EXPIRY_MS = 15 * 60 * 1000;
@@ -63,6 +64,8 @@ export class AuthController {
 
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
+
+    private readonly monitoring: MonitoringService,
   ) {}
 
   @HttpCode(201)
@@ -95,6 +98,7 @@ export class AuthController {
       // Blocage immédiat si l'utilisateur est banni
       const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
       if (candidate?.isBanned) {
+        this.monitoring.recordAuthAttempt('/auth/login', false);
         throw new ForbiddenException('Account banned');
       }
 
@@ -108,8 +112,12 @@ export class AuthController {
         maxAge: TOKEN_EXPIRY_MS,
       });
 
+      this.monitoring.recordAuthAttempt('/auth/login', true);
       return { success: true, message: 'Login successful' };
     } catch (error) {
+      if (!(error instanceof ForbiddenException)) {
+        this.monitoring.recordAuthAttempt('/auth/login', false);
+      }
       throw AuthErrorMapper.mapToHttpException(error);
     }
   }

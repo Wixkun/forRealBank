@@ -12,10 +12,10 @@ export const BROWSER_API_BASE = process.env.NEXT_PUBLIC_API_BASE || '/api/proxy'
  * Base des appels API côté serveur.
  *
  * En local hors docker: `http://localhost:3001/api`
- * En docker: `http://forrealbank-api:3001/api`
+ * En docker: `http://api:3001/api` (utilise le service name du docker-compose)
  */
 export const SERVER_API_URL =
-  process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+  process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
 
 /**
  * Normalise une URL base en retirant le trailing slash.
