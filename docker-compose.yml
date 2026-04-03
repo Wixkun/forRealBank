@@ -32,9 +32,7 @@ services:
     user: '0'
 
   api:
-    build:
-      context: .
-      dockerfile: apps/api-nest/Dockerfile
+    image: ghcr.io/ESGI-ForRealBank/forRealBank/api:latest
     container_name: forrealbank-api
     restart: unless-stopped
     env_file:
@@ -46,11 +44,7 @@ services:
         condition: service_healthy
 
   web:
-    build:
-      context: .
-      dockerfile: apps/web-next/Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: http://localhost:3001/api
+    image: ghcr.io/ESGI-ForRealBank/forRealBank/web:latest
     container_name: forrealbank-web
     restart: unless-stopped
     ports:
