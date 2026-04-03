@@ -32,7 +32,7 @@ services:
     user: '0'
 
   api:
-    image: ghcr.io/ESGI-ForRealBank/forRealBank/api:latest
+    image: ghcr.io/wixkun/forrealbank/api:latest
     container_name: forrealbank-api
     restart: unless-stopped
     env_file:
@@ -44,7 +44,7 @@ services:
         condition: service_healthy
 
   web:
-    image: ghcr.io/ESGI-ForRealBank/forRealBank/web:latest
+    image: ghcr.io/wixkun/forrealbank/web:latest
     container_name: forrealbank-web
     restart: unless-stopped
     ports:

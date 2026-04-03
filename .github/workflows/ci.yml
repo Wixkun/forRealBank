@@ -422,7 +422,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/${{ matrix.image.name }}
+          images: ${{ env.REGISTRY }}/wixkun/forrealbank/${{ matrix.image.name }}
           tags: |
             type=raw,value=latest
             type=sha,prefix={{branch}}-
@@ -475,4 +475,3 @@ jobs:
             echo "Déploiement échoué!"
             exit 1
           fi
-          
