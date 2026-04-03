@@ -465,7 +465,7 @@ jobs:
             export DOCKER_USERNAME=${{ secrets.GHCR_USERNAME }}
             export DOCKER_PASSWORD=${{ secrets.GHCR_PASSWORD }}
             
-            bash deploy.sh
+            sudo bash deploy.sh
 
       - name: Notify deployment status
         if: always()
