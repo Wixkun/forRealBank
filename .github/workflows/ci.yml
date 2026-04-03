@@ -462,19 +462,17 @@ jobs:
           script: |
             cd /opt/forRealBank || exit 1
             
-            # Exports pour l'authentification Docker
             export DOCKER_USERNAME=${{ secrets.GHCR_USERNAME }}
             export DOCKER_PASSWORD=${{ secrets.GHCR_PASSWORD }}
             
-            # Exécuter le script de déploiement
             bash deploy.sh
 
       - name: Notify deployment status
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Déploiement réussi en production!"
+            echo "Déploiement réussi en production!"
           else
-            echo "❌ Déploiement échoué!"
+            echo "Déploiement échoué!"
             exit 1
           fi
