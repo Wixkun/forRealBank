@@ -460,7 +460,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /opt/forrealbank || exit 1
+            cd /opt/forRealBank || exit 1
             
             # Exports pour l'authentification Docker
             export DOCKER_USERNAME=${{ secrets.GHCR_USERNAME }}
