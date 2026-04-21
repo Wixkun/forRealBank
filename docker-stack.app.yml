@@ -1,0 +1,168 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-forreal}
+      # TODO(secrets): migrate POSTGRES_PASSWORD to a Swarm secret.
+      # Suggested target: POSTGRES_PASSWORD_FILE=/run/secrets/frb_postgres_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forreal}
+      POSTGRES_DB: ${POSTGRES_DB:-forrealbank}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - db_net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  api:
+    image: ghcr.io/wixkun/forrealbank/api:latest
+    environment:
+      PORT: '3001'
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: '5432'
+      DB_USER: ${POSTGRES_USER:-forreal}
+      DB_PASS: ${POSTGRES_PASSWORD:-forreal}
+      DB_NAME: ${POSTGRES_DB:-forrealbank}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-forreal}:${POSTGRES_PASSWORD:-forreal}@db:5432/${POSTGRES_DB:-forrealbank}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-swarm-secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_ISSUER: ${JWT_ISSUER:-forrealbank.auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-forrealbank.api}
+      FRONTEND_ORIGIN: http://57.131.50.29:3000
+      # TODO(secrets): migrate JWT_SECRET to a Swarm secret.
+      # Suggested target: JWT_SECRET_FILE=/run/secrets/frb_jwt_secret
+    ports:
+      # Temporary direct publishing before reverse proxy (Traefik/Nginx) is introduced.
+      # Later, reduce or remove published ports and expose services through the proxy only.
+      - target: 3001
+        published: 3001
+        protocol: tcp
+        mode: ingress
+    healthcheck:
+      test: ['CMD-SHELL', "node -e \"fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - db_net
+      - app_net
+      - public
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+          - node.role == worker
+        preferences:
+          - spread: node.id
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  web:
+    image: ghcr.io/wixkun/forrealbank/web:latest
+    environment:
+      NEXT_PUBLIC_API_URL: http://57.131.50.29:3001/api
+      API_URL: http://api:3001/api
+    ports:
+      # Temporary direct publishing before reverse proxy (Traefik/Nginx) is introduced.
+      # Later, reduce or remove published ports and expose services through the proxy only.
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: ingress
+    healthcheck:
+      test: ['CMD-SHELL', "node -e \"fetch('http://localhost:3000').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - app_net
+      - public
+    deploy:
+      replicas: 3
+      placement:
+        constraints:
+          - node.role == worker
+        preferences:
+          - spread: node.id
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+        reservations:
+          cpus: '0.20'
+          memory: 192M
+
+networks:
+  app_net:
+    driver: overlay
+    attachable: true
+  db_net:
+    driver: overlay
+    attachable: true
+  # Shared ingress network consumed by the proxy stack (Traefik).
+  # Must exist as an external overlay network named "public".
+  public:
+    external: true
+    name: public
+
+volumes:
+  dbdata:
+    driver: local
+
+# Swarm secrets migration hints (next iteration):
+# - POSTGRES_PASSWORD -> frb_postgres_password
+# - JWT_SECRET        -> frb_jwt_secret
+# Keep plain env vars for now, then switch to *_FILE once app/config supports it.
