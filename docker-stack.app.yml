@@ -56,11 +56,6 @@ services:
       JWT_ISSUER: ${JWT_ISSUER:-forrealbank.auth}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-forrealbank.api}
       FRONTEND_ORIGIN: https://for-real.cloud
-    ports:
-      - target: 3001
-        published: 3001
-        protocol: tcp
-        mode: ingress
     healthcheck:
       test: ['CMD-SHELL', "node -e \"fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 15s
@@ -112,11 +107,6 @@ services:
     environment:
       NEXT_PUBLIC_API_URL: https://for-real.cloud/api
       API_URL: http://api:3001/api
-    ports:
-      - target: 3000
-        published: 3000
-        protocol: tcp
-        mode: ingress
     healthcheck:
       test: ['CMD-SHELL', "node -e \"fetch('http://localhost:3000').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 15s
