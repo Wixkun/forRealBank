@@ -52,16 +52,12 @@ services:
       DB_PASS: ${POSTGRES_PASSWORD:-forreal}
       DB_NAME: ${POSTGRES_DB:-forrealbank}
       DATABASE_URL: postgresql://${POSTGRES_USER:-forreal}:${POSTGRES_PASSWORD:-forreal}@db:5432/${POSTGRES_DB:-forrealbank}
-      JWT_SECRET: ${JWT_SECRET:-change-me-in-swarm-secret}
+      JWT_SECRET_FILE: /run/secrets/frb_jwt_secret
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_ISSUER: ${JWT_ISSUER:-forrealbank.auth}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-forrealbank.api}
       FRONTEND_ORIGIN: https://for-real.cloud
-      # TODO(secrets): migrate JWT_SECRET to a Swarm secret.
-      # Suggested target: JWT_SECRET_FILE=/run/secrets/frb_jwt_secret
     ports:
-      # Temporary direct publishing before reverse proxy (Traefik/Nginx) is introduced.
-      # Later, reduce or remove published ports and expose services through the proxy only.
       - target: 3001
         published: 3001
         protocol: tcp
@@ -108,6 +104,8 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
+    secrets:
+      - frb_jwt_secret
 
   web:
     image: ghcr.io/wixkun/forrealbank/web:latest
@@ -115,8 +113,6 @@ services:
       NEXT_PUBLIC_API_URL: https://for-real.cloud/api
       API_URL: http://api:3001/api
     ports:
-      # Temporary direct publishing before reverse proxy (Traefik/Nginx) is introduced.
-      # Later, reduce or remove published ports and expose services through the proxy only.
       - target: 3000
         published: 3000
         protocol: tcp
@@ -170,8 +166,6 @@ networks:
   db_net:
     driver: overlay
     attachable: true
-  # Shared ingress network consumed by the proxy stack (Traefik).
-  # Must exist as an external overlay network named "public".
   public:
     external: true
     name: public
@@ -179,8 +173,3 @@ networks:
 volumes:
   dbdata:
     driver: local
-
-# Swarm secrets migration hints (next iteration):
-# - POSTGRES_PASSWORD -> frb_postgres_password
-# - JWT_SECRET        -> frb_jwt_secret
-# Keep plain env vars for now, then switch to *_FILE once app/config supports it.

@@ -10,7 +10,7 @@ export default () => ({
     name: process.env.DB_NAME ?? 'forrealbank',
   },
   jwt: {
-    secret: resolveEnvSecret('JWT_SECRET') ?? 'dev-secret',
+    secret: resolveEnvSecret('JWT_SECRET') ?? 'fallback',
     expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   },
 });
