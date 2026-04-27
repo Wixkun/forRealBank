@@ -1,5 +1,6 @@
 import jwt, { SignOptions, VerifyOptions } from 'jsonwebtoken';
 import { JwtPayload, ITokenService } from '@forreal/domain';
+import { resolveEnvSecret } from './resolveEnvSecret';
 
 export class JwtTokenService implements ITokenService {
   private readonly secret: string;
@@ -7,9 +8,9 @@ export class JwtTokenService implements ITokenService {
   private readonly verifyOpts: VerifyOptions;
 
   constructor() {
-    this.secret = process.env.JWT_SECRET ?? 'dev-secret';
+    this.secret = resolveEnvSecret('JWT_SECRET') ?? 'fallback';
     if (!this.secret) {
-      throw new Error('[JwtTokenService] Missing JWT_SECRET in environment variables');
+      throw new Error('[JwtTokenService] Missing JWT_SECRET (or JWT_SECRET_FILE) in environment variables');
     }
 
     this.signOpts = {};

@@ -1,3 +1,5 @@
+import { resolveEnvSecret } from '@forreal/infrastructure-jwt-nest';
+
 export default () => ({
   port: parseInt(process.env.PORT ?? '3001', 10),
   db: {
@@ -8,7 +10,7 @@ export default () => ({
     name: process.env.DB_NAME ?? 'forrealbank',
   },
   jwt: {
-    secret: process.env.JWT_SECRET ?? 'dev-secret',
+    secret: resolveEnvSecret('JWT_SECRET') ?? 'dev-secret',
     expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   },
 });

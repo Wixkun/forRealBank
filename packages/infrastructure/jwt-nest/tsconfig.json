@@ -6,7 +6,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "composite": true,
-    "declaration": true
+    "declaration": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src/**/*"],
   "references": [{ "path": "../../domain" }]
