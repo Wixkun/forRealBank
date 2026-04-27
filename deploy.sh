@@ -1,43 +1,25 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -e
+cd /opt/forrealbank
 
-echo "Démarrage du déploiement..."
-echo "Répertoire: $(pwd)"
+echo "Pull latest code..."
+git pull origin main
 
-PROJECT_DIR="/opt/forRealBank"  
-REGISTRY="ghcr.io"
+echo "Login to GHCR..."
+echo "${DOCKER_PASSWORD}" | docker login ghcr.io -u "${DOCKER_USERNAME}" --password-stdin
 
-cd "$PROJECT_DIR" || { echo "Répertoire $PROJECT_DIR introuvable"; exit 1; }
+echo "Ensure shared overlay network exists..."
+docker network inspect public >/dev/null 2>&1 || docker network create --driver overlay --attachable public
 
-echo "Mise à jour du code depuis GitHub..."
-git pull
+echo "Deploy app stack..."
+docker stack deploy -c docker-stack.app.yml forrealbank
 
-echo "Connexion au registre Docker..."
-echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin "$REGISTRY"
+echo "Deploy proxy stack..."
+docker stack deploy -c docker-stack.proxy.yml proxy
 
-echo "⬇Récupération des dernières images..."
-docker compose pull
+echo "Deploy monitoring stack..."
+docker stack deploy -c docker-stack.monitoring.yml monitoring
 
-echo "Redémarrage des services..."
-docker compose up -d --no-build
-
-echo "Attente que les services soient prêts..."
-sleep 10
-
-echo "Vérification de la santé..."
-API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/api/health || echo "000")
-WEB_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 || echo "000")
-
-if [ "$API_STATUS" = "200" ] && [ "$WEB_STATUS" != "000" ]; then
-  echo "Déploiement réussi!"
-  echo "  API health: $API_STATUS"
-  echo "  Web status: $WEB_STATUS"
-  exit 0
-else
-  echo "Déploiement échoué!"
-  echo "  API health: $API_STATUS"
-  echo "  Web status: $WEB_STATUS"
-  docker compose logs api
-  exit 1
-fi
+echo "Current services:"
+docker service ls
