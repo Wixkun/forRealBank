@@ -56,7 +56,7 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_ISSUER: ${JWT_ISSUER:-forrealbank.auth}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-forrealbank.api}
-      FRONTEND_ORIGIN: http://57.131.50.29:3000
+      FRONTEND_ORIGIN: http://for-real.cloud
       # TODO(secrets): migrate JWT_SECRET to a Swarm secret.
       # Suggested target: JWT_SECRET_FILE=/run/secrets/frb_jwt_secret
     ports:
@@ -78,6 +78,13 @@ services:
       - public
     deploy:
       replicas: 2
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=public
+        - traefik.http.routers.forrealbank-api.rule=Host(`for-real.cloud`) && PathPrefix(`/api`)
+        - traefik.http.routers.forrealbank-api.entrypoints=web
+        - traefik.http.routers.forrealbank-api.priority=100
+        - traefik.http.services.forrealbank-api.loadbalancer.server.port=3001
       placement:
         constraints:
           - node.role == worker
@@ -103,7 +110,7 @@ services:
   web:
     image: ghcr.io/wixkun/forrealbank/web:latest
     environment:
-      NEXT_PUBLIC_API_URL: http://57.131.50.29:3001/api
+      NEXT_PUBLIC_API_URL: Nhttp://for-real.cloud/api
       API_URL: http://api:3001/api
     ports:
       # Temporary direct publishing before reverse proxy (Traefik/Nginx) is introduced.
@@ -123,6 +130,13 @@ services:
       - public
     deploy:
       replicas: 3
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=public
+        - traefik.http.routers.forrealbank-web.rule=Host(`for-real.cloud`)
+        - traefik.http.routers.forrealbank-web.entrypoints=web
+        - traefik.http.routers.forrealbank-web.priority=1
+        - traefik.http.services.forrealbank-web.loadbalancer.server.port=3000
       placement:
         constraints:
           - node.role == worker
