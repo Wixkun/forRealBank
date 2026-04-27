@@ -51,7 +51,7 @@ export default function BrokeragePage() {
       try {
         setLoading(true);
 
-        const accountRes = await fetch(`/api/proxy/accounts/brokerage/${accountId}`);
+        const accountRes = await fetch(`/api/accounts/brokerage/${accountId}`);
         if (!accountRes.ok) {
           if (accountRes.status === 401) {
             router.push('/login');
@@ -62,7 +62,7 @@ export default function BrokeragePage() {
         const accountData = await accountRes.json();
         setAccount(accountData);
 
-        const posRes = await fetch(`/api/proxy/trading/positions/${accountId}`);
+        const posRes = await fetch(`/api/trading/positions/${accountId}`);
         if (posRes.ok) {
           const positionsData: TradingPosition[] = await posRes.json();
 
@@ -181,3 +181,4 @@ export default function BrokeragePage() {
     />
   );
 }
+

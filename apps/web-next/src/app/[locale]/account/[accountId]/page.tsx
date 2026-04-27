@@ -43,14 +43,14 @@ export default function AccountPage() {
       try {
         setLoading(true);
 
-        const accountRes = await fetch(`/api/proxy/accounts/bank/${accountId}`);
+        const accountRes = await fetch(`/api/accounts/bank/${accountId}`);
         if (!accountRes.ok) {
           throw new Error(`Failed to fetch account: ${accountRes.status}`);
         }
         const accountData = await accountRes.json();
         setAccount(accountData);
 
-        const txnRes = await fetch(`/api/proxy/transactions/account/${accountId}?limit=50`);
+        const txnRes = await fetch(`/api/transactions/account/${accountId}?limit=50`);
         if (txnRes.ok) {
           const txnData = await txnRes.json();
           setTransactions(txnData);
@@ -145,3 +145,4 @@ export default function AccountPage() {
     />
   );
 }
+

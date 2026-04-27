@@ -3,10 +3,10 @@ const DEFAULT_API_ORIGIN = '';
 /**
  * Base des appels API côté navigateur.
  *
- * Recommandation: utiliser le proxy Next (`/api/proxy/*`) pour éviter CORS et
+ * Recommandation: utiliser le proxy Next (`/api/*`) pour éviter CORS et
  * avoir un comportement identique en local / docker.
  */
-export const BROWSER_API_BASE = process.env.NEXT_PUBLIC_API_BASE || '/api/proxy';
+export const BROWSER_API_BASE = process.env.NEXT_PUBLIC_API_BASE || '/api';
 
 /**
  * Base des appels API côté serveur.

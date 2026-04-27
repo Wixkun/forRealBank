@@ -20,7 +20,7 @@ interface NewsFeedProps {
 }
 
 export default function NewsFeed({
-  apiUrl = '/api/proxy',
+  apiUrl = '/api',
   userRoles = null,
 }: NewsFeedProps) {
   const t = useTranslations('feed');

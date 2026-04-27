@@ -55,7 +55,7 @@ function TransferPageContent() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`/api/proxy/accounts`);
+        const res = await fetch(`/api/accounts`);
         const data: AccountsResponse = await res.json();
         const bank: AccountItemWithIban[] = (data.bankAccounts || []).map((acc) => ({
           id: acc.id,
@@ -120,7 +120,7 @@ function TransferPageContent() {
       } else {
         body.destinationIban = destinationIban || data.recipient || '';
       }
-      const res = await fetch('/api/proxy/transactions/transfer', {
+      const res = await fetch('/api/transactions/transfer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -328,3 +328,4 @@ export default function TransferPage() {
     </ThemeProvider>
   );
 }
+

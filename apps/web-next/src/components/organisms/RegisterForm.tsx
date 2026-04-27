@@ -21,7 +21,7 @@ export function RegisterForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch(`/api/proxy/auth/me`, {
+        const response = await fetch(`/api/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -49,7 +49,7 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
-      const response = await fetch(`/api/proxy/auth/register`, {
+      const response = await fetch(`/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

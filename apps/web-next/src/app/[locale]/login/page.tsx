@@ -22,7 +22,7 @@ function LoginForm() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch(`/api/proxy/auth/me`, {
+        const response = await fetch(`/api/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -170,3 +170,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+

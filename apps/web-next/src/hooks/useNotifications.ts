@@ -20,7 +20,7 @@ interface UseNotificationsOptions {
 
 export function useNotifications({
   userId,
-  apiUrl = '/api/proxy',
+  apiUrl = '/api',
 }: UseNotificationsOptions) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMarkAllLoading, setIsMarkAllLoading] = useState(false);

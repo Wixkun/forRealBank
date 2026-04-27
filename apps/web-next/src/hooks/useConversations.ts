@@ -19,7 +19,7 @@ interface UseConversationsOptions {
 }
 
 export function useConversations({
-  apiUrl = '/api/proxy',
+  apiUrl = '/api',
 }: UseConversationsOptions = {}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);

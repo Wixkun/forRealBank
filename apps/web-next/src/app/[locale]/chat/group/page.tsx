@@ -20,7 +20,7 @@ export default function GroupChatPage() {
     Array<{ id: string; name: string; role: string }>
   >([]);
   const conversationId = searchParams.get('conversationId') || '';
-  const apiUrl = '/api/proxy';
+  const apiUrl = '/api';
 
   useEffect(() => {
     if (conversationId || !user || autoLoadAttemptedRef.current) return;
@@ -135,3 +135,4 @@ export default function GroupChatPage() {
     </div>
   );
 }
+

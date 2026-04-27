@@ -40,7 +40,7 @@ function defaultWsUrl(): string {
 export function useChat({
   conversationId,
   userId,
-  apiUrl = '/api/proxy',
+  apiUrl = '/api',
   wsUrl,
 }: UseChatOptions) {
   const [messages, setMessages] = useState<Message[]>([]);

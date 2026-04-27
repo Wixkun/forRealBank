@@ -9,7 +9,7 @@ type Props = {
   onCreatedAction?: () => void;
 };
 
-export function CreateNewsInlineForm({ apiUrl = '/api/proxy', onCreatedAction }: Props) {
+export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props) {
   const t = useTranslations('feed.create');
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';

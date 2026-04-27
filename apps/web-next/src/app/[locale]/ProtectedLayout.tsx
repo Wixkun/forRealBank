@@ -20,7 +20,7 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
-        const apiUrl = '/api/proxy';
+        const apiUrl = '/api';
         try {
           const isAuthorized = await performAuthCheck(apiUrl);
 
@@ -61,3 +61,4 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   return <>{children}</>;
 }
+
