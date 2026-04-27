@@ -13,7 +13,6 @@ export class MonitoringService {
   private httpErrorsTotal: Counter;
 
   constructor() {
-    // Total HTTP requests
     this.httpRequestsTotal = new Counter({
       name: 'http_requests_total',
       help: 'Total HTTP requests processed',
@@ -21,7 +20,6 @@ export class MonitoringService {
       registers: [register],
     });
 
-    // HTTP request duration in milliseconds
     this.httpRequestDuration = new Histogram({
       name: 'http_request_duration_ms',
       help: 'HTTP request latency in milliseconds',
@@ -30,7 +28,6 @@ export class MonitoringService {
       registers: [register],
     });
 
-    // Authentication attempts
     this.authAttemptsTotal = new Counter({
       name: 'auth_attempts_total',
       help: 'Total authentication attempts',
@@ -38,7 +35,6 @@ export class MonitoringService {
       registers: [register],
     });
 
-    // HTTP errors
     this.httpErrorsTotal = new Counter({
       name: 'http_errors_total',
       help: 'Total HTTP errors (4xx, 5xx)',

@@ -18,10 +18,8 @@ RUN pnpm install --no-frozen-lockfile
 
 COPY . .
 
-# Clean tsbuildinfo
 RUN find . -name "*.tsbuildinfo" -delete
 
-# Build des packages + API
 RUN pnpm --filter @forreal/domain build \
  && pnpm --filter @forreal/application build \
  && pnpm --filter @forreal/infrastructure-* build \

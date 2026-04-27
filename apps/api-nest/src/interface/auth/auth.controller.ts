@@ -26,14 +26,11 @@ import { MonitoringService } from '../../metrics/monitoring.service';
 const isProduction = process.env.NODE_ENV === 'production';
 const TOKEN_EXPIRY_MS = 15 * 60 * 1000;
 
-// Rate limit simple en mémoire (par IP) pour /auth/login.
-// Note: si tu scales sur plusieurs instances, remplace par Redis.
 const LOGIN_RATE_LIMIT = { windowMs: 60_000, max: 10 } as const;
 type RateRec = { count: number; resetAt: number };
 const loginAttemptsByIp = new Map<string, RateRec>();
 
 function getRequestIp(req: Request): string {
-  // trust proxy peut être activé en prod (main.ts). On check x-forwarded-for.
   const xff = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim();
   return xff || req.ip || (req.socket?.remoteAddress ?? 'unknown');
 }
@@ -95,7 +92,6 @@ export class AuthController {
     try {
       enforceLoginRateLimit(req);
 
-      // Blocage immédiat si l'utilisateur est banni
       const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
       if (candidate?.isBanned) {
         this.monitoring.recordAuthAttempt('/auth/login', false);
@@ -150,7 +146,6 @@ export class AuthController {
         throw new UnauthorizedException('User not found');
       }
 
-      // Si l'utilisateur est banni, on renvoie 403 (même message que RolesGuard)
       if (user.isBanned) {
         throw new ForbiddenException('Account banned');
       }

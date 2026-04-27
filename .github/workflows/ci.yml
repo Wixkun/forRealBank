@@ -16,8 +16,6 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  # ============ STEP 1: QUALITY CHECKS (Parallel) ============
-
   lint-and-test:
     name: Lint & Unit Tests
     runs-on: ubuntu-latest
@@ -129,8 +127,6 @@ jobs:
             trivy-report.json
           retention-days: 30
 
-  # ============ STEP 2: BUILD (Matrix) ============
-
   docker-build:
     name: Build ${{ matrix.image.name }} Image
     runs-on: ubuntu-latest
@@ -151,7 +147,7 @@ jobs:
             dockerfile: ./apps/web-next/Dockerfile
             tag-name: web
             build-args: |
-              NEXT_PUBLIC_API_URL=http://api:3001/api
+              NEXT_PUBLIC_API_URL=https://for-real.cloud/api
 
     steps:
       - name: Checkout du code
@@ -170,8 +166,6 @@ jobs:
           build-args: ${{ matrix.image.build-args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  # ============ STEP 3: TESTS (Parallel) ============
 
   integration-tests:
     name: Integration Tests
@@ -338,7 +332,6 @@ jobs:
             API_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/api/health 2>/dev/null || echo "000")
             WEB_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null || echo "000")
             
-            # Accept 2xx or 3xx as successful for web (redirects are ok)
             WEB_OK="no"
             if [ "$WEB_CODE" -ge 200 ] && [ "$WEB_CODE" -lt 400 ]; then
               WEB_OK="ok"
@@ -382,8 +375,6 @@ jobs:
         if: always()
         run: docker compose down -v
 
-  # ============ STEP 4: DEPLOY (Main only) ============
-
   docker-push:
     name: Push to GHCR
     runs-on: ubuntu-latest
@@ -402,7 +393,7 @@ jobs:
           - name: web
             dockerfile: ./apps/web-next/Dockerfile
             build-args: |
-              NEXT_PUBLIC_API_URL=http://api:3001/api
+              NEXT_PUBLIC_API_URL=https://for-real.cloud/api
 
     steps:
       - name: Checkout du code
@@ -438,8 +429,6 @@ jobs:
           build-args: ${{ matrix.image.build-args }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  # ============ STEP 5: DEPLOY TO VPS (Main only) ============
 
   deploy-to-vps:
     name: Deploy to VPS

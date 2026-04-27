@@ -48,7 +48,6 @@ export class AuthErrorMapper {
 
     const errorMessage = error.message as AuthErrorCode;
     if (errorMessage === AuthErrorCode.ACCOUNT_LOCKED) {
-      // 423 Locked = "compte temporairement verrouillé"
       return new HttpException('Account temporarily locked, try later', 423);
     }
 

@@ -9,7 +9,6 @@ export class MonitoringMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const startTime = Date.now();
 
-    // Normalize endpoint path (remove IDs to group similar requests)
     let endpoint = req.path;
     endpoint = endpoint.replace(/\/[0-9a-f-]{36}/g, '/:id');
     endpoint = endpoint.replace(/\/\d+/g, '/:id');
@@ -21,7 +20,6 @@ export class MonitoringMiddleware implements NestMiddleware {
       const duration = Date.now() - startTime;
       const statusCode = this.statusCode;
 
-      // Record HTTP request
       monitoring.recordHttpRequest(
         req.method,
         endpoint,
