@@ -173,3 +173,7 @@ networks:
 volumes:
   dbdata:
     driver: local
+
+secrets:
+  frb_jwt_secret:
+    external: true
