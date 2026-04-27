@@ -106,8 +106,6 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-    secrets:
-      - frb_jwt_secret
 
   web:
     image: ghcr.io/wixkun/forrealbank/web:latest
