@@ -1,4 +1,5 @@
 version: "3.9"
+
 services:
   traefik:
     image: traefik:v2.11
@@ -8,12 +9,22 @@ services:
       - --providers.docker.endpoint=unix:///var/run/docker.sock
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=public
+
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
-      # HTTP first: TLS routing can be added later with certificates.
+
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+
+      - --certificatesresolvers.letsencrypt.acme.email=alexismontoya.pro@gmail.com
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+
       - --api.dashboard=true
       - --accesslog=true
       - --log.level=INFO
+
     ports:
       - target: 80
         published: 80
@@ -23,11 +34,14 @@ services:
         published: 443
         protocol: tcp
         mode: ingress
+
     volumes:
-      # Read-only Docker socket so Traefik can discover Swarm services and labels.
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_letsencrypt:/letsencrypt
+
     networks:
       - public
+
     deploy:
       mode: replicated
       replicas: 1
@@ -53,14 +67,9 @@ services:
 
 networks:
   public:
-    # Shared external overlay network used by proxy + app stacks.
-    # Create once on Swarm manager: docker network create --driver overlay --attachable public
     external: true
     name: public
 
-# App services (web, api) are intentionally not defined here.
-# They will later need Traefik labels in docker-stack.app.yml, for example:
-# - traefik.enable=true
-# - traefik.http.routers.<service>.rule=Host(...) && PathPrefix(...)
-# - traefik.http.services.<service>.loadbalancer.server.port=<container-port>
-# - traefik.docker.network=public
+volumes:
+  traefik_letsencrypt:
+    driver: local
