@@ -94,7 +94,7 @@ export class AuthController {
 
       const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
       if (candidate?.isBanned) {
-        this.monitoring.recordAuthAttempt('/auth/login', false);
+        this.monitoring.recordLoginAttempt('failure');
         throw new ForbiddenException('Account banned');
       }
 
@@ -108,11 +108,11 @@ export class AuthController {
         maxAge: TOKEN_EXPIRY_MS,
       });
 
-      this.monitoring.recordAuthAttempt('/auth/login', true);
+      this.monitoring.recordLoginAttempt('success');
       return { success: true, message: 'Login successful' };
     } catch (error) {
       if (!(error instanceof ForbiddenException)) {
-        this.monitoring.recordAuthAttempt('/auth/login', false);
+        this.monitoring.recordLoginAttempt('failure');
       }
       throw AuthErrorMapper.mapToHttpException(error);
     }

@@ -1,0 +1,11 @@
+apiVersion: 1
+
+providers:
+  - name: ForRealBank dashboards
+    type: file
+    disabled: false
+    editable: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

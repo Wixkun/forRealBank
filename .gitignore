@@ -41,3 +41,6 @@ volumes/dbdata/
 **/*.js.map
 
 !**/src/**/*.ts
+
+clusterInstallation.md
+
