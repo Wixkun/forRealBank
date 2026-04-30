@@ -50,7 +50,9 @@ export class MonitoringService implements OnModuleInit {
   onModuleInit() {
     try {
       collectDefaultMetrics({ register });
-    } catch (error) {
+    } catch {
+      // Les métriques par défaut sont peut-être déjà collectées
+      // Ne pas lever d'erreur, continuer silencieusement
     }
   }
 
