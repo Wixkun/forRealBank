@@ -1,10 +1,10 @@
-# ForRealBank 🏦
+# ForRealBank
 
 A modern, scalable fintech platform built with TypeScript, featuring real-time trading, account management, and social features for banking and investment services.
 
 [![CI Pipeline](https://github.com/Wixkun/forRealBank/actions/workflows/ci.yml/badge.svg)](https://github.com/Wixkun/forRealBank/actions/workflows/ci.yml)
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
 - [Technology Stack](#technology-stack)
@@ -16,7 +16,7 @@ A modern, scalable fintech platform built with TypeScript, featuring real-time t
 - [API Documentation](#api-documentation)
 - [Contributing](#contributing)
 
-## 🎯 Overview
+## Overview
 
 ForRealBank is a comprehensive fintech solution offering:
 
@@ -28,7 +28,7 @@ ForRealBank is a comprehensive fintech solution offering:
 - **Monitoring & Analytics** — Prometheus metrics and Grafana dashboards
 - **Admin Dashboard** — PgAdmin interface for database management
 
-## 🛠 Technology Stack
+## Technology Stack
 
 ### Backend
 - **Framework**: [NestJS](https://nestjs.com) — TypeScript-first Node.js framework
@@ -56,7 +56,7 @@ ForRealBank is a comprehensive fintech solution offering:
   - `@forreal/application` — Use cases and services
   - `@forreal/infrastructure/*` — Technical implementations (crypto, DB, JWT, UUID)
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 forRealBank/
@@ -125,7 +125,7 @@ forRealBank/
     └── ci.yml                 # GitHub Actions CI/CD pipeline
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -154,7 +154,7 @@ docker compose up -d
 pnpm bootstrap
 ```
 
-## 💻 Development
+## Development
 
 ### Running the Application
 
@@ -225,7 +225,7 @@ The API follows a modular architecture:
 - `/chat` → Messaging
 - `/notifications` → Notification center
 
-## 🐳 Docker Setup
+## Docker Setup
 
 ### Quick Start
 
@@ -263,7 +263,7 @@ docker compose stop
 docker compose down -v
 ```
 
-## ✅ Testing
+## Testing
 
 ### Unit Tests
 
@@ -301,7 +301,7 @@ pnpm --filter web-next test:e2e
 pnpm --filter web-next test -- --ui
 ```
 
-## 📚 API Documentation
+## API Documentation
 
 ### Authentication Flow
 
@@ -329,7 +329,7 @@ curl http://localhost:3001/health
 curl http://localhost:3001/metrics
 ```
 
-## 🔧 CI/CD Pipeline
+## CI/CD Pipeline
 
 GitHub Actions workflow (`.github/workflows/ci.yml`):
 
@@ -342,7 +342,7 @@ GitHub Actions workflow (`.github/workflows/ci.yml`):
 
 See [CI/CD Documentation](https://github.com/Wixkun/forRealBank/wiki/CI-CD) for details.
 
-## 📊 Monitoring
+## Monitoring
 
 ### Prometheus
 
@@ -355,6 +355,6 @@ See [CI/CD Documentation](https://github.com/Wixkun/forRealBank/wiki/CI-CD) for 
 - UI: `http://localhost:3002`
 - Pre-configured dashboards for API metrics
 
-## 📄 License
+## License
 
 This project is proprietary software. All rights reserved © 2024-2026.
