@@ -42,5 +42,4 @@ volumes/dbdata/
 
 !**/src/**/*.ts
 
-clusterInstallation.md
-
+documentation/

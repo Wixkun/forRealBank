@@ -60,6 +60,10 @@ ForRealBank is a comprehensive fintech solution offering:
 
 ```
 forRealBank/
+├── documentation/
+│   ├──clusterInstallation.md
+│   ├──schéma_archi.png
+│   ├──tests_cluster.docx
 ├── apps/
 │   ├── api-nest/              # NestJS REST API
 │   │   ├── src/
@@ -297,14 +301,6 @@ pnpm --filter web-next test:e2e
 pnpm --filter web-next test -- --ui
 ```
 
-### Coverage
-
-```bash
-# View coverage reports
-ls apps/api-nest/coverage/
-ls apps/web-next/coverage/
-```
-
 ## 📚 API Documentation
 
 ### Authentication Flow
@@ -356,17 +352,8 @@ See [CI/CD Documentation](https://github.com/Wixkun/forRealBank/wiki/CI-CD) for 
 
 ### Grafana
 
-- UI: `http://localhost:3000`
-- Default credentials: (see `.env`)
+- UI: `http://localhost:3002`
 - Pre-configured dashboards for API metrics
-
-### Code Standards
-
-- Use **TypeScript** for type safety
-- Follow **ESLint** rules (auto-enforced in CI)
-- Format with **Prettier** before committing
-- Write **tests** for new features
-- Keep commits **atomic** and descriptive
 
 ## 📄 License
 
