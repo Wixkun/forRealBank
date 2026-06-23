@@ -31,3 +31,8 @@ export * from './repositories/NewsRepository';
 // mappers
 export * from './mappers/UserMapper';
 export * from './mappers/ConversationMapper';
+export * from './mappers/AdvisorClientMapper';
+export * from './mappers/ConversationParticipantMapper';
+export * from './mappers/MessageMapper';
+export * from './mappers/NotificationMapper';
+export * from './mappers/NewsMapper';
