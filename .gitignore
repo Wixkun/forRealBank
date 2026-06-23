@@ -17,7 +17,6 @@ lerna-debug.log*
 Thumbs.db
 *.tsbuildinfo
 
-env/
 .env
 .env.*
 !.env.example
