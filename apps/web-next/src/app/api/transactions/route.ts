@@ -17,8 +17,9 @@ export async function GET(request: Request) {
     const limit = searchParams.get('limit') || '5';
 
     console.log('[API Routes] /api/transactions - Making request to NestJS...');
+    const apiUrl = process.env.API_URL || 'http://localhost:3001/api';
     const response = await fetch(
-      `http://forrealbank-api:3001/api/transactions/recent?limit=${limit}`,
+      `${apiUrl}/transactions/recent?limit=${limit}`,
       {
         method: 'GET',
         headers: {
