@@ -1,4 +1,6 @@
 // entities
+export * from './entities/BaseEntity';
+export * from './entities/ImmutableEntity';
 export * from './entities/AdvisorClientEntity';
 export * from './entities/UserEntity';
 export * from './entities/BankAccountEntity';

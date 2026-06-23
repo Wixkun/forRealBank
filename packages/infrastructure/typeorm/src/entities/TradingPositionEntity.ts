@@ -1,24 +1,12 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-  Unique,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index, Unique } from 'typeorm';
 import { BrokerageAccountEntity } from './BrokerageAccountEntity';
 import { MarketAssetEntity } from './MarketAssetEntity';
+import { BaseEntity } from './BaseEntity';
 
 @Entity('trading_positions')
 @Index(['brokerageAccountId'])
 @Unique(['brokerageAccountId', 'assetId'])
-export class TradingPositionEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class TradingPositionEntity extends BaseEntity {
   @Column({ name: 'brokerage_account_id', type: 'uuid' })
   brokerageAccountId!: string;
 
@@ -38,10 +26,4 @@ export class TradingPositionEntity {
 
   @Column({ name: 'avg_purchase_price', type: 'decimal', precision: 15, scale: 2 })
   avgPurchasePrice!: number;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
-  updatedAt!: Date;
 }

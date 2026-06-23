@@ -1,18 +1,9 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from './UserEntity';
+import { ImmutableEntity } from './ImmutableEntity';
 
 @Entity('notifications')
-export class NotificationEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class NotificationEntity extends ImmutableEntity {
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE', nullable: false })
   @JoinColumn({ name: 'user_id' })
   user!: UserEntity;
@@ -25,9 +16,6 @@ export class NotificationEntity {
 
   @Column({ type: 'varchar', length: 100, nullable: false })
   type!: string;
-
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  createdAt!: Date;
 
   @Column({ type: 'timestamptz', name: 'read_at', nullable: true })
   readAt!: Date | null;

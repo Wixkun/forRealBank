@@ -1,18 +1,9 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ManyToMany,
-  JoinTable,
-  UpdateDateColumn,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToMany, JoinTable } from 'typeorm';
 import { RoleEntity } from './RoleEntity';
+import { BaseEntity } from './BaseEntity';
 
 @Entity('users')
-export class UserEntity {
-  @PrimaryGeneratedColumn('uuid') id!: string;
-
+export class UserEntity extends BaseEntity {
   @Column({ unique: true }) email!: string;
   @Column() passwordHash!: string;
 
@@ -29,12 +20,6 @@ export class UserEntity {
     inverseJoinColumn: { name: 'role_id' },
   })
   roles!: RoleEntity[];
-
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
-  updatedAt!: Date;
 
   @Column({ type: 'timestamptz', name: 'last_login_at', nullable: true })
   lastLoginAt!: Date | null;

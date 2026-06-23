@@ -1,21 +1,10 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { UserEntity } from './UserEntity';
+import { BaseEntity } from './BaseEntity';
 
 @Entity('brokerage_accounts')
 @Index(['userId'])
-export class BrokerageAccountEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class BrokerageAccountEntity extends BaseEntity {
   @Column({ name: 'user_id', type: 'uuid' })
   userId!: string;
 
@@ -40,10 +29,4 @@ export class BrokerageAccountEntity {
 
   @Column({ name: 'opened_at', type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   openedAt!: Date;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
-  updatedAt!: Date;
 }
