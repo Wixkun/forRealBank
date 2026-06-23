@@ -15,6 +15,7 @@ export * from './entities/TradingOrderEntity';
 export * from './entities/TradingPositionEntity';
 export * from './entities/MarketAssetEntity';
 export * from './entities/NewsEntity';
+export * from './entities/NewsDismissalEntity';
 
 // repositories
 export * from './repositories/AdvisorClientRepository';

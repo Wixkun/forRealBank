@@ -27,6 +27,9 @@ export * from './feed/usecases/CreateNewsUseCase';
 export * from './feed/usecases/DeleteNewsUseCase';
 export * from './feed/usecases/ListNewsUseCase';
 export * from './feed/usecases/UpdateNewsUseCase';
+export * from './feed/usecases/ArchiveNewsUseCase';
+export * from './feed/usecases/UnarchiveNewsUseCase';
+export * from './feed/usecases/DismissNewsUseCase';
 
 // notifications
 export * from './notifications/usecases/ListNotificationsByUserUseCase';
