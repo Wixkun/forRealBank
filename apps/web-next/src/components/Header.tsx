@@ -14,7 +14,7 @@ export default function Header() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch(`/api/proxy/auth/me`, {
+        const response = await fetch(`/api/auth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -31,7 +31,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     try {
-      await fetch(`/api/proxy/auth/logout`, {
+      await fetch(`/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });

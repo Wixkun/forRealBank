@@ -11,7 +11,7 @@ interface UseCreateConversationOptions {
 export function useCreateConversation(options?: UseCreateConversationOptions) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = '/api/proxy';
+  const API_URL = '/api';
 
   const createPrivateConversation = useCallback(
     async (targetUserId: string, currentUserId: string) => {

@@ -92,7 +92,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     members.add(data.userId);
 
-    // Toujours broadcast, même si l'UC dit "déjà participant": la présence est un état runtime.
     this.broadcastPresence(data.conversationId);
 
     try {

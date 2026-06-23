@@ -1,0 +1,171 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-forreal}
+      POSTGRES_PASSWORD_FILE: /run/secrets/frb_postgres_password
+      POSTGRES_DB: ${POSTGRES_DB:-forrealbank}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - db_net
+    secrets:
+      - frb_postgres_password
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  api:
+    image: ghcr.io/wixkun/forrealbank/api:latest
+    environment:
+      PORT: '3001'
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: '5432'
+      DB_USER: ${POSTGRES_USER:-forreal}
+      DB_NAME: ${POSTGRES_DB:-forrealbank}
+      DB_PASS_FILE: /run/secrets/frb_postgres_password
+      JWT_SECRET_FILE: /run/secrets/frb_jwt_secret
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_ISSUER: ${JWT_ISSUER:-forrealbank.auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-forrealbank.api}
+      FRONTEND_ORIGIN: https://for-real.cloud
+    healthcheck:
+      test: ['CMD-SHELL', "node -e \"fetch('http://localhost:3001/api/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - db_net
+      - app_net
+      - public
+    secrets:
+      - frb_postgres_password
+      - frb_jwt_secret
+    deploy:
+      replicas: 2
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=public
+        - traefik.http.routers.forrealbank-api.rule=Host(`for-real.cloud`) && PathPrefix(`/api`)
+        - traefik.http.routers.forrealbank-api.entrypoints=websecure
+        - traefik.http.routers.forrealbank-api.tls=true
+        - traefik.http.routers.forrealbank-api.tls.certresolver=letsencrypt
+        - traefik.http.routers.forrealbank-api.priority=100
+        - traefik.http.services.forrealbank-api.loadbalancer.server.port=3001
+      placement:
+        constraints:
+          - node.role == worker
+        preferences:
+          - spread: node.id
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  web:
+    image: ghcr.io/wixkun/forrealbank/web:latest
+    environment:
+      NEXT_PUBLIC_API_URL: https://for-real.cloud/api
+      API_URL: http://api:3001/api
+    healthcheck:
+      test: ['CMD-SHELL', "node -e \"fetch('http://localhost:3000').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - app_net
+      - public
+    deploy:
+      replicas: 3
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=public
+        - traefik.http.routers.forrealbank-web.rule=Host(`for-real.cloud`)
+        - traefik.http.routers.forrealbank-web.entrypoints=websecure
+        - traefik.http.routers.forrealbank-web.tls=true
+        - traefik.http.routers.forrealbank-web.tls.certresolver=letsencrypt
+        - traefik.http.routers.forrealbank-web.priority=1
+        - traefik.http.services.forrealbank-web.loadbalancer.server.port=3000
+      placement:
+        constraints:
+          - node.role == worker
+        preferences:
+          - spread: node.id
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: start-first
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 768M
+        reservations:
+          cpus: '0.20'
+          memory: 192M
+
+networks:
+  app_net:
+    driver: overlay
+    attachable: true
+  db_net:
+    driver: overlay
+    attachable: true
+  public:
+    external: true
+    name: public
+
+volumes:
+  dbdata:
+    driver: local
+
+secrets:
+  frb_jwt_secret:
+    external: true
+  frb_postgres_password:
+    external: true

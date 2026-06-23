@@ -1,6 +1,6 @@
 import { unstable_cache } from 'next/cache';
 
-const apiUrl = '/api/proxy';
+const apiUrl = '/api';
 
 export interface ConversationData {
   id: string;

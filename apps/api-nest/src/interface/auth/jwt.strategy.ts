@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import type { Request } from 'express';
+import { resolveEnvSecret } from '@forreal/infrastructure-jwt-nest';
 
 const cookieExtractor = (req: Request): string | null =>
   (req?.cookies?.['access_token'] as string | undefined) ?? null;
@@ -15,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET ?? 'change-me-dev-only',
+      secretOrKey: resolveEnvSecret('JWT_SECRET') ?? 'fallback',
       issuer: process.env.JWT_ISSUER ?? 'forrealbank.auth',
       audience: process.env.JWT_AUDIENCE ?? 'forrealbank.api',
     });

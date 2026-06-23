@@ -38,7 +38,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
       setError(null);
 
       try {
-        const apiUrl = '/api/proxy';
+        const apiUrl = '/api';
 
         const userResponse = await fetch(`${apiUrl}/auth/me`, {
           method: 'GET',

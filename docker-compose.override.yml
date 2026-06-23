@@ -1,0 +1,15 @@
+# Override for local development - rebuilds images locally instead of pulling from GHCR
+# This file is only used locally; ignored in production
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api-nest/Dockerfile
+  
+  web:
+    build:
+      context: .
+      dockerfile: apps/web-next/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001/api

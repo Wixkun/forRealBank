@@ -54,7 +54,7 @@ export default function ChatPageContainer({
     if (!user?.id) return;
     const loadConversations = async () => {
       try {
-        const res = await fetch(`/api/proxy/chat/conversations/by-user/${user.id}`, {
+        const res = await fetch(`/api/chat/conversations/by-user/${user.id}`, {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -92,7 +92,7 @@ export default function ChatPageContainer({
     async (targetUserId: string) => {
       const convId = await createPrivateConversation(targetUserId, user?.id || '');
       if (convId) {
-        const res = await fetch(`/api/proxy/chat/conversations/by-user/${user?.id}`, {
+        const res = await fetch(`/api/chat/conversations/by-user/${user?.id}`, {
           credentials: 'include',
         });
         if (res.ok) {

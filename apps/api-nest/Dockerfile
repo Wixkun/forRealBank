@@ -18,10 +18,8 @@ RUN pnpm install --no-frozen-lockfile
 
 COPY . .
 
-# Clean tsbuildinfo
 RUN find . -name "*.tsbuildinfo" -delete
 
-# Build des packages + API
 RUN pnpm --filter @forreal/domain build \
  && pnpm --filter @forreal/application build \
  && pnpm --filter @forreal/infrastructure-* build \
@@ -31,6 +29,8 @@ RUN pnpm deploy --filter api-nest --prod --legacy /prod
 
 
 FROM node:20-alpine AS runtime
+
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
 ENV NODE_ENV=production
 WORKDIR /usr/src/app

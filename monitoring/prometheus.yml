@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'forrealbank-api'
+    metrics_path: '/api/metrics'
+    static_configs:
+      # Cross-stack target: <stack>_<service>:<port>
+      - targets: ['forrealbank_api:3001']

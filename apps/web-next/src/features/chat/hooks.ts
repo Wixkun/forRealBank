@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-const API_URL = '/api/proxy';
+const API_URL = '/api';
 
 interface User {
   id: string;

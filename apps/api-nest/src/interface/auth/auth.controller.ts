@@ -21,18 +21,16 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
 import { AuthErrorMapper } from './error-mapper';
+import { MonitoringService } from '../../metrics/monitoring.service';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const TOKEN_EXPIRY_MS = 15 * 60 * 1000;
 
-// Rate limit simple en mémoire (par IP) pour /auth/login.
-// Note: si tu scales sur plusieurs instances, remplace par Redis.
 const LOGIN_RATE_LIMIT = { windowMs: 60_000, max: 10 } as const;
 type RateRec = { count: number; resetAt: number };
 const loginAttemptsByIp = new Map<string, RateRec>();
 
 function getRequestIp(req: Request): string {
-  // trust proxy peut être activé en prod (main.ts). On check x-forwarded-for.
   const xff = (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim();
   return xff || req.ip || (req.socket?.remoteAddress ?? 'unknown');
 }
@@ -63,6 +61,8 @@ export class AuthController {
 
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
+
+    private readonly monitoring: MonitoringService,
   ) {}
 
   @HttpCode(201)
@@ -92,9 +92,9 @@ export class AuthController {
     try {
       enforceLoginRateLimit(req);
 
-      // Blocage immédiat si l'utilisateur est banni
       const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
       if (candidate?.isBanned) {
+        this.monitoring.recordLoginAttempt('failure');
         throw new ForbiddenException('Account banned');
       }
 
@@ -108,8 +108,12 @@ export class AuthController {
         maxAge: TOKEN_EXPIRY_MS,
       });
 
+      this.monitoring.recordLoginAttempt('success');
       return { success: true, message: 'Login successful' };
     } catch (error) {
+      if (!(error instanceof ForbiddenException)) {
+        this.monitoring.recordLoginAttempt('failure');
+      }
       throw AuthErrorMapper.mapToHttpException(error);
     }
   }
@@ -142,7 +146,6 @@ export class AuthController {
         throw new UnauthorizedException('User not found');
       }
 
-      // Si l'utilisateur est banni, on renvoie 403 (même message que RolesGuard)
       if (user.isBanned) {
         throw new ForbiddenException('Account banned');
       }
