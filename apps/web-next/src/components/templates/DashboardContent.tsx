@@ -380,7 +380,7 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
 
             {/* News feed */}
             <div className="bg-[#111318] rounded-2xl border border-white/5 overflow-hidden">
-              <NewsFeed userRoles={user?.roles ?? null} />
+              <NewsFeed userRoles={user?.roles ?? null} userId={user?.id ?? null} />
             </div>
           </main>
 
