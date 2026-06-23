@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, Column } from 'typeorm';
+import { ImmutableEntity } from './ImmutableEntity';
 
 export enum ConversationType {
   PRIVATE = 'PRIVATE',
@@ -6,13 +7,7 @@ export enum ConversationType {
 }
 
 @Entity('conversations')
-export class ConversationEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class ConversationEntity extends ImmutableEntity {
   @Column({ type: 'enum', enum: ConversationType })
   type!: ConversationType;
-
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  createdAt!: Date;
 }

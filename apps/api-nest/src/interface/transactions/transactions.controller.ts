@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards, Req, Post, Body } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, Req, Post, Body, Inject } from '@nestjs/common';
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,6 +13,8 @@ import { BrokerageAccountRepository } from '@forreal/infrastructure-typeorm';
 import { BankTransactionRepository } from '@forreal/infrastructure-typeorm';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import { InitiateTransferUseCase } from '@forreal/application';
+import { NewsService } from '../feed/news.service';
+import { NewsStatus } from '@forreal/domain';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
@@ -28,6 +30,8 @@ export class TransactionsController {
     private readonly notificationRepo: Repository<NotificationEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    @Inject(NewsService)
+    private readonly newsService: NewsService,
   ) {}
 
   @Get('account/:accountId')
@@ -134,6 +138,21 @@ export class TransactionsController {
 
     if (!result.success) {
       return { success: false, error: result.message };
+    }
+
+    // Créer une news de type TRANSACTIONS pour l'utilisateur
+    try {
+      await this.newsService.createSystemNews({
+        authorId: userId,
+        title: 'Transaction Alert',
+        content: body.description
+          ? `${body.description} — ${body.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}`
+          : `Virement de ${body.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} effectué avec succès.`,
+        status: NewsStatus.TRANSACTIONS,
+        userId,
+      });
+    } catch {
+      // Ne pas bloquer la réponse si la news échoue
     }
 
     return {

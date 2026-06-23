@@ -1,19 +1,10 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ConversationEntity } from './ConversationEntity';
 import { UserEntity } from './UserEntity';
+import { ImmutableEntity } from './ImmutableEntity';
 
 @Entity('messages')
-export class MessageEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class MessageEntity extends ImmutableEntity {
   @ManyToOne(() => ConversationEntity, { onDelete: 'CASCADE', nullable: false })
   @JoinColumn({ name: 'conversation_id' })
   conversation!: ConversationEntity;
@@ -24,9 +15,6 @@ export class MessageEntity {
 
   @Column({ type: 'text', nullable: false })
   content!: string;
-
-  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
-  createdAt!: Date;
 
   @Column({ type: 'timestamptz', name: 'read_at', nullable: true })
   readAt!: Date | null;

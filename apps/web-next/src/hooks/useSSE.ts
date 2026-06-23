@@ -94,9 +94,8 @@ export function useSSE<T = unknown>({
         const state = eventSourceRef.current?.readyState;
         const delay = retryDelayRef.current;
 
-        // En dev, l'erreur peut être vide {} => on log contexte utile.
-        if (process.env.NODE_ENV !== 'production') {
-          console.error('SSE error:', { url, readyState: state, retryInMs: delay, err });
+        if (process.env.NODE_ENV !== 'production' && delay >= maxRetryMs) {
+          console.warn(`SSE: connexion perdue (${url}), readyState=${state}. Nouvelle tentative dans ${delay}ms.`);
         }
 
         // Reconnexion avec backoff (évite un spam qui peut ralentir l'app)

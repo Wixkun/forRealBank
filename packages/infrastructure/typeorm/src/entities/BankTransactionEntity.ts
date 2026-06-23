@@ -1,21 +1,11 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BankAccountEntity } from './BankAccountEntity';
+import { ImmutableEntity } from './ImmutableEntity';
 
 @Entity('bank_transactions')
 @Index(['accountId'])
 @Index(['createdAt'])
-export class BankTransactionEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class BankTransactionEntity extends ImmutableEntity {
   @Column({ name: 'account_id', type: 'uuid' })
   accountId!: string;
 
@@ -34,7 +24,4 @@ export class BankTransactionEntity {
 
   @Column({ name: 'balance_after', type: 'decimal', precision: 15, scale: 2 })
   balanceAfter!: number;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-  createdAt!: Date;
 }

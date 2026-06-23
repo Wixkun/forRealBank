@@ -356,19 +356,56 @@ ON CONFLICT DO NOTHING;
 -- STEP 11: Seed News
 -- ============================================================================
 
-INSERT INTO news (author_id, title, content)
-SELECT u.id, 'Mise à jour des fonctionnalités', 'Nous avons ajouté le chat en temps réel et des notifications personnalisées.'
-FROM users u
-WHERE u.email = 'director1@forreal.bank'
+-- Colonnes ajoutées par TypeORM — on les crée ici pour le seed initial
+ALTER TABLE news ADD COLUMN IF NOT EXISTS user_id    varchar       NULL;
+ALTER TABLE news ADD COLUMN IF NOT EXISTS status     varchar(50)   NOT NULL DEFAULT 'INFORMATION';
+ALTER TABLE news ADD COLUMN IF NOT EXISTS archived_at timestamptz  NULL;
+
+-- Table pour les dismissals utilisateur
+CREATE TABLE IF NOT EXISTS news_dismissals (
+    id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id    varchar NOT NULL,
+    news_id    varchar NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT uq_news_dismissal UNIQUE (user_id, news_id)
+);
+
+INSERT INTO news (author_id, user_id, title, content, status)
+SELECT u.id, NULL,
+    'Connexion depuis un nouvel appareil',
+    'Une connexion à votre compte a été détectée depuis un appareil inconnu. Si ce n''était pas vous, sécurisez immédiatement votre compte.',
+    'SECURITY'
+FROM users u WHERE u.email = 'director1@forreal.bank'
 UNION ALL
-SELECT u.id, 'Nouveaux services disponibles', 'Découvrez nos nouveaux produits d''investissement disponibles dès maintenant.'
-FROM users u
-WHERE u.email = 'advisor1@forreal.bank'
+SELECT u.id, NULL,
+    'Virement reçu avec succès',
+    'Vous avez reçu un virement de 1 250,00 € sur votre compte principal. Le solde a été mis à jour.',
+    'TRANSACTIONS'
+FROM users u WHERE u.email = 'director1@forreal.bank'
 UNION ALL
-SELECT u.id, 'Maintenance prévue', 'Une maintenance système est prévue ce week-end de 2h à 5h du matin.'
-FROM users u
-WHERE u.email = 'director1@forreal.bank'
-ON CONFLICT DO NOTHING;
+SELECT u.id, NULL,
+    'Prélèvement automatique programmé',
+    'Un prélèvement de 89,99 € est prévu le 28 de ce mois pour votre abonnement. Vérifiez que votre solde est suffisant.',
+    'PAYMENTS'
+FROM users u WHERE u.email = 'director1@forreal.bank'
+UNION ALL
+SELECT u.id, NULL,
+    'Informations de profil mises à jour',
+    'Les informations de votre compte ont été modifiées. Si vous n''êtes pas à l''origine de ce changement, contactez le support.',
+    'ACCOUNT_UPDATES'
+FROM users u WHERE u.email = 'director1@forreal.bank'
+UNION ALL
+SELECT u.id, NULL,
+    'Maintenance planifiée',
+    'Une maintenance technique est prévue cette nuit de 2h à 4h. Certains services seront temporairement indisponibles.',
+    'SYSTEM'
+FROM users u WHERE u.email = 'director1@forreal.bank'
+UNION ALL
+SELECT u.id, NULL,
+    'Nouvelle réglementation bancaire',
+    'À compter du 1er juillet, de nouvelles règles s''appliquent aux virements internationaux. Consultez notre guide pour en savoir plus.',
+    'INFORMATION'
+FROM users u WHERE u.email = 'director1@forreal.bank';
 
 -- ============================================================================
 -- STEP 12: Seed Notifications
@@ -582,7 +619,7 @@ END $$;
 -- - Credentials: {role}@123 (e.g., Director@123, Advisor@123, Client@123)
 -- - 2 conversations: 1 PRIVATE (advisor1<->client1), 1 GROUP (all users)
 -- - Sample messages in both conversations
--- - 3 news articles
+-- - 6 news articles (1 par status : SECURITY, TRANSACTIONS, PAYMENTS, ACCOUNT_UPDATES, SYSTEM, INFORMATION)
 -- - Multiple notifications
 -- - Banking accounts for both clients with different balances:
 --   * Client1: Checking €5,420.50, Savings €12,350.00, Trading €10,000 (8 positions)

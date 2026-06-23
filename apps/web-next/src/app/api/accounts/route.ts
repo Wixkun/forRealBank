@@ -14,7 +14,8 @@ export async function GET() {
     }
 
     console.log('[API Routes] /api/accounts - Making request to NestJS...');
-    const response = await fetch('http://forrealbank-api:3001/api/accounts', {
+    const apiUrl = process.env.API_URL || 'http://localhost:3001/api';
+    const response = await fetch(`${apiUrl}/accounts`, {
       method: 'GET',
       headers: {
         Cookie: `access_token=${token}`,

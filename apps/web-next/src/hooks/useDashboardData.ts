@@ -76,7 +76,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
         };
 
         const transactionsResponse = await fetch(
-          `${apiUrl}/transactions/recent?limit=${DASHBOARD_CONFIG.RECENT_TRANSACTIONS_LIMIT}`,
+          `${apiUrl}/transactions?limit=${DASHBOARD_CONFIG.RECENT_TRANSACTIONS_LIMIT}`,
           {
             credentials: 'include',
             next: { revalidate: 30 },

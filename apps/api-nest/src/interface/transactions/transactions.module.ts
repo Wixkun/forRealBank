@@ -1,11 +1,14 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionsController } from './transactions.controller';
-import { BankTransactionEntity } from '@forreal/infrastructure-typeorm';
-import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
-import { NotificationEntity } from '@forreal/infrastructure-typeorm';
-import { UserEntity } from '@forreal/infrastructure-typeorm';
+import {
+  BankTransactionEntity,
+  BankAccountEntity,
+  BrokerageAccountEntity,
+  NotificationEntity,
+  UserEntity,
+} from '@forreal/infrastructure-typeorm';
+import { NewsModule } from '../feed/news.module';
 
 @Module({
   imports: [
@@ -16,6 +19,7 @@ import { UserEntity } from '@forreal/infrastructure-typeorm';
       NotificationEntity,
       UserEntity,
     ]),
+    NewsModule,
   ],
   controllers: [TransactionsController],
 })

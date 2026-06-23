@@ -1,4 +1,6 @@
 // entities
+export * from './entities/BaseEntity';
+export * from './entities/ImmutableEntity';
 export * from './entities/AdvisorClientEntity';
 export * from './entities/UserEntity';
 export * from './entities/BankAccountEntity';
@@ -13,6 +15,7 @@ export * from './entities/TradingOrderEntity';
 export * from './entities/TradingPositionEntity';
 export * from './entities/MarketAssetEntity';
 export * from './entities/NewsEntity';
+export * from './entities/NewsDismissalEntity';
 
 // repositories
 export * from './repositories/AdvisorClientRepository';
@@ -29,3 +32,8 @@ export * from './repositories/NewsRepository';
 // mappers
 export * from './mappers/UserMapper';
 export * from './mappers/ConversationMapper';
+export * from './mappers/AdvisorClientMapper';
+export * from './mappers/ConversationParticipantMapper';
+export * from './mappers/MessageMapper';
+export * from './mappers/NotificationMapper';
+export * from './mappers/NewsMapper';

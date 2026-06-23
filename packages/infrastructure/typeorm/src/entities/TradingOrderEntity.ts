@@ -1,23 +1,12 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  Index,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { BrokerageAccountEntity } from './BrokerageAccountEntity';
 import { MarketAssetEntity } from './MarketAssetEntity';
+import { BaseEntity } from './BaseEntity';
 
 @Entity('trading_orders')
 @Index(['brokerageAccountId'])
 @Index(['status'])
-export class TradingOrderEntity {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
-
+export class TradingOrderEntity extends BaseEntity {
   @Column({ name: 'brokerage_account_id', type: 'uuid' })
   brokerageAccountId!: string;
 
@@ -52,10 +41,4 @@ export class TradingOrderEntity {
 
   @Column({ name: 'executed_at', type: 'timestamptz', nullable: true })
   executedAt?: Date;
-
-  @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
-  createdAt!: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
-  updatedAt!: Date;
 }

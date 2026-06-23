@@ -19,7 +19,7 @@ function parseOrigins(raw: string | undefined, fallback: string[]): string[] {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const config = app.get(ConfigService);
 
   const portRaw = config.get<string>('PORT') ?? '3001';
