@@ -1,31 +1,30 @@
 import { Repository } from 'typeorm';
-import { IAccountRepository } from '@forreal/domain';
-import { BankAccount } from '@forreal/domain';
-import { BankAccountEntity } from '../entities/BankAccountEntity';
+import { IAccountRepository, Account } from '@forreal/domain';
+import { AccountEntity } from '../entities/AccountEntity';
 
-export class BankAccountRepository implements IAccountRepository {
-  constructor(private readonly repo: Repository<BankAccountEntity>) {}
+export class AccountRepository implements IAccountRepository {
+  constructor(private readonly repo: Repository<AccountEntity>) {}
 
-  async findBankAccountById(id: string): Promise<BankAccount | null> {
+  async findById(id: string): Promise<Account | null> {
     const e = await this.repo.findOne({ where: { id } });
     return e ? this.map(e) : null;
   }
 
-  async findBankAccountByIban(iban: string): Promise<BankAccount | null> {
+  async findByIban(iban: string): Promise<Account | null> {
     const e = await this.repo.findOne({ where: { iban } });
     return e ? this.map(e) : null;
   }
 
-  async listUserBankAccounts(userId: string): Promise<BankAccount[]> {
+  async listByUser(userId: string): Promise<Account[]> {
     const list = await this.repo.find({ where: { userId } });
     return list.map(this.map);
   }
 
-  async updateBankAccountBalance(id: string, newBalance: number): Promise<void> {
+  async updateBalance(id: string, newBalance: number): Promise<void> {
     await this.repo.update({ id }, { balance: newBalance });
   }
 
-  private map(e: BankAccountEntity): BankAccount {
+  private map(e: AccountEntity): Account {
     return {
       id: e.id,
       userId: e.userId,
@@ -34,6 +33,7 @@ export class BankAccountRepository implements IAccountRepository {
       balance: Number(e.balance),
       iban: e.iban,
       accountNumber: e.accountNumber,
+      interestRate: e.interestRate !== null ? Number(e.interestRate) : null,
       status: e.status,
       openedAt: e.openedAt,
     };

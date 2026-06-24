@@ -3,100 +3,84 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { AccountEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('accounts')
 @UseGuards(JwtAuthGuard)
 export class AccountsController {
   constructor(
-    @InjectRepository(BankAccountEntity)
-    private readonly bankAccountRepo: Repository<BankAccountEntity>,
-    @InjectRepository(BrokerageAccountEntity)
-    private readonly brokerageAccountRepo: Repository<BrokerageAccountEntity>,
+    @InjectRepository(AccountEntity)
+    private readonly accountRepo: Repository<AccountEntity>,
+    @InjectRepository(InvestmentAccountEntity)
+    private readonly investmentAccountRepo: Repository<InvestmentAccountEntity>,
   ) {}
 
-  @Get('bank')
-  async getBankAccounts(@Req() req: Request) {
-    const userId = (req.user as any).id;
-    console.log('[AccountsController] getBankAccounts - userId:', userId);
-    const accounts = await this.bankAccountRepo.find({
-      where: { userId },
-      order: { createdAt: 'ASC' },
-    });
-    console.log('[AccountsController] getBankAccounts - found', accounts.length, 'accounts');
-    return accounts;
-  }
-
-  @Get('bank/:id')
-  async getBankAccountById(@Param('id') id: string, @Req() req: Request) {
-    const userId = (req.user as any).id;
-    const account = await this.bankAccountRepo.findOne({
-      where: { id, userId },
-    });
-    if (!account) {
-      throw new Error('Account not found');
-    }
-    return account;
-  }
-
-  @Get('brokerage')
-  async getBrokerageAccounts(@Req() req: Request) {
-    const userId = (req.user as any).id;
-    const accounts = await this.brokerageAccountRepo.find({
-      where: { userId },
-      order: { createdAt: 'ASC' },
-    });
-    return accounts;
-  }
-
-  @Get('brokerage/:id')
-  async getBrokerageAccountById(@Param('id') id: string, @Req() req: Request) {
-    const userId = (req.user as any).id;
-    const account = await this.brokerageAccountRepo.findOne({
-      where: { id, userId },
-    });
-    if (!account) {
-      throw new Error('Account not found');
-    }
-    return account;
-  }
-
   @Get()
-  async getAllAccounts(@Req() req: Request) {
+  async getAccounts(@Req() req: Request) {
     const userId = (req.user as any).id;
-    console.log('[AccountsController] getAllAccounts - userId:', userId);
-    const bankAccounts = await this.bankAccountRepo.find({
+    const accounts = await this.accountRepo.find({
       where: { userId },
       order: { createdAt: 'ASC' },
     });
-    const brokerageAccounts = await this.brokerageAccountRepo.find({
+    return accounts;
+  }
+
+  @Get(':id')
+  async getAccountById(@Param('id') id: string, @Req() req: Request) {
+    const userId = (req.user as any).id;
+    const account = await this.accountRepo.findOne({ where: { id, userId } });
+    if (!account) {
+      throw new Error('Account not found');
+    }
+    return account;
+  }
+
+  @Get('investment/all')
+  async getInvestmentAccounts(@Req() req: Request) {
+    const userId = (req.user as any).id;
+    const accounts = await this.investmentAccountRepo.find({
       where: { userId },
       order: { createdAt: 'ASC' },
     });
-    console.log(
-      '[AccountsController] getAllAccounts - bank:',
-      bankAccounts.length,
-      'brokerage:',
-      brokerageAccounts.length,
-    );
+    return accounts;
+  }
+
+  @Get('investment/:id')
+  async getInvestmentAccountById(@Param('id') id: string, @Req() req: Request) {
+    const userId = (req.user as any).id;
+    const account = await this.investmentAccountRepo.findOne({ where: { id, userId } });
+    if (!account) {
+      throw new Error('Investment account not found');
+    }
+    return account;
+  }
+
+  @Get('all/summary')
+  async getAllAccountsSummary(@Req() req: Request) {
+    const userId = (req.user as any).id;
+    const [accounts, investmentAccounts] = await Promise.all([
+      this.accountRepo.find({ where: { userId }, order: { createdAt: 'ASC' } }),
+      this.investmentAccountRepo.find({ where: { userId }, order: { createdAt: 'ASC' } }),
+    ]);
 
     return {
-      bankAccounts: bankAccounts.map((acc) => ({
+      accounts: accounts.map((acc) => ({
         id: acc.id,
         name: acc.name,
         balance: parseFloat(acc.balance.toString()),
         iban: acc.iban,
         type: acc.accountType,
-        accountType: 'banking',
+        interestRate: acc.interestRate !== null ? parseFloat(acc.interestRate.toString()) : null,
+        accountCategory: 'banking',
       })),
-      brokerageAccounts: brokerageAccounts.map((acc) => ({
+      investmentAccounts: investmentAccounts.map((acc) => ({
         id: acc.id,
         name: acc.name,
-        balance: parseFloat(acc.balance.toString()),
-        iban: acc.id,
-        type: 'checking',
-        accountType: 'brokerage',
+        cashBalance: parseFloat(acc.cashBalance.toString()),
+        totalValue: parseFloat(acc.totalValue.toString()),
+        totalGainLoss: parseFloat(acc.totalGainLoss.toString()),
+        accountCategory: 'investment',
       })),
     };
   }

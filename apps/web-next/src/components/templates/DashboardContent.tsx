@@ -31,7 +31,7 @@ type DashboardContentProps = {
       balance: number;
       iban?: string;
       type: string;
-      accountType?: 'banking' | 'brokerage';
+      accountType?: 'banking' | 'investment';
     }>;
     recentTransactions: Array<{
       id: string;
@@ -55,7 +55,7 @@ const lastFour = (acc: DashboardContentProps['accountData']['accounts'][0]) =>
   (acc.iban ?? acc.id).slice(-4).toUpperCase();
 
 const accountLabel = (acc: DashboardContentProps['accountData']['accounts'][0]) => {
-  if (acc.accountType === 'brokerage') return 'Investment';
+  if (acc.accountType === 'investment' || acc.type === 'investment') return 'Investment';
   const t = (acc.type ?? '').toLowerCase();
   if (t.includes('saving')) return 'Savings';
   return 'Checking';
@@ -311,17 +311,24 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
                 {accountData.accounts.length > 0 ? (
                   <div className="grid grid-cols-3 gap-3">
                     {accountData.accounts.slice(0, 3).map((acc) => (
-                      <div
+                      <button
                         key={acc.id}
-                        className="bg-black/25 backdrop-blur-sm rounded-xl p-3 border border-white/5"
+                        onClick={() => {
+                          const href =
+                            acc.accountType === 'investment' || acc.type === 'investment'
+                              ? `/${locale}/brokerage/${acc.id}`
+                              : `/${locale}/account/${acc.id}`;
+                          router.push(href);
+                        }}
+                        className="bg-black/25 backdrop-blur-sm rounded-xl p-3 border border-white/5 text-left hover:bg-black/40 hover:border-teal-500/30 transition-all cursor-pointer group"
                       >
-                        <p className="text-teal-200/50 text-[11px] font-mono truncate">
+                        <p className="text-teal-200/50 text-[11px] font-mono truncate group-hover:text-teal-300/70 transition-colors">
                           {accountLabel(acc)} (···{lastFour(acc)})
                         </p>
                         <p className="text-white font-semibold text-sm mt-1.5 font-mono">
                           {fmt(acc.balance)}
                         </p>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 ) : (

@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
 import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('trading')
@@ -16,8 +16,8 @@ export class TradingController {
     private readonly positionRepo: Repository<TradingPositionEntity>,
     @InjectRepository(TradingOrderEntity)
     private readonly orderRepo: Repository<TradingOrderEntity>,
-    @InjectRepository(BrokerageAccountEntity)
-    private readonly brokerageRepo: Repository<BrokerageAccountEntity>,
+    @InjectRepository(InvestmentAccountEntity)
+    private readonly investmentRepo: Repository<InvestmentAccountEntity>,
     @InjectRepository(MarketAssetEntity)
     private readonly assetRepo: Repository<MarketAssetEntity>,
   ) {}
@@ -26,7 +26,7 @@ export class TradingController {
   async getPositions(@Param('accountId') accountId: string, @Req() req: Request) {
     const userId = (req.user as any).id;
 
-    const account = await this.brokerageRepo.findOne({
+    const account = await this.investmentRepo.findOne({
       where: { id: accountId, userId },
     });
     if (!account) {
@@ -34,7 +34,7 @@ export class TradingController {
     }
 
     const positions = await this.positionRepo.find({
-      where: { brokerageAccountId: accountId },
+      where: { investmentAccountId: accountId },
       relations: ['asset'],
       order: { quantity: 'DESC' },
     });
@@ -53,7 +53,7 @@ export class TradingController {
   async getOrders(@Param('accountId') accountId: string, @Req() req: Request) {
     const userId = (req.user as any).id;
 
-    const account = await this.brokerageRepo.findOne({
+    const account = await this.investmentRepo.findOne({
       where: { id: accountId, userId },
     });
     if (!account) {
@@ -61,7 +61,7 @@ export class TradingController {
     }
 
     const orders = await this.orderRepo.find({
-      where: { brokerageAccountId: accountId },
+      where: { investmentAccountId: accountId },
       relations: ['asset'],
       order: { createdAt: 'DESC' },
     });
@@ -96,7 +96,7 @@ export class TradingController {
   ) {
     const userId = (req.user as any).id;
 
-    const account = await this.brokerageRepo.findOne({
+    const account = await this.investmentRepo.findOne({
       where: { id: body.accountId, userId },
     });
     if (!account) {
@@ -111,7 +111,7 @@ export class TradingController {
     }
 
     const order = this.orderRepo.create({
-      brokerageAccountId: body.accountId,
+      investmentAccountId: body.accountId,
       assetId: asset.id,
       orderType: body.orderType,
       side: body.side,
@@ -153,7 +153,7 @@ export class TradingController {
     price: number,
   ) {
     let position = await this.positionRepo.findOne({
-      where: { brokerageAccountId: accountId, assetId },
+      where: { investmentAccountId: accountId, assetId },
       relations: ['asset'],
     });
 
@@ -168,7 +168,7 @@ export class TradingController {
         position.avgPurchasePrice = totalCost / newQuantity;
       } else {
         position = this.positionRepo.create({
-          brokerageAccountId: accountId,
+          investmentAccountId: accountId,
           assetId,
           quantity,
           avgPurchasePrice: price,

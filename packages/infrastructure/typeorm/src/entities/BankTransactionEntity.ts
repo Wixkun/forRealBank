@@ -1,5 +1,5 @@
 import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { BankAccountEntity } from './BankAccountEntity';
+import { AccountEntity } from './AccountEntity';
 import { ImmutableEntity } from './ImmutableEntity';
 
 @Entity('bank_transactions')
@@ -9,9 +9,9 @@ export class BankTransactionEntity extends ImmutableEntity {
   @Column({ name: 'account_id', type: 'uuid' })
   accountId!: string;
 
-  @ManyToOne(() => BankAccountEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => AccountEntity, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'account_id' })
-  account!: BankAccountEntity;
+  account!: AccountEntity;
 
   @Column({ type: 'varchar', length: 20 })
   type!: 'credit' | 'debit' | 'transfer' | 'payment';

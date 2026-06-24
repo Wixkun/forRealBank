@@ -1,18 +1,18 @@
 import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
-import { BrokerageAccountEntity } from './BrokerageAccountEntity';
+import { InvestmentAccountEntity } from './InvestmentAccountEntity';
 import { MarketAssetEntity } from './MarketAssetEntity';
 import { BaseEntity } from './BaseEntity';
 
 @Entity('trading_orders')
-@Index(['brokerageAccountId'])
+@Index(['investmentAccountId'])
 @Index(['status'])
 export class TradingOrderEntity extends BaseEntity {
-  @Column({ name: 'brokerage_account_id', type: 'uuid' })
-  brokerageAccountId!: string;
+  @Column({ name: 'investment_account_id', type: 'uuid' })
+  investmentAccountId!: string;
 
-  @ManyToOne(() => BrokerageAccountEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'brokerage_account_id' })
-  brokerageAccount!: BrokerageAccountEntity;
+  @ManyToOne(() => InvestmentAccountEntity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'investment_account_id' })
+  investmentAccount!: InvestmentAccountEntity;
 
   @Column({ name: 'asset_id', type: 'uuid' })
   assetId!: string;

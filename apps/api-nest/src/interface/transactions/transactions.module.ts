@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TransactionsController } from './transactions.controller';
 import {
   BankTransactionEntity,
-  BankAccountEntity,
-  BrokerageAccountEntity,
+  AccountEntity,
+  InvestmentAccountEntity,
   NotificationEntity,
   UserEntity,
 } from '@forreal/infrastructure-typeorm';
@@ -14,8 +14,8 @@ import { NewsModule } from '../feed/news.module';
   imports: [
     TypeOrmModule.forFeature([
       BankTransactionEntity,
-      BankAccountEntity,
-      BrokerageAccountEntity,
+      AccountEntity,
+      InvestmentAccountEntity,
       NotificationEntity,
       UserEntity,
     ]),

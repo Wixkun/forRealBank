@@ -51,7 +51,7 @@ export default function BrokeragePage() {
       try {
         setLoading(true);
 
-        const accountRes = await fetch(`/api/accounts/brokerage/${accountId}`);
+        const accountRes = await fetch(`/api/accounts/investment/${accountId}`);
         if (!accountRes.ok) {
           if (accountRes.status === 401) {
             router.push('/login');

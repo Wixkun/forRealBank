@@ -1,10 +1,14 @@
 // accounts
-export * from './accounts/BankAccount';
+export * from './accounts/Account';
 export * from './accounts/ports/IAccountRepository';
 
-// brokerage
-export * from './brokerage/BrokerageAccount';
-export * from './brokerage/ports/IBrokerageRepository';
+// investment
+export * from './investment/InvestmentAccount';
+export * from './investment/ports/IInvestmentRepository';
+
+// cards
+export * from './cards/Card';
+export * from './cards/ports/ICardRepository';
 
 // chat
 export * from './chat/AdvisorClient';

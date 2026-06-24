@@ -10,7 +10,7 @@ interface Account {
   balance: number;
   iban?: string;
   type: string;
-  accountType?: 'banking' | 'brokerage';
+  accountType?: 'banking' | 'investment';
 }
 
 interface Transaction {
@@ -46,10 +46,7 @@ export function useDashboardData(initialData: AccountData, locale: string) {
           headers: { 'Content-Type': 'application/json' },
         });
 
-        if (!userResponse.ok) {
-          console.error('[useDashboardData] Failed to fetch user info:', userResponse.status);
-          return;
-        }
+        if (!userResponse.ok) return;
 
         const userData = await userResponse.json();
 
@@ -58,29 +55,41 @@ export function useDashboardData(initialData: AccountData, locale: string) {
           next: { revalidate: 30 },
         });
 
-        if (!accountsResponse.ok) {
-          console.error('[useDashboardData] Failed to fetch accounts:', accountsResponse.status);
-          return;
-        }
+        if (!accountsResponse.ok) return;
 
         const accountsData = await accountsResponse.json();
-        const allAccounts = [
-          ...(accountsData.bankAccounts || []),
-          ...(accountsData.brokerageAccounts || []),
-        ];
+
+        const bankAccounts = (accountsData.accounts || []).map(
+          (acc: Record<string, unknown>) => ({
+            id: acc.id as string,
+            name: acc.name as string,
+            balance: acc.balance as number,
+            iban: acc.iban as string | undefined,
+            type: (acc.type as string) || 'checking',
+            accountType: 'banking' as const,
+          }),
+        );
+
+        const investmentAccounts = (accountsData.investmentAccounts || []).map(
+          (acc: Record<string, unknown>) => ({
+            id: acc.id as string,
+            name: acc.name as string,
+            balance: acc.totalValue as number,
+            iban: undefined,
+            type: 'investment',
+            accountType: 'investment' as const,
+          }),
+        );
 
         const newData: AccountData = {
           user: userData.user,
-          accounts: normalizeAccounts(allAccounts),
+          accounts: [...bankAccounts, ...investmentAccounts],
           recentTransactions: [],
         };
 
         const transactionsResponse = await fetch(
           `${apiUrl}/transactions?limit=${DASHBOARD_CONFIG.RECENT_TRANSACTIONS_LIMIT}`,
-          {
-            credentials: 'include',
-            next: { revalidate: 30 },
-          },
+          { credentials: 'include', next: { revalidate: 30 } },
         );
 
         if (transactionsResponse.ok) {
@@ -88,15 +97,12 @@ export function useDashboardData(initialData: AccountData, locale: string) {
           const transactions = Array.isArray(transactionsData)
             ? transactionsData
             : transactionsData.transactions || [];
-
           newData.recentTransactions = normalizeTransactions(transactions);
         }
 
         setAccountData(newData);
       } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to load dashboard data');
-        console.error('[useDashboardData] Error loading data:', error);
-        setError(error);
+        setError(err instanceof Error ? err : new Error('Failed to load dashboard data'));
       } finally {
         setIsLoading(false);
       }
@@ -106,17 +112,6 @@ export function useDashboardData(initialData: AccountData, locale: string) {
   }, [locale]);
 
   return { accountData, isLoading, error };
-}
-
-function normalizeAccounts(accounts: Array<Record<string, unknown>>): Account[] {
-  return accounts.map((acc) => ({
-    id: acc.id as string,
-    name: acc.name as string,
-    balance: acc.balance as number,
-    iban: acc.iban as string | undefined,
-    type: (acc.type as string) || 'checking',
-    accountType: acc.accountType as 'banking' | 'brokerage' | undefined,
-  }));
 }
 
 function normalizeTransactions(transactions: Array<Record<string, unknown>>): Transaction[] {

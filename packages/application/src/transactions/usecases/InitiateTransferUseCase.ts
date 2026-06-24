@@ -1,13 +1,13 @@
 import { IAccountRepository } from '@forreal/domain';
-import { IBrokerageRepository } from '@forreal/domain';
+import { IInvestmentRepository } from '@forreal/domain';
 import { ITransactionRepository } from '@forreal/domain';
 import { INotificationRepository, NotificationType } from '@forreal/domain';
-import { BankAccount } from '@forreal/domain';
-import { BrokerageAccount } from '@forreal/domain';
+import { Account } from '@forreal/domain';
+import { InvestmentAccount } from '@forreal/domain';
 
 export type TransferRequest = {
   userId: string;
-  sourceType: 'bank' | 'brokerage';
+  sourceType: 'bank' | 'investment';
   sourceAccountId: string;
   destinationAccountId?: string;
   destinationIban?: string;
@@ -25,7 +25,7 @@ export type TransferResult = {
 export class InitiateTransferUseCase {
   constructor(
     private readonly accountRepo: IAccountRepository,
-    private readonly brokerageRepo: IBrokerageRepository,
+    private readonly investmentRepo: IInvestmentRepository,
     private readonly transactionRepo: ITransactionRepository,
     private readonly notificationRepo: INotificationRepository,
   ) {}
@@ -42,7 +42,7 @@ export class InitiateTransferUseCase {
     const amount = Number(req.amount);
 
     if (req.sourceType === 'bank') {
-      const source = await this.accountRepo.findBankAccountById(req.sourceAccountId);
+      const source = await this.accountRepo.findById(req.sourceAccountId);
       if (!source || source.userId !== req.userId) {
         return { success: false, message: 'Source account not found' };
       }
@@ -55,17 +55,17 @@ export class InitiateTransferUseCase {
         return { success: false, message: 'Insufficient funds' };
       }
 
-      let destinationBank: BankAccount | null = null;
-      let destinationBrokerage: BrokerageAccount | null = null;
+      let destinationBank: Account | null = null;
+      let destinationInvestment: InvestmentAccount | null = null;
 
       if (req.destinationAccountId) {
-        destinationBank = await this.accountRepo.findBankAccountById(req.destinationAccountId);
+        destinationBank = await this.accountRepo.findById(req.destinationAccountId);
         if (destinationBank && destinationBank.userId !== req.userId) {
           return { success: false, message: 'Destination not owned by user' };
         }
         if (!destinationBank) {
-          destinationBrokerage = await this.brokerageRepo.findById(req.destinationAccountId);
-          if (!destinationBrokerage || destinationBrokerage.userId !== req.userId) {
+          destinationInvestment = await this.investmentRepo.findById(req.destinationAccountId);
+          if (!destinationInvestment || destinationInvestment.userId !== req.userId) {
             return { success: false, message: 'Destination account not found' };
           }
         }
@@ -73,7 +73,7 @@ export class InitiateTransferUseCase {
         if (source.accountType !== 'checking') {
           return { success: false, message: 'Only checking can transfer to external IBAN' };
         }
-        destinationBank = await this.accountRepo.findBankAccountByIban(req.destinationIban);
+        destinationBank = await this.accountRepo.findByIban(req.destinationIban);
         if (!destinationBank) {
           return { success: false, message: 'Recipient IBAN not found' };
         }
@@ -82,7 +82,7 @@ export class InitiateTransferUseCase {
       }
 
       const newSourceBalance = Number((source.balance - amount).toFixed(2));
-      await this.accountRepo.updateBankAccountBalance(source.id, newSourceBalance);
+      await this.accountRepo.updateBalance(source.id, newSourceBalance);
       await this.transactionRepo.createBankTransaction({
         accountId: source.id,
         type: 'debit',
@@ -95,7 +95,7 @@ export class InitiateTransferUseCase {
 
       if (destinationBank) {
         const newDestBalance = Number((destinationBank.balance + amount).toFixed(2));
-        await this.accountRepo.updateBankAccountBalance(destinationBank.id, newDestBalance);
+        await this.accountRepo.updateBalance(destinationBank.id, newDestBalance);
         await this.transactionRepo.createBankTransaction({
           accountId: destinationBank.id,
           type: 'transfer',
@@ -111,9 +111,9 @@ export class InitiateTransferUseCase {
           `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
           NotificationType.TRANSFER_RECEIVED,
         );
-      } else if (destinationBrokerage) {
-        const newDestBalance = Number((destinationBrokerage.balance + amount).toFixed(2));
-        await this.brokerageRepo.updateCashBalance(destinationBrokerage.id, newDestBalance);
+      } else if (destinationInvestment) {
+        const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
+        await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);
         destinationBalanceUpdated = newDestBalance;
       }
 
@@ -125,46 +125,46 @@ export class InitiateTransferUseCase {
       };
     }
 
-    const sourceBrokerage = await this.brokerageRepo.findById(req.sourceAccountId);
-    if (!sourceBrokerage || sourceBrokerage.userId !== req.userId) {
-      return { success: false, message: 'Brokerage source not found' };
+    const sourceInvestment = await this.investmentRepo.findById(req.sourceAccountId);
+    if (!sourceInvestment || sourceInvestment.userId !== req.userId) {
+      return { success: false, message: 'Investment source not found' };
     }
 
-    if (sourceBrokerage.balance < amount) {
-      return { success: false, message: 'Insufficient brokerage cash' };
+    if (sourceInvestment.cashBalance < amount) {
+      return { success: false, message: 'Insufficient investment cash balance' };
     }
 
     if (req.destinationIban) {
-      return { success: false, message: 'Brokerage cannot transfer to external IBAN' };
+      return { success: false, message: 'Investment account cannot transfer to external IBAN' };
     }
 
     if (!req.destinationAccountId) {
-      return { success: false, message: 'Missing destination account for brokerage transfer' };
+      return { success: false, message: 'Missing destination account for investment transfer' };
     }
 
-    const destinationBank = await this.accountRepo.findBankAccountById(req.destinationAccountId);
-    const destinationBrokerage = destinationBank
+    const destinationBank = await this.accountRepo.findById(req.destinationAccountId);
+    const destinationInvestment = destinationBank
       ? null
-      : await this.brokerageRepo.findById(req.destinationAccountId);
+      : await this.investmentRepo.findById(req.destinationAccountId);
 
     if (destinationBank && destinationBank.userId !== req.userId) {
       return { success: false, message: 'Destination not owned by user' };
     }
-    if (destinationBrokerage && destinationBrokerage.userId !== req.userId) {
+    if (destinationInvestment && destinationInvestment.userId !== req.userId) {
       return { success: false, message: 'Destination not owned by user' };
     }
-    if (!destinationBank && !destinationBrokerage) {
+    if (!destinationBank && !destinationInvestment) {
       return { success: false, message: 'Destination account not found' };
     }
 
-    const newSourceBalance = Number((sourceBrokerage.balance - amount).toFixed(2));
-    await this.brokerageRepo.updateCashBalance(sourceBrokerage.id, newSourceBalance);
+    const newSourceBalance = Number((sourceInvestment.cashBalance - amount).toFixed(2));
+    await this.investmentRepo.updateCashBalance(sourceInvestment.id, newSourceBalance);
 
     let destinationBalanceUpdated: number | undefined = undefined;
 
     if (destinationBank) {
       const newDestBalance = Number((destinationBank.balance + amount).toFixed(2));
-      await this.accountRepo.updateBankAccountBalance(destinationBank.id, newDestBalance);
+      await this.accountRepo.updateBalance(destinationBank.id, newDestBalance);
       await this.transactionRepo.createBankTransaction({
         accountId: destinationBank.id,
         type: 'transfer',
@@ -180,9 +180,9 @@ export class InitiateTransferUseCase {
         `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
         NotificationType.TRANSFER_RECEIVED,
       );
-    } else if (destinationBrokerage) {
-      const newDestBalance = Number((destinationBrokerage.balance + amount).toFixed(2));
-      await this.brokerageRepo.updateCashBalance(destinationBrokerage.id, newDestBalance);
+    } else if (destinationInvestment) {
+      const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
+      await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);
       destinationBalanceUpdated = newDestBalance;
     }
 

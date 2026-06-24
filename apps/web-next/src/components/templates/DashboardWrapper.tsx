@@ -33,7 +33,7 @@ type DashboardWrapperProps = {
       balance: number;
       iban?: string;
       type: string;
-      accountType?: 'banking' | 'brokerage';
+      accountType?: 'banking' | 'investment';
     }>;
     recentTransactions: Array<{
       id: string;
