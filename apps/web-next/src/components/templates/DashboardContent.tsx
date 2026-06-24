@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
@@ -175,9 +176,135 @@ function BankWatermark() {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+type DisplayTransaction = {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  type: 'credit' | 'debit';
+};
+type AccountItem = DashboardContentProps['accountData']['accounts'][0];
+
 export function DashboardContent({ accountData, totalBalance, locale }: DashboardContentProps) {
   const { user } = useAuth();
   const router = useRouter();
+
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [accountTransactions, setAccountTransactions] = useState<DisplayTransaction[]>([]);
+  const [txLoading, setTxLoading] = useState(false);
+
+  // Transfer state
+  const [showTransfer, setShowTransfer] = useState(false);
+  const [transferAmount, setTransferAmount] = useState('');
+  const [transferSourceId, setTransferSourceId] = useState<string | null>(null);
+  const [transferLoading, setTransferLoading] = useState(false);
+  const [transferError, setTransferError] = useState<string | null>(null);
+
+  const selectedAccount = selectedAccountId
+    ? accountData.accounts.find((a) => a.id === selectedAccountId) ?? null
+    : null;
+
+  // Accounts that can be used as source (all except the selected destination)
+  const sourceOptions = accountData.accounts.filter((a) => a.id !== selectedAccountId);
+  const transferSource = transferSourceId
+    ? accountData.accounts.find((a) => a.id === transferSourceId) ?? null
+    : sourceOptions[0] ?? null;
+
+  // Auto-select checking account on first load
+  useEffect(() => {
+    if (selectedAccountId !== null || accountData.accounts.length === 0) return;
+    const checking = accountData.accounts.find(
+      (a) => a.accountType === 'banking' && (a.type === 'checking' || a.type?.includes('check')),
+    ) ?? accountData.accounts[0];
+    if (checking) {
+      setSelectedAccountId(checking.id);
+      loadActivities(checking);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountData.accounts]);
+
+  const loadActivities = async (acc: AccountItem) => {
+    setTxLoading(true);
+    try {
+      const isInvestment = acc.accountType === 'investment' || acc.type === 'investment';
+      const url = isInvestment
+        ? `/api/trading/activities/${acc.id}`
+        : `/api/transactions/account/${acc.id}?limit=10`;
+
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) { setAccountTransactions([]); return; }
+
+      const data = await res.json();
+      const raw: Array<Record<string, unknown>> = Array.isArray(data)
+        ? data
+        : (data.transactions ?? []);
+
+      setAccountTransactions(
+        raw.map((t) => ({
+          id: t.id as string,
+          date: (t.date as string) || new Date().toISOString(),
+          description: (t.description as string) || '',
+          amount: Math.abs(t.amount as number),
+          type: (t.type as string) === 'credit' ? ('credit' as const) : ('debit' as const),
+        })),
+      );
+    } catch {
+      setAccountTransactions([]);
+    } finally {
+      setTxLoading(false);
+    }
+  };
+
+  const selectAccount = async (acc: AccountItem) => {
+    if (selectedAccountId === acc.id) return; // always keep one selected
+    setSelectedAccountId(acc.id);
+    setShowTransfer(false);
+    setTransferError(null);
+    setTransferSourceId(null);
+    await loadActivities(acc);
+  };
+
+  const handleTransfer = async () => {
+    if (!transferSource || !selectedAccount || !transferAmount) return;
+    const amount = parseFloat(transferAmount);
+    if (isNaN(amount) || amount <= 0) { setTransferError('Montant invalide'); return; }
+    if (amount > transferSource.balance) { setTransferError('Fonds insuffisants'); return; }
+
+    const sourceType =
+      transferSource.accountType === 'investment' || transferSource.type === 'investment'
+        ? 'investment'
+        : 'bank';
+
+    setTransferLoading(true);
+    setTransferError(null);
+    try {
+      const res = await fetch('/api/transactions/transfer', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sourceType,
+          sourceAccountId: transferSource.id,
+          destinationAccountId: selectedAccount.id,
+          amount,
+          description: `Virement ${accountLabel(transferSource)} → ${accountLabel(selectedAccount)}`,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) { setTransferError(data.error || 'Échec du virement'); return; }
+
+      setShowTransfer(false);
+      setTransferAmount('');
+      await loadActivities(selectedAccount);
+      window.location.reload();
+    } catch {
+      setTransferError('Erreur réseau');
+    } finally {
+      setTransferLoading(false);
+    }
+  };
+
+  const displayedTransactions = accountTransactions;
 
   const handleLogout = async () => {
     try {
@@ -310,26 +437,29 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
                 </h2>
                 {accountData.accounts.length > 0 ? (
                   <div className="grid grid-cols-3 gap-3">
-                    {accountData.accounts.slice(0, 3).map((acc) => (
-                      <button
-                        key={acc.id}
-                        onClick={() => {
-                          const href =
-                            acc.accountType === 'investment' || acc.type === 'investment'
-                              ? `/${locale}/brokerage/${acc.id}`
-                              : `/${locale}/account/${acc.id}`;
-                          router.push(href);
-                        }}
-                        className="bg-black/25 backdrop-blur-sm rounded-xl p-3 border border-white/5 text-left hover:bg-black/40 hover:border-teal-500/30 transition-all cursor-pointer group"
-                      >
-                        <p className="text-teal-200/50 text-[11px] font-mono truncate group-hover:text-teal-300/70 transition-colors">
-                          {accountLabel(acc)} (···{lastFour(acc)})
-                        </p>
-                        <p className="text-white font-semibold text-sm mt-1.5 font-mono">
-                          {fmt(acc.balance)}
-                        </p>
-                      </button>
-                    ))}
+                    {accountData.accounts.slice(0, 3).map((acc) => {
+                      const isSelected = selectedAccountId === acc.id;
+                      return (
+                        <button
+                          key={acc.id}
+                          onClick={() => selectAccount(acc)}
+                          className={`backdrop-blur-sm rounded-xl p-3 border text-left transition-all cursor-pointer group ${
+                            isSelected
+                              ? 'bg-teal-900/30 border-teal-500/60 ring-1 ring-teal-500/30'
+                              : 'bg-black/25 border-white/5 hover:bg-black/40 hover:border-teal-500/30'
+                          }`}
+                        >
+                          <p className={`text-[11px] font-mono truncate transition-colors ${
+                            isSelected ? 'text-teal-300' : 'text-teal-200/50 group-hover:text-teal-300/70'
+                          }`}>
+                            {accountLabel(acc)} (···{lastFour(acc)})
+                          </p>
+                          <p className="text-white font-semibold text-sm mt-1.5 font-mono">
+                            {fmt(acc.balance)}
+                          </p>
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-teal-200/40 text-sm">No accounts yet</p>
@@ -340,14 +470,77 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
             {/* Transactions */}
             <div className="bg-[#111318] rounded-2xl border border-white/5">
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
-                <h3 className="font-semibold text-white text-sm">Recent Transactions</h3>
-                <button className="text-cyan-400 text-xs hover:text-cyan-300 transition">
-                  View All
-                </button>
+                <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+                  Recent Transactions
+                  {selectedAccount && (
+                    <span className="text-teal-400 font-normal text-xs">
+                      — {accountLabel(selectedAccount)}
+                    </span>
+                  )}
+                </h3>
+                <div className="flex items-center gap-3">
+                  {selectedAccount && sourceOptions.length > 0 && (
+                    <button
+                      onClick={() => { setShowTransfer((v) => !v); setTransferError(null); }}
+                      className="text-xs px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30 transition"
+                    >
+                      + Alimenter
+                    </button>
+                  )}
+                </div>
               </div>
-              {accountData.recentTransactions.length === 0 ? (
+
+              {/* Transfer form */}
+              {showTransfer && selectedAccount && sourceOptions.length > 0 && (
+                <div className="px-5 py-4 border-b border-white/5 bg-teal-950/30">
+                  <p className="text-teal-300 text-xs mb-2 font-medium">
+                    Depuis → vers {accountLabel(selectedAccount)}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={transferSourceId ?? sourceOptions[0]?.id ?? ''}
+                      onChange={(e) => setTransferSourceId(e.target.value)}
+                      className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-teal-500/50"
+                    >
+                      {sourceOptions.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {accountLabel(a)} — {fmt(a.balance)}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      min="1"
+                      step="0.01"
+                      placeholder="Montant (€)"
+                      value={transferAmount}
+                      onChange={(e) => setTransferAmount(e.target.value)}
+                      className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
+                    />
+                    <button
+                      onClick={handleTransfer}
+                      disabled={transferLoading || !transferAmount}
+                      className="px-4 py-1.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {transferLoading ? '...' : 'Virer'}
+                    </button>
+                    <button
+                      onClick={() => { setShowTransfer(false); setTransferError(null); setTransferAmount(''); }}
+                      className="text-gray-500 text-xs hover:text-gray-300 transition"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                  {transferError && (
+                    <p className="text-red-400 text-xs mt-2">{transferError}</p>
+                  )}
+                </div>
+              )}
+              {txLoading ? (
+                <div className="px-5 py-10 text-center text-gray-600 text-sm">Loading...</div>
+              ) : displayedTransactions.length === 0 ? (
                 <div className="px-5 py-10 text-center text-gray-600 text-sm">
-                  No transactions yet
+                  {selectedAccount ? 'No transactions for this account' : 'No transactions yet'}
                 </div>
               ) : (
                 <table className="w-full text-sm">
@@ -360,7 +553,7 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
                     </tr>
                   </thead>
                   <tbody>
-                    {accountData.recentTransactions.map((tx) => (
+                    {displayedTransactions.map((tx) => (
                       <tr
                         key={tx.id}
                         className="border-t border-white/[0.04] hover:bg-white/[0.02] transition-colors"

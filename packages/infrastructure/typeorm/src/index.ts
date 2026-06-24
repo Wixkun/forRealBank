@@ -14,6 +14,7 @@ export * from './entities/NotificationEntity';
 export * from './entities/RoleEntity';
 export * from './entities/TradingOrderEntity';
 export * from './entities/TradingPositionEntity';
+export * from './entities/InvestmentTransactionEntity';
 export * from './entities/MarketAssetEntity';
 export * from './entities/NewsEntity';
 export * from './entities/NewsDismissalEntity';

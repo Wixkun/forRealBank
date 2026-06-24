@@ -5,6 +5,7 @@ import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
 import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
       TradingOrderEntity,
       InvestmentAccountEntity,
       MarketAssetEntity,
+      InvestmentTransactionEntity,
     ]),
   ],
   controllers: [TradingController],

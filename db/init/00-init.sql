@@ -162,6 +162,17 @@ CREATE TABLE IF NOT EXISTS bank_transactions (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Investment cash movements (deposits / withdrawals to investment account)
+CREATE TABLE IF NOT EXISTS investment_transactions (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    investment_account_id uuid NOT NULL REFERENCES investment_accounts(id) ON DELETE CASCADE,
+    type varchar(20) NOT NULL CHECK (type IN ('deposit', 'withdrawal')),
+    description text NOT NULL,
+    amount decimal(15, 2) NOT NULL,
+    cash_balance_after decimal(15, 2) NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- Market assets
 CREATE TABLE IF NOT EXISTS market_assets (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

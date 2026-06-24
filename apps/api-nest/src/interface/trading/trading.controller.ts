@@ -7,6 +7,7 @@ import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
 import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('trading')
 @UseGuards(JwtAuthGuard)
@@ -20,6 +21,8 @@ export class TradingController {
     private readonly investmentRepo: Repository<InvestmentAccountEntity>,
     @InjectRepository(MarketAssetEntity)
     private readonly assetRepo: Repository<MarketAssetEntity>,
+    @InjectRepository(InvestmentTransactionEntity)
+    private readonly investmentTxnRepo: Repository<InvestmentTransactionEntity>,
   ) {}
 
   @Get('positions/:accountId')
@@ -47,6 +50,56 @@ export class TradingController {
       quantity: parseFloat(pos.quantity.toString()),
       avgPurchasePrice: parseFloat(pos.avgPurchasePrice.toString()),
     }));
+  }
+
+  @Get('activities/:accountId')
+  async getActivities(@Param('accountId') accountId: string, @Req() req: Request) {
+    const userId = (req.user as any).id;
+
+    const account = await this.investmentRepo.findOne({ where: { id: accountId, userId } });
+    if (!account) throw new Error('Account not found');
+
+    const [orders, cashMovements] = await Promise.all([
+      this.orderRepo.find({
+        where: { investmentAccountId: accountId },
+        relations: ['asset'],
+        order: { createdAt: 'DESC' },
+        take: 50,
+      }),
+      this.investmentTxnRepo.find({
+        where: { investmentAccountId: accountId },
+        order: { createdAt: 'DESC' },
+        take: 50,
+      }),
+    ]);
+
+    const orderItems = orders.map((o) => ({
+      id: o.id,
+      activityType: 'order' as const,
+      date: o.createdAt.toISOString(),
+      description: `${o.side === 'buy' ? 'Achat' : 'Vente'} ${o.asset.symbol} × ${parseFloat(o.quantity.toString())}`,
+      amount: o.executedPrice
+        ? parseFloat(o.quantity.toString()) * parseFloat(o.executedPrice.toString())
+        : null,
+      type: o.side === 'buy' ? ('debit' as const) : ('credit' as const),
+      status: o.status,
+      symbol: o.asset.symbol,
+    }));
+
+    const cashItems = cashMovements.map((c) => ({
+      id: c.id,
+      activityType: 'cash' as const,
+      date: c.createdAt.toISOString(),
+      description: c.description,
+      amount: parseFloat(c.amount.toString()),
+      type: c.type === 'deposit' ? ('credit' as const) : ('debit' as const),
+      status: 'executed' as const,
+      symbol: null,
+    }));
+
+    return [...orderItems, ...cashItems].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
   }
 
   @Get('orders/:accountId')

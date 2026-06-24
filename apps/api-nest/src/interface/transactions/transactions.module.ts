@@ -5,6 +5,7 @@ import {
   BankTransactionEntity,
   AccountEntity,
   InvestmentAccountEntity,
+  InvestmentTransactionEntity,
   NotificationEntity,
   UserEntity,
 } from '@forreal/infrastructure-typeorm';
@@ -16,6 +17,7 @@ import { NewsModule } from '../feed/news.module';
       BankTransactionEntity,
       AccountEntity,
       InvestmentAccountEntity,
+      InvestmentTransactionEntity,
       NotificationEntity,
       UserEntity,
     ]),

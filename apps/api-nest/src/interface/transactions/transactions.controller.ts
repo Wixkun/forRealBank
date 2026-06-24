@@ -12,6 +12,7 @@ import { AccountRepository } from '@forreal/infrastructure-typeorm';
 import { InvestmentAccountRepository } from '@forreal/infrastructure-typeorm';
 import { BankTransactionRepository } from '@forreal/infrastructure-typeorm';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
+import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 import { InitiateTransferUseCase } from '@forreal/application';
 import { NewsService } from '../feed/news.service';
 import { NewsStatus } from '@forreal/domain';
@@ -30,6 +31,8 @@ export class TransactionsController {
     private readonly notificationRepo: Repository<NotificationEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(InvestmentTransactionEntity)
+    private readonly investmentTxnRepo: Repository<InvestmentTransactionEntity>,
     @Inject(NewsService)
     private readonly newsService: NewsService,
   ) {}
@@ -121,7 +124,7 @@ export class TransactionsController {
     const userId = (req.user as any)?.id;
     const usecase = new InitiateTransferUseCase(
       new AccountRepository(this.accountRepo),
-      new InvestmentAccountRepository(this.investmentRepo),
+      new InvestmentAccountRepository(this.investmentRepo, this.investmentTxnRepo),
       new BankTransactionRepository(this.transactionRepo),
       new NotificationRepository(this.notificationRepo, this.userRepo),
     );

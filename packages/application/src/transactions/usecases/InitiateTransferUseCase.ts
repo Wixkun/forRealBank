@@ -114,6 +114,13 @@ export class InitiateTransferUseCase {
       } else if (destinationInvestment) {
         const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
         await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);
+        await this.investmentRepo.createCashMovement({
+          investmentAccountId: destinationInvestment.id,
+          type: 'deposit',
+          amount,
+          cashBalanceAfter: newDestBalance,
+          description: req.description || 'Transfer from bank account',
+        });
         destinationBalanceUpdated = newDestBalance;
       }
 
@@ -159,6 +166,13 @@ export class InitiateTransferUseCase {
 
     const newSourceBalance = Number((sourceInvestment.cashBalance - amount).toFixed(2));
     await this.investmentRepo.updateCashBalance(sourceInvestment.id, newSourceBalance);
+    await this.investmentRepo.createCashMovement({
+      investmentAccountId: sourceInvestment.id,
+      type: 'withdrawal',
+      amount,
+      cashBalanceAfter: newSourceBalance,
+      description: req.description || 'Transfer to bank account',
+    });
 
     let destinationBalanceUpdated: number | undefined = undefined;
 
