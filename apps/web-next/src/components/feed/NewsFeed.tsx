@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, type JSX } from 'react';
 import { useSSE } from '@/hooks/useSSE';
 import { CreateNewsInlineForm } from '@/components/feed/CreateNewsInlineForm';
 
