@@ -338,7 +338,26 @@ function AccountChart({ transactions, currentBalance }: { transactions: DisplayT
     </div>
   );
 }
+type Period = 'day' | 'week' | 'month' | 'year' | 'all';
 type AccountItem = DashboardContentProps['accountData']['accounts'][0];
+
+const PERIODS: { key: Period; label: string }[] = [
+  { key: 'day',   label: 'Jour'    },
+  { key: 'week',  label: 'Semaine' },
+  { key: 'month', label: 'Mois'    },
+  { key: 'year',  label: 'Année'   },
+  { key: 'all',   label: 'Tout'    },
+];
+
+function filterByPeriod(txns: DisplayTransaction[], p: Period): DisplayTransaction[] {
+  if (p === 'all') return txns;
+  const cutoff = new Date();
+  if (p === 'day')   cutoff.setDate(cutoff.getDate() - 1);
+  if (p === 'week')  cutoff.setDate(cutoff.getDate() - 7);
+  if (p === 'month') cutoff.setMonth(cutoff.getMonth() - 1);
+  if (p === 'year')  cutoff.setFullYear(cutoff.getFullYear() - 1);
+  return txns.filter((t) => new Date(t.date) >= cutoff);
+}
 
 export function DashboardContent({ accountData, totalBalance, locale }: DashboardContentProps) {
   const { user } = useAuth();
@@ -347,6 +366,7 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [accountTransactions, setAccountTransactions] = useState<DisplayTransaction[]>([]);
   const [txLoading, setTxLoading] = useState(false);
+  const [period, setPeriod] = useState<Period>('month');
 
   const [showChart, setShowChart] = useState(false);
 
@@ -386,7 +406,7 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
       const isInvestment = acc.accountType === 'investment' || acc.type === 'investment';
       const url = isInvestment
         ? `/api/trading/activities/${acc.id}`
-        : `/api/transactions/account/${acc.id}?limit=10`;
+        : `/api/transactions/account/${acc.id}?limit=500`;
 
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) { setAccountTransactions([]); return; }
@@ -462,7 +482,7 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
     }
   };
 
-  const displayedTransactions = accountTransactions;
+  const displayedTransactions = filterByPeriod(accountTransactions, period);
 
   const handleLogout = async () => {
     try {
@@ -627,15 +647,31 @@ export function DashboardContent({ accountData, totalBalance, locale }: Dashboar
 
             {/* Transactions */}
             <div className="bg-[#111318] rounded-2xl border border-white/5">
-              <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
                 <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-                  Recent Transactions
+                  Transactions
                   {selectedAccount && (
                     <span className="text-teal-400 font-normal text-xs">
                       — {accountLabel(selectedAccount)}
                     </span>
                   )}
                 </h3>
+                {/* Period selector */}
+                <div className="flex items-center gap-1 bg-black/20 rounded-lg p-0.5">
+                  {PERIODS.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      onClick={() => setPeriod(key)}
+                      className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                        period === key
+                          ? 'bg-teal-500/25 text-teal-300 border border-teal-500/30'
+                          : 'text-gray-500 hover:text-gray-300'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <div className="flex items-center gap-2">
                   {selectedAccount && (
                     <button
