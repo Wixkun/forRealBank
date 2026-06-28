@@ -2,9 +2,9 @@ import { Entity, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { UserEntity } from './UserEntity';
 import { BaseEntity } from './BaseEntity';
 
-@Entity('bank_accounts')
+@Entity('accounts')
 @Index(['userId'])
-export class BankAccountEntity extends BaseEntity {
+export class AccountEntity extends BaseEntity {
   @Column({ name: 'user_id', type: 'uuid' })
   userId!: string;
 
@@ -26,6 +26,9 @@ export class BankAccountEntity extends BaseEntity {
 
   @Column({ name: 'account_number', type: 'varchar', length: 20 })
   accountNumber!: string;
+
+  @Column({ name: 'interest_rate', type: 'decimal', precision: 5, scale: 2, nullable: true })
+  interestRate!: number | null;
 
   @Column({ type: 'varchar', length: 20, default: 'active' })
   status!: 'active' | 'closed' | 'suspended';

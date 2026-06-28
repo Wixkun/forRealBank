@@ -5,8 +5,9 @@ import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
 import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 
 @Controller('trading')
 @UseGuards(JwtAuthGuard)
@@ -16,17 +17,19 @@ export class TradingController {
     private readonly positionRepo: Repository<TradingPositionEntity>,
     @InjectRepository(TradingOrderEntity)
     private readonly orderRepo: Repository<TradingOrderEntity>,
-    @InjectRepository(BrokerageAccountEntity)
-    private readonly brokerageRepo: Repository<BrokerageAccountEntity>,
+    @InjectRepository(InvestmentAccountEntity)
+    private readonly investmentRepo: Repository<InvestmentAccountEntity>,
     @InjectRepository(MarketAssetEntity)
     private readonly assetRepo: Repository<MarketAssetEntity>,
+    @InjectRepository(InvestmentTransactionEntity)
+    private readonly investmentTxnRepo: Repository<InvestmentTransactionEntity>,
   ) {}
 
   @Get('positions/:accountId')
   async getPositions(@Param('accountId') accountId: string, @Req() req: Request) {
     const userId = (req.user as any).id;
 
-    const account = await this.brokerageRepo.findOne({
+    const account = await this.investmentRepo.findOne({
       where: { id: accountId, userId },
     });
     if (!account) {
@@ -34,7 +37,7 @@ export class TradingController {
     }
 
     const positions = await this.positionRepo.find({
-      where: { brokerageAccountId: accountId },
+      where: { investmentAccountId: accountId },
       relations: ['asset'],
       order: { quantity: 'DESC' },
     });
@@ -49,11 +52,61 @@ export class TradingController {
     }));
   }
 
+  @Get('activities/:accountId')
+  async getActivities(@Param('accountId') accountId: string, @Req() req: Request) {
+    const userId = (req.user as any).id;
+
+    const account = await this.investmentRepo.findOne({ where: { id: accountId, userId } });
+    if (!account) throw new Error('Account not found');
+
+    const [orders, cashMovements] = await Promise.all([
+      this.orderRepo.find({
+        where: { investmentAccountId: accountId },
+        relations: ['asset'],
+        order: { createdAt: 'DESC' },
+        take: 50,
+      }),
+      this.investmentTxnRepo.find({
+        where: { investmentAccountId: accountId },
+        order: { createdAt: 'DESC' },
+        take: 50,
+      }),
+    ]);
+
+    const orderItems = orders.map((o) => ({
+      id: o.id,
+      activityType: 'order' as const,
+      date: o.createdAt.toISOString(),
+      description: `${o.side === 'buy' ? 'Achat' : 'Vente'} ${o.asset.symbol} × ${parseFloat(o.quantity.toString())}`,
+      amount: o.executedPrice
+        ? parseFloat(o.quantity.toString()) * parseFloat(o.executedPrice.toString())
+        : null,
+      type: o.side === 'buy' ? ('debit' as const) : ('credit' as const),
+      status: o.status,
+      symbol: o.asset.symbol,
+    }));
+
+    const cashItems = cashMovements.map((c) => ({
+      id: c.id,
+      activityType: 'cash' as const,
+      date: c.createdAt.toISOString(),
+      description: c.description,
+      amount: parseFloat(c.amount.toString()),
+      type: c.type === 'deposit' ? ('credit' as const) : ('debit' as const),
+      status: 'executed' as const,
+      symbol: null,
+    }));
+
+    return [...orderItems, ...cashItems].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }
+
   @Get('orders/:accountId')
   async getOrders(@Param('accountId') accountId: string, @Req() req: Request) {
     const userId = (req.user as any).id;
 
-    const account = await this.brokerageRepo.findOne({
+    const account = await this.investmentRepo.findOne({
       where: { id: accountId, userId },
     });
     if (!account) {
@@ -61,7 +114,7 @@ export class TradingController {
     }
 
     const orders = await this.orderRepo.find({
-      where: { brokerageAccountId: accountId },
+      where: { investmentAccountId: accountId },
       relations: ['asset'],
       order: { createdAt: 'DESC' },
     });
@@ -96,7 +149,7 @@ export class TradingController {
   ) {
     const userId = (req.user as any).id;
 
-    const account = await this.brokerageRepo.findOne({
+    const account = await this.investmentRepo.findOne({
       where: { id: body.accountId, userId },
     });
     if (!account) {
@@ -111,7 +164,7 @@ export class TradingController {
     }
 
     const order = this.orderRepo.create({
-      brokerageAccountId: body.accountId,
+      investmentAccountId: body.accountId,
       assetId: asset.id,
       orderType: body.orderType,
       side: body.side,
@@ -153,7 +206,7 @@ export class TradingController {
     price: number,
   ) {
     let position = await this.positionRepo.findOne({
-      where: { brokerageAccountId: accountId, assetId },
+      where: { investmentAccountId: accountId, assetId },
       relations: ['asset'],
     });
 
@@ -168,7 +221,7 @@ export class TradingController {
         position.avgPurchasePrice = totalCost / newQuantity;
       } else {
         position = this.positionRepo.create({
-          brokerageAccountId: accountId,
+          investmentAccountId: accountId,
           assetId,
           quantity,
           avgPurchasePrice: price,

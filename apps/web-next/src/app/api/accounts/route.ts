@@ -6,16 +6,12 @@ export async function GET() {
     const cookieStore = await cookies();
     const token = cookieStore.get('access_token')?.value;
 
-    console.log('[API Routes] /api/accounts - Token:', token ? '***' : 'NO TOKEN');
-
     if (!token) {
-      console.warn('[API Routes] /api/accounts - No auth token found');
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    console.log('[API Routes] /api/accounts - Making request to NestJS...');
     const apiUrl = process.env.API_URL || 'http://localhost:3001/api';
-    const response = await fetch(`${apiUrl}/accounts`, {
+    const response = await fetch(`${apiUrl}/accounts/all/summary`, {
       method: 'GET',
       headers: {
         Cookie: `access_token=${token}`,
@@ -24,16 +20,11 @@ export async function GET() {
       cache: 'no-store',
     });
 
-    console.log('[API Routes] /api/accounts - Response status:', response.status);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[API Routes] /api/accounts - Error response:', errorText);
       return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: response.status });
     }
 
     const data = await response.json();
-    console.log('[API Routes] /api/accounts - Success, returning data');
     return NextResponse.json(data);
   } catch (error) {
     console.error('[API Routes] GET /api/accounts error:', error);

@@ -1,8 +1,8 @@
-import { BankAccount } from '../BankAccount';
+import { Account } from '../Account';
 
 export interface IAccountRepository {
-  findBankAccountById(id: string): Promise<BankAccount | null>;
-  findBankAccountByIban(iban: string): Promise<BankAccount | null>;
-  listUserBankAccounts(userId: string): Promise<BankAccount[]>;
-  updateBankAccountBalance(id: string, newBalance: number): Promise<void>;
+  findById(id: string): Promise<Account | null>;
+  findByIban(iban: string): Promise<Account | null>;
+  listByUser(userId: string): Promise<Account[]>;
+  updateBalance(id: string, newBalance: number): Promise<void>;
 }

@@ -11,7 +11,7 @@ export interface Account {
   balance: number;
   iban?: string;
   type: string;
-  accountType?: 'banking' | 'brokerage';
+  accountType?: 'banking' | 'investment';
 }
 
 export interface Transaction {

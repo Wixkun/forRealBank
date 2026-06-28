@@ -43,7 +43,7 @@ export default function AccountPage() {
       try {
         setLoading(true);
 
-        const accountRes = await fetch(`/api/accounts/bank/${accountId}`);
+        const accountRes = await fetch(`/api/accounts/${accountId}`);
         if (!accountRes.ok) {
           throw new Error(`Failed to fetch account: ${accountRes.status}`);
         }

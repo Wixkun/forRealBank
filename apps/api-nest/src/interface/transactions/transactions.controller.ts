@@ -4,14 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BankTransactionEntity } from '@forreal/infrastructure-typeorm';
-import { BankAccountEntity } from '@forreal/infrastructure-typeorm';
-import { BrokerageAccountEntity } from '@forreal/infrastructure-typeorm';
+import { AccountEntity } from '@forreal/infrastructure-typeorm';
+import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { NotificationEntity } from '@forreal/infrastructure-typeorm';
 import { UserEntity } from '@forreal/infrastructure-typeorm';
-import { BankAccountRepository } from '@forreal/infrastructure-typeorm';
-import { BrokerageAccountRepository } from '@forreal/infrastructure-typeorm';
+import { AccountRepository } from '@forreal/infrastructure-typeorm';
+import { InvestmentAccountRepository } from '@forreal/infrastructure-typeorm';
 import { BankTransactionRepository } from '@forreal/infrastructure-typeorm';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
+import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 import { InitiateTransferUseCase } from '@forreal/application';
 import { NewsService } from '../feed/news.service';
 import { NewsStatus } from '@forreal/domain';
@@ -22,14 +23,16 @@ export class TransactionsController {
   constructor(
     @InjectRepository(BankTransactionEntity)
     private readonly transactionRepo: Repository<BankTransactionEntity>,
-    @InjectRepository(BankAccountEntity)
-    private readonly accountRepo: Repository<BankAccountEntity>,
-    @InjectRepository(BrokerageAccountEntity)
-    private readonly brokerageRepo: Repository<BrokerageAccountEntity>,
+    @InjectRepository(AccountEntity)
+    private readonly accountRepo: Repository<AccountEntity>,
+    @InjectRepository(InvestmentAccountEntity)
+    private readonly investmentRepo: Repository<InvestmentAccountEntity>,
     @InjectRepository(NotificationEntity)
     private readonly notificationRepo: Repository<NotificationEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(InvestmentTransactionEntity)
+    private readonly investmentTxnRepo: Repository<InvestmentTransactionEntity>,
     @Inject(NewsService)
     private readonly newsService: NewsService,
   ) {}
@@ -110,7 +113,7 @@ export class TransactionsController {
     @Req() req: Request,
     @Body()
     body: {
-      sourceType: 'bank' | 'brokerage';
+      sourceType: 'bank' | 'investment';
       sourceAccountId: string;
       destinationAccountId?: string;
       destinationIban?: string;
@@ -120,8 +123,8 @@ export class TransactionsController {
   ) {
     const userId = (req.user as any)?.id;
     const usecase = new InitiateTransferUseCase(
-      new BankAccountRepository(this.accountRepo),
-      new BrokerageAccountRepository(this.brokerageRepo),
+      new AccountRepository(this.accountRepo),
+      new InvestmentAccountRepository(this.investmentRepo, this.investmentTxnRepo),
       new BankTransactionRepository(this.transactionRepo),
       new NotificationRepository(this.notificationRepo, this.userRepo),
     );
@@ -140,7 +143,6 @@ export class TransactionsController {
       return { success: false, error: result.message };
     }
 
-    // Créer une news de type TRANSACTIONS pour l'utilisateur
     try {
       await this.newsService.createSystemNews({
         authorId: userId,
