@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { BrokeragePageWrapper } from '@/components/templates/BrokeragePageWrapper';
+import { BrokeragePageWrapper } from '@/features/brokerage/components/BrokeragePageWrapper';
 import { useEffect, useState } from 'react';
 
 type BrokerageAccount = {

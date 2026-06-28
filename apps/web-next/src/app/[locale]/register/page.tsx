@@ -1,5 +1,5 @@
-import { RegisterForm } from '@/components/organisms/RegisterForm';
-import { AuthLayout } from '@/components/templates/AuthLayout';
+import { RegisterForm } from '@/features/auth/components/RegisterForm';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
 
 export const metadata = {
   title: 'Register',

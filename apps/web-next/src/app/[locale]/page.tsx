@@ -1,9 +1,9 @@
 import { getTranslations } from 'next-intl/server';
-import { HeroSection } from '@/components/organisms/HeroSection';
-import { FeaturesSection } from '@/components/organisms/FeaturesSection';
-import { ServicesSection } from '@/components/organisms/ServicesSection';
-import { CTASection } from '@/components/organisms/CTASection';
-import Header from '@/components/Header';
+import { HeroSection } from '@/features/landing/components/HeroSection';
+import { FeaturesSection } from '@/features/landing/components/FeaturesSection';
+import { ServicesSection } from '@/features/landing/components/ServicesSection';
+import { CTASection } from '@/features/landing/components/CTASection';
+import Header from '@/components/layout/Header';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({

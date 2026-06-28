@@ -1,5 +1,5 @@
 import { getTranslations } from 'next-intl/server';
-import { MarketPageWrapper } from '@/components/templates/MarketPageWrapper';
+import { MarketPageWrapper } from '@/features/market/components/MarketPageWrapper';
 import { fetchMarketAssets } from '@/lib/api';
 export const revalidate = 60;
 

@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
-import { TransferFormCard } from '@/components/molecules/TransferFormCard';
-import { DashboardHeader } from '@/components/organisms/DashboardHeader';
+import { TransferFormCard } from '@/features/transfer/components/TransferFormCard';
+import { DashboardHeader } from '@/features/dashboard/components/DashboardHeader';
 
 type AccountItem = {
   id: string;

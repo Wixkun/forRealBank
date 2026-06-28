@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useTheme } from '@/contexts/ThemeContext';
-import { DashboardHeader } from '@/components/organisms/DashboardHeader';
+import { DashboardHeader } from '@/features/dashboard/components/DashboardHeader';
 import { useAuth } from '@/hooks/useAuth';
 import { apiFetch, ApiError } from '@/lib/api-client';
 
