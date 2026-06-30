@@ -18,6 +18,8 @@ export * from './entities/InvestmentTransactionEntity';
 export * from './entities/MarketAssetEntity';
 export * from './entities/NewsEntity';
 export * from './entities/NewsDismissalEntity';
+export * from './entities/UserNewsArchiveEntity';
+export * from './entities/UserNewsStatusEntity';
 
 // repositories
 export * from './repositories/AdvisorClientRepository';

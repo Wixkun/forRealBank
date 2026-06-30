@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { PortfolioCard } from '@/components/dashboard/PortfolioCard';
-import { TransactionsSection } from '@/components/dashboard/TransactionsSection';
+import { PortfolioCard } from '@/features/dashboard/components/PortfolioCard';
+import { TransactionsSection } from '@/features/dashboard/components/TransactionsSection';
 import NewsFeed from '@/features/feed/components/NewsFeed';
-import type { Account } from '@/components/dashboard/types';
+import type { Account } from '@/features/dashboard/types';
 
 type DashboardContentProps = {
   accountData: {
@@ -47,7 +47,7 @@ export function DashboardContent({ accountData, totalBalance }: DashboardContent
           accounts={accountData.accounts}
           totalBalance={totalBalance}
           selectedAccountId={selectedAccountId}
-          onSelectAccount={(acc) => setSelectedAccountId(acc.id)}
+          onSelectAccount={(acc: Account) => setSelectedAccountId(acc.id)}
         />
       )}
 

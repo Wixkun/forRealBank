@@ -1,6 +1,8 @@
-import { News, NewsStatus } from '../News';
+import { News, NewsSource, NewsStatus } from '../News';
 
 export const INewsRepository = Symbol('INewsRepository');
+
+export type UserNewsStatusValue = 'VISIBLE' | 'READ' | 'ARCHIVED' | 'DELETED';
 
 export interface INewsRepository {
   findById(id: string): Promise<News | null>;
@@ -10,6 +12,7 @@ export interface INewsRepository {
     title: string;
     content: string;
     status?: NewsStatus;
+    source?: NewsSource;
     userId?: string | null;
   }): Promise<News>;
   list(params?: {
@@ -17,9 +20,13 @@ export interface INewsRepository {
     offset?: number;
     userId?: string | null;
     includeArchived?: boolean;
+    archivedOnly?: boolean;
   }): Promise<News[]>;
   deleteById(id: string): Promise<void>;
-  archiveById(id: string): Promise<void>;
-  unarchiveById(id: string): Promise<void>;
+  deactivateById(id: string): Promise<void>;
+  setUserStatus(newsId: string, userId: string, status: UserNewsStatusValue): Promise<void>;
+  clearUserStatus(newsId: string, userId: string): Promise<void>;
+  archiveForUser(newsId: string, userId: string): Promise<void>;
+  unarchiveForUser(newsId: string, userId: string): Promise<void>;
   dismissForUser(newsId: string, userId: string): Promise<void>;
 }

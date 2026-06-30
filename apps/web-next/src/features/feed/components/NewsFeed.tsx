@@ -6,9 +6,9 @@ import { CreateNewsInlineForm } from '@/features/feed/components/CreateNewsInlin
 
 type NewsStatus =
   | 'SECURITY'
-  | 'TRANSACTIONS'
-  | 'PAYMENTS'
-  | 'ACCOUNT_UPDATES'
+  | 'TRANSACTION'
+  | 'PAYMENT'
+  | 'ACCOUNT'
   | 'SYSTEM'
   | 'INFORMATION';
 
@@ -45,8 +45,8 @@ const STATUS_CONFIG: Record<
       </svg>
     ),
   },
-  TRANSACTIONS: {
-    label: 'Transactions',
+  TRANSACTION: {
+    label: 'Transaction',
     bg: 'bg-cyan-500/15',
     color: '#06b6d4',
     icon: (
@@ -57,8 +57,8 @@ const STATUS_CONFIG: Record<
       </svg>
     ),
   },
-  PAYMENTS: {
-    label: 'Payments',
+  PAYMENT: {
+    label: 'Payment',
     bg: 'bg-emerald-500/15',
     color: '#10b981',
     icon: (
@@ -69,7 +69,7 @@ const STATUS_CONFIG: Record<
       </svg>
     ),
   },
-  ACCOUNT_UPDATES: {
+  ACCOUNT: {
     label: 'Account',
     bg: 'bg-blue-500/15',
     color: '#3b82f6',
@@ -265,13 +265,16 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
 
   const loadNews = useCallback(async () => {
     try {
-      const res = await fetch(`${apiUrl}/news`, { credentials: 'include' });
-      const json = await res.json();
-      const data: NewsItem[] = Array.isArray(json) ? json : [];
-      const active = data.filter((n) => !n.archivedAt && !removedIdsRef.current.has(n.id));
-      const arch = data.filter((n) => n.archivedAt && !removedIdsRef.current.has(n.id));
-      setNews(active);
-      setArchived(arch);
+      const [activeRes, archiveRes] = await Promise.all([
+        fetch(`${apiUrl}/news`, { credentials: 'include' }),
+        fetch(`${apiUrl}/news?archivedOnly=true`, { credentials: 'include' }),
+      ]);
+      const activeJson = await activeRes.json();
+      const archiveJson = await archiveRes.json();
+      const activeData: NewsItem[] = Array.isArray(activeJson) ? activeJson : [];
+      const archiveData: NewsItem[] = Array.isArray(archiveJson) ? archiveJson : [];
+      setNews(activeData.filter((n) => !removedIdsRef.current.has(n.id)));
+      setArchived(archiveData.filter((n) => !removedIdsRef.current.has(n.id)));
     } catch (err) {
       console.error('Failed to load news:', err);
     }
@@ -297,6 +300,7 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
     }
     try {
       await fetch(`${apiUrl}/news/${id}/archive`, { method: 'POST', credentials: 'include' });
+      removedIdsRef.current.delete(id);
     } catch {
       removedIdsRef.current.delete(id);
       loadNews();

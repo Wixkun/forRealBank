@@ -1,6 +1,6 @@
 import { INewsRepository } from '@forreal/domain';
 
-export class DismissNewsUseCase {
+export class MarkAsReadUseCase {
   constructor(private readonly newsRepository: INewsRepository) {}
 
   async execute({ newsId, userId }: { newsId: string; userId: string }) {
@@ -8,10 +8,10 @@ export class DismissNewsUseCase {
     if (!news) throw new Error('NEWS_NOT_FOUND');
 
     if (news.userId && news.userId !== userId) {
-      throw new Error('FORBIDDEN_CANNOT_DISMISS_OTHER_USER_NEWS');
+      throw new Error('FORBIDDEN_CANNOT_READ_OTHER_USER_NEWS');
     }
 
-    await this.newsRepository.setUserStatus(newsId, userId, 'DELETED');
+    await this.newsRepository.setUserStatus(newsId, userId, 'READ');
     return { success: true };
   }
 }

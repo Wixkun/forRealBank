@@ -8,62 +8,145 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { RoleName } from '@forreal/domain';
+import { type NewsStatus, RoleName } from '@forreal/domain';
 import type { Request } from 'express';
+
+// RolesGuard peuple req.auth.userId (lookup DB complet).
+// JwtAuthGuard seul peuple req.user.id (payload JWT, pas de DB).
+function extractUserId(req: Request): string {
+  const userId = (req as any).auth?.userId ?? (req as any).user?.id ?? null;
+  if (!userId) throw new BadRequestException('Missing auth context');
+  return userId as string;
+}
+
+function optionalUserId(req: Request): string | null {
+  return (req as any).auth?.userId ?? (req as any).user?.id ?? null;
+}
 
 @Controller('news')
 export class NewsController {
   constructor(@Inject(NewsService) private readonly newsService: NewsService) {}
 
+  // ─── Création manuelle (DIRECTOR / ADVISOR uniquement) ───────────────────
+
+  @Post('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
+  async createManual(
+    @Body() body: { title: string; content: string; status?: NewsStatus },
+    @Req() req: Request,
+  ) {
+    const userId = extractUserId(req);
+    return this.newsService.createManualNews(userId, body.title, body.content, body.status);
+  }
+
+  // Alias rétrocompatible (ancienne route POST /)
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
-  async create(@Body() body: { title: string; content: string }, @Req() req: Request) {
-    const auth = (req as any).auth;
-    if (!auth?.userId) throw new BadRequestException('Missing auth context');
-    return this.newsService.createNews(auth.userId, body.title, body.content);
+  async createLegacy(
+    @Body() body: { title: string; content: string; status?: NewsStatus },
+    @Req() req: Request,
+  ) {
+    const userId = extractUserId(req);
+    return this.newsService.createManualNews(userId, body.title, body.content, body.status);
   }
 
+  // ─── Lecture du fil ──────────────────────────────────────────────────────
+
+  @Get('feed')
+  @UseGuards(JwtAuthGuard)
+  async getFeed(
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Req() req?: Request,
+  ) {
+    const userId = optionalUserId(req!);
+    return this.newsService.listNews(limit ? +limit : 20, offset ? +offset : 0, userId);
+  }
+
+  @Get('archived')
+  @UseGuards(JwtAuthGuard)
+  async getArchived(@Req() req: Request) {
+    const userId = optionalUserId(req);
+    return this.newsService.listNews(100, 0, userId, false, true);
+  }
+
+  // Alias rétrocompatible (ancienne route GET /)
   @Get()
   @UseGuards(OptionalJwtGuard)
   async list(
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
+    @Query('includeArchived') includeArchived?: string,
+    @Query('archivedOnly') archivedOnly?: string,
     @Req() req?: Request,
   ) {
-    const userId = (req as any)?.auth?.userId ?? null;
-    return this.newsService.listNews(limit ? +limit : 20, offset ? +offset : 0, userId);
+    const userId = optionalUserId(req!);
+    return this.newsService.listNews(
+      limit ? +limit : 20,
+      offset ? +offset : 0,
+      userId,
+      includeArchived === 'true',
+      archivedOnly === 'true',
+    );
   }
 
-  @Delete(':id')
+  // ─── Actions utilisateur (per-user, ne modifient jamais la news globale) ─
+
+  @HttpCode(200)
+  @Patch(':id/archive')
   @UseGuards(JwtAuthGuard)
-  async delete(@Param('id') id: string, @Req() req: Request) {
-    const auth = (req as any).auth;
-    return this.newsService.deleteNews(id, auth?.userId);
+  async archive(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.archiveNews(id, extractUserId(req));
   }
 
+  // Alias rétrocompatible POST (ancien endpoint)
   @HttpCode(200)
   @Post(':id/archive')
   @UseGuards(JwtAuthGuard)
-  async archive(@Param('id') id: string) {
-    return this.newsService.archiveNews(id);
+  async archiveLegacy(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.archiveNews(id, extractUserId(req));
   }
 
+  @HttpCode(200)
+  @Patch(':id/restore')
+  @UseGuards(JwtAuthGuard)
+  async restore(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.unarchiveNews(id, extractUserId(req));
+  }
+
+  // Alias rétrocompatible POST (ancien endpoint /unarchive)
   @HttpCode(200)
   @Post(':id/unarchive')
   @UseGuards(JwtAuthGuard)
-  async unarchive(@Param('id') id: string) {
-    return this.newsService.unarchiveNews(id);
+  async unarchiveLegacy(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.unarchiveNews(id, extractUserId(req));
   }
 
   @HttpCode(200)
+  @Patch(':id/delete')
+  @UseGuards(JwtAuthGuard)
+  async deleteForUser(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.deleteNewsForUser(id, extractUserId(req));
+  }
+
+  // Alias rétrocompatible POST (ancien endpoint /dismiss)
+  @HttpCode(200)
   @Post(':id/dismiss')
   @UseGuards(JwtAuthGuard)
-  async dismiss(@Param('id') id: string, @Req() req: Request) {
-    const auth = (req as any).auth;
-    if (!auth?.userId) throw new BadRequestException('Missing auth context');
-    return this.newsService.dismissNews(id, auth.userId);
+  async dismissLegacy(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.deleteNewsForUser(id, extractUserId(req));
   }
+
+  @HttpCode(200)
+  @Patch(':id/read')
+  @UseGuards(JwtAuthGuard)
+  async markAsRead(@Param('id') id: string, @Req() req: Request) {
+    return this.newsService.markAsRead(id, extractUserId(req));
+  }
+
+  // ─── Mise à jour d'une news (DIRECTOR / ADVISOR) ────────────────────────
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -71,17 +154,25 @@ export class NewsController {
   async update(
     @Param('id') id: string,
     @Body() body: { title?: string; content?: string },
-    @Req() req: Request,
   ) {
-    const auth = (req as any).auth;
-    if (!auth?.userId) throw new BadRequestException('Missing auth context');
     return this.newsService.updateNews(id, { title: body.title, content: body.content });
   }
+
+  // ─── Désactivation globale (DIRECTOR uniquement) ─────────────────────────
+
+  @Delete('admin/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleName.DIRECTOR)
+  async deactivate(@Param('id') id: string) {
+    return this.newsService.deactivateNews(id);
+  }
+
+  // ─── SSE stream ──────────────────────────────────────────────────────────
 
   @Sse('stream')
   @UseGuards(OptionalJwtGuard)
   stream(@Req() req: Request): Observable<MessageEvent> {
-    const userId = (req as any)?.auth?.userId ?? null;
+    const userId = optionalUserId(req);
     return merge(
       this.newsService.getNewsChangeObservable(),
       interval(5000).pipe(switchMap(async () => this.newsService.listNews(20, 0, userId))),

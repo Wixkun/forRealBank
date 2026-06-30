@@ -30,6 +30,7 @@ export * from './feed/usecases/UpdateNewsUseCase';
 export * from './feed/usecases/ArchiveNewsUseCase';
 export * from './feed/usecases/UnarchiveNewsUseCase';
 export * from './feed/usecases/DismissNewsUseCase';
+export * from './feed/usecases/MarkAsReadUseCase';
 
 // notifications
 export * from './notifications/usecases/ListNotificationsByUserUseCase';

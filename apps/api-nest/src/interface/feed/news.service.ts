@@ -8,8 +8,9 @@ import {
   ArchiveNewsUseCase,
   UnarchiveNewsUseCase,
   DismissNewsUseCase,
+  MarkAsReadUseCase,
 } from '@forreal/application';
-import { INewsRepository, NewsStatus } from '@forreal/domain';
+import { INewsRepository, NewsSource, NewsStatus } from '@forreal/domain';
 
 @Injectable()
 export class NewsService {
@@ -23,69 +24,87 @@ export class NewsService {
     @Inject(ArchiveNewsUseCase) private readonly archiveNewsUC: ArchiveNewsUseCase,
     @Inject(UnarchiveNewsUseCase) private readonly unarchiveNewsUC: UnarchiveNewsUseCase,
     @Inject(DismissNewsUseCase) private readonly dismissNewsUC: DismissNewsUseCase,
+    @Inject(MarkAsReadUseCase) private readonly markAsReadUC: MarkAsReadUseCase,
     @Inject(INewsRepository) private readonly newsRepo: INewsRepository,
   ) {}
 
-  async createNews(
+  // ─── Création manuelle (DIRECTOR / ADVISOR) ───────────────────────────────
+
+  async createManualNews(
     authorId: string,
     title: string,
     content: string,
     status?: NewsStatus,
-    userId?: string | null,
   ) {
-    const result = await this.createNewsUC.execute({ authorId, title, content, status, userId });
-    await this.broadcastUpdate(userId);
+    const result = await this.createNewsUC.execute({
+      authorId,
+      title,
+      content,
+      status,
+      source: NewsSource.MANUAL,
+    });
+    await this.broadcastUpdate();
     return result;
   }
 
-  async createSystemNews(params: {
-    authorId: string;
+  // ─── Création automatique (backend uniquement) ────────────────────────────
+
+  async createAutomaticNews(params: {
+    targetUserId: string;
     title: string;
     content: string;
     status: NewsStatus;
-    userId: string;
   }) {
     const result = await this.newsRepo.create({
-      authorId: params.authorId,
+      authorId: null,
       title: params.title,
       content: params.content,
       status: params.status,
-      userId: params.userId,
+      source: NewsSource.AUTOMATIC,
+      userId: params.targetUserId,
     });
     this.newsChangeSubject.next(result);
     return result;
   }
 
-  async listNews(limit = 20, offset = 0, userId?: string | null) {
-    return this.listNewsUC.execute({ limit, offset, userId });
+  // ─── Lecture ──────────────────────────────────────────────────────────────
+
+  async listNews(
+    limit = 20,
+    offset = 0,
+    userId?: string | null,
+    includeArchived = false,
+    archivedOnly = false,
+  ) {
+    return this.listNewsUC.execute({ limit, offset, userId, includeArchived, archivedOnly });
   }
 
-  async deleteNews(id: string, requesterId?: string) {
+  // ─── Actions utilisateur (per-user) ──────────────────────────────────────
+
+  async archiveNews(newsId: string, userId: string) {
+    return this.archiveNewsUC.execute({ newsId, userId });
+  }
+
+  async unarchiveNews(newsId: string, userId: string) {
+    return this.unarchiveNewsUC.execute({ newsId, userId });
+  }
+
+  async deleteNewsForUser(newsId: string, userId: string) {
+    return this.dismissNewsUC.execute({ newsId, userId });
+  }
+
+  async markAsRead(newsId: string, userId: string) {
+    return this.markAsReadUC.execute({ newsId, userId });
+  }
+
+  // ─── Opérations admin ────────────────────────────────────────────────────
+
+  async deactivateNews(id: string) {
     const news = await this.newsRepo.findById(id);
     if (!news) throw new ForbiddenException('News not found');
-    // Owner or anyone can delete their own user-specific news
-    if (news.userId && news.userId !== requesterId) {
-      throw new ForbiddenException('Cannot delete this news item');
-    }
-    const result = await this.deleteNewsUC.execute({ newsId: id });
+    await this.newsRepo.deactivateById(id);
     await this.broadcastUpdate();
-    return result;
-  }
-
-  async archiveNews(id: string) {
-    const result = await this.archiveNewsUC.execute({ newsId: id });
-    await this.broadcastUpdate();
-    return result;
-  }
-
-  async unarchiveNews(id: string) {
-    const result = await this.unarchiveNewsUC.execute({ newsId: id });
-    await this.broadcastUpdate();
-    return result;
-  }
-
-  async dismissNews(newsId: string, userId: string) {
-    return this.dismissNewsUC.execute({ newsId, userId });
+    return { success: true };
   }
 
   async updateNews(id: string, input: { title?: string; content?: string }) {
@@ -93,6 +112,8 @@ export class NewsService {
     await this.broadcastUpdate();
     return result;
   }
+
+  // ─── SSE ─────────────────────────────────────────────────────────────────
 
   getNewsChangeObservable() {
     return this.newsChangeSubject.asObservable();

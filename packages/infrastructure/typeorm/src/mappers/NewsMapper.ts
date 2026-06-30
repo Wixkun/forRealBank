@@ -1,4 +1,4 @@
-import { News, NewsStatus } from '@forreal/domain';
+import { News, NewsSource, NewsStatus } from '@forreal/domain';
 import { NewsEntity } from '../entities/NewsEntity';
 
 export class NewsMapper {
@@ -9,11 +9,10 @@ export class NewsMapper {
       content: news.content,
       status: news.status,
       userId: news.userId,
-      archivedAt: news.archivedAt,
     };
   }
 
-  static toDomain(entity: NewsEntity): News {
+  static toDomain(entity: NewsEntity, userArchivedAt: Date | null = null): News {
     return new News(
       entity.id,
       entity.author?.id ?? null,
@@ -22,7 +21,9 @@ export class NewsMapper {
       entity.createdAt,
       (entity.status as NewsStatus) ?? NewsStatus.INFORMATION,
       entity.userId ?? null,
-      entity.archivedAt ?? null,
+      userArchivedAt,
+      (entity.source as NewsSource) ?? NewsSource.MANUAL,
+      entity.isActive ?? true,
     );
   }
 }

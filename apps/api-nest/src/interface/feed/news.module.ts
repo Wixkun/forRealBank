@@ -2,7 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsService } from './news.service';
 import { NewsController } from './news.controller';
-import { NewsEntity, NewsDismissalEntity, UserEntity, NotificationEntity, RoleEntity } from '@forreal/infrastructure-typeorm';
+import {
+  NewsEntity,
+  UserNewsStatusEntity,
+  UserEntity,
+  NotificationEntity,
+  RoleEntity,
+} from '@forreal/infrastructure-typeorm';
 import { INewsRepository, IUserRepository, INotificationRepository } from '@forreal/domain';
 import { NewsRepository, UserRepository, NotificationRepository } from '@forreal/infrastructure-typeorm';
 import {
@@ -13,6 +19,7 @@ import {
   ArchiveNewsUseCase,
   UnarchiveNewsUseCase,
   DismissNewsUseCase,
+  MarkAsReadUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
 import { RolesGuard } from '../auth/roles.guard';
@@ -20,7 +27,10 @@ import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 import { NewsSeed } from './news.seed';
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([NewsEntity, NewsDismissalEntity, UserEntity, RoleEntity, NotificationEntity])],
+  imports: [
+    AuthModule,
+    TypeOrmModule.forFeature([NewsEntity, UserNewsStatusEntity, UserEntity, RoleEntity, NotificationEntity]),
+  ],
   controllers: [NewsController],
   providers: [
     NewsService,
@@ -62,6 +72,11 @@ import { NewsSeed } from './news.seed';
     {
       provide: DismissNewsUseCase,
       useFactory: (repo) => new DismissNewsUseCase(repo),
+      inject: [INewsRepository],
+    },
+    {
+      provide: MarkAsReadUseCase,
+      useFactory: (repo) => new MarkAsReadUseCase(repo),
       inject: [INewsRepository],
     },
     NewsSeed,
