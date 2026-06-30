@@ -10,9 +10,7 @@ export class GetConversationNotificationSettingsUseCase {
       input.userId,
       input.conversationId,
     );
-    if (!settings) {
-      return { muted: false, mutedUntil: null };
-    }
+    if (!settings) return { muted: false, mutedUntil: null };
     return {
       muted: settings.isMuted(),
       mutedUntil: settings.mutedUntil,

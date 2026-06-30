@@ -3,8 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConversationUserState, IConversationUserStateRepository } from '@forreal/domain';
 import { ConversationUserStateEntity } from '../entities/ConversationUserStateEntity';
-import { ConversationUserStateMapper } from '../mappers/ConversationUserStateMapper';
 import { v4 as uuidv4 } from 'uuid';
+
+function toDomain(entity: ConversationUserStateEntity): ConversationUserState {
+  return new ConversationUserState(
+    entity.id,
+    entity.userId,
+    entity.conversationId,
+    entity.lastReadMessageId,
+    entity.lastReadAt,
+    entity.createdAt,
+    entity.updatedAt,
+  );
+}
 
 @Injectable()
 export class ConversationUserStateRepository implements IConversationUserStateRepository {
@@ -18,7 +29,7 @@ export class ConversationUserStateRepository implements IConversationUserStateRe
     conversationId: string,
   ): Promise<ConversationUserState | null> {
     const entity = await this.repo.findOne({ where: { userId, conversationId } });
-    return entity ? ConversationUserStateMapper.toDomain(entity) : null;
+    return entity ? toDomain(entity) : null;
   }
 
   async upsert(params: {
@@ -33,8 +44,7 @@ export class ConversationUserStateRepository implements IConversationUserStateRe
     if (existing) {
       existing.lastReadMessageId = params.lastReadMessageId;
       existing.lastReadAt = new Date();
-      const saved = await this.repo.save(existing);
-      return ConversationUserStateMapper.toDomain(saved);
+      return toDomain(await this.repo.save(existing));
     }
 
     const entity = this.repo.create({
@@ -44,7 +54,6 @@ export class ConversationUserStateRepository implements IConversationUserStateRe
       lastReadMessageId: params.lastReadMessageId,
       lastReadAt: new Date(),
     });
-    const saved = await this.repo.save(entity);
-    return ConversationUserStateMapper.toDomain(saved);
+    return toDomain(await this.repo.save(entity));
   }
 }

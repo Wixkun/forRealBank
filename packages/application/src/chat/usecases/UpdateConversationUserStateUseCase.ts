@@ -21,14 +21,12 @@ export class UpdateConversationUserStateUseCase {
       lastReadMessageId: input.lastReadMessageId,
     });
 
-    // marque aussi comme lue la notification groupée associée
     const groupKey = `conversation:${input.conversationId}`;
     const existing = await this.notificationRepository.findUnreadByGroupKey(
       input.userId,
       NotificationType.MESSAGE,
       groupKey,
     );
-
     if (existing) {
       await this.notificationRepository.markAsRead(existing.id, input.userId);
     }

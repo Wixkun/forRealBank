@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
 import { NotificationEntity, UserEntity } from '@forreal/infrastructure-typeorm';
 import { INotificationRepository } from '@forreal/domain';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import {
-  SendNotificationUseCase,
   ListNotificationsByUserUseCase,
   GetUnreadCountUseCase,
   MarkNotificationReadUseCase,
@@ -22,13 +20,7 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [NotificationsController],
   providers: [
-    NotificationsService,
     { provide: INotificationRepository, useClass: NotificationRepository },
-    {
-      provide: SendNotificationUseCase,
-      useFactory: (repo: INotificationRepository) => new SendNotificationUseCase(repo),
-      inject: [INotificationRepository],
-    },
     {
       provide: ListNotificationsByUserUseCase,
       useFactory: (repo: INotificationRepository) => new ListNotificationsByUserUseCase(repo),
@@ -55,6 +47,6 @@ import { AuthModule } from '../auth/auth.module';
       inject: [INotificationRepository],
     },
   ],
-  exports: [NotificationsService, INotificationRepository],
+  exports: [INotificationRepository],
 })
 export class NotificationsModule {}

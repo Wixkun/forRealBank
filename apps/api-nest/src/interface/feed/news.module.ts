@@ -16,10 +16,7 @@ import {
   ListNewsUseCase,
   DeleteNewsUseCase,
   UpdateNewsUseCase,
-  ArchiveNewsUseCase,
-  UnarchiveNewsUseCase,
-  DismissNewsUseCase,
-  MarkAsReadUseCase,
+  SetNewsUserStatusUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
 import { RolesGuard } from '../auth/roles.guard';
@@ -60,23 +57,8 @@ import { NewsSeed } from './news.seed';
       inject: [INewsRepository],
     },
     {
-      provide: ArchiveNewsUseCase,
-      useFactory: (repo) => new ArchiveNewsUseCase(repo),
-      inject: [INewsRepository],
-    },
-    {
-      provide: UnarchiveNewsUseCase,
-      useFactory: (repo) => new UnarchiveNewsUseCase(repo),
-      inject: [INewsRepository],
-    },
-    {
-      provide: DismissNewsUseCase,
-      useFactory: (repo) => new DismissNewsUseCase(repo),
-      inject: [INewsRepository],
-    },
-    {
-      provide: MarkAsReadUseCase,
-      useFactory: (repo) => new MarkAsReadUseCase(repo),
+      provide: SetNewsUserStatusUseCase,
+      useFactory: (repo) => new SetNewsUserStatusUseCase(repo),
       inject: [INewsRepository],
     },
     NewsSeed,

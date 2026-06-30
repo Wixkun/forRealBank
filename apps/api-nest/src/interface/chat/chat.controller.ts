@@ -26,8 +26,7 @@ import { AddConversationParticipantUseCase } from '@forreal/application';
 import { ListClientsOfAdvisorUseCase } from '@forreal/application';
 import { FindAdvisorOfClientUseCase } from '@forreal/application';
 import { ListUsersByRoleUseCase } from '@forreal/application';
-import { MuteConversationUseCase } from '@forreal/application';
-import { UnmuteConversationUseCase } from '@forreal/application';
+import { SetConversationMuteUseCase } from '@forreal/application';
 import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
 import { UpdateConversationUserStateUseCase } from '@forreal/application';
 
@@ -58,10 +57,8 @@ export class ChatController {
     @Inject(FindAdvisorOfClientUseCase)
     private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
     @Inject(ListUsersByRoleUseCase) private readonly listUsersByRole: ListUsersByRoleUseCase,
-    @Inject(MuteConversationUseCase)
-    private readonly muteConversationUC: MuteConversationUseCase,
-    @Inject(UnmuteConversationUseCase)
-    private readonly unmuteConversationUC: UnmuteConversationUseCase,
+    @Inject(SetConversationMuteUseCase)
+    private readonly setConversationMuteUC: SetConversationMuteUseCase,
     @Inject(GetConversationNotificationSettingsUseCase)
     private readonly getConversationSettingsUC: GetConversationNotificationSettingsUseCase,
     @Inject(UpdateConversationUserStateUseCase)
@@ -149,9 +146,10 @@ export class ChatController {
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    return this.muteConversationUC.execute({
+    return this.setConversationMuteUC.execute({
       userId,
       conversationId,
+      muted: true,
       mutedUntil: body.mutedUntil ? new Date(body.mutedUntil) : null,
     });
   }
@@ -160,7 +158,7 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async unmuteConversation(@Param('id') conversationId: string, @Req() req: Request) {
     const userId = extractUserId(req);
-    return this.unmuteConversationUC.execute({ userId, conversationId });
+    return this.setConversationMuteUC.execute({ userId, conversationId, muted: false });
   }
 
   @Get('conversations/:id/notifications/settings')

@@ -5,10 +5,7 @@ import {
   ListNewsUseCase,
   DeleteNewsUseCase,
   UpdateNewsUseCase,
-  ArchiveNewsUseCase,
-  UnarchiveNewsUseCase,
-  DismissNewsUseCase,
-  MarkAsReadUseCase,
+  SetNewsUserStatusUseCase,
 } from '@forreal/application';
 import { INewsRepository, NewsSource, NewsStatus } from '@forreal/domain';
 
@@ -21,10 +18,7 @@ export class NewsService {
     @Inject(ListNewsUseCase) private readonly listNewsUC: ListNewsUseCase,
     @Inject(DeleteNewsUseCase) private readonly deleteNewsUC: DeleteNewsUseCase,
     @Inject(UpdateNewsUseCase) private readonly updateNewsUC: UpdateNewsUseCase,
-    @Inject(ArchiveNewsUseCase) private readonly archiveNewsUC: ArchiveNewsUseCase,
-    @Inject(UnarchiveNewsUseCase) private readonly unarchiveNewsUC: UnarchiveNewsUseCase,
-    @Inject(DismissNewsUseCase) private readonly dismissNewsUC: DismissNewsUseCase,
-    @Inject(MarkAsReadUseCase) private readonly markAsReadUC: MarkAsReadUseCase,
+    @Inject(SetNewsUserStatusUseCase) private readonly setStatusUC: SetNewsUserStatusUseCase,
     @Inject(INewsRepository) private readonly newsRepo: INewsRepository,
   ) {}
 
@@ -82,19 +76,19 @@ export class NewsService {
   // ─── Actions utilisateur (per-user) ──────────────────────────────────────
 
   async archiveNews(newsId: string, userId: string) {
-    return this.archiveNewsUC.execute({ newsId, userId });
+    return this.setStatusUC.execute({ newsId, userId, status: 'ARCHIVED' });
   }
 
   async unarchiveNews(newsId: string, userId: string) {
-    return this.unarchiveNewsUC.execute({ newsId, userId });
+    return this.setStatusUC.execute({ newsId, userId, status: null });
   }
 
   async deleteNewsForUser(newsId: string, userId: string) {
-    return this.dismissNewsUC.execute({ newsId, userId });
+    return this.setStatusUC.execute({ newsId, userId, status: 'DELETED' });
   }
 
   async markAsRead(newsId: string, userId: string) {
-    return this.markAsReadUC.execute({ newsId, userId });
+    return this.setStatusUC.execute({ newsId, userId, status: 'READ' });
   }
 
   // ─── Opérations admin ────────────────────────────────────────────────────

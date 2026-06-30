@@ -1,6 +1,6 @@
 import { IConversationNotificationSettingsRepository } from '@forreal/domain';
 
-export class MuteConversationUseCase {
+export class SetConversationMuteUseCase {
   constructor(
     private readonly settingsRepository: IConversationNotificationSettingsRepository,
   ) {}
@@ -8,13 +8,14 @@ export class MuteConversationUseCase {
   async execute(input: {
     userId: string;
     conversationId: string;
+    muted: boolean;
     mutedUntil?: Date | null;
   }) {
     const settings = await this.settingsRepository.upsert({
       userId: input.userId,
       conversationId: input.conversationId,
-      muted: true,
-      mutedUntil: input.mutedUntil ?? null,
+      muted: input.muted,
+      mutedUntil: input.muted ? (input.mutedUntil ?? null) : null,
     });
     return {
       muted: settings.isMuted(),

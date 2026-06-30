@@ -49,8 +49,7 @@ import {
   ListClientsOfAdvisorUseCase,
   FindAdvisorOfClientUseCase,
   ListUsersByRoleUseCase,
-  MuteConversationUseCase,
-  UnmuteConversationUseCase,
+  SetConversationMuteUseCase,
   GetConversationNotificationSettingsUseCase,
   UpdateConversationUserStateUseCase,
 } from '@forreal/application';
@@ -162,15 +161,9 @@ import { AuthModule } from '../auth/auth.module';
       inject: [IUserRepository],
     },
     {
-      provide: MuteConversationUseCase,
+      provide: SetConversationMuteUseCase,
       useFactory: (settingsRepo: IConversationNotificationSettingsRepository) =>
-        new MuteConversationUseCase(settingsRepo),
-      inject: [IConversationNotificationSettingsRepository],
-    },
-    {
-      provide: UnmuteConversationUseCase,
-      useFactory: (settingsRepo: IConversationNotificationSettingsRepository) =>
-        new UnmuteConversationUseCase(settingsRepo),
+        new SetConversationMuteUseCase(settingsRepo),
       inject: [IConversationNotificationSettingsRepository],
     },
     {
