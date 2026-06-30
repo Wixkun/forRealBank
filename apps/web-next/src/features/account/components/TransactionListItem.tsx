@@ -29,7 +29,7 @@ export function TransactionListItem({
     minimumFractionDigits: 2,
   }).format(Math.abs(amount));
 
-  const isCredit = type === 'credit' || type === 'deposit';
+  const isCredit = type === 'credit' || type === 'deposit' || (type === 'transfer' && amount > 0);
   const iconName = isCredit ? 'trending' : 'trending';
   const iconRotation = isCredit ? '' : 'rotate-180';
 

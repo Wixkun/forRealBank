@@ -37,6 +37,12 @@ export * from './notifications/usecases/ListNotificationsByUserUseCase';
 export * from './notifications/usecases/MarkNotificationReadUseCase';
 export * from './notifications/usecases/MarkAllNotificationsReadUseCase';
 export * from './notifications/usecases/SendNotificationUseCase';
+export * from './notifications/usecases/GetUnreadCountUseCase';
+export * from './notifications/usecases/DeleteNotificationUseCase';
+export * from './notifications/usecases/MuteConversationUseCase';
+export * from './notifications/usecases/UnmuteConversationUseCase';
+export * from './notifications/usecases/GetConversationNotificationSettingsUseCase';
+export * from './notifications/usecases/UpdateConversationUserStateUseCase';
 
 // transactions
 export * from './transactions/usecases/InitiateTransferUseCase';

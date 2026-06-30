@@ -20,6 +20,10 @@ export * from './chat/ports/IAdvisorClientRepository';
 export * from './chat/ports/IConversationRepository';
 export * from './chat/ports/IConversationParticipantRepository';
 export * from './chat/ports/IMessageRepository';
+export * from './chat/ConversationNotificationSettings';
+export * from './chat/ports/IConversationNotificationSettingsRepository';
+export * from './chat/ConversationUserState';
+export * from './chat/ports/IConversationUserStateRepository';
 
 // feed
 export * from './feed/News';
@@ -28,6 +32,7 @@ export * from './feed/ports/INewsRepository';
 // notifications
 export * from './notifications/Notification';
 export * from './notifications/NotificationType';
+export * from './notifications/NotificationTargetType';
 export * from './notifications/ports/INotificationRepository';
 
 // transactions

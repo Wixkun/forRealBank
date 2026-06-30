@@ -71,8 +71,8 @@ export class TransactionsController {
       description: t.description,
       date: t.createdAt.toISOString().split('T')[0],
       amount:
-        t.type === 'credit'
-          ? parseFloat(t.amount.toString())
+        t.type === 'credit' || t.type === 'transfer'
+          ? Math.abs(parseFloat(t.amount.toString()))
           : -Math.abs(parseFloat(t.amount.toString())),
       balance: parseFloat(t.balanceAfter.toString()),
     }));

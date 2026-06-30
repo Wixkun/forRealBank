@@ -1,7 +1,7 @@
 import { IAccountRepository } from '@forreal/domain';
 import { IInvestmentRepository } from '@forreal/domain';
 import { ITransactionRepository } from '@forreal/domain';
-import { INotificationRepository, NotificationType } from '@forreal/domain';
+import { INotificationRepository, NotificationType, NotificationTargetType } from '@forreal/domain';
 import { Account } from '@forreal/domain';
 import { InvestmentAccount } from '@forreal/domain';
 
@@ -105,12 +105,14 @@ export class InitiateTransferUseCase {
         });
         destinationBalanceUpdated = newDestBalance;
 
-        await this.notificationRepo.create(
-          destinationBank.userId,
-          'Virement reçu',
-          `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
-          NotificationType.TRANSFER_RECEIVED,
-        );
+        await this.notificationRepo.create({
+          userId: destinationBank.userId,
+          title: 'Virement reçu',
+          content: `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
+          type: NotificationType.TRANSACTION,
+          targetType: NotificationTargetType.ACCOUNT,
+          targetUrl: '/accounts',
+        });
       } else if (destinationInvestment) {
         const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
         await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);
@@ -188,12 +190,14 @@ export class InitiateTransferUseCase {
       });
       destinationBalanceUpdated = newDestBalance;
 
-      await this.notificationRepo.create(
-        destinationBank.userId,
-        'Virement reçu',
-        `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
-        NotificationType.TRANSFER_RECEIVED,
-      );
+      await this.notificationRepo.create({
+        userId: destinationBank.userId,
+        title: 'Virement reçu',
+        content: `Vous avez reçu un virement de ${amount.toFixed(2)}€. ${req.description || ''}`,
+        type: NotificationType.TRANSACTION,
+        targetType: NotificationTargetType.ACCOUNT,
+        targetUrl: '/accounts',
+      });
     } else if (destinationInvestment) {
       const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
       await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);

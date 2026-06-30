@@ -3,6 +3,7 @@ import {
   IUserRepository,
   INotificationRepository,
   NotificationType,
+  NotificationTargetType,
   RoleName,
   User,
   NewsStatus,
@@ -59,12 +60,15 @@ export class CreateNewsUseCase {
       const notificationPromises = allUsers
         .filter((user: User) => user.id !== input.authorId)
         .map((user: User) =>
-          this.notificationRepository.create(
-            user.id,
-            'Nouvelle actualité',
-            input.title,
-            NotificationType.NEWS_POSTED,
-          ),
+          this.notificationRepository.create({
+            userId: user.id,
+            title: 'Nouvelle actualité',
+            content: input.title,
+            type: NotificationType.NEWS,
+            targetType: NotificationTargetType.NEWS,
+            targetId: news.id,
+            targetUrl: `/dashboard/news/${news.id}`,
+          }),
         );
       await Promise.all(notificationPromises);
     }

@@ -1,34 +1,37 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useNotifications } from '@/features/notifications/useNotifications';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface NotificationCenterProps {
-  userId: string;
+  userId?: string;
   apiUrl?: string;
 }
 
-export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) {
+export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, unreadCount, isConnected, markAsRead, markAllAsRead, isMarkAllLoading } =
-    useNotifications({ userId, apiUrl });
+  const router = useRouter();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, isMarkAllLoading } =
+    useNotifications({ apiUrl });
   const t = useTranslations('notifications');
   const locale = useLocale();
   const { theme, mounted } = useTheme();
   const currentTheme = mounted ? theme : 'dark';
 
   const { unreadNotifications } = useMemo(() => {
-    const unread: typeof notifications = [];
-    for (const n of notifications) {
-      if (!n.readAt) unread.push(n);
-    }
+    const unread = notifications.filter((n) => !n.isRead);
     return { unreadNotifications: unread };
   }, [notifications]);
 
-  const handleNotificationClick = (notificationId: string) => {
+  const handleNotificationClick = (notificationId: string, targetUrl?: string | null) => {
     markAsRead(notificationId);
+    if (targetUrl) {
+      setIsOpen(false);
+      router.push(targetUrl);
+    }
   };
 
   return (
@@ -57,13 +60,6 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
           <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full">
             {unreadCount}
           </span>
-        )}
-        {isConnected && (
-          <span
-            className={`absolute bottom-0 right-0 w-3 h-3 border-2 rounded-full ${
-              currentTheme === 'dark' ? 'bg-green-500 border-gray-900' : 'bg-green-500 border-white'
-            }`}
-          />
         )}
       </button>
 
@@ -119,7 +115,7 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                 {unreadNotifications.map((notif) => (
                   <div
                     key={notif.id}
-                    onClick={() => handleNotificationClick(notif.id)}
+                    onClick={() => handleNotificationClick(notif.id, notif.targetUrl)}
                     className={`p-4 border-b cursor-pointer transition ${
                       currentTheme === 'dark'
                         ? 'border-gray-800 hover:bg-gray-900/50 bg-blue-950/20'
@@ -130,6 +126,13 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                       <div className="flex-1">
                         <h4 className={`font-semibold text-sm mb-1 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           {notif.title}
+                          {notif.unreadCount > 1 && (
+                            <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                              currentTheme === 'dark' ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                              {notif.unreadCount}
+                            </span>
+                          )}
                         </h4>
                         <p className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
                           {notif.content}
@@ -139,13 +142,24 @@ export function NotificationCenter({ userId, apiUrl }: NotificationCenterProps) 
                             {notif.type}
                           </span>
                           <span>
-                            {new Date(notif.createdAt).toLocaleString(locale, {
+                            {new Date(notif.updatedAt ?? notif.createdAt).toLocaleString(locale, {
                               day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
                             })}
                           </span>
                         </div>
                       </div>
-                      <div className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'}`} />
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'}`} />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
+                          className={`text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition ${
+                            currentTheme === 'dark' ? 'hover:bg-gray-800 text-gray-500 hover:text-gray-300' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
+                          }`}
+                          aria-label="Supprimer"
+                        >
+                          ✕
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -216,14 +216,17 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
       const data = await res.json();
       const raw: Array<Record<string, unknown>> = Array.isArray(data) ? data : (data.transactions ?? []);
 
-      setTransactions(raw.map((t) => ({
-        id: t.id as string,
-        date: (t.date as string) || new Date().toISOString(),
-        description: (t.description as string) || '',
-        amount: Math.abs(t.amount as number),
-        type: (t.type as string) === 'credit' ? ('credit' as const) : ('debit' as const),
-        balance: t.balance != null ? (t.balance as number) : undefined,
-      })));
+      setTransactions(raw.map((t) => {
+        const rawAmount = t.amount as number;
+        return {
+          id: t.id as string,
+          date: (t.date as string) || new Date().toISOString(),
+          description: (t.description as string) || '',
+          amount: Math.abs(rawAmount),
+          type: rawAmount >= 0 ? ('credit' as const) : ('debit' as const),
+          balance: t.balance != null ? (t.balance as number) : undefined,
+        };
+      }));
     } catch {
       setTransactions([]);
     } finally {

@@ -1,51 +1,68 @@
 'use client';
 
-import { useState } from 'react';
-import { useSSE } from '@/hooks/useSSE';
+import { useState, useEffect, useCallback } from 'react';
 
-interface Notification {
+export interface Notification {
   id: string;
   userId: string;
   title: string;
   content: string;
   type: string;
-  createdAt: string;
+  targetType: string | null;
+  targetId: string | null;
+  targetUrl: string | null;
+  groupKey: string | null;
+  oldestUnreadMessageId: string | null;
+  unreadCount: number;
+  isRead: boolean;
   readAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface UseNotificationsOptions {
-  userId: string;
   apiUrl?: string;
+  pollingInterval?: number;
 }
 
 export function useNotifications({
-  userId,
   apiUrl = '/api',
-}: UseNotificationsOptions) {
+  pollingInterval = 10000,
+}: UseNotificationsOptions = {}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMarkAllLoading, setIsMarkAllLoading] = useState(false);
 
-  type NotificationsSSEPayload = Notification[] | { data: Notification[] };
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const res = await fetch(`${apiUrl}/notifications`, {
+        credentials: 'include',
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setNotifications(Array.isArray(data) ? data : []);
+    } catch {
+      // silently fail for background polling
+    }
+  }, [apiUrl]);
 
-  const { isConnected } = useSSE<NotificationsSSEPayload>({
-    url: `${apiUrl}/notifications/stream/${userId}`,
-    onMessage: (payload) => {
-      const arr = Array.isArray(payload)
-        ? payload
-        : (payload as { data?: Notification[] })?.data ?? [];
-      setNotifications(arr);
-    },
-    withCredentials: true,
-  });
+  useEffect(() => {
+    fetchNotifications();
+    const intervalId = setInterval(fetchNotifications, pollingInterval);
+    return () => clearInterval(intervalId);
+  }, [fetchNotifications, pollingInterval]);
 
   const markAsRead = async (notificationId: string) => {
     try {
       await fetch(`${apiUrl}/notifications/${notificationId}/read`, {
-        method: 'POST',
+        method: 'PATCH',
         credentials: 'include',
       });
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, readAt: new Date().toISOString() } : n)),
+        prev.map((n) =>
+          n.id === notificationId
+            ? { ...n, isRead: true, readAt: new Date().toISOString() }
+            : n,
+        ),
       );
     } catch (err) {
       console.error('Failed to mark notification as read:', err);
@@ -55,12 +72,14 @@ export function useNotifications({
   const markAllAsRead = async () => {
     setIsMarkAllLoading(true);
     try {
-      await fetch(`${apiUrl}/notifications/user/${userId}/read-all`, {
-        method: 'POST',
+      await fetch(`${apiUrl}/notifications/read-all`, {
+        method: 'PATCH',
         credentials: 'include',
       });
       const nowIso = new Date().toISOString();
-      setNotifications((prev) => prev.map((n) => (n.readAt ? n : { ...n, readAt: nowIso })));
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, isRead: true, readAt: nowIso })),
+      );
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
     } finally {
@@ -68,14 +87,27 @@ export function useNotifications({
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.readAt).length;
+  const deleteNotification = async (notificationId: string) => {
+    try {
+      await fetch(`${apiUrl}/notifications/${notificationId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    } catch (err) {
+      console.error('Failed to delete notification:', err);
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return {
     notifications,
     unreadCount,
-    isConnected,
+    isMarkAllLoading,
     markAsRead,
     markAllAsRead,
-    isMarkAllLoading,
+    deleteNotification,
+    refresh: fetchNotifications,
   };
 }

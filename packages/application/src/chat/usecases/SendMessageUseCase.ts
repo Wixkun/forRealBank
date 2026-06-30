@@ -2,7 +2,9 @@ import {
   IMessageRepository,
   IConversationParticipantRepository,
   INotificationRepository,
+  IConversationNotificationSettingsRepository,
   NotificationType,
+  NotificationTargetType,
   ConversationParticipant,
 } from '@forreal/domain';
 
@@ -11,6 +13,7 @@ export class SendMessageUseCase {
     private readonly messageRepository: IMessageRepository,
     private readonly conversationParticipantRepository: IConversationParticipantRepository,
     private readonly notificationRepository: INotificationRepository,
+    private readonly conversationNotificationSettingsRepository: IConversationNotificationSettingsRepository,
   ) {}
 
   async execute(input: { conversationId: string; senderId: string; content: string }) {
@@ -24,18 +27,47 @@ export class SendMessageUseCase {
       input.conversationId,
     );
 
-    const notificationPromises = participants
-      .filter((participant: ConversationParticipant) => participant.userId !== input.senderId)
-      .map((participant: ConversationParticipant) =>
-        this.notificationRepository.create(
+    const recipients = participants.filter(
+      (p: ConversationParticipant) => p.userId !== input.senderId,
+    );
+
+    for (const participant of recipients) {
+      const settings =
+        await this.conversationNotificationSettingsRepository.findByUserAndConversation(
           participant.userId,
-          'Nouveau message',
-          `Vous avez reçu un nouveau message`,
-          NotificationType.MESSAGE_RECEIVED,
-        ),
+          input.conversationId,
+        );
+      if (settings?.isMuted()) continue;
+
+      const groupKey = `conversation:${input.conversationId}`;
+      const existing = await this.notificationRepository.findUnreadByGroupKey(
+        participant.userId,
+        NotificationType.MESSAGE,
+        groupKey,
       );
 
-    await Promise.all(notificationPromises);
+      if (existing) {
+        const newCount = existing.unreadCount + 1;
+        await this.notificationRepository.incrementGrouped(
+          existing.id,
+          `${newCount} nouveaux messages`,
+          `Vous avez ${newCount} messages non lus`,
+        );
+      } else {
+        await this.notificationRepository.create({
+          userId: participant.userId,
+          title: '1 nouveau message',
+          content: 'Vous avez reçu un nouveau message',
+          type: NotificationType.MESSAGE,
+          targetType: NotificationTargetType.CONVERSATION,
+          targetId: input.conversationId,
+          targetUrl: `/messages/conversations/${input.conversationId}?messageId=${message.id}`,
+          groupKey,
+          oldestUnreadMessageId: message.id,
+          unreadCount: 1,
+        });
+      }
+    }
 
     return {
       messageId: message.id,

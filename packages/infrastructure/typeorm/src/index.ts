@@ -20,6 +20,8 @@ export * from './entities/NewsEntity';
 export * from './entities/NewsDismissalEntity';
 export * from './entities/UserNewsArchiveEntity';
 export * from './entities/UserNewsStatusEntity';
+export * from './entities/ConversationNotificationSettingsEntity';
+export * from './entities/ConversationUserStateEntity';
 
 // repositories
 export * from './repositories/AdvisorClientRepository';
@@ -33,6 +35,8 @@ export * from './repositories/ConversationParticipantRepository';
 export * from './repositories/MessageRepository';
 export * from './repositories/NotificationRepository';
 export * from './repositories/NewsRepository';
+export * from './repositories/ConversationNotificationSettingsRepository';
+export * from './repositories/ConversationUserStateRepository';
 
 // mappers
 export * from './mappers/UserMapper';
@@ -42,3 +46,5 @@ export * from './mappers/ConversationParticipantMapper';
 export * from './mappers/MessageMapper';
 export * from './mappers/NotificationMapper';
 export * from './mappers/NewsMapper';
+export * from './mappers/ConversationNotificationSettingsMapper';
+export * from './mappers/ConversationUserStateMapper';

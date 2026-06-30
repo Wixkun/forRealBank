@@ -1,10 +1,10 @@
 import { INotificationRepository } from '@forreal/domain';
 
-export class MarkAllNotificationsReadUseCase {
+export class GetUnreadCountUseCase {
   constructor(private readonly notificationRepository: INotificationRepository) {}
 
   async execute(input: { userId: string }) {
-    const updatedCount = await this.notificationRepository.markAllAsRead(input.userId);
-    return { success: true, updatedCount };
+    const count = await this.notificationRepository.countUnread(input.userId);
+    return { count };
   }
 }
