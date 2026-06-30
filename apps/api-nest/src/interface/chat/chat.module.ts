@@ -3,42 +3,61 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
-import { AdvisorClientEntity } from '@forreal/infrastructure-typeorm';
-import { ConversationEntity } from '@forreal/infrastructure-typeorm';
-import { ConversationParticipantEntity } from '@forreal/infrastructure-typeorm';
-import { MessageEntity } from '@forreal/infrastructure-typeorm';
-import { UserEntity } from '@forreal/infrastructure-typeorm';
-import { RoleEntity } from '@forreal/infrastructure-typeorm';
-import { NotificationEntity } from '@forreal/infrastructure-typeorm';
+import {
+  AdvisorClientEntity,
+  ConversationEntity,
+  ConversationParticipantEntity,
+  MessageEntity,
+  UserEntity,
+  RoleEntity,
+  NotificationEntity,
+  ConversationNotificationSettingsEntity,
+  ConversationUserStateEntity,
+} from '@forreal/infrastructure-typeorm';
 
-import { IConversationRepository } from '@forreal/domain';
-import { IMessageRepository } from '@forreal/domain';
-import { IConversationParticipantRepository } from '@forreal/domain';
-import { IAdvisorClientRepository } from '@forreal/domain';
-import { INotificationRepository } from '@forreal/domain';
+import {
+  IConversationRepository,
+  IMessageRepository,
+  IConversationParticipantRepository,
+  IAdvisorClientRepository,
+  INotificationRepository,
+  IConversationNotificationSettingsRepository,
+  IConversationUserStateRepository,
+  IUserRepository,
+} from '@forreal/domain';
 
-import { ConversationRepository } from '@forreal/infrastructure-typeorm';
-import { MessageRepository } from '@forreal/infrastructure-typeorm';
-import { ConversationParticipantRepository } from '@forreal/infrastructure-typeorm';
-import { AdvisorClientRepository } from '@forreal/infrastructure-typeorm';
-import { NotificationRepository } from '@forreal/infrastructure-typeorm';
+import {
+  ConversationRepository,
+  MessageRepository,
+  ConversationParticipantRepository,
+  AdvisorClientRepository,
+  NotificationRepository,
+  ConversationNotificationSettingsRepository,
+  ConversationUserStateRepository,
+  UserRepository,
+} from '@forreal/infrastructure-typeorm';
 
-import { CreateConversationUseCase } from '@forreal/application';
-import { AddConversationParticipantUseCase } from '@forreal/application';
-import { SendMessageUseCase } from '@forreal/application';
-import { ListMessagesUseCase } from '@forreal/application';
-import { MarkMessageReadUseCase } from '@forreal/application';
-import { LinkAdvisorClientUseCase } from '@forreal/application';
-import { ListConversationsByUserUseCase } from '@forreal/application';
-import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application';
-import { ListClientsOfAdvisorUseCase } from '@forreal/application';
-import { FindAdvisorOfClientUseCase } from '@forreal/application';
-import { ListUsersByRoleUseCase } from '@forreal/application';
-import { IUserRepository } from '@forreal/domain';
-import { UserRepository } from '@forreal/infrastructure-typeorm';
+import {
+  CreateConversationUseCase,
+  AddConversationParticipantUseCase,
+  SendMessageUseCase,
+  ListMessagesUseCase,
+  MarkMessageReadUseCase,
+  LinkAdvisorClientUseCase,
+  ListConversationsByUserUseCase,
+  ListParticipantsDetailsByConversationUseCase,
+  ListClientsOfAdvisorUseCase,
+  FindAdvisorOfClientUseCase,
+  ListUsersByRoleUseCase,
+  SetConversationMuteUseCase,
+  GetConversationNotificationSettingsUseCase,
+  UpdateConversationUserStateUseCase,
+} from '@forreal/application';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([
       AdvisorClientEntity,
       ConversationEntity,
@@ -47,6 +66,8 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
       UserEntity,
       RoleEntity,
       NotificationEntity,
+      ConversationNotificationSettingsEntity,
+      ConversationUserStateEntity,
     ]),
   ],
   controllers: [ChatController],
@@ -59,6 +80,11 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAdvisorClientRepository, useClass: AdvisorClientRepository },
     { provide: INotificationRepository, useClass: NotificationRepository },
+    {
+      provide: IConversationNotificationSettingsRepository,
+      useClass: ConversationNotificationSettingsRepository,
+    },
+    { provide: IConversationUserStateRepository, useClass: ConversationUserStateRepository },
     {
       provide: CreateConversationUseCase,
       useFactory: (repo: IConversationRepository) => new CreateConversationUseCase(repo),
@@ -76,8 +102,14 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
         messageRepo: IMessageRepository,
         participantRepo: IConversationParticipantRepository,
         notifRepo: INotificationRepository,
-      ) => new SendMessageUseCase(messageRepo, participantRepo, notifRepo),
-      inject: [IMessageRepository, IConversationParticipantRepository, INotificationRepository],
+        settingsRepo: IConversationNotificationSettingsRepository,
+      ) => new SendMessageUseCase(messageRepo, participantRepo, notifRepo, settingsRepo),
+      inject: [
+        IMessageRepository,
+        IConversationParticipantRepository,
+        INotificationRepository,
+        IConversationNotificationSettingsRepository,
+      ],
     },
     {
       provide: ListMessagesUseCase,
@@ -127,6 +159,26 @@ import { UserRepository } from '@forreal/infrastructure-typeorm';
       provide: ListUsersByRoleUseCase,
       useFactory: (userRepo: IUserRepository) => new ListUsersByRoleUseCase(userRepo),
       inject: [IUserRepository],
+    },
+    {
+      provide: SetConversationMuteUseCase,
+      useFactory: (settingsRepo: IConversationNotificationSettingsRepository) =>
+        new SetConversationMuteUseCase(settingsRepo),
+      inject: [IConversationNotificationSettingsRepository],
+    },
+    {
+      provide: GetConversationNotificationSettingsUseCase,
+      useFactory: (settingsRepo: IConversationNotificationSettingsRepository) =>
+        new GetConversationNotificationSettingsUseCase(settingsRepo),
+      inject: [IConversationNotificationSettingsRepository],
+    },
+    {
+      provide: UpdateConversationUserStateUseCase,
+      useFactory: (
+        stateRepo: IConversationUserStateRepository,
+        notifRepo: INotificationRepository,
+      ) => new UpdateConversationUserStateUseCase(stateRepo, notifRepo),
+      inject: [IConversationUserStateRepository, INotificationRepository],
     },
   ],
   exports: [ChatService],

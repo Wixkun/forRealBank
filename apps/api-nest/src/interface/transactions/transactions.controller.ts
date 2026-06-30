@@ -71,8 +71,8 @@ export class TransactionsController {
       description: t.description,
       date: t.createdAt.toISOString().split('T')[0],
       amount:
-        t.type === 'credit'
-          ? parseFloat(t.amount.toString())
+        t.type === 'credit' || t.type === 'transfer'
+          ? Math.abs(parseFloat(t.amount.toString()))
           : -Math.abs(parseFloat(t.amount.toString())),
       balance: parseFloat(t.balanceAfter.toString()),
     }));
@@ -144,14 +144,13 @@ export class TransactionsController {
     }
 
     try {
-      await this.newsService.createSystemNews({
-        authorId: userId,
-        title: 'Transaction Alert',
+      await this.newsService.createAutomaticNews({
+        targetUserId: userId,
+        title: 'Virement effectué',
         content: body.description
           ? `${body.description} — ${body.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}`
           : `Virement de ${body.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} effectué avec succès.`,
-        status: NewsStatus.TRANSACTIONS,
-        userId,
+        status: NewsStatus.TRANSACTION,
       });
     } catch {
       // Ne pas bloquer la réponse si la news échoue

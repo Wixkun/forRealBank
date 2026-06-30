@@ -1,5 +1,5 @@
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { ErrorPageTemplate } from '@/components/templates/ErrorPageTemplate';
+import { ErrorPageTemplate } from '@/components/ui/ErrorPageTemplate';
 import { getTranslations } from 'next-intl/server';
 import { cookies } from 'next/headers';
 import { defaultLocale } from '@/i18n/config';

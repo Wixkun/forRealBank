@@ -2,9 +2,8 @@
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslations } from 'next-intl';
-import { ChatHeader } from '@/components/organisms/ChatHeader';
-import ConversationsList from '@/components/chat/ConversationsList';
-import ChatDisplay from '@/components/chat/ChatDisplay';
+import ConversationsList from '@/features/chat/components/ConversationsList';
+import ChatDisplay from '@/features/chat/components/ChatDisplay';
 import { ConversationData } from '@/lib/cache/conversations';
 
 interface User {
@@ -95,8 +94,6 @@ export default function ChatPagePresenter({
           : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
       }`}
     >
-      <ChatHeader />
-
       <main className="flex-1 px-6 py-6 overflow-hidden">
         <div
           className={`rounded-lg shadow-lg overflow-hidden flex h-full ${

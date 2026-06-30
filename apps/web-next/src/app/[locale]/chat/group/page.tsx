@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import GroupConversation from '@/components/chat/GroupConversation';
+import GroupConversation from '@/features/chat/components/GroupConversation';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslations } from 'next-intl';
 

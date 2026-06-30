@@ -1,4 +1,4 @@
-import { ChatWrapper } from '@/components/templates/ChatWrapper';
+import { ChatWrapper } from '@/features/chat/components/ChatWrapper';
 
 type ChatPageProps = {
   params: Promise<{ locale: string }>;

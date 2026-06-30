@@ -14,8 +14,16 @@ export class ListNotificationsByUserUseCase {
       title: n.title,
       content: n.content,
       type: n.type,
-      createdAt: n.createdAt,
+      targetType: n.targetType,
+      targetId: n.targetId,
+      targetUrl: n.targetUrl,
+      groupKey: n.groupKey,
+      oldestUnreadMessageId: n.oldestUnreadMessageId,
+      unreadCount: n.unreadCount,
+      isRead: n.isRead(),
       readAt: n.readAt,
+      createdAt: n.createdAt,
+      updatedAt: n.updatedAt,
     }));
   }
 }

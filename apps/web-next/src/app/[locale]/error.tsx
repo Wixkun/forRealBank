@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { ErrorPageTemplate } from '@/components/templates/ErrorPageTemplate';
+import { ErrorPageTemplate } from '@/components/ui/ErrorPageTemplate';
 import { useParams, useRouter } from 'next/navigation';
 
 export default function Error({

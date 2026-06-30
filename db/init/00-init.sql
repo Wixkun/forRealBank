@@ -27,9 +27,6 @@ CREATE TABLE IF NOT EXISTS users (
     lock_until timestamptz NULL
 );
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS failed_login_count int NOT NULL DEFAULT 0;
-ALTER TABLE users ADD COLUMN IF NOT EXISTS lock_until timestamptz NULL;
-
 CREATE TABLE IF NOT EXISTS roles (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name text NOT NULL UNIQUE
@@ -76,17 +73,71 @@ CREATE TABLE IF NOT EXISTS messages (
     read_at timestamptz NULL
 );
 
+-- Préférences de notifications par conversation et par utilisateur
+-- muted = false                        → notifications activées
+-- muted = true  AND muted_until IS NULL → désactivé définitivement
+-- muted = true  AND muted_until > now() → désactivé temporairement
+-- muted = true  AND muted_until <= now()→ expiré, traiter comme activé
+CREATE TABLE IF NOT EXISTS conversation_notification_settings (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    muted boolean NOT NULL DEFAULT false,
+    muted_until timestamptz NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT uq_conv_notif_settings UNIQUE (user_id, conversation_id)
+);
+
+-- État de lecture par utilisateur et par conversation
+-- Permet de savoir jusqu'où l'utilisateur a lu dans une conversation
+-- et de marquer comme lue la notification groupée associée
+CREATE TABLE IF NOT EXISTS conversation_user_state (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+    last_read_message_id uuid NULL REFERENCES messages(id) ON DELETE SET NULL,
+    last_read_at timestamptz NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT uq_conv_user_state UNIQUE (user_id, conversation_id)
+);
+
+-- News globales et ciblées
+-- source  : MANUAL  = créée par DIRECTOR/ADVISOR via l'interface
+--           AUTOMATIC = générée par le backend lors d'un événement métier
+-- user_id : NULL       = news globale (visible par tous)
+--           <uuid>     = news ciblée pour un seul utilisateur
 CREATE TABLE IF NOT EXISTS news (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     author_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
     user_id varchar NULL,
     title varchar(255) NOT NULL,
     content text NOT NULL,
-    status varchar(50) NOT NULL DEFAULT 'INFORMATION',
-    archived_at timestamptz NULL,
+    status varchar(50) NOT NULL DEFAULT 'INFORMATION'
+        CHECK (status IN ('INFORMATION', 'SECURITY', 'TRANSACTION', 'PAYMENT', 'ACCOUNT', 'SYSTEM')),
+    source varchar(20) NOT NULL DEFAULT 'MANUAL'
+        CHECK (source IN ('MANUAL', 'AUTOMATIC')),
+    is_active boolean NOT NULL DEFAULT true,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Statut par utilisateur pour une news
+CREATE TABLE IF NOT EXISTS user_news_status (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id varchar NOT NULL,
+    news_id varchar NOT NULL,
+    status varchar(20) NOT NULL DEFAULT 'VISIBLE'
+        CHECK (status IN ('VISIBLE', 'READ', 'ARCHIVED', 'DELETED')),
+    read_at timestamptz NULL,
+    archived_at timestamptz NULL,
+    deleted_at timestamptz NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT uq_user_news_status UNIQUE (user_id, news_id)
+);
+
+-- Tables legacy conservées pour compatibilité
 CREATE TABLE IF NOT EXISTS news_dismissals (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id varchar NOT NULL,
@@ -95,14 +146,43 @@ CREATE TABLE IF NOT EXISTS news_dismissals (
     CONSTRAINT uq_news_dismissal UNIQUE (user_id, news_id)
 );
 
+CREATE TABLE IF NOT EXISTS news_user_archives (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id varchar NOT NULL,
+    news_id varchar NOT NULL,
+    archived_at timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT uq_news_user_archive UNIQUE (user_id, news_id)
+);
+
+-- Notifications utilisateur
+-- Séparées des actualités (news) : courtes, actionnables, liées à un utilisateur précis
+-- group_key              : permet de regrouper les notifications d'une même source
+--                          ex. "conversation:uuid" pour les messages d'une conversation
+-- oldest_unread_message_id : le plus vieux message non lu → point de départ du scroll
+-- unread_count           : nombre de messages non lus dans ce groupe
+-- is_read                : false = non lue, true = lue (redondant avec read_at pour les index)
+-- target_type / target_id / target_url : lien vers l'entité cible
+--
+-- Enum NotificationType    : MESSAGE | TRANSACTION | SECURITY | SYSTEM | PAYMENT | ACCOUNT | NEWS
+-- Enum NotificationTargetType : CONVERSATION | MESSAGE | ACCOUNT | TRANSACTION | PAYMENT | NEWS | URL
 CREATE TABLE IF NOT EXISTS notifications (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     title varchar(255) NOT NULL,
     content text NOT NULL,
-    type varchar(100) NOT NULL,
+    type varchar(100) NOT NULL
+        CHECK (type IN ('MESSAGE', 'TRANSACTION', 'SECURITY', 'SYSTEM', 'PAYMENT', 'ACCOUNT', 'NEWS')),
+    target_type varchar(100) NULL
+        CHECK (target_type IN ('CONVERSATION', 'MESSAGE', 'ACCOUNT', 'TRANSACTION', 'PAYMENT', 'NEWS', 'URL')),
+    target_id varchar NULL,
+    target_url text NULL,
+    group_key varchar NULL,
+    oldest_unread_message_id varchar NULL,
+    unread_count int NOT NULL DEFAULT 1,
+    is_read boolean NOT NULL DEFAULT false,
+    read_at timestamptz NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
-    read_at timestamptz NULL
+    updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 -- ============================================================================
@@ -162,7 +242,7 @@ CREATE TABLE IF NOT EXISTS bank_transactions (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Investment cash movements (deposits / withdrawals to investment account)
+-- Investment cash movements
 CREATE TABLE IF NOT EXISTS investment_transactions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     investment_account_id uuid NOT NULL REFERENCES investment_accounts(id) ON DELETE CASCADE,
@@ -212,20 +292,44 @@ CREATE TABLE IF NOT EXISTS trading_orders (
     updated_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Indexes
-CREATE INDEX IF NOT EXISTS idx_accounts_user_id ON accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_investment_accounts_user_id ON investment_accounts(user_id);
-CREATE INDEX IF NOT EXISTS idx_cards_account_id ON cards(account_id);
-CREATE INDEX IF NOT EXISTS idx_bank_transactions_account_id ON bank_transactions(account_id);
-CREATE INDEX IF NOT EXISTS idx_bank_transactions_created_at ON bank_transactions(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_trading_positions_investment_account ON trading_positions(investment_account_id);
-CREATE INDEX IF NOT EXISTS idx_trading_orders_investment_account ON trading_orders(investment_account_id);
-CREATE INDEX IF NOT EXISTS idx_trading_orders_status ON trading_orders(status);
-CREATE INDEX IF NOT EXISTS idx_market_assets_symbol ON market_assets(symbol);
-CREATE INDEX IF NOT EXISTS idx_market_assets_type ON market_assets(asset_type);
+-- ============================================================================
+-- STEP 5: Indexes
+-- ============================================================================
+
+CREATE INDEX IF NOT EXISTS idx_accounts_user_id                 ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_investment_accounts_user_id      ON investment_accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_cards_account_id                 ON cards(account_id);
+CREATE INDEX IF NOT EXISTS idx_bank_transactions_account_id     ON bank_transactions(account_id);
+CREATE INDEX IF NOT EXISTS idx_bank_transactions_created_at     ON bank_transactions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_trading_positions_investment     ON trading_positions(investment_account_id);
+CREATE INDEX IF NOT EXISTS idx_trading_orders_investment        ON trading_orders(investment_account_id);
+CREATE INDEX IF NOT EXISTS idx_trading_orders_status            ON trading_orders(status);
+CREATE INDEX IF NOT EXISTS idx_market_assets_symbol             ON market_assets(symbol);
+CREATE INDEX IF NOT EXISTS idx_market_assets_type               ON market_assets(asset_type);
+
+-- Feed indexes
+CREATE INDEX IF NOT EXISTS idx_news_is_active                   ON news(is_active);
+CREATE INDEX IF NOT EXISTS idx_news_user_id                     ON news(user_id);
+CREATE INDEX IF NOT EXISTS idx_news_created_at                  ON news(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_user_news_status_user_news       ON user_news_status(user_id, news_id);
+CREATE INDEX IF NOT EXISTS idx_user_news_status_news            ON user_news_status(news_id);
+
+-- Notification indexes
+-- idx_notifications_user_unread : requête principale (cloche → badge non lues)
+-- idx_notifications_group_key   : lookup de notification groupée (MESSAGE par conversation)
+CREATE INDEX IF NOT EXISTS idx_notifications_user_id            ON notifications(user_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread        ON notifications(user_id, is_read) WHERE is_read = false;
+CREATE INDEX IF NOT EXISTS idx_notifications_group_key          ON notifications(user_id, type, group_key) WHERE is_read = false;
+CREATE INDEX IF NOT EXISTS idx_notifications_updated_at         ON notifications(user_id, updated_at DESC);
+
+-- Chat notification indexes
+CREATE INDEX IF NOT EXISTS idx_conv_notif_settings_user         ON conversation_notification_settings(user_id);
+CREATE INDEX IF NOT EXISTS idx_conv_notif_settings_conv         ON conversation_notification_settings(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_conv_user_state_user             ON conversation_user_state(user_id);
+CREATE INDEX IF NOT EXISTS idx_conv_user_state_conv             ON conversation_user_state(conversation_id);
 
 -- ============================================================================
--- STEP 5: Seed Roles
+-- STEP 6: Seed Roles
 -- ============================================================================
 
 DELETE FROM roles WHERE name IS NULL;
@@ -238,7 +342,7 @@ INSERT INTO roles (name) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- ============================================================================
--- STEP 6: Seed Users
+-- STEP 7: Seed Users
 -- ============================================================================
 -- 1 Director, 1 Advisor, 2 Clients
 -- Passwords: Director@123 / Advisor@123 / Client@123
@@ -252,7 +356,7 @@ VALUES
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================================
--- STEP 7: Assign User Roles
+-- STEP 8: Assign User Roles
 -- ============================================================================
 
 INSERT INTO user_roles (user_id, role_id)
@@ -271,7 +375,7 @@ WHERE u.email IN ('client1@forreal.bank', 'client2@forreal.bank')
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
--- STEP 8: Link Advisor <-> Clients
+-- STEP 9: Link Advisor <-> Clients
 -- ============================================================================
 
 INSERT INTO advisor_clients (advisor_id, client_id)
@@ -282,7 +386,7 @@ WHERE a.email = 'advisor1@forreal.bank'
 ON CONFLICT ON CONSTRAINT uq_advisor_client DO NOTHING;
 
 -- ============================================================================
--- STEP 9: Create Conversations
+-- STEP 10: Create Conversations
 -- ============================================================================
 
 WITH conv AS (
@@ -300,7 +404,7 @@ SELECT conv.id, u.id FROM conv CROSS JOIN users u
 WHERE u.email IN ('director1@forreal.bank', 'advisor1@forreal.bank', 'client1@forreal.bank', 'client2@forreal.bank');
 
 -- ============================================================================
--- STEP 10: Seed Messages
+-- STEP 11: Seed Messages
 -- ============================================================================
 
 WITH conv AS (
@@ -334,65 +438,179 @@ SELECT (SELECT id FROM conv), (SELECT id FROM client2),  'Content de faire parti
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
--- STEP 11: Seed News
--- ============================================================================
-
-INSERT INTO news (author_id, user_id, title, content, status)
-SELECT u.id, NULL, 'Connexion depuis un nouvel appareil',
-    'Une connexion à votre compte a été détectée depuis un appareil inconnu. Si ce n''était pas vous, sécurisez immédiatement votre compte.',
-    'SECURITY'
-FROM users u WHERE u.email = 'director1@forreal.bank'
-UNION ALL
-SELECT u.id, NULL, 'Virement reçu avec succès',
-    'Vous avez reçu un virement de 1 250,00 € sur votre compte principal. Le solde a été mis à jour.',
-    'TRANSACTIONS'
-FROM users u WHERE u.email = 'director1@forreal.bank'
-UNION ALL
-SELECT u.id, NULL, 'Prélèvement automatique programmé',
-    'Un prélèvement de 89,99 € est prévu le 28 de ce mois pour votre abonnement. Vérifiez que votre solde est suffisant.',
-    'PAYMENTS'
-FROM users u WHERE u.email = 'director1@forreal.bank'
-UNION ALL
-SELECT u.id, NULL, 'Informations de profil mises à jour',
-    'Les informations de votre compte ont été modifiées. Si vous n''êtes pas à l''origine de ce changement, contactez le support.',
-    'ACCOUNT_UPDATES'
-FROM users u WHERE u.email = 'director1@forreal.bank'
-UNION ALL
-SELECT u.id, NULL, 'Maintenance planifiée',
-    'Une maintenance technique est prévue cette nuit de 2h à 4h. Certains services seront temporairement indisponibles.',
-    'SYSTEM'
-FROM users u WHERE u.email = 'director1@forreal.bank'
-UNION ALL
-SELECT u.id, NULL, 'Nouvelle réglementation bancaire',
-    'À compter du 1er juillet, de nouvelles règles s''appliquent aux virements internationaux. Consultez notre guide pour en savoir plus.',
-    'INFORMATION'
-FROM users u WHERE u.email = 'director1@forreal.bank';
-
--- ============================================================================
--- STEP 12: Seed Notifications
--- ============================================================================
-
-INSERT INTO notifications (user_id, title, content, type)
-SELECT u.id, 'Bienvenue !', 'Votre compte a été configuré avec des données de démonstration.', 'WELCOME'
-FROM users u WHERE u.email IN ('client1@forreal.bank', 'client2@forreal.bank')
-UNION ALL
-SELECT u.id, 'Nouveau message', 'Vous avez reçu un nouveau message de votre conseiller.', 'MESSAGE'
-FROM users u WHERE u.email = 'client1@forreal.bank'
-UNION ALL
-SELECT u.id, 'Rappel', 'N''oubliez pas de vérifier votre portefeuille d''investissements.', 'REMINDER'
-FROM users u WHERE u.email = 'client2@forreal.bank'
-ON CONFLICT DO NOTHING;
-
--- ============================================================================
--- STEP 13: Seed Banking Data (Client1)
+-- STEP 12: Seed News
 -- ============================================================================
 
 DO $$
 DECLARE
-    v_client1_id          uuid;
-    v_checking_id         uuid;
-    v_savings_id          uuid;
-    v_investment_id       uuid;
+    v_director_id uuid;
+    v_advisor_id  uuid;
+    v_client1_id  uuid;
+    v_client2_id  uuid;
+BEGIN
+    SELECT id INTO v_director_id FROM users WHERE email = 'director1@forreal.bank';
+    SELECT id INTO v_advisor_id  FROM users WHERE email = 'advisor1@forreal.bank';
+    SELECT id INTO v_client1_id  FROM users WHERE email = 'client1@forreal.bank';
+    SELECT id INTO v_client2_id  FROM users WHERE email = 'client2@forreal.bank';
+
+    -- ── News MANUELLES globales (source = MANUAL, user_id = NULL) ──────────
+
+    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
+        (v_director_id, NULL,
+            'Maintenance planifiée',
+            'Une maintenance technique est prévue cette nuit de 2h à 4h. Certains services seront temporairement indisponibles.',
+            'SYSTEM', 'MANUAL', true),
+        (v_director_id, NULL,
+            'Nouvelle réglementation bancaire',
+            'À compter du 1er juillet, de nouvelles règles s''appliquent aux virements internationaux. Consultez notre guide pour en savoir plus.',
+            'INFORMATION', 'MANUAL', true),
+        (v_advisor_id, NULL,
+            'Nouvelle fonctionnalité disponible',
+            'Vous pouvez désormais programmer vos virements récurrents directement depuis votre espace client.',
+            'INFORMATION', 'MANUAL', true);
+
+    -- ── News AUTOMATIQUES ciblées client1 ─────────────────────────────────
+
+    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
+        (NULL, v_client1_id::varchar,
+            'Virement reçu avec succès',
+            'Vous avez reçu un virement de 1 250,00 € sur votre compte principal. Le solde a été mis à jour.',
+            'TRANSACTION', 'AUTOMATIC', true),
+        (NULL, v_client1_id::varchar,
+            'Connexion depuis un nouvel appareil',
+            'Une connexion à votre compte a été détectée depuis un appareil inconnu. Si ce n''était pas vous, sécurisez immédiatement votre compte.',
+            'SECURITY', 'AUTOMATIC', true),
+        (NULL, v_client1_id::varchar,
+            'Prélèvement automatique programmé',
+            'Un prélèvement de 89,99 € est prévu le 28 de ce mois pour votre abonnement. Vérifiez que votre solde est suffisant.',
+            'PAYMENT', 'AUTOMATIC', true),
+        (NULL, v_client1_id::varchar,
+            'Informations de profil mises à jour',
+            'Les informations de votre compte ont été modifiées. Si vous n''êtes pas à l''origine de ce changement, contactez le support.',
+            'ACCOUNT', 'AUTOMATIC', true);
+
+    -- ── News AUTOMATIQUES ciblées client2 ────────────────────────────────
+
+    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
+        (NULL, v_client2_id::varchar,
+            'Virement effectué',
+            'Votre virement de 500,00 € vers votre compte épargne a été exécuté avec succès.',
+            'TRANSACTION', 'AUTOMATIC', true),
+        (NULL, v_client2_id::varchar,
+            'Intérêts crédités',
+            'Des intérêts de 45,80 € ont été crédités sur votre compte épargne (taux annuel 2,75 %).',
+            'ACCOUNT', 'AUTOMATIC', true);
+
+END $$;
+
+-- ============================================================================
+-- STEP 13: Seed Notifications
+-- ============================================================================
+
+DO $$
+DECLARE
+    v_client1_id  uuid;
+    v_client2_id  uuid;
+    v_advisor_id  uuid;
+    v_director_id uuid;
+    v_conv_private_id uuid;
+    v_conv_group_id   uuid;
+    v_news_maintenance_id uuid;
+BEGIN
+    SELECT id INTO v_client1_id  FROM users WHERE email = 'client1@forreal.bank';
+    SELECT id INTO v_client2_id  FROM users WHERE email = 'client2@forreal.bank';
+    SELECT id INTO v_advisor_id  FROM users WHERE email = 'advisor1@forreal.bank';
+    SELECT id INTO v_director_id FROM users WHERE email = 'director1@forreal.bank';
+
+    SELECT id INTO v_conv_private_id
+    FROM conversations WHERE type = 'PRIVATE' ORDER BY created_at ASC LIMIT 1;
+
+    SELECT id INTO v_conv_group_id
+    FROM conversations WHERE type = 'GROUP' ORDER BY created_at ASC LIMIT 1;
+
+    SELECT id INTO v_news_maintenance_id
+    FROM news WHERE title = 'Maintenance planifiée' LIMIT 1;
+
+    -- Notification de bienvenue (SYSTEM) pour les clients
+    INSERT INTO notifications (user_id, title, content, type, target_type, target_url, is_read)
+    VALUES
+        (v_client1_id, 'Bienvenue sur ForRealBank',
+            'Votre compte a été configuré avec des données de démonstration.',
+            'SYSTEM', 'URL', '/dashboard', false),
+        (v_client2_id, 'Bienvenue sur ForRealBank',
+            'Votre compte a été configuré avec des données de démonstration.',
+            'SYSTEM', 'URL', '/dashboard', false);
+
+    -- Notification de message groupée (non lue) pour client1 dans la conversation privée
+    IF v_conv_private_id IS NOT NULL THEN
+        INSERT INTO notifications (
+            user_id, title, content, type,
+            target_type, target_id, target_url,
+            group_key, unread_count, is_read
+        ) VALUES (
+            v_client1_id,
+            '1 nouveau message',
+            'Vous avez reçu un nouveau message',
+            'MESSAGE',
+            'CONVERSATION',
+            v_conv_private_id::varchar,
+            '/messages/conversations/' || v_conv_private_id,
+            'conversation:' || v_conv_private_id,
+            1,
+            false
+        );
+    END IF;
+
+    -- Notification de sécurité (SECURITY) pour client1
+    INSERT INTO notifications (user_id, title, content, type, target_type, target_url, is_read)
+    VALUES (
+        v_client1_id,
+        'Connexion depuis un nouvel appareil',
+        'Une connexion a été détectée depuis un nouvel appareil. Vérifiez votre activité.',
+        'SECURITY', 'URL', '/settings/security', false
+    );
+
+    -- Notification de transaction (TRANSACTION) pour client1
+    INSERT INTO notifications (user_id, title, content, type, target_type, target_url, is_read)
+    VALUES (
+        v_client1_id,
+        'Virement reçu',
+        'Vous avez reçu un virement de 1 250,00 €.',
+        'TRANSACTION', 'ACCOUNT', '/accounts', false
+    );
+
+    -- Notification liée à la news de maintenance pour clients et advisor (déjà lue)
+    IF v_news_maintenance_id IS NOT NULL THEN
+        INSERT INTO notifications (
+            user_id, title, content, type,
+            target_type, target_id, target_url, is_read, read_at
+        )
+        SELECT
+            u.id,
+            'Maintenance planifiée ce soir',
+            'Une maintenance est prévue de 2h à 4h. Certains services seront indisponibles.',
+            'NEWS',
+            'NEWS',
+            v_news_maintenance_id::varchar,
+            '/dashboard/news/' || v_news_maintenance_id,
+            true,
+            now() - interval '1 hour'
+        FROM users u
+        WHERE u.email IN ('client1@forreal.bank', 'client2@forreal.bank', 'advisor1@forreal.bank');
+    END IF;
+
+END $$;
+
+-- ============================================================================
+-- STEP 14: Seed Banking Data (Client1)
+-- ============================================================================
+
+DO $$
+DECLARE
+    v_client1_id    uuid;
+    v_checking_id   uuid;
+    v_savings_id    uuid;
+    v_investment_id uuid;
 BEGIN
     SELECT id INTO v_client1_id FROM users WHERE email = 'client1@forreal.bank';
     IF v_client1_id IS NULL THEN RAISE EXCEPTION 'Client1 user not found'; END IF;
@@ -409,26 +627,23 @@ BEGIN
     SELECT id INTO v_checking_id FROM accounts WHERE iban = 'FR76 1234 5678 9012 3456 7890 123';
     SELECT id INTO v_savings_id  FROM accounts WHERE iban = 'FR76 9876 5432 1098 7654 3210 987';
 
-    -- Card for checking account
     IF v_checking_id IS NOT NULL THEN
         INSERT INTO cards (account_id, type, last_four, expiry_date)
         VALUES (v_checking_id, 'virtual', '4789', now() + interval '3 years')
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Checking transactions
     IF v_checking_id IS NOT NULL THEN
         INSERT INTO bank_transactions (account_id, type, description, amount, balance_after, created_at)
         VALUES
-            (v_checking_id, 'credit', 'Salaire',               3500.00,   5420.50, now() - interval '6 days'),
-            (v_checking_id, 'debit',  'Carrefour',              -85.40,   1920.50, now() - interval '8 days'),
-            (v_checking_id, 'debit',  'Netflix',                -13.99,   2005.90, now() - interval '11 days'),
-            (v_checking_id, 'debit',  'Virement Épargne',      -500.00,   2019.89, now() - interval '14 days'),
-            (v_checking_id, 'credit', 'Remboursement',           45.20,   2519.89, now() - interval '16 days')
+            (v_checking_id, 'credit', 'Salaire',          3500.00,  5420.50, now() - interval '6 days'),
+            (v_checking_id, 'debit',  'Carrefour',          -85.40,  1920.50, now() - interval '8 days'),
+            (v_checking_id, 'debit',  'Netflix',            -13.99,  2005.90, now() - interval '11 days'),
+            (v_checking_id, 'debit',  'Virement Épargne',  -500.00,  2019.89, now() - interval '14 days'),
+            (v_checking_id, 'credit', 'Remboursement',       45.20,  2519.89, now() - interval '16 days')
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Savings transactions
     IF v_savings_id IS NOT NULL THEN
         INSERT INTO bank_transactions (account_id, type, description, amount, balance_after, created_at)
         VALUES
@@ -437,14 +652,12 @@ BEGIN
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Investment account
     INSERT INTO investment_accounts (id, user_id, name, cash_balance, total_value, total_gain_loss, opened_at)
     VALUES (gen_random_uuid(), v_client1_id, 'Compte Investissement', 10000.00, 98450.25, 13563.00, '2023-06-10')
     ON CONFLICT DO NOTHING;
 
     SELECT id INTO v_investment_id FROM investment_accounts WHERE user_id = v_client1_id LIMIT 1;
 
-    -- Market assets
     INSERT INTO market_assets (symbol, name, asset_type) VALUES
         ('BTC',   'Bitcoin',               'crypto'),
         ('ETH',   'Ethereum',              'crypto'),
@@ -460,19 +673,18 @@ BEGIN
         ('OIL',   'Crude Oil',             'commodity')
     ON CONFLICT (symbol) DO NOTHING;
 
-    -- Trading positions
     IF v_investment_id IS NOT NULL THEN
         INSERT INTO trading_positions (investment_account_id, asset_id, quantity, avg_purchase_price)
         SELECT v_investment_id, ma.id, pos.quantity, pos.avg_price
         FROM (VALUES
-            ('AAPL', 50::decimal,   145.30::decimal),
-            ('BTC',   0.5::decimal, 35000.00::decimal),
-            ('MSFT', 30::decimal,   320.00::decimal),
-            ('ETH',   5::decimal,   1800.00::decimal),
-            ('SPY',  25::decimal,   410.00::decimal),
-            ('TSLA', 15::decimal,   230.00::decimal),
-            ('GOLD', 10::decimal,   1850.00::decimal),
-            ('SOL', 100::decimal,    95.00::decimal)
+            ('AAPL',  50::decimal,   145.30::decimal),
+            ('BTC',    0.5::decimal, 35000.00::decimal),
+            ('MSFT',  30::decimal,   320.00::decimal),
+            ('ETH',    5::decimal,   1800.00::decimal),
+            ('SPY',   25::decimal,   410.00::decimal),
+            ('TSLA',  15::decimal,   230.00::decimal),
+            ('GOLD',  10::decimal,   1850.00::decimal),
+            ('SOL',  100::decimal,    95.00::decimal)
         ) AS pos(symbol, quantity, avg_price)
         JOIN market_assets ma ON ma.symbol = pos.symbol
         ON CONFLICT (investment_account_id, asset_id) DO NOTHING;
@@ -481,7 +693,7 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- STEP 14: Seed Banking Data (Client2)
+-- STEP 15: Seed Banking Data (Client2)
 -- ============================================================================
 
 DO $$
@@ -494,7 +706,6 @@ BEGIN
     SELECT id INTO v_client2_id FROM users WHERE email = 'client2@forreal.bank';
     IF v_client2_id IS NULL THEN RAISE EXCEPTION 'Client2 user not found'; END IF;
 
-    -- Accounts
     INSERT INTO accounts (id, user_id, name, account_type, balance, iban, account_number, interest_rate, opened_at)
     VALUES
         (gen_random_uuid(), v_client2_id, 'Compte Courant', 'checking', 8750.80,
@@ -506,14 +717,12 @@ BEGIN
     SELECT id INTO v_checking_id FROM accounts WHERE iban = 'FR76 5555 6666 7777 8888 9999 000';
     SELECT id INTO v_savings_id  FROM accounts WHERE iban = 'FR76 1111 2222 3333 4444 5555 666';
 
-    -- Card for checking account
     IF v_checking_id IS NOT NULL THEN
         INSERT INTO cards (account_id, type, last_four, expiry_date)
         VALUES (v_checking_id, 'virtual', '5623', now() + interval '3 years')
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Checking transactions
     IF v_checking_id IS NOT NULL THEN
         INSERT INTO bank_transactions (account_id, type, description, amount, balance_after, created_at)
         VALUES
@@ -525,7 +734,6 @@ BEGIN
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Savings transactions
     IF v_savings_id IS NOT NULL THEN
         INSERT INTO bank_transactions (account_id, type, description, amount, balance_after, created_at)
         VALUES
@@ -535,14 +743,12 @@ BEGIN
         ON CONFLICT DO NOTHING;
     END IF;
 
-    -- Investment account
     INSERT INTO investment_accounts (id, user_id, name, cash_balance, total_value, total_gain_loss, opened_at)
     VALUES (gen_random_uuid(), v_client2_id, 'Compte Investissement', 15000.00, 142350.75, 28420.50, '2022-08-15')
     ON CONFLICT DO NOTHING;
 
     SELECT id INTO v_investment_id FROM investment_accounts WHERE user_id = v_client2_id LIMIT 1;
 
-    -- Trading positions
     IF v_investment_id IS NOT NULL THEN
         INSERT INTO trading_positions (investment_account_id, asset_id, quantity, avg_purchase_price)
         SELECT v_investment_id, ma.id, pos.quantity, pos.avg_price
@@ -565,11 +771,18 @@ END $$;
 -- ============================================================================
 -- Initialization Complete
 -- ============================================================================
--- Users     : 4 (1 Director, 1 Advisor, 2 Clients) — passwords: {Role}@123
--- Accounts  : checking + savings par client (interest_rate 2.50% / 2.75% sur savings)
--- Cards     : 1 carte virtuelle par compte courant
--- Investment: 1 compte investissement par client avec 8 positions chacun
--- Assets    : BTC ETH SOL AAPL MSFT TSLA GOOGL AMZN SPY QQQ GOLD OIL
--- Client1   : Checking €5 420,50 | Savings €12 350,00 | Invest cash €10 000
--- Client2   : Checking €8 750,80 | Savings €25 600,00 | Invest cash €15 000
+-- Users      : 4 (1 Director, 1 Advisor, 2 Clients) — passwords: {Role}@123
+-- Roles      : CLIENT / ADVISOR / DIRECTOR / ADMIN
+-- Accounts   : checking + savings par client
+-- Cards      : 1 carte virtuelle par compte courant
+-- Investment : 1 compte investissement par client avec 8 positions chacun
+-- Assets     : BTC ETH SOL AAPL MSFT TSLA GOOGL AMZN SPY QQQ GOLD OIL
+-- News       : 3 globales MANUAL (DIRECTOR/ADVISOR) + 4 ciblées client1 + 2 ciblées client2
+-- Client1    : Checking €5 420,50 | Savings €12 350,00 | Invest cash €10 000
+-- Client2    : Checking €8 750,80 | Savings €25 600,00 | Invest cash €15 000
+-- Notifications:
+--   client1  : bienvenue, message non lu (conv privée), sécurité, transaction, maintenance (lue)
+--   client2  : bienvenue, maintenance (lue)
+--   advisor  : maintenance (lue)
+-- Tables notifications : conversation_notification_settings, conversation_user_state
 -- ============================================================================

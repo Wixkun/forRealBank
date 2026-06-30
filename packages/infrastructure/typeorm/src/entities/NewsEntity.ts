@@ -20,6 +20,9 @@ export class NewsEntity extends ImmutableEntity {
   @Column({ type: 'varchar', length: 50, default: 'INFORMATION' })
   status!: string;
 
-  @Column({ type: 'timestamptz', nullable: true, name: 'archived_at' })
-  archivedAt!: Date | null;
+  @Column({ type: 'varchar', length: 20, default: 'MANUAL' })
+  source!: string;
+
+  @Column({ type: 'boolean', default: true, name: 'is_active' })
+  isActive!: boolean;
 }

@@ -1,5 +1,20 @@
-import { Controller, Get, Post, Body, Param, Query, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Patch,
+  Inject,
+  UseGuards,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
+import type { Request } from 'express';
 import { ConversationType } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateConversationUseCase } from '@forreal/application';
 import { SendMessageUseCase } from '@forreal/application';
 import { ListMessagesUseCase } from '@forreal/application';
@@ -11,7 +26,15 @@ import { AddConversationParticipantUseCase } from '@forreal/application';
 import { ListClientsOfAdvisorUseCase } from '@forreal/application';
 import { FindAdvisorOfClientUseCase } from '@forreal/application';
 import { ListUsersByRoleUseCase } from '@forreal/application';
-import { RoleName } from '@forreal/domain';
+import { SetConversationMuteUseCase } from '@forreal/application';
+import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
+import { UpdateConversationUserStateUseCase } from '@forreal/application';
+
+function extractUserId(req: Request): string {
+  const userId = (req as any).auth?.userId ?? (req as any).user?.id ?? null;
+  if (!userId) throw new BadRequestException('Missing auth context');
+  return userId as string;
+}
 
 @Controller('chat')
 export class ChatController {
@@ -34,6 +57,12 @@ export class ChatController {
     @Inject(FindAdvisorOfClientUseCase)
     private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
     @Inject(ListUsersByRoleUseCase) private readonly listUsersByRole: ListUsersByRoleUseCase,
+    @Inject(SetConversationMuteUseCase)
+    private readonly setConversationMuteUC: SetConversationMuteUseCase,
+    @Inject(GetConversationNotificationSettingsUseCase)
+    private readonly getConversationSettingsUC: GetConversationNotificationSettingsUseCase,
+    @Inject(UpdateConversationUserStateUseCase)
+    private readonly updateConversationStateUC: UpdateConversationUserStateUseCase,
   ) {}
 
   @Post('conversations')
@@ -93,9 +122,7 @@ export class ChatController {
   @Get('users/by-role/:role')
   async listUsersByRoleEndpoint(@Param('role') role: string) {
     const normalized = role.toUpperCase() as keyof typeof RoleName;
-    if (!RoleName[normalized]) {
-      return [];
-    }
+    if (!RoleName[normalized]) return [];
     return this.listUsersByRole.execute({ role: RoleName[normalized] });
   }
 
@@ -107,5 +134,57 @@ export class ChatController {
   @Get('conversations/:id/participants')
   async listParticipants(@Param('id') conversationId: string) {
     return this.listParticipantsDetails.execute({ conversationId });
+  }
+
+  // ─── Notifications de conversation ──────────────────────────────────────────
+
+  @Patch('conversations/:id/notifications/mute')
+  @UseGuards(JwtAuthGuard)
+  async muteConversation(
+    @Param('id') conversationId: string,
+    @Body() body: { mutedUntil?: string },
+    @Req() req: Request,
+  ) {
+    const userId = extractUserId(req);
+    return this.setConversationMuteUC.execute({
+      userId,
+      conversationId,
+      muted: true,
+      mutedUntil: body.mutedUntil ? new Date(body.mutedUntil) : null,
+    });
+  }
+
+  @Patch('conversations/:id/notifications/unmute')
+  @UseGuards(JwtAuthGuard)
+  async unmuteConversation(@Param('id') conversationId: string, @Req() req: Request) {
+    const userId = extractUserId(req);
+    return this.setConversationMuteUC.execute({ userId, conversationId, muted: false });
+  }
+
+  @Get('conversations/:id/notifications/settings')
+  @UseGuards(JwtAuthGuard)
+  async getConversationNotificationSettings(
+    @Param('id') conversationId: string,
+    @Req() req: Request,
+  ) {
+    const userId = extractUserId(req);
+    return this.getConversationSettingsUC.execute({ userId, conversationId });
+  }
+
+  // ─── État de lecture ──────────────────────────────────────────────────────
+
+  @Patch('conversations/:id/state')
+  @UseGuards(JwtAuthGuard)
+  async updateConversationState(
+    @Param('id') conversationId: string,
+    @Body() body: { lastReadMessageId: string },
+    @Req() req: Request,
+  ) {
+    const userId = extractUserId(req);
+    return this.updateConversationStateUC.execute({
+      userId,
+      conversationId,
+      lastReadMessageId: body.lastReadMessageId,
+    });
   }
 }

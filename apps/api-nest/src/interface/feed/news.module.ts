@@ -2,7 +2,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsService } from './news.service';
 import { NewsController } from './news.controller';
-import { NewsEntity, NewsDismissalEntity, UserEntity, NotificationEntity, RoleEntity } from '@forreal/infrastructure-typeorm';
+import {
+  NewsEntity,
+  UserNewsStatusEntity,
+  UserEntity,
+  NotificationEntity,
+  RoleEntity,
+} from '@forreal/infrastructure-typeorm';
 import { INewsRepository, IUserRepository, INotificationRepository } from '@forreal/domain';
 import { NewsRepository, UserRepository, NotificationRepository } from '@forreal/infrastructure-typeorm';
 import {
@@ -10,9 +16,7 @@ import {
   ListNewsUseCase,
   DeleteNewsUseCase,
   UpdateNewsUseCase,
-  ArchiveNewsUseCase,
-  UnarchiveNewsUseCase,
-  DismissNewsUseCase,
+  SetNewsUserStatusUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
 import { RolesGuard } from '../auth/roles.guard';
@@ -20,7 +24,10 @@ import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 import { NewsSeed } from './news.seed';
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([NewsEntity, NewsDismissalEntity, UserEntity, RoleEntity, NotificationEntity])],
+  imports: [
+    AuthModule,
+    TypeOrmModule.forFeature([NewsEntity, UserNewsStatusEntity, UserEntity, RoleEntity, NotificationEntity]),
+  ],
   controllers: [NewsController],
   providers: [
     NewsService,
@@ -50,18 +57,8 @@ import { NewsSeed } from './news.seed';
       inject: [INewsRepository],
     },
     {
-      provide: ArchiveNewsUseCase,
-      useFactory: (repo) => new ArchiveNewsUseCase(repo),
-      inject: [INewsRepository],
-    },
-    {
-      provide: UnarchiveNewsUseCase,
-      useFactory: (repo) => new UnarchiveNewsUseCase(repo),
-      inject: [INewsRepository],
-    },
-    {
-      provide: DismissNewsUseCase,
-      useFactory: (repo) => new DismissNewsUseCase(repo),
+      provide: SetNewsUserStatusUseCase,
+      useFactory: (repo) => new SetNewsUserStatusUseCase(repo),
       inject: [INewsRepository],
     },
     NewsSeed,

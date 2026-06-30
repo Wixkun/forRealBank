@@ -1,0 +1,9 @@
+export enum NotificationTargetType {
+  CONVERSATION = 'CONVERSATION',
+  MESSAGE = 'MESSAGE',
+  ACCOUNT = 'ACCOUNT',
+  TRANSACTION = 'TRANSACTION',
+  PAYMENT = 'PAYMENT',
+  NEWS = 'NEWS',
+  URL = 'URL',
+}

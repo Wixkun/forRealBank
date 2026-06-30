@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { INewsRepository, NewsStatus } from '@forreal/domain';
+import { In, Repository } from 'typeorm';
+import { INewsRepository, NewsSource, NewsStatus, UserNewsStatusValue } from '@forreal/domain';
 import { News } from '@forreal/domain';
 import { NewsEntity } from '../entities/NewsEntity';
-import { NewsDismissalEntity } from '../entities/NewsDismissalEntity';
+import { UserNewsStatusEntity } from '../entities/UserNewsStatusEntity';
 import { UserEntity } from '../entities/UserEntity';
 import { NewsMapper } from '../mappers/NewsMapper';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,8 +16,8 @@ export class NewsRepository implements INewsRepository {
     private readonly repo: Repository<NewsEntity>,
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
-    @InjectRepository(NewsDismissalEntity)
-    private readonly dismissalRepo: Repository<NewsDismissalEntity>,
+    @InjectRepository(UserNewsStatusEntity)
+    private readonly statusRepo: Repository<UserNewsStatusEntity>,
   ) {}
 
   async findById(id: string): Promise<News | null> {
@@ -26,7 +26,12 @@ export class NewsRepository implements INewsRepository {
   }
 
   async save(news: News): Promise<void> {
-    await this.repo.update({ id: news.id }, NewsMapper.toPersistence(news));
+    await this.repo.update({ id: news.id }, {
+      title: news.title,
+      content: news.content,
+      status: news.status,
+      userId: news.userId,
+    });
   }
 
   async create(params: {
@@ -34,6 +39,7 @@ export class NewsRepository implements INewsRepository {
     title: string;
     content: string;
     status?: NewsStatus;
+    source?: NewsSource;
     userId?: string | null;
   }): Promise<News> {
     let author: UserEntity | null = null;
@@ -48,7 +54,8 @@ export class NewsRepository implements INewsRepository {
       title: params.title,
       content: params.content,
       status: params.status ?? NewsStatus.INFORMATION,
-      archivedAt: null,
+      source: params.source ?? NewsSource.MANUAL,
+      isActive: true,
     });
     const saved = await this.repo.save(entity);
     return NewsMapper.toDomain({ ...saved, author } as NewsEntity);
@@ -59,55 +66,106 @@ export class NewsRepository implements INewsRepository {
     offset?: number;
     userId?: string | null;
     includeArchived?: boolean;
+    archivedOnly?: boolean;
   }): Promise<News[]> {
-    const { limit = 20, offset = 0, userId, includeArchived = false } = params ?? {};
+    const { limit = 20, offset = 0, userId, includeArchived = false, archivedOnly = false } = params ?? {};
+
+    if (archivedOnly && !userId) return [];
 
     const qb = this.repo
       .createQueryBuilder('news')
       .leftJoinAndSelect('news.author', 'author')
-      .orderBy('news.createdAt', 'DESC')
-      .take(limit)
-      .skip(offset);
+      .where('news.is_active = true')
+      .orderBy('news.createdAt', 'DESC');
 
-    if (!includeArchived) {
-      qb.andWhere('news.archived_at IS NULL');
-    }
-
-    // Global news (userId IS NULL) OR user-specific news for this user
     if (userId) {
       qb.andWhere('(news.user_id IS NULL OR news.user_id = :userId)', { userId });
-      // Exclude news dismissed by this user
-      qb.andWhere(
-        'news.id NOT IN (SELECT d.news_id FROM news_dismissals d WHERE d.user_id = :userId)',
-        { userId },
-      );
     } else {
       qb.andWhere('news.user_id IS NULL');
+      qb.take(limit).skip(offset);
     }
 
     const entities = await qb.getMany();
-    return entities.map(NewsMapper.toDomain);
+
+    if (!userId) {
+      return entities.map((e) => NewsMapper.toDomain(e));
+    }
+
+    // Fetch per-user statuses for these news items
+    const newsIds = entities.map((e) => e.id);
+    const statuses =
+      newsIds.length > 0
+        ? await this.statusRepo.find({ where: { userId, newsId: In(newsIds) } })
+        : [];
+
+    const statusMap = new Map(statuses.map((s) => [s.newsId, s]));
+
+    const filtered = entities.filter((entity) => {
+      const ust = statusMap.get(entity.id);
+      const statusVal = ust?.status ?? 'VISIBLE';
+      if (archivedOnly) return statusVal === 'ARCHIVED';
+      if (!includeArchived) return statusVal !== 'ARCHIVED' && statusVal !== 'DELETED';
+      return statusVal !== 'DELETED';
+    });
+
+    const paginated = archivedOnly ? filtered : filtered.slice(offset, offset + limit);
+
+    return paginated.map((entity) => {
+      const ust = statusMap.get(entity.id);
+      return NewsMapper.toDomain(entity, ust?.archivedAt ?? null);
+    });
   }
 
   async deleteById(id: string): Promise<void> {
     await this.repo.delete({ id });
   }
 
-  async archiveById(id: string): Promise<void> {
-    await this.repo.update({ id }, { archivedAt: new Date() });
+  async deactivateById(id: string): Promise<void> {
+    await this.repo.update({ id }, { isActive: false });
   }
 
-  async unarchiveById(id: string): Promise<void> {
-    await this.repo.update({ id }, { archivedAt: null });
+  async setUserStatus(newsId: string, userId: string, status: UserNewsStatusValue): Promise<void> {
+    const existing = await this.statusRepo.findOne({ where: { newsId, userId } });
+    if (existing) {
+      existing.status = status;
+      if (status === 'READ') existing.readAt = new Date();
+      else if (status === 'ARCHIVED') existing.archivedAt = new Date();
+      else if (status === 'DELETED') existing.deletedAt = new Date();
+      else if (status === 'VISIBLE') {
+        existing.readAt = null;
+        existing.archivedAt = null;
+        existing.deletedAt = null;
+      }
+      await this.statusRepo.save(existing);
+    } else {
+      const entity = this.statusRepo.create({
+        id: uuidv4(),
+        newsId,
+        userId,
+        status,
+        readAt: status === 'READ' ? new Date() : null,
+        archivedAt: status === 'ARCHIVED' ? new Date() : null,
+        deletedAt: status === 'DELETED' ? new Date() : null,
+      });
+      await this.statusRepo.save(entity);
+    }
+  }
+
+  async clearUserStatus(newsId: string, userId: string): Promise<void> {
+    await this.statusRepo.delete({ newsId, userId });
+  }
+
+  // Backward-compat aliases
+
+  async archiveForUser(newsId: string, userId: string): Promise<void> {
+    await this.setUserStatus(newsId, userId, 'ARCHIVED');
+  }
+
+  async unarchiveForUser(newsId: string, userId: string): Promise<void> {
+    await this.clearUserStatus(newsId, userId);
   }
 
   async dismissForUser(newsId: string, userId: string): Promise<void> {
-    await this.dismissalRepo
-      .createQueryBuilder()
-      .insert()
-      .into(NewsDismissalEntity)
-      .values({ id: uuidv4(), newsId, userId })
-      .orIgnore() // ignore si déjà dismissed (contrainte unique)
-      .execute();
+    await this.setUserStatus(newsId, userId, 'DELETED');
   }
 }

@@ -1,45 +1,52 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
-import { NotificationEntity } from '@forreal/infrastructure-typeorm';
-import { UserEntity } from '@forreal/infrastructure-typeorm';
-
+import { NotificationEntity, UserEntity } from '@forreal/infrastructure-typeorm';
 import { INotificationRepository } from '@forreal/domain';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
-
-import { SendNotificationUseCase } from '@forreal/application';
-import { MarkNotificationReadUseCase } from '@forreal/application';
-import { MarkAllNotificationsReadUseCase } from '@forreal/application';
-import { ListNotificationsByUserUseCase } from '@forreal/application';
+import {
+  ListNotificationsByUserUseCase,
+  GetUnreadCountUseCase,
+  MarkNotificationReadUseCase,
+  MarkAllNotificationsReadUseCase,
+  DeleteNotificationUseCase,
+} from '@forreal/application';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([NotificationEntity, UserEntity])],
+  imports: [
+    AuthModule,
+    TypeOrmModule.forFeature([NotificationEntity, UserEntity]),
+  ],
   controllers: [NotificationsController],
   providers: [
-    NotificationsService,
     { provide: INotificationRepository, useClass: NotificationRepository },
     {
-      provide: SendNotificationUseCase,
-      useFactory: (repo) => new SendNotificationUseCase(repo),
+      provide: ListNotificationsByUserUseCase,
+      useFactory: (repo: INotificationRepository) => new ListNotificationsByUserUseCase(repo),
+      inject: [INotificationRepository],
+    },
+    {
+      provide: GetUnreadCountUseCase,
+      useFactory: (repo: INotificationRepository) => new GetUnreadCountUseCase(repo),
       inject: [INotificationRepository],
     },
     {
       provide: MarkNotificationReadUseCase,
-      useFactory: (repo) => new MarkNotificationReadUseCase(repo),
+      useFactory: (repo: INotificationRepository) => new MarkNotificationReadUseCase(repo),
       inject: [INotificationRepository],
     },
     {
       provide: MarkAllNotificationsReadUseCase,
-      useFactory: (repo) => new MarkAllNotificationsReadUseCase(repo),
+      useFactory: (repo: INotificationRepository) => new MarkAllNotificationsReadUseCase(repo),
       inject: [INotificationRepository],
     },
     {
-      provide: ListNotificationsByUserUseCase,
-      useFactory: (repo) => new ListNotificationsByUserUseCase(repo),
+      provide: DeleteNotificationUseCase,
+      useFactory: (repo: INotificationRepository) => new DeleteNotificationUseCase(repo),
       inject: [INotificationRepository],
     },
   ],
-  exports: [NotificationsService],
+  exports: [INotificationRepository],
 })
 export class NotificationsModule {}

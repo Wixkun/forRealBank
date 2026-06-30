@@ -1,25 +1,23 @@
-import { Notification } from '@forreal/domain';
+import { Notification, NotificationType, NotificationTargetType } from '@forreal/domain';
 import { NotificationEntity } from '../entities/NotificationEntity';
 
 export class NotificationMapper {
-  static toPersistence(notification: Notification): NotificationEntity {
-    const entity = new NotificationEntity();
-    entity.id = notification.id;
-    entity.title = notification.title;
-    entity.content = notification.content;
-    entity.type = notification.type;
-    return entity;
-  }
-
   static toDomain(entity: NotificationEntity): Notification {
     return new Notification(
       entity.id,
       entity.user.id,
       entity.title,
       entity.content,
-      entity.type,
+      entity.type as NotificationType,
       entity.createdAt,
       entity.readAt,
+      entity.updatedAt,
+      entity.targetType as NotificationTargetType | null,
+      entity.targetId,
+      entity.targetUrl,
+      entity.groupKey,
+      entity.oldestUnreadMessageId,
+      entity.unreadCount ?? 1,
     );
   }
 }

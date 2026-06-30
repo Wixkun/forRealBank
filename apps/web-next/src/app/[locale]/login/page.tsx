@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense, FormEvent } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { AuthLayout } from '@/components/templates/AuthLayout';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
 
 function LoginForm() {
   const t = useTranslations('auth.login');

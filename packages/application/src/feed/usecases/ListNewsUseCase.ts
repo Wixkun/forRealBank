@@ -8,12 +8,14 @@ export class ListNewsUseCase {
     offset?: number;
     userId?: string | null;
     includeArchived?: boolean;
+    archivedOnly?: boolean;
   }) {
     const newsList = await this.newsRepository.list({
       limit: input.limit,
       offset: input.offset,
       userId: input.userId,
       includeArchived: input.includeArchived ?? false,
+      archivedOnly: input.archivedOnly ?? false,
     });
     return newsList.map((n) => ({
       id: n.id,

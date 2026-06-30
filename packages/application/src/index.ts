@@ -21,21 +21,23 @@ export * from './chat/usecases/ListParticipantsDetailsByConversationUseCase';
 export * from './chat/usecases/FindAdvisorOfClientUseCase';
 export * from './chat/usecases/LinkAdvisorClientUseCase';
 export * from './chat/usecases/ListClientsOfAdvisorUseCase';
+export * from './chat/usecases/SetConversationMuteUseCase';
+export * from './chat/usecases/GetConversationNotificationSettingsUseCase';
+export * from './chat/usecases/UpdateConversationUserStateUseCase';
 
 // feed
 export * from './feed/usecases/CreateNewsUseCase';
 export * from './feed/usecases/DeleteNewsUseCase';
 export * from './feed/usecases/ListNewsUseCase';
 export * from './feed/usecases/UpdateNewsUseCase';
-export * from './feed/usecases/ArchiveNewsUseCase';
-export * from './feed/usecases/UnarchiveNewsUseCase';
-export * from './feed/usecases/DismissNewsUseCase';
+export * from './feed/usecases/SetNewsUserStatusUseCase';
 
 // notifications
 export * from './notifications/usecases/ListNotificationsByUserUseCase';
 export * from './notifications/usecases/MarkNotificationReadUseCase';
 export * from './notifications/usecases/MarkAllNotificationsReadUseCase';
-export * from './notifications/usecases/SendNotificationUseCase';
+export * from './notifications/usecases/GetUnreadCountUseCase';
+export * from './notifications/usecases/DeleteNotificationUseCase';
 
 // transactions
 export * from './transactions/usecases/InitiateTransferUseCase';

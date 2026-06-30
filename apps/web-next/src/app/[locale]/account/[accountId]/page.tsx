@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AccountPageWrapper } from '@/components/templates/AccountPageWrapper';
+import { AccountPageWrapper } from '@/features/account/components/AccountPageWrapper';
 import { useEffect, useState } from 'react';
 
 type BankAccount = {

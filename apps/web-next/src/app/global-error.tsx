@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { ThemeProvider } from '@/contexts/ThemeContext';
-import { ErrorPageTemplate } from '@/components/templates/ErrorPageTemplate';
+import { ErrorPageTemplate } from '@/components/ui/ErrorPageTemplate';
 import { useTranslations } from 'next-intl';
 
 export default function GlobalError({
