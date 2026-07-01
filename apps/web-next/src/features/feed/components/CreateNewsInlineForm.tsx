@@ -13,10 +13,6 @@ type NewsStatus =
 
 const STATUS_OPTIONS: { value: NewsStatus; label: string; color: string; dot: string }[] = [
   { value: 'INFORMATION', label: 'Information', color: 'text-amber-400', dot: 'bg-amber-400' },
-  { value: 'SECURITY', label: 'Sécurité', color: 'text-rose-400', dot: 'bg-rose-400' },
-  { value: 'TRANSACTIONS', label: 'Transaction', color: 'text-cyan-400', dot: 'bg-cyan-400' },
-  { value: 'PAYMENTS', label: 'Paiement', color: 'text-emerald-400', dot: 'bg-emerald-400' },
-  { value: 'ACCOUNT_UPDATES', label: 'Compte', color: 'text-blue-400', dot: 'bg-blue-400' },
   { value: 'SYSTEM', label: 'Système', color: 'text-violet-400', dot: 'bg-violet-400' },
 ];
 
@@ -67,7 +63,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
   };
 
   return (
-    <div className="bg-[#1a1d24] rounded-xl border border-white/8 p-4">
+    <>
       <h3 className="text-sm font-semibold text-white mb-3">{t('title')}</h3>
 
       {message && (
@@ -136,6 +132,6 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
           {submitting ? t('submitLoading') : t('submit')}
         </button>
       </form>
-    </div>
+    </>
   );
 }
