@@ -113,12 +113,16 @@ CREATE TABLE IF NOT EXISTS news (
     author_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
     user_id varchar NULL,
     title varchar(255) NOT NULL,
+    subtitle varchar(255) NULL,
     content text NOT NULL,
     status varchar(50) NOT NULL DEFAULT 'INFORMATION'
         CHECK (status IN ('INFORMATION', 'SECURITY', 'TRANSACTION', 'PAYMENT', 'ACCOUNT', 'SYSTEM')),
     source varchar(20) NOT NULL DEFAULT 'MANUAL'
         CHECK (source IN ('MANUAL', 'AUTOMATIC')),
     is_active boolean NOT NULL DEFAULT true,
+    image_url varchar NULL,
+    -- Données structurées propres au type de news (ex. détail d'un virement)
+    metadata jsonb NULL,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
@@ -471,11 +475,15 @@ BEGIN
 
     -- ── News AUTOMATIQUES ciblées client1 ─────────────────────────────────
 
-    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
+    INSERT INTO news (author_id, user_id, title, subtitle, content, status, source, is_active, metadata) VALUES
         (NULL, v_client1_id::varchar,
             'Virement reçu avec succès',
+            '+ 1 250,00 € de Sophie Martin',
             'Vous avez reçu un virement de 1 250,00 € sur votre compte principal. Le solde a été mis à jour.',
-            'TRANSACTION', 'AUTOMATIC', true),
+            'TRANSACTION', 'AUTOMATIC', true,
+            '{"kind":"TRANSFER","direction":"IN","status":"COMPLETED","amount":1250,"currency":"EUR","fees":0,"transactionId":"TRX-20240520-143245-8F7A2C1D","sourceAccountName":"Compte Courant","sourceIban":"FR76 1234 5678 9012 3456 7890 123","destinationAccountName":"Compte Courant","destinationIban":"FR14 2004 1010 0505 0001 3M02 606","beneficiaryName":"Sophie Martin","description":"Loyer mai 2024"}'::jsonb);
+
+    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
         (NULL, v_client1_id::varchar,
             'Connexion depuis un nouvel appareil',
             'Une connexion à votre compte a été détectée depuis un appareil inconnu. Si ce n''était pas vous, sécurisez immédiatement votre compte.',
@@ -491,11 +499,15 @@ BEGIN
 
     -- ── News AUTOMATIQUES ciblées client2 ────────────────────────────────
 
-    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
+    INSERT INTO news (author_id, user_id, title, subtitle, content, status, source, is_active, metadata) VALUES
         (NULL, v_client2_id::varchar,
             'Virement effectué',
+            '- 500,00 € vers Compte Épargne',
             'Votre virement de 500,00 € vers votre compte épargne a été exécuté avec succès.',
-            'TRANSACTION', 'AUTOMATIC', true),
+            'TRANSACTION', 'AUTOMATIC', true,
+            '{"kind":"TRANSFER","direction":"OUT","status":"COMPLETED","amount":500,"currency":"EUR","fees":0,"transactionId":"TRX-20240612-091812-2C4E8A1B","sourceAccountName":"Compte Courant","sourceIban":"FR76 9876 5432 1098 7654 3210 987","destinationAccountName":"Compte Épargne","destinationIban":"FR76 5555 4444 3333 2222 1111 000","description":"Épargne mensuelle"}'::jsonb);
+
+    INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
         (NULL, v_client2_id::varchar,
             'Intérêts crédités',
             'Des intérêts de 45,80 € ont été crédités sur votre compte épargne (taux annuel 2,75 %).',
@@ -592,7 +604,7 @@ BEGIN
             'NEWS',
             'NEWS',
             v_news_maintenance_id::varchar,
-            '/dashboard/news/' || v_news_maintenance_id,
+            '/dashboard?newsId=' || v_news_maintenance_id,
             true,
             now() - interval '1 hour'
         FROM users u

@@ -5,6 +5,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import { join } from 'path';
 
 function parseOrigins(raw: string | undefined, fallback: string[]): string[] {
   const value = (raw ?? '').trim();
@@ -32,6 +33,7 @@ async function bootstrap() {
   const isProd = (config.get<string>('NODE_ENV') ?? 'development') === 'production';
 
   app.setGlobalPrefix('api');
+  app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads' });
 
   app.enableCors({
     origin: origins,

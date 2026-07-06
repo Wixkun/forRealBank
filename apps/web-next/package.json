@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
+    "emoji-picker-react": "^4.19.1",
     "next": "15.5.14",
     "next-intl": "^4.6.1",
     "react": "19.1.0",
@@ -35,6 +36,7 @@
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
+    "eslint-plugin-react-hooks": "^5.2.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

@@ -14,6 +14,9 @@ export class NewsEntity extends ImmutableEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title!: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  subtitle!: string | null;
+
   @Column({ type: 'text', nullable: false })
   content!: string;
 
@@ -25,4 +28,10 @@ export class NewsEntity extends ImmutableEntity {
 
   @Column({ type: 'boolean', default: true, name: 'is_active' })
   isActive!: boolean;
+
+  @Column({ type: 'varchar', nullable: true, name: 'image_url' })
+  imageUrl!: string | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata!: Record<string, unknown> | null;
 }

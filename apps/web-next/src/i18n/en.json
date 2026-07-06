@@ -381,14 +381,44 @@
       "title": "Publish a news item",
       "fields": {
         "title": "Title",
+        "subtitle": "Subtitle",
         "content": "Content"
       },
+      "editorHint": "Drag and drop or paste (Ctrl+V) an image directly into the content",
       "submit": "Publish",
       "submitLoading": "Sending…",
       "messages": {
         "created": "News item created",
         "createFailed": "Failed to create the news item",
-        "unknownError": "Unknown error"
+        "unknownError": "Unknown error",
+        "invalidImageType": "The selected file is not an image",
+        "imageTooLarge": "The image exceeds the maximum size of 5 MB",
+        "tooManyImages": "Maximum of 10 images per news item"
+      }
+    },
+    "detail": {
+      "close": "Close",
+      "loading": "Loading…",
+      "notFoundTitle": "News item unavailable",
+      "notFound": "This news item could not be found. It may have been deleted.",
+      "archived": "This news item is archived.",
+      "transfer": {
+        "sent": "Transfer sent",
+        "received": "Transfer received",
+        "completed": "Completed",
+        "dateTime": "Date and time",
+        "status": "Status",
+        "sourceAccount": "Source account",
+        "destinationAccount": "Beneficiary account",
+        "beneficiary": "Beneficiary name",
+        "iban": "IBAN",
+        "copyIban": "Copy IBAN",
+        "copied": "Copied!",
+        "reason": "Reason",
+        "transactionId": "Transaction ID",
+        "fees": "Fees",
+        "downloadReceipt": "Download receipt",
+        "redoTransfer": "Make another transfer"
       }
     }
   },

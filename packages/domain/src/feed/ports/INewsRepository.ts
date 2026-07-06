@@ -10,10 +10,13 @@ export interface INewsRepository {
   create(params: {
     authorId: string | null;
     title: string;
+    subtitle?: string | null;
     content: string;
     status?: NewsStatus;
     source?: NewsSource;
     userId?: string | null;
+    imageUrl?: string | null;
+    metadata?: Record<string, unknown> | null;
   }): Promise<News>;
   list(params?: {
     limit?: number;

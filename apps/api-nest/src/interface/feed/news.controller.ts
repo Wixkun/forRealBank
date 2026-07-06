@@ -1,7 +1,12 @@
 import {
   Controller, Get, Post, Body, Param, Query, Inject,
-  Sse, Delete, UseGuards, Req, BadRequestException, Patch, HttpCode,
+  Sse, Delete, UseGuards, UseInterceptors, UploadedFiles, Req, BadRequestException, NotFoundException, Patch, HttpCode,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import type { Request as ExpressRequest } from 'express';
+import { extname } from 'path';
+import { randomUUID } from 'crypto';
 import { Observable, interval, map, switchMap, merge } from 'rxjs';
 import { NewsService } from './news.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,6 +15,30 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { type NewsStatus, RoleName } from '@forreal/domain';
 import type { Request } from 'express';
+import { NEWS_UPLOADS_DIR, buildNewsImageUrl } from './news-uploads.constants';
+
+const IMAGE_MIME_TYPES = /^image\/(jpeg|png|gif|webp)$/;
+
+// `image` : champ legacy (une seule image hors contenu)
+// `images` : images intégrées au contenu, référencées par `(cid:N)` dans le texte
+const newsImageInterceptor = FileFieldsInterceptor([
+  { name: 'image', maxCount: 1 },
+  { name: 'images', maxCount: 10 },
+], {
+  storage: diskStorage({
+    destination: NEWS_UPLOADS_DIR,
+    filename: (_req: ExpressRequest, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) =>
+      cb(null, `${randomUUID()}${extname(file.originalname)}`),
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req: ExpressRequest, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    if (!IMAGE_MIME_TYPES.test(file.mimetype)) {
+      cb(new BadRequestException('INVALID_IMAGE_TYPE'), false);
+      return;
+    }
+    cb(null, true);
+  },
+});
 
 // RolesGuard peuple req.auth.userId (lookup DB complet).
 // JwtAuthGuard seul peuple req.user.id (payload JWT, pas de DB).
@@ -23,6 +52,17 @@ function optionalUserId(req: Request): string | null {
   return (req as any).auth?.userId ?? (req as any).user?.id ?? null;
 }
 
+type NewsUploadedFiles = { image?: Express.Multer.File[]; images?: Express.Multer.File[] };
+
+// Le front référence les images inline par `(cid:N)` (index dans le champ `images`) ;
+// une fois les fichiers stockés, on substitue leur URL publique dans le contenu.
+function resolveInlineImages(content: string, images: Express.Multer.File[]): string {
+  return (content ?? '').replace(/\(cid:(\d+)\)/g, (match, idx: string) => {
+    const file = images[Number(idx)];
+    return file ? `(${buildNewsImageUrl(file.filename)})` : match;
+  });
+}
+
 @Controller('news')
 export class NewsController {
   constructor(@Inject(NewsService) private readonly newsService: NewsService) {}
@@ -32,24 +72,38 @@ export class NewsController {
   @Post('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
+  @UseInterceptors(newsImageInterceptor)
   async createManual(
-    @Body() body: { title: string; content: string; status?: NewsStatus },
+    @Body() body: { title: string; subtitle?: string; content: string; status?: NewsStatus },
+    @UploadedFiles() files: NewsUploadedFiles | undefined,
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    return this.newsService.createManualNews(userId, body.title, body.content, body.status);
+    const legacyImage = files?.image?.[0];
+    const imageUrl = legacyImage ? buildNewsImageUrl(legacyImage.filename) : null;
+    const content = resolveInlineImages(body.content, files?.images ?? []);
+    return this.newsService.createManualNews(
+      userId, body.title, content, body.status, imageUrl, body.subtitle?.trim() || null,
+    );
   }
 
   // Alias rétrocompatible (ancienne route POST /)
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
+  @UseInterceptors(newsImageInterceptor)
   async createLegacy(
-    @Body() body: { title: string; content: string; status?: NewsStatus },
+    @Body() body: { title: string; subtitle?: string; content: string; status?: NewsStatus },
+    @UploadedFiles() files: NewsUploadedFiles | undefined,
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    return this.newsService.createManualNews(userId, body.title, body.content, body.status);
+    const legacyImage = files?.image?.[0];
+    const imageUrl = legacyImage ? buildNewsImageUrl(legacyImage.filename) : null;
+    const content = resolveInlineImages(body.content, files?.images ?? []);
+    return this.newsService.createManualNews(
+      userId, body.title, content, body.status, imageUrl, body.subtitle?.trim() || null,
+    );
   }
 
   // ─── Lecture du fil ──────────────────────────────────────────────────────
@@ -177,5 +231,15 @@ export class NewsController {
       this.newsService.getNewsChangeObservable(),
       interval(5000).pipe(switchMap(async () => this.newsService.listNews(20, 0, userId))),
     ).pipe(map((news) => ({ data: news }) as MessageEvent));
+  }
+
+  // ─── Lecture d'une news par id (déclaré en dernier : ':id' est un catch-all) ─
+
+  @Get(':id')
+  @UseGuards(OptionalJwtGuard)
+  async getOne(@Param('id') id: string) {
+    const news = await this.newsService.getNewsById(id);
+    if (!news) throw new NotFoundException('NEWS_NOT_FOUND');
+    return news;
   }
 }

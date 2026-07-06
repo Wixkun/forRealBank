@@ -1,27 +1,17 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback, type JSX } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useSSE } from '@/hooks/useSSE';
 import { CreateNewsInlineForm } from '@/features/feed/components/CreateNewsInlineForm';
-
-type NewsStatus =
-  | 'SECURITY'
-  | 'TRANSACTION'
-  | 'PAYMENT'
-  | 'ACCOUNT'
-  | 'SYSTEM'
-  | 'INFORMATION';
-
-interface NewsItem {
-  id: string;
-  authorId: string | null;
-  userId: string | null;
-  title: string;
-  content: string;
-  status: NewsStatus;
-  createdAt: string;
-  archivedAt: string | null;
-}
+import {
+  NewsDetailModal,
+  stripNewsImages,
+  newsHasImage,
+  type NewsItem,
+  type NewsStatus,
+  type NewsStatusConfig,
+} from '@/features/feed/components/NewsDetailModal';
 
 interface NewsFeedProps {
   apiUrl?: string;
@@ -29,10 +19,7 @@ interface NewsFeedProps {
   userId?: string | null;
 }
 
-const STATUS_CONFIG: Record<
-  NewsStatus,
-  { label: string; bg: string; color: string; icon: JSX.Element }
-> = {
+const STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
   SECURITY: {
     label: 'Security',
     bg: 'bg-rose-500/15',
@@ -117,14 +104,17 @@ const timeAgo = (dateStr: string) => {
 
 const DRAG_THRESHOLD = 75;
 
+const CLICK_THRESHOLD = 6;
+
 interface DraggableNewsItemProps {
   item: NewsItem;
   onArchive: (id: string) => void;
   onDelete: (id: string) => void;
+  onOpen: (item: NewsItem) => void;
   isNew?: boolean;
 }
 
-function DraggableNewsItem({ item, onArchive, onDelete, isNew }: DraggableNewsItemProps) {
+function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: DraggableNewsItemProps) {
   const [translateX, setTranslateX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -153,6 +143,7 @@ function DraggableNewsItem({ item, onArchive, onDelete, isNew }: DraggableNewsIt
       setExiting(true);
       setTimeout(() => onArchive(item.id), 260);
     } else {
+      if (Math.abs(translateX) < CLICK_THRESHOLD) onOpen(item);
       setTranslateX(0);
     }
   };
@@ -193,7 +184,7 @@ function DraggableNewsItem({ item, onArchive, onDelete, isNew }: DraggableNewsIt
       </div>
 
       <div
-        className="relative flex items-start gap-3 p-3.5 bg-[#1a1d24] rounded-xl border border-white/4 cursor-grab active:cursor-grabbing select-none"
+        className="relative flex items-start gap-3 p-3.5 bg-[#1a1d24] rounded-xl border border-white/4 cursor-pointer select-none hover:border-white/10 transition-colors"
         style={{ transform: `translateX(${translateX}px)`, transition: isDragging ? 'none' : 'transform 240ms cubic-bezier(0.25,0.46,0.45,0.94)' }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -208,9 +199,23 @@ function DraggableNewsItem({ item, onArchive, onDelete, isNew }: DraggableNewsIt
             <span className="text-white text-xs font-semibold leading-snug truncate">{item.title}</span>
             <span className="text-gray-600 text-[10px] whitespace-nowrap shrink-0 mt-0.5">{timeAgo(item.createdAt)}</span>
           </div>
-          <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-2 leading-relaxed pr-1">{item.content}</p>
+          <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed pr-1">
+            {item.subtitle || stripNewsImages(item.content)}
+          </p>
         </div>
-        {isNew && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 mt-1.5" />}
+        <div className="flex items-center gap-1.5 shrink-0 mt-1.5">
+          {newsHasImage(item) && (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          )}
+          {isNew && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
       </div>
     </div>
   );
@@ -240,7 +245,51 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [detail, setDetail] = useState<{ item: NewsItem | null; loading: boolean; error: string | null } | null>(null);
   const removedIdsRef = useRef<Set<string>>(new Set());
+
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const newsIdParam = searchParams.get('newsId');
+
+  const openNews = useCallback((item: NewsItem) => {
+    setDetail({ item, loading: false, error: null });
+  }, []);
+
+  const closeDetail = useCallback(() => {
+    setDetail(null);
+    // Nettoie le deep-link (?newsId=...) posé par une notification
+    if (newsIdParam) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete('newsId');
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    }
+  }, [newsIdParam, searchParams, router, pathname]);
+
+  // Notification cliquée → /dashboard?newsId=<id> : on charge la news depuis
+  // l'API (elle peut ne pas être dans le fil) et on ouvre la popup de détail.
+  useEffect(() => {
+    if (!newsIdParam) return;
+    let cancelled = false;
+    setDetail({ item: null, loading: true, error: null });
+    (async () => {
+      try {
+        const res = await fetch(`${apiUrl}/news/${newsIdParam}`, { credentials: 'include' });
+        if (cancelled) return;
+        if (!res.ok) {
+          setDetail({ item: null, loading: false, error: 'NOT_FOUND' });
+          return;
+        }
+        const data: NewsItem = await res.json();
+        setDetail({ item: data, loading: false, error: null });
+      } catch {
+        if (!cancelled) setDetail({ item: null, loading: false, error: 'NOT_FOUND' });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [newsIdParam, apiUrl]);
 
   useEffect(() => {
     if (!userId) {
@@ -409,8 +458,8 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
             return (
               <div
                 key={item.id}
-                onClick={() => selectionMode && toggleSelect(item.id)}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors ${selectionMode ? 'cursor-pointer' : ''} ${selected ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-[#1a1d24]/50 border-white/4'}`}
+                onClick={() => (selectionMode ? toggleSelect(item.id) : openNews(item))}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${selected ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-[#1a1d24]/50 border-white/4 hover:border-white/10'}`}
               >
                 {selectionMode && (
                   <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}>
@@ -420,10 +469,10 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
                 <div className={`rounded-lg flex items-center justify-center shrink-0 ${cfg.bg} ${selectionMode ? 'w-7 h-7' : 'w-8 h-8'}`}>{cfg.icon}</div>
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-xs font-medium truncate">{item.title}</p>
-                  <p className="text-gray-600 text-[11px] mt-0.5 line-clamp-1">{item.content}</p>
+                  <p className="text-gray-600 text-[11px] mt-0.5 line-clamp-1">{item.subtitle || stripNewsImages(item.content)}</p>
                 </div>
                 {!selectionMode && (
-                  <button onClick={() => handleUnarchive(item.id)} title="Désarchiver" className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5">↩</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleUnarchive(item.id); }} title="Désarchiver" className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5">↩</button>
                 )}
               </div>
             );
@@ -445,13 +494,13 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
                   <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}>{cfg.icon}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-white text-xs font-semibold leading-snug truncate">{item.title}</p>
-                    <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-2 leading-relaxed">{item.content}</p>
+                    <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed">{item.subtitle || stripNewsImages(item.content)}</p>
                   </div>
                 </div>
               );
             }
             return (
-              <DraggableNewsItem key={item.id} item={item} onArchive={handleArchive} onDelete={handleDelete} isNew={!seenIds.has(item.id)} />
+              <DraggableNewsItem key={item.id} item={item} onArchive={handleArchive} onDelete={handleDelete} onOpen={openNews} isNew={!seenIds.has(item.id)} />
             );
           })
         )}
@@ -469,6 +518,16 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
             <button onClick={handleBulkDelete} className="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition">Supprimer</button>
           </div>
         </div>
+      )}
+
+      {detail && (
+        <NewsDetailModal
+          item={detail.item}
+          cfg={detail.item ? (STATUS_CONFIG[detail.item.status] ?? STATUS_CONFIG.INFORMATION) : null}
+          loading={detail.loading}
+          error={detail.error}
+          onCloseAction={closeDetail}
+        />
       )}
     </div>
   );

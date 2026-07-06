@@ -29,13 +29,17 @@ export class NewsService {
     title: string,
     content: string,
     status?: NewsStatus,
+    imageUrl?: string | null,
+    subtitle?: string | null,
   ) {
     const result = await this.createNewsUC.execute({
       authorId,
       title,
+      subtitle,
       content,
       status,
       source: NewsSource.MANUAL,
+      imageUrl,
     });
     await this.broadcastUpdate();
     return result;
@@ -46,16 +50,20 @@ export class NewsService {
   async createAutomaticNews(params: {
     targetUserId: string;
     title: string;
+    subtitle?: string | null;
     content: string;
     status: NewsStatus;
+    metadata?: Record<string, unknown> | null;
   }) {
     const result = await this.newsRepo.create({
       authorId: null,
       title: params.title,
+      subtitle: params.subtitle ?? null,
       content: params.content,
       status: params.status,
       source: NewsSource.AUTOMATIC,
       userId: params.targetUserId,
+      metadata: params.metadata ?? null,
     });
     this.newsChangeSubject.next(result);
     return result;
@@ -71,6 +79,24 @@ export class NewsService {
     archivedOnly = false,
   ) {
     return this.listNewsUC.execute({ limit, offset, userId, includeArchived, archivedOnly });
+  }
+
+  async getNewsById(id: string) {
+    const news = await this.newsRepo.findById(id);
+    if (!news || !news.isActive) return null;
+    return {
+      id: news.id,
+      authorId: news.authorId,
+      userId: news.userId,
+      title: news.title,
+      subtitle: news.subtitle,
+      content: news.content,
+      status: news.status,
+      createdAt: news.createdAt,
+      archivedAt: news.archivedAt,
+      imageUrl: news.imageUrl,
+      metadata: news.metadata,
+    };
   }
 
   // ─── Actions utilisateur (per-user) ──────────────────────────────────────

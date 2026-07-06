@@ -61,7 +61,7 @@ export class SendMessageUseCase {
           type: NotificationType.MESSAGE,
           targetType: NotificationTargetType.CONVERSATION,
           targetId: input.conversationId,
-          targetUrl: `/messages/conversations/${input.conversationId}?messageId=${message.id}`,
+          targetUrl: `/dashboard/messages?conversationId=${input.conversationId}&messageId=${message.id}`,
           groupKey,
           oldestUnreadMessageId: message.id,
           unreadCount: 1,
