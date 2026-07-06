@@ -28,6 +28,7 @@ export class News {
     private readonly _isActive: boolean = true,
     private readonly _imageUrl: string | null = null,
     private _subtitle: string | null = null,
+    private readonly _metadata: Record<string, unknown> | null = null,
   ) {}
 
   get id() { return this._id; }
@@ -43,6 +44,7 @@ export class News {
   get isActive() { return this._isActive; }
   get imageUrl() { return this._imageUrl; }
   get subtitle() { return this._subtitle; }
+  get metadata() { return this._metadata; }
 
   updateTitle(title: string) { this._title = title; }
   updateSubtitle(subtitle: string | null) { this._subtitle = subtitle; }

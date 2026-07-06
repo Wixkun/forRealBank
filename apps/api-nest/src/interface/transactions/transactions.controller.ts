@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Query, UseGuards, Req, Post, Body, Inject } from '@nestjs/common';
 import { Request } from 'express';
+import { randomUUID } from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -144,13 +145,53 @@ export class TransactionsController {
     }
 
     try {
+      const amount = Number(body.amount);
+      const formattedAmount = amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+
+      const sourceAccount =
+        body.sourceType === 'bank'
+          ? await this.accountRepo.findOne({ where: { id: body.sourceAccountId, userId } })
+          : null;
+      const destinationAccount = body.destinationAccountId
+        ? await this.accountRepo.findOne({
+            where: { id: body.destinationAccountId },
+            relations: ['user'],
+          })
+        : null;
+
+      const beneficiaryName = destinationAccount?.user
+        ? `${destinationAccount.user.firstName} ${destinationAccount.user.lastName}`
+        : null;
+      const now = new Date();
+      const pad = (n: number) => String(n).padStart(2, '0');
+      const transactionId = `TRX-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}-${randomUUID().slice(0, 8).toUpperCase()}`;
+
       await this.newsService.createAutomaticNews({
         targetUserId: userId,
         title: 'Virement effectué',
+        subtitle: beneficiaryName
+          ? `${formattedAmount} vers ${beneficiaryName}`
+          : `Virement de ${formattedAmount}`,
         content: body.description
-          ? `${body.description} — ${body.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })}`
-          : `Virement de ${body.amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} effectué avec succès.`,
+          ? `${body.description} — ${formattedAmount}`
+          : `Virement de ${formattedAmount} effectué avec succès.`,
         status: NewsStatus.TRANSACTION,
+        metadata: {
+          kind: 'TRANSFER',
+          direction: 'OUT',
+          status: 'COMPLETED',
+          amount,
+          currency: 'EUR',
+          fees: 0,
+          transactionId,
+          executedAt: now.toISOString(),
+          sourceAccountName: sourceAccount?.name ?? (body.sourceType === 'investment' ? 'Compte Investissement' : null),
+          sourceIban: sourceAccount?.iban ?? null,
+          destinationAccountName: destinationAccount?.name ?? null,
+          destinationIban: destinationAccount?.iban ?? body.destinationIban ?? null,
+          beneficiaryName,
+          description: body.description ?? null,
+        },
       });
     } catch {
       // Ne pas bloquer la réponse si la news échoue

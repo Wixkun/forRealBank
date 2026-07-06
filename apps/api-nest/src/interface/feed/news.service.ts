@@ -50,16 +50,20 @@ export class NewsService {
   async createAutomaticNews(params: {
     targetUserId: string;
     title: string;
+    subtitle?: string | null;
     content: string;
     status: NewsStatus;
+    metadata?: Record<string, unknown> | null;
   }) {
     const result = await this.newsRepo.create({
       authorId: null,
       title: params.title,
+      subtitle: params.subtitle ?? null,
       content: params.content,
       status: params.status,
       source: NewsSource.AUTOMATIC,
       userId: params.targetUserId,
+      metadata: params.metadata ?? null,
     });
     this.newsChangeSubject.next(result);
     return result;
@@ -91,6 +95,7 @@ export class NewsService {
       createdAt: news.createdAt,
       archivedAt: news.archivedAt,
       imageUrl: news.imageUrl,
+      metadata: news.metadata,
     };
   }
 

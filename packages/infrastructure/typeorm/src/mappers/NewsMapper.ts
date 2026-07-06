@@ -28,6 +28,7 @@ export class NewsMapper {
       entity.isActive ?? true,
       entity.imageUrl ?? null,
       entity.subtitle ?? null,
+      entity.metadata ?? null,
     );
   }
 }

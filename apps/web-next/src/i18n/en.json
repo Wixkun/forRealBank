@@ -401,7 +401,25 @@
       "loading": "Loading…",
       "notFoundTitle": "News item unavailable",
       "notFound": "This news item could not be found. It may have been deleted.",
-      "archived": "This news item is archived."
+      "archived": "This news item is archived.",
+      "transfer": {
+        "sent": "Transfer sent",
+        "received": "Transfer received",
+        "completed": "Completed",
+        "dateTime": "Date and time",
+        "status": "Status",
+        "sourceAccount": "Source account",
+        "destinationAccount": "Beneficiary account",
+        "beneficiary": "Beneficiary name",
+        "iban": "IBAN",
+        "copyIban": "Copy IBAN",
+        "copied": "Copied!",
+        "reason": "Reason",
+        "transactionId": "Transaction ID",
+        "fees": "Fees",
+        "downloadReceipt": "Download receipt",
+        "redoTransfer": "Make another transfer"
+      }
     }
   },
   "notifications": {

@@ -44,6 +44,7 @@ export class NewsRepository implements INewsRepository {
     source?: NewsSource;
     userId?: string | null;
     imageUrl?: string | null;
+    metadata?: Record<string, unknown> | null;
   }): Promise<News> {
     let author: UserEntity | null = null;
     if (params.authorId) {
@@ -61,6 +62,7 @@ export class NewsRepository implements INewsRepository {
       source: params.source ?? NewsSource.MANUAL,
       isActive: true,
       imageUrl: params.imageUrl ?? null,
+      metadata: params.metadata ?? null,
     });
     const saved = await this.repo.save(entity);
     return NewsMapper.toDomain({ ...saved, author } as NewsEntity);

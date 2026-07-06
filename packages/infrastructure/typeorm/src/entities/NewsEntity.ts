@@ -31,4 +31,7 @@ export class NewsEntity extends ImmutableEntity {
 
   @Column({ type: 'varchar', nullable: true, name: 'image_url' })
   imageUrl!: string | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata!: Record<string, unknown> | null;
 }

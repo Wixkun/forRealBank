@@ -28,6 +28,7 @@ export class ListNewsUseCase {
       createdAt: n.createdAt,
       archivedAt: n.archivedAt,
       imageUrl: n.imageUrl,
+      metadata: n.metadata,
     }));
   }
 }

@@ -402,7 +402,25 @@
       "loading": "Chargement…",
       "notFoundTitle": "Actualité indisponible",
       "notFound": "Cette actualité est introuvable. Elle a peut-être été supprimée.",
-      "archived": "Cette actualité est archivée."
+      "archived": "Cette actualité est archivée.",
+      "transfer": {
+        "sent": "Virement émis",
+        "received": "Virement reçu",
+        "completed": "Terminé",
+        "dateTime": "Date et heure",
+        "status": "Statut",
+        "sourceAccount": "Compte émetteur",
+        "destinationAccount": "Compte bénéficiaire",
+        "beneficiary": "Nom du bénéficiaire",
+        "iban": "IBAN",
+        "copyIban": "Copier l'IBAN",
+        "copied": "Copié !",
+        "reason": "Motif",
+        "transactionId": "ID de transaction",
+        "fees": "Frais",
+        "downloadReceipt": "Télécharger le reçu",
+        "redoTransfer": "Refaire un virement"
+      }
     }
   },
   "notifications": {
