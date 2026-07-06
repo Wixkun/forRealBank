@@ -18,6 +18,40 @@ const STATUS_OPTIONS: { value: NewsStatus; label: string; color: string; dot: st
 ];
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGES = 10;
+const MAX_IMAGE_DIMENSION = 1600;
+const EDITOR_IMG_CLASS = 'my-2 max-w-full max-h-48 h-auto rounded-lg border border-white/10 object-contain';
+
+// Redimensionne côté client avant envoi : limite la plus grande dimension et
+// ré-encode en webp. On garde l'original si le résultat n'est pas plus léger.
+async function downscaleImage(file: File): Promise<File> {
+  if (file.type === 'image/gif') return file; // préserve l'animation
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    return file;
+  }
+  const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(bitmap.width, bitmap.height));
+  if (scale === 1 && file.size <= 500 * 1024) return file;
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+  canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.85));
+  if (!blob || blob.size >= file.size) return file;
+  return new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' });
+}
+
+// Sérialise le contenu de l'éditeur en texte brut avec marqueurs `![image](src)`.
+function serializeNode(node: Node): string {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
+  if (!(node instanceof HTMLElement)) return '';
+  if (node.tagName === 'BR') return '\n';
+  if (node.tagName === 'IMG') return `\n![image](${(node as HTMLImageElement).src})\n`;
+  const inner = Array.from(node.childNodes).map(serializeNode).join('');
+  return node.tagName === 'DIV' || node.tagName === 'P' ? `\n${inner}` : inner;
+}
 
 type Props = {
   apiUrl?: string;
@@ -27,18 +61,20 @@ type Props = {
 export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props) {
   const t = useTranslations('feed.create');
 
-  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const emojiPickerWrapperRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  // blobUrl -> fichier (déjà redimensionné) inséré dans l'éditeur
+  const imageFilesRef = useRef<Map<string, File>>(new Map());
 
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [subtitle, setSubtitle] = useState('');
   const [status, setStatus] = useState<NewsStatus>('INFORMATION');
+  const [hasContent, setHasContent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
 
   useEffect(() => {
     if (!showEmojiPicker) return;
@@ -52,74 +88,161 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
   }, [showEmojiPicker]);
 
   useEffect(() => {
+    const files = imageFilesRef.current;
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      files.forEach((_file, url) => URL.revokeObjectURL(url));
+      files.clear();
     };
-  }, [imagePreview]);
+  }, []);
 
-  const resizeContent = () => {
-    const el = contentRef.current;
+  const syncHasContent = () => {
+    const el = editorRef.current;
     if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    setHasContent(Boolean(el.textContent?.trim()) || el.querySelector('img') !== null);
+  };
+
+  const insertAtCaret = (node: Node) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    editor.focus();
+    const sel = window.getSelection();
+    let range = sel && sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+    if (!range || !editor.contains(range.commonAncestorContainer)) {
+      range = document.createRange();
+      range.selectNodeContents(editor);
+      range.collapse(false);
+    }
+    range.deleteContents();
+    range.insertNode(node);
+    range.setStartAfter(node);
+    range.collapse(true);
+    sel?.removeAllRanges();
+    sel?.addRange(range);
+  };
+
+  const insertText = (text: string) => {
+    editorRef.current?.focus();
+    document.execCommand('insertText', false, text);
+    syncHasContent();
   };
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
-    const el = contentRef.current;
-    if (!el) {
-      setContent((prev) => prev + emojiData.emoji);
-      return;
-    }
-    const start = el.selectionStart ?? content.length;
-    const end = el.selectionEnd ?? content.length;
-    const next = content.slice(0, start) + emojiData.emoji + content.slice(end);
-    setContent(next);
-    requestAnimationFrame(() => {
-      el.focus();
-      const cursor = start + emojiData.emoji.length;
-      el.setSelectionRange(cursor, cursor);
-      resizeContent();
-    });
+    insertText(emojiData.emoji);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    if (!file) return;
-
-    if (!file.type.startsWith('image/')) {
-      setMessage({ text: t('messages.invalidImageType'), ok: false });
-      e.target.value = '';
-      return;
+  const addImages = async (files: File[]) => {
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setMessage({ text: t('messages.invalidImageType'), ok: false });
+        continue;
+      }
+      if (imageFilesRef.current.size >= MAX_IMAGES) {
+        setMessage({ text: t('messages.tooManyImages'), ok: false });
+        break;
+      }
+      const resized = await downscaleImage(file);
+      if (resized.size > MAX_IMAGE_BYTES) {
+        setMessage({ text: t('messages.imageTooLarge'), ok: false });
+        continue;
+      }
+      const url = URL.createObjectURL(resized);
+      imageFilesRef.current.set(url, resized);
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = EDITOR_IMG_CLASS;
+      img.setAttribute('draggable', 'false');
+      insertAtCaret(img);
     }
-    if (file.size > MAX_IMAGE_BYTES) {
-      setMessage({ text: t('messages.imageTooLarge'), ok: false });
-      e.target.value = '';
-      return;
-    }
-
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImage(file);
-    setImagePreview(URL.createObjectURL(file));
+    syncHasContent();
   };
 
-  const handleRemoveImage = () => {
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImage(null);
-    setImagePreview(null);
-    if (imageInputRef.current) imageInputRef.current.value = '';
+  const handleImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length) void addImages(files);
+    e.target.value = '';
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const imageFiles = Array.from(e.clipboardData.items)
+      .filter((it) => it.kind === 'file' && it.type.startsWith('image/'))
+      .map((it) => it.getAsFile())
+      .filter((f): f is File => f !== null);
+    e.preventDefault();
+    if (imageFiles.length > 0) {
+      void addImages(imageFiles);
+      return;
+    }
+    // Colle en texte brut pour ne pas importer de HTML mis en forme
+    const text = e.clipboardData.getData('text/plain');
+    if (text) insertText(text);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    // Place le point d'insertion à l'endroit du drop quand le navigateur le permet
+    type CaretDoc = Document & {
+      caretRangeFromPoint?: (x: number, y: number) => Range | null;
+      caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null;
+    };
+    const doc = document as CaretDoc;
+    const sel = window.getSelection();
+    if (doc.caretRangeFromPoint) {
+      const range = doc.caretRangeFromPoint(e.clientX, e.clientY);
+      if (range && sel) {
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    } else if (doc.caretPositionFromPoint) {
+      const pos = doc.caretPositionFromPoint(e.clientX, e.clientY);
+      if (pos && sel) {
+        const range = document.createRange();
+        range.setStart(pos.offsetNode, pos.offset);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'));
+    if (files.length) void addImages(files);
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setSubtitle('');
+    setStatus('INFORMATION');
+    setShowEmojiPicker(false);
+    imageFilesRef.current.forEach((_file, url) => URL.revokeObjectURL(url));
+    imageFilesRef.current.clear();
+    if (editorRef.current) editorRef.current.innerHTML = '';
+    setHasContent(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const editor = editorRef.current;
+    if (!editor) return;
     setSubmitting(true);
     setMessage(null);
 
     try {
+      // Images dans l'ordre du document ; le contenu les référence par `cid:N`
+      const orderedImages = Array.from(editor.querySelectorAll('img'))
+        .map((img) => ({ src: img.src, file: imageFilesRef.current.get(img.src) }))
+        .filter((entry): entry is { src: string; file: File } => entry.file !== undefined);
+
+      let content = serializeNode(editor);
+      orderedImages.forEach(({ src }, i) => {
+        content = content.replaceAll(`](${src})`, `](cid:${i})`);
+      });
+      content = content.replace(/\n{3,}/g, '\n\n').trim();
+
       const formData = new FormData();
       formData.set('title', title);
+      formData.set('subtitle', subtitle);
       formData.set('content', content);
       formData.set('status', status);
-      if (image) formData.set('image', image);
+      orderedImages.forEach(({ file }) => formData.append('images', file));
 
       const res = await fetch(`${apiUrl}/news/admin`, {
         method: 'POST',
@@ -134,12 +257,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
       }
 
       setMessage({ text: t('messages.created'), ok: true });
-      setTitle('');
-      setContent('');
-      setStatus('INFORMATION');
-      handleRemoveImage();
-      setShowEmojiPicker(false);
-      if (contentRef.current) contentRef.current.style.height = 'auto';
+      resetForm();
       onCreatedAction?.();
     } catch (err) {
       const text = err instanceof Error ? err.message : t('messages.unknownError');
@@ -200,6 +318,18 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
         </div>
 
         <div>
+          <label className="block text-[11px] text-gray-500 mb-1.5">{t('fields.subtitle')}</label>
+          <input
+            value={subtitle}
+            onChange={(e) => setSubtitle(e.target.value)}
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
+            required
+            maxLength={180}
+            placeholder="Résumé affiché dans le fil"
+          />
+        </div>
+
+        <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="block text-[11px] text-gray-500">{t('fields.content')}</label>
             <div className="flex items-center gap-1 relative" ref={emojiPickerWrapperRef}>
@@ -234,7 +364,8 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
                 ref={imageInputRef}
                 type="file"
                 accept="image/*"
-                onChange={handleImageChange}
+                multiple
+                onChange={handleImageInputChange}
                 className="hidden"
               />
               {showEmojiPicker && (
@@ -244,38 +375,33 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
               )}
             </div>
           </div>
-          <textarea
-            ref={contentRef}
-            value={content}
-            onChange={(e) => {
-              setContent(e.target.value);
-              resizeContent();
-            }}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50 min-h-20 resize-none overflow-hidden"
-            required
-            maxLength={2000}
-            placeholder="Contenu du message..."
-          />
-        </div>
-
-        {imagePreview && (
-          <div className="relative inline-block">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imagePreview} alt="" className="max-h-40 rounded-lg border border-white/10" />
-            <button
-              type="button"
-              onClick={handleRemoveImage}
-              className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-gray-900 border border-white/20 text-gray-300 hover:text-white flex items-center justify-center text-xs leading-none"
-              aria-label="Retirer l'image"
-            >
-              ✕
-            </button>
+          <div className="relative">
+            <div
+              ref={editorRef}
+              contentEditable
+              role="textbox"
+              aria-multiline="true"
+              onInput={syncHasContent}
+              onPaste={handlePaste}
+              onDrop={handleDrop}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              className={`w-full bg-black/30 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none min-h-24 whitespace-pre-wrap wrap-break-word transition-colors ${
+                dragOver ? 'border-teal-500/60 bg-teal-500/5' : 'border-white/10 focus:border-teal-500/50'
+              }`}
+            />
+            {!hasContent && (
+              <div className="absolute top-2 left-3 text-sm text-gray-600 pointer-events-none">
+                Contenu du message...
+              </div>
+            )}
           </div>
-        )}
+          <p className="mt-1 text-[10px] text-gray-600">{t('editorHint')}</p>
+        </div>
 
         <button
           type="submit"
-          disabled={submitting || !title || !content}
+          disabled={submitting || !title || !subtitle || !hasContent}
           className="px-4 py-2 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? t('submitLoading') : t('submit')}

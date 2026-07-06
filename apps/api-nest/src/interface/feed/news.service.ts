@@ -30,10 +30,12 @@ export class NewsService {
     content: string,
     status?: NewsStatus,
     imageUrl?: string | null,
+    subtitle?: string | null,
   ) {
     const result = await this.createNewsUC.execute({
       authorId,
       title,
+      subtitle,
       content,
       status,
       source: NewsSource.MANUAL,
@@ -73,6 +75,23 @@ export class NewsService {
     archivedOnly = false,
   ) {
     return this.listNewsUC.execute({ limit, offset, userId, includeArchived, archivedOnly });
+  }
+
+  async getNewsById(id: string) {
+    const news = await this.newsRepo.findById(id);
+    if (!news || !news.isActive) return null;
+    return {
+      id: news.id,
+      authorId: news.authorId,
+      userId: news.userId,
+      title: news.title,
+      subtitle: news.subtitle,
+      content: news.content,
+      status: news.status,
+      createdAt: news.createdAt,
+      archivedAt: news.archivedAt,
+      imageUrl: news.imageUrl,
+    };
   }
 
   // ─── Actions utilisateur (per-user) ──────────────────────────────────────

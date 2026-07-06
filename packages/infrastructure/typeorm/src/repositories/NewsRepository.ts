@@ -28,6 +28,7 @@ export class NewsRepository implements INewsRepository {
   async save(news: News): Promise<void> {
     await this.repo.update({ id: news.id }, {
       title: news.title,
+      subtitle: news.subtitle,
       content: news.content,
       status: news.status,
       userId: news.userId,
@@ -37,6 +38,7 @@ export class NewsRepository implements INewsRepository {
   async create(params: {
     authorId: string | null;
     title: string;
+    subtitle?: string | null;
     content: string;
     status?: NewsStatus;
     source?: NewsSource;
@@ -53,6 +55,7 @@ export class NewsRepository implements INewsRepository {
       author,
       userId: params.userId ?? null,
       title: params.title,
+      subtitle: params.subtitle ?? null,
       content: params.content,
       status: params.status ?? NewsStatus.INFORMATION,
       source: params.source ?? NewsSource.MANUAL,

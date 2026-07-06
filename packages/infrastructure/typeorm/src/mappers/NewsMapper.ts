@@ -6,6 +6,7 @@ export class NewsMapper {
     return {
       id: news.id,
       title: news.title,
+      subtitle: news.subtitle,
       content: news.content,
       status: news.status,
       userId: news.userId,
@@ -26,6 +27,7 @@ export class NewsMapper {
       (entity.source as NewsSource) ?? NewsSource.MANUAL,
       entity.isActive ?? true,
       entity.imageUrl ?? null,
+      entity.subtitle ?? null,
     );
   }
 }

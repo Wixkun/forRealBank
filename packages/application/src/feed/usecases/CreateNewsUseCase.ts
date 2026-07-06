@@ -23,6 +23,7 @@ export class CreateNewsUseCase {
   async execute(input: {
     authorId: string;
     title: string;
+    subtitle?: string | null;
     content: string;
     status?: NewsStatus;
     source?: NewsSource;
@@ -50,6 +51,7 @@ export class CreateNewsUseCase {
     const news = await this.newsRepository.create({
       authorId: input.authorId,
       title: input.title,
+      subtitle: input.subtitle ?? null,
       content: input.content,
       status: input.status ?? NewsStatus.INFORMATION,
       source: isAutomaticNews ? NewsSource.AUTOMATIC : NewsSource.MANUAL,
@@ -65,11 +67,11 @@ export class CreateNewsUseCase {
           this.notificationRepository.create({
             userId: user.id,
             title: 'Nouvelle actualité',
-            content: input.title,
+            content: input.subtitle || input.title,
             type: NotificationType.NEWS,
             targetType: NotificationTargetType.NEWS,
             targetId: news.id,
-            targetUrl: `/dashboard/news/${news.id}`,
+            targetUrl: `/dashboard?newsId=${news.id}`,
           }),
         );
       await Promise.all(notificationPromises);
@@ -78,6 +80,7 @@ export class CreateNewsUseCase {
     return {
       newsId: news.id,
       title: news.title,
+      subtitle: news.subtitle,
       content: news.content,
       status: news.status,
       source: news.source,

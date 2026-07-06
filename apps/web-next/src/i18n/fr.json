@@ -382,8 +382,10 @@
       "title": "Publier une actualité",
       "fields": {
         "title": "Titre",
+        "subtitle": "Sous-titre",
         "content": "Contenu"
       },
+      "editorHint": "Glissez-déposez ou collez (Ctrl+V) une image directement dans le contenu",
       "submit": "Publier",
       "submitLoading": "Envoi…",
       "messages": {
@@ -391,8 +393,16 @@
         "createFailed": "Échec de la création de l'actualité",
         "unknownError": "Erreur inconnue",
         "invalidImageType": "Le fichier sélectionné n'est pas une image",
-        "imageTooLarge": "L'image dépasse la taille maximale de 5 Mo"
+        "imageTooLarge": "L'image dépasse la taille maximale de 5 Mo",
+        "tooManyImages": "Maximum de 10 images par actualité"
       }
+    },
+    "detail": {
+      "close": "Fermer",
+      "loading": "Chargement…",
+      "notFoundTitle": "Actualité indisponible",
+      "notFound": "Cette actualité est introuvable. Elle a peut-être été supprimée.",
+      "archived": "Cette actualité est archivée."
     }
   },
   "notifications": {

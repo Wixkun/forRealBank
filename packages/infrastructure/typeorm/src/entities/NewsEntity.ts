@@ -14,6 +14,9 @@ export class NewsEntity extends ImmutableEntity {
   @Column({ type: 'varchar', length: 255, nullable: false })
   title!: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  subtitle!: string | null;
+
   @Column({ type: 'text', nullable: false })
   content!: string;
 

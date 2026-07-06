@@ -10,6 +10,7 @@ export interface INewsRepository {
   create(params: {
     authorId: string | null;
     title: string;
+    subtitle?: string | null;
     content: string;
     status?: NewsStatus;
     source?: NewsSource;

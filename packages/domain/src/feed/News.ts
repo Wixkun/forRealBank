@@ -27,6 +27,7 @@ export class News {
     private readonly _source: NewsSource = NewsSource.MANUAL,
     private readonly _isActive: boolean = true,
     private readonly _imageUrl: string | null = null,
+    private _subtitle: string | null = null,
   ) {}
 
   get id() { return this._id; }
@@ -41,8 +42,10 @@ export class News {
   get source() { return this._source; }
   get isActive() { return this._isActive; }
   get imageUrl() { return this._imageUrl; }
+  get subtitle() { return this._subtitle; }
 
   updateTitle(title: string) { this._title = title; }
+  updateSubtitle(subtitle: string | null) { this._subtitle = subtitle; }
   updateContent(content: string) { this._content = content; }
 
   hasAuthor(): boolean { return this._authorId !== null; }

@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS news (
     author_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
     user_id varchar NULL,
     title varchar(255) NOT NULL,
+    subtitle varchar(255) NULL,
     content text NOT NULL,
     status varchar(50) NOT NULL DEFAULT 'INFORMATION'
         CHECK (status IN ('INFORMATION', 'SECURITY', 'TRANSACTION', 'PAYMENT', 'ACCOUNT', 'SYSTEM')),
@@ -593,7 +594,7 @@ BEGIN
             'NEWS',
             'NEWS',
             v_news_maintenance_id::varchar,
-            '/dashboard/news/' || v_news_maintenance_id,
+            '/dashboard?newsId=' || v_news_maintenance_id,
             true,
             now() - interval '1 hour'
         FROM users u

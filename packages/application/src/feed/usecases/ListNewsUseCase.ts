@@ -22,6 +22,7 @@ export class ListNewsUseCase {
       authorId: n.authorId,
       userId: n.userId,
       title: n.title,
+      subtitle: n.subtitle,
       content: n.content,
       status: n.status,
       createdAt: n.createdAt,
