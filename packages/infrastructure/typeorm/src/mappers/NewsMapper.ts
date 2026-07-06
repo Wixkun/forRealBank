@@ -9,6 +9,7 @@ export class NewsMapper {
       content: news.content,
       status: news.status,
       userId: news.userId,
+      imageUrl: news.imageUrl,
     };
   }
 
@@ -24,6 +25,7 @@ export class NewsMapper {
       userArchivedAt,
       (entity.source as NewsSource) ?? NewsSource.MANUAL,
       entity.isActive ?? true,
+      entity.imageUrl ?? null,
     );
   }
 }

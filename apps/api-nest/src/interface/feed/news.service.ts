@@ -29,6 +29,7 @@ export class NewsService {
     title: string,
     content: string,
     status?: NewsStatus,
+    imageUrl?: string | null,
   ) {
     const result = await this.createNewsUC.execute({
       authorId,
@@ -36,6 +37,7 @@ export class NewsService {
       content,
       status,
       source: NewsSource.MANUAL,
+      imageUrl,
     });
     await this.broadcastUpdate();
     return result;

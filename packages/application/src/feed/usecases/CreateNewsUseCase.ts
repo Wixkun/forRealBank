@@ -27,6 +27,7 @@ export class CreateNewsUseCase {
     status?: NewsStatus;
     source?: NewsSource;
     userId?: string | null;
+    imageUrl?: string | null;
   }) {
     const author = await this.userRepository.findById(input.authorId);
     if (!author) throw new Error('AUTHOR_NOT_FOUND');
@@ -53,6 +54,7 @@ export class CreateNewsUseCase {
       status: input.status ?? NewsStatus.INFORMATION,
       source: isAutomaticNews ? NewsSource.AUTOMATIC : NewsSource.MANUAL,
       userId: input.userId ?? null,
+      imageUrl: input.imageUrl ?? null,
     });
 
     if (!isAutomaticNews) {
@@ -80,6 +82,7 @@ export class CreateNewsUseCase {
       status: news.status,
       source: news.source,
       createdAt: news.createdAt,
+      imageUrl: news.imageUrl,
     };
   }
 }

@@ -388,7 +388,9 @@
       "messages": {
         "created": "News item created",
         "createFailed": "Failed to create the news item",
-        "unknownError": "Unknown error"
+        "unknownError": "Unknown error",
+        "invalidImageType": "The selected file is not an image",
+        "imageTooLarge": "The image exceeds the maximum size of 5 MB"
       }
     }
   },

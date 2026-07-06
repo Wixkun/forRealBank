@@ -1,7 +1,12 @@
 import {
   Controller, Get, Post, Body, Param, Query, Inject,
-  Sse, Delete, UseGuards, Req, BadRequestException, Patch, HttpCode,
+  Sse, Delete, UseGuards, UseInterceptors, UploadedFile, Req, BadRequestException, Patch, HttpCode,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import type { Request as ExpressRequest } from 'express';
+import { extname } from 'path';
+import { randomUUID } from 'crypto';
 import { Observable, interval, map, switchMap, merge } from 'rxjs';
 import { NewsService } from './news.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -10,6 +15,25 @@ import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { type NewsStatus, RoleName } from '@forreal/domain';
 import type { Request } from 'express';
+import { NEWS_UPLOADS_DIR, buildNewsImageUrl } from './news-uploads.constants';
+
+const IMAGE_MIME_TYPES = /^image\/(jpeg|png|gif|webp)$/;
+
+const newsImageInterceptor = FileInterceptor('image', {
+  storage: diskStorage({
+    destination: NEWS_UPLOADS_DIR,
+    filename: (_req: ExpressRequest, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) =>
+      cb(null, `${randomUUID()}${extname(file.originalname)}`),
+  }),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req: ExpressRequest, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    if (!IMAGE_MIME_TYPES.test(file.mimetype)) {
+      cb(new BadRequestException('INVALID_IMAGE_TYPE'), false);
+      return;
+    }
+    cb(null, true);
+  },
+});
 
 // RolesGuard peuple req.auth.userId (lookup DB complet).
 // JwtAuthGuard seul peuple req.user.id (payload JWT, pas de DB).
@@ -32,24 +56,30 @@ export class NewsController {
   @Post('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
+  @UseInterceptors(newsImageInterceptor)
   async createManual(
     @Body() body: { title: string; content: string; status?: NewsStatus },
+    @UploadedFile() image: Express.Multer.File | undefined,
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    return this.newsService.createManualNews(userId, body.title, body.content, body.status);
+    const imageUrl = image ? buildNewsImageUrl(image.filename) : null;
+    return this.newsService.createManualNews(userId, body.title, body.content, body.status, imageUrl);
   }
 
   // Alias rétrocompatible (ancienne route POST /)
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
+  @UseInterceptors(newsImageInterceptor)
   async createLegacy(
     @Body() body: { title: string; content: string; status?: NewsStatus },
+    @UploadedFile() image: Express.Multer.File | undefined,
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    return this.newsService.createManualNews(userId, body.title, body.content, body.status);
+    const imageUrl = image ? buildNewsImageUrl(image.filename) : null;
+    return this.newsService.createManualNews(userId, body.title, body.content, body.status, imageUrl);
   }
 
   // ─── Lecture du fil ──────────────────────────────────────────────────────

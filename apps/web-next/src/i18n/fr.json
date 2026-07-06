@@ -389,7 +389,9 @@
       "messages": {
         "created": "Actualité créée",
         "createFailed": "Échec de la création de l'actualité",
-        "unknownError": "Erreur inconnue"
+        "unknownError": "Erreur inconnue",
+        "invalidImageType": "Le fichier sélectionné n'est pas une image",
+        "imageTooLarge": "L'image dépasse la taille maximale de 5 Mo"
       }
     }
   },

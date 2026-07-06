@@ -25,4 +25,7 @@ export class NewsEntity extends ImmutableEntity {
 
   @Column({ type: 'boolean', default: true, name: 'is_active' })
   isActive!: boolean;
+
+  @Column({ type: 'varchar', nullable: true, name: 'image_url' })
+  imageUrl!: string | null;
 }

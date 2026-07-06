@@ -21,6 +21,7 @@ interface NewsItem {
   status: NewsStatus;
   createdAt: string;
   archivedAt: string | null;
+  imageUrl?: string | null;
 }
 
 interface NewsFeedProps {
@@ -209,6 +210,14 @@ function DraggableNewsItem({ item, onArchive, onDelete, isNew }: DraggableNewsIt
             <span className="text-gray-600 text-[10px] whitespace-nowrap shrink-0 mt-0.5">{timeAgo(item.createdAt)}</span>
           </div>
           <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-2 leading-relaxed pr-1">{item.content}</p>
+          {item.imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.imageUrl}
+              alt=""
+              className="mt-2 max-h-48 w-full object-cover rounded-lg border border-white/5"
+            />
+          )}
         </div>
         {isNew && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0 mt-1.5" />}
       </div>

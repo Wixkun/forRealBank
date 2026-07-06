@@ -26,6 +26,7 @@ export class News {
     private _archivedAt: Date | null = null,
     private readonly _source: NewsSource = NewsSource.MANUAL,
     private readonly _isActive: boolean = true,
+    private readonly _imageUrl: string | null = null,
   ) {}
 
   get id() { return this._id; }
@@ -39,6 +40,7 @@ export class News {
   get isArchived() { return this._archivedAt !== null; }
   get source() { return this._source; }
   get isActive() { return this._isActive; }
+  get imageUrl() { return this._imageUrl; }
 
   updateTitle(title: string) { this._title = title; }
   updateContent(content: string) { this._content = content; }

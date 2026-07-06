@@ -14,6 +14,7 @@ export interface INewsRepository {
     status?: NewsStatus;
     source?: NewsSource;
     userId?: string | null;
+    imageUrl?: string | null;
   }): Promise<News>;
   list(params?: {
     limit?: number;

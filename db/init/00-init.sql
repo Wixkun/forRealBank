@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS news (
     source varchar(20) NOT NULL DEFAULT 'MANUAL'
         CHECK (source IN ('MANUAL', 'AUTOMATIC')),
     is_active boolean NOT NULL DEFAULT true,
+    image_url varchar NULL,
     created_at timestamptz NOT NULL DEFAULT now()
 );
 

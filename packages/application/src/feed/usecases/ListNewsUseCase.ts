@@ -26,6 +26,7 @@ export class ListNewsUseCase {
       status: n.status,
       createdAt: n.createdAt,
       archivedAt: n.archivedAt,
+      imageUrl: n.imageUrl,
     }));
   }
 }
