@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type JSX, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 export type NewsStatus =
   | 'SECURITY'
@@ -136,6 +136,7 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
   const t = useTranslations('feed.detail.transfer');
   const tDetail = useTranslations('feed.detail');
   const router = useRouter();
+  const locale = useLocale();
   const [copied, setCopied] = useState(false);
 
   const isIncoming = meta.direction === 'IN';
@@ -160,7 +161,7 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
     } catch {}
   };
 
-  const downloadReceipt = () => {
+  const downloadReceipt = async () => {
     const rows: [string, string | null | undefined][] = [
       [t(isIncoming ? 'received' : 'sent'), amount],
       [t('dateTime'), executedAt],
@@ -174,18 +175,59 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
       [t('transactionId'), meta.transactionId],
       [t('fees'), fees],
     ];
-    const text = [
-      '=== ForReal Bank — ' + t(isIncoming ? 'received' : 'sent') + ' ===',
-      '',
-      ...rows.filter(([, v]) => v).map(([k, v]) => `${k} : ${v}`),
-    ].join('\n');
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recu-virement-${meta.transactionId ?? item.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    // Import dynamique pour ne pas alourdir le bundle initial
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 56;
+    // Les polices standard ne couvrent ni la flèche ni les espaces fines de fr-FR
+    const clean = (s: string) => s.replace(/→/g, '->').replace(/[  ]/g, ' ');
+
+    let y = 70;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.setTextColor(13, 158, 143);
+    doc.text('ForReal Bank', margin, y);
+    y += 20;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(115, 120, 133);
+    doc.text(clean(t(isIncoming ? 'received' : 'sent')), margin, y);
+    y += 16;
+    doc.setDrawColor(217, 222, 230);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 44;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(24);
+    doc.setTextColor(26, 28, 33);
+    doc.text(clean(`${isIncoming ? '+' : '-'} ${amount}`), margin, y);
+    y += 30;
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 28;
+
+    for (const [label, value] of rows) {
+      if (!value) continue;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(115, 120, 133);
+      doc.text(clean(label), margin, y);
+      doc.setFontSize(10);
+      doc.setTextColor(26, 28, 33);
+      doc.text(clean(value), margin + 175, y);
+      y += 24;
+    }
+
+    const generatedAt = new Date().toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+      day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+    doc.line(margin, pageHeight - 64, pageWidth - margin, pageHeight - 64);
+    doc.setFontSize(8);
+    doc.setTextColor(115, 120, 133);
+    doc.text(clean(`ForReal Bank — ${generatedAt}`), margin, pageHeight - 48);
+
+    doc.save(`recu-virement-${meta.transactionId ?? item.id}.pdf`);
   };
 
   return (
@@ -252,7 +294,7 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
           {t('downloadReceipt')}
         </button>
         <button
-          onClick={() => router.push('/transfer')}
+          onClick={() => router.push(`/${locale}/dashboard/transfer`)}
           className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-teal-500/40 text-teal-300 text-xs font-semibold hover:bg-teal-500/10 transition"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>

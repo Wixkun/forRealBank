@@ -179,9 +179,10 @@ function filterByPeriod(txns: DisplayTransaction[], p: Period): DisplayTransacti
 type Props = {
   accounts: Account[];
   selectedAccountId: string | null;
+  onTransferCompleteAction?: () => void | Promise<void>;
 };
 
-export function TransactionsSection({ accounts, selectedAccountId }: Props) {
+export function TransactionsSection({ accounts, selectedAccountId, onTransferCompleteAction }: Props) {
   const [transactions, setTransactions] = useState<DisplayTransaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState<Period>('month');
@@ -273,8 +274,10 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
 
       setShowTransfer(false);
       setTransferAmount('');
+      // Rafraîchissement ciblé : transactions du compte + données du dashboard
+      // (soldes), sans reload complet de la page.
       await loadActivities(selectedAccount);
-      window.location.reload();
+      await onTransferCompleteAction?.();
     } catch {
       setTransferError('Erreur réseau');
     } finally {

@@ -305,8 +305,11 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
   useSSE<NewsSSEPayload>({
     url: `${apiUrl}/news/stream`,
     onMessage: (payload) => {
-      const arr = Array.isArray(payload) ? payload : ((payload as { data?: NewsItem[] })?.data ?? []);
-      const filtered = (arr as NewsItem[]).filter((n) => !removedIdsRef.current.has(n.id) && !n.archivedAt);
+      const arr = Array.isArray(payload) ? payload : (payload as { data?: NewsItem[] })?.data;
+      // Ignore les émissions unitaires (création d'une news) : le poll SSE
+      // suivant renvoie la liste complète filtrée par utilisateur.
+      if (!Array.isArray(arr)) return;
+      const filtered = arr.filter((n) => !removedIdsRef.current.has(n.id) && !n.archivedAt);
       setNews(filtered);
     },
     withCredentials: true,

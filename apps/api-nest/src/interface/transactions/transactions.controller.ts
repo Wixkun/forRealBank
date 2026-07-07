@@ -16,7 +16,7 @@ import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 import { InitiateTransferUseCase } from '@forreal/application';
 import { NewsService } from '../feed/news.service';
-import { NewsStatus } from '@forreal/domain';
+import { NewsStatus, NotificationType, NotificationTargetType } from '@forreal/domain';
 
 @Controller('transactions')
 @UseGuards(JwtAuthGuard)
@@ -127,7 +127,6 @@ export class TransactionsController {
       new AccountRepository(this.accountRepo),
       new InvestmentAccountRepository(this.investmentRepo, this.investmentTxnRepo),
       new BankTransactionRepository(this.transactionRepo),
-      new NotificationRepository(this.notificationRepo, this.userRepo),
     );
 
     const result = await usecase.execute({
@@ -157,7 +156,12 @@ export class TransactionsController {
             where: { id: body.destinationAccountId },
             relations: ['user'],
           })
-        : null;
+        : body.destinationIban
+          ? await this.accountRepo.findOne({
+              where: { iban: body.destinationIban },
+              relations: ['user'],
+            })
+          : null;
 
       const beneficiaryName = destinationAccount?.user
         ? `${destinationAccount.user.firstName} ${destinationAccount.user.lastName}`
@@ -166,7 +170,23 @@ export class TransactionsController {
       const pad = (n: number) => String(n).padStart(2, '0');
       const transactionId = `TRX-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}-${randomUUID().slice(0, 8).toUpperCase()}`;
 
-      await this.newsService.createAutomaticNews({
+      const transferMetadata = {
+        kind: 'TRANSFER',
+        status: 'COMPLETED',
+        amount,
+        currency: 'EUR',
+        fees: 0,
+        transactionId,
+        executedAt: now.toISOString(),
+        sourceAccountName: sourceAccount?.name ?? (body.sourceType === 'investment' ? 'Compte Investissement' : null),
+        sourceIban: sourceAccount?.iban ?? null,
+        destinationAccountName: destinationAccount?.name ?? null,
+        destinationIban: destinationAccount?.iban ?? body.destinationIban ?? null,
+        beneficiaryName,
+        description: body.description ?? null,
+      };
+
+      const senderNews = await this.newsService.createAutomaticNews({
         targetUserId: userId,
         title: 'Virement effectué',
         subtitle: beneficiaryName
@@ -176,25 +196,39 @@ export class TransactionsController {
           ? `${body.description} — ${formattedAmount}`
           : `Virement de ${formattedAmount} effectué avec succès.`,
         status: NewsStatus.TRANSACTION,
-        metadata: {
-          kind: 'TRANSFER',
-          direction: 'OUT',
-          status: 'COMPLETED',
-          amount,
-          currency: 'EUR',
-          fees: 0,
-          transactionId,
-          executedAt: now.toISOString(),
-          sourceAccountName: sourceAccount?.name ?? (body.sourceType === 'investment' ? 'Compte Investissement' : null),
-          sourceIban: sourceAccount?.iban ?? null,
-          destinationAccountName: destinationAccount?.name ?? null,
-          destinationIban: destinationAccount?.iban ?? body.destinationIban ?? null,
-          beneficiaryName,
-          description: body.description ?? null,
-        },
+        metadata: { ...transferMetadata, direction: 'OUT' },
       });
+
+      // Notification « Virement reçu » pour le titulaire du compte crédité : elle
+      // cible la news de détail (popup) et non plus une page (/accounts).
+      if (destinationAccount?.userId) {
+        const recipientNews =
+          destinationAccount.userId === userId
+            ? senderNews
+            : await this.newsService.createAutomaticNews({
+                targetUserId: destinationAccount.userId,
+                title: 'Virement reçu',
+                subtitle: `${formattedAmount} reçu sur ${destinationAccount.name}`,
+                content: body.description
+                  ? `${body.description} — ${formattedAmount}`
+                  : `Vous avez reçu un virement de ${formattedAmount}.`,
+                status: NewsStatus.TRANSACTION,
+                metadata: { ...transferMetadata, direction: 'IN' },
+              });
+
+        const notifications = new NotificationRepository(this.notificationRepo, this.userRepo);
+        await notifications.create({
+          userId: destinationAccount.userId,
+          title: 'Virement reçu',
+          content: `Vous avez reçu un virement de ${formattedAmount}. ${body.description || ''}`.trim(),
+          type: NotificationType.TRANSACTION,
+          targetType: NotificationTargetType.NEWS,
+          targetId: recipientNews.id,
+          targetUrl: `/dashboard?newsId=${recipientNews.id}`,
+        });
+      }
     } catch {
-      // Ne pas bloquer la réponse si la news échoue
+      // Ne pas bloquer la réponse si la news ou la notification échoue
     }
 
     return {

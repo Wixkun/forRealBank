@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useNotifications } from '@/features/notifications/useNotifications';
+import { useNotifications, type Notification } from '@/features/notifications/useNotifications';
 import { useLocale, useTranslations } from 'next-intl';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -26,12 +26,37 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
     return { unreadNotifications: unread };
   }, [notifications]);
 
-  const handleNotificationClick = (notificationId: string, targetUrl?: string | null) => {
-    markAsRead(notificationId);
-    if (targetUrl) {
-      setIsOpen(false);
-      router.push(targetUrl);
+  // Les targetUrl sont stockées sans préfixe de locale côté backend
+  const localize = (url: string) => (url.startsWith('/') ? `/${locale}${url}` : url);
+
+  // Résout la cible de navigation selon le type de notification :
+  // - NEWS (virements, transactions, actualités) → popup de détail via ?newsId=
+  // - CONVERSATION / MESSAGE → la conversation concernée
+  // - anciens liens (/accounts, page inexistante) et types inconnus → fallback propre
+  const resolveTarget = (notif: Notification): string | null => {
+    switch (notif.targetType) {
+      case 'NEWS':
+        if (notif.targetId) return `/${locale}/dashboard?newsId=${notif.targetId}`;
+        return notif.targetUrl ? localize(notif.targetUrl) : null;
+      case 'CONVERSATION':
+      case 'MESSAGE':
+        return notif.targetUrl ? localize(notif.targetUrl) : `/${locale}/dashboard/messages`;
+      case 'TRANSACTION':
+      case 'PAYMENT':
+      case 'ACCOUNT':
+        return notif.targetUrl && notif.targetUrl !== '/accounts'
+          ? localize(notif.targetUrl)
+          : `/${locale}/dashboard`;
+      default:
+        return notif.targetUrl ? localize(notif.targetUrl) : null;
     }
+  };
+
+  const handleNotificationClick = (notif: Notification) => {
+    markAsRead(notif.id);
+    const target = resolveTarget(notif);
+    setIsOpen(false);
+    if (target) router.push(target);
   };
 
   return (
@@ -115,7 +140,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                 {unreadNotifications.map((notif) => (
                   <div
                     key={notif.id}
-                    onClick={() => handleNotificationClick(notif.id, notif.targetUrl)}
+                    onClick={() => handleNotificationClick(notif)}
                     className={`p-4 border-b cursor-pointer transition ${
                       currentTheme === 'dark'
                         ? 'border-gray-800 hover:bg-gray-900/50 bg-blue-950/20'

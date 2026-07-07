@@ -21,9 +21,10 @@ type DashboardContentProps = {
   };
   totalBalance: number;
   locale: string;
+  onRefreshAction?: () => void | Promise<void>;
 };
 
-export function DashboardContent({ accountData, totalBalance }: DashboardContentProps) {
+export function DashboardContent({ accountData, totalBalance, onRefreshAction }: DashboardContentProps) {
   const { user } = useAuth();
 
   const isStaff =
@@ -56,6 +57,7 @@ export function DashboardContent({ accountData, totalBalance }: DashboardContent
         <TransactionsSection
           accounts={accountData.accounts}
           selectedAccountId={selectedAccountId}
+          onTransferCompleteAction={onRefreshAction}
         />
       )}
 
