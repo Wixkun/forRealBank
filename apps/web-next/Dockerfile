@@ -1,8 +1,8 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /usr/src/app
 
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
 COPY pnpm-lock.yaml* package.json pnpm-workspace.yaml ./
 
@@ -20,11 +20,11 @@ ENV NEXT_LINT_ON_BUILD=false
 RUN pnpm --filter web-next... build
 
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /usr/src/app/apps/web-next
 
 ENV NODE_ENV=production
-RUN npm install -g pnpm
+RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
 COPY --from=builder /usr/src/app/apps/web-next/.next ./.next
 COPY --from=builder /usr/src/app/apps/web-next/public ./public

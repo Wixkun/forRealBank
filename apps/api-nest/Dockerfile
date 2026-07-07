@@ -1,4 +1,4 @@
-FROM node:20-alpine AS build
+FROM node:22-alpine AS build
 
 RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
@@ -28,7 +28,7 @@ RUN pnpm --filter @forreal/domain build \
 RUN pnpm deploy --filter api-nest --prod --legacy /prod
 
 
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 
 RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
