@@ -1,168 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Account, DisplayTransaction, fmt, fmtDate, accountLabel } from '@/features/dashboard/types';
-
-// ── Chart ─────────────────────────────────────────────────────────────────────
-
-type ChartPoint = DisplayTransaction & { balance: number };
-
-function AccountChart({ transactions, currentBalance }: {
-  transactions: DisplayTransaction[];
-  currentBalance?: number;
-}) {
-  const [hovered, setHovered] = useState<number | null>(null);
-
-  const fmtA = (v: number) =>
-    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
-
-  if (transactions.length === 0) {
-    return <div className="flex items-center justify-center h-28 text-gray-600 text-sm">Pas assez de données</div>;
-  }
-
-  const sorted = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const hasBalance = sorted.some((t) => t.balance != null);
-
-  const W = 560; const H = 110;
-  const PL = 52; const PR = 16; const PT = 8; const PB = 24;
-  const cW = W - PL - PR; const cH = H - PT - PB;
-
-  if (hasBalance) {
-    let points = sorted.filter((t) => t.balance != null) as ChartPoint[];
-    const last = points[points.length - 1];
-    if (currentBalance != null && last && Math.abs(currentBalance - last.balance) > 0.01) {
-      points = [...points, {
-        id: '__now__', date: new Date().toISOString().split('T')[0],
-        description: 'Solde actuel', amount: 0, type: 'credit' as const, balance: currentBalance,
-      }];
-    }
-
-    const minB = Math.min(...points.map((t) => t.balance));
-    const maxB = Math.max(...points.map((t) => t.balance));
-    const range = maxB - minB || 1;
-    const px = (i: number) => PL + (i / Math.max(points.length - 1, 1)) * cW;
-    const py = (b: number) => PT + cH - ((b - minB) / range) * cH;
-    const linePath = points.map((t, i) => `${i === 0 ? 'M' : 'L'} ${px(i).toFixed(1)} ${py(t.balance).toFixed(1)}`).join(' ');
-    const areaPath = `${linePath} L ${px(points.length - 1).toFixed(1)} ${PT + cH} L ${PL} ${PT + cH} Z`;
-    const hovPt = hovered != null ? points[hovered] : null;
-
-    return (
-      <div className="relative select-none">
-        {hovPt && hovered != null && (
-          <div
-            className="absolute z-10 pointer-events-none bg-[#1a1d24] border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
-            style={{ left: `${(px(hovered) / W) * 100}%`, top: '-8px', transform: 'translate(-50%, -100%)' }}
-          >
-            <p className="text-gray-500 mb-0.5">{new Date(hovPt.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-            {hovPt.id !== '__now__' && (
-              <>
-                <p className="text-gray-300 truncate max-w-40 mb-0.5">{hovPt.description}</p>
-                <p className={`font-mono font-semibold ${hovPt.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}>
-                  {hovPt.type === 'credit' ? '+' : '−'}{fmtA(hovPt.amount)}
-                </p>
-              </>
-            )}
-            <p className="text-white font-mono font-semibold mt-0.5">Solde : {fmtA(hovPt.balance)}</p>
-          </div>
-        )}
-        <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
-          <defs>
-            <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#2dd4bf" stopOpacity="0.01" />
-            </linearGradient>
-          </defs>
-          {[0, 0.5, 1].map((r) => {
-            const gy = PT + cH - r * cH;
-            return (
-              <g key={r}>
-                <line x1={PL} y1={gy} x2={W - PR} y2={gy} stroke="#ffffff0d" strokeWidth="1" />
-                <text x={PL - 5} y={gy + 4} textAnchor="end" fontSize="9" fill="#4b5563">{fmtA(minB + r * range)}</text>
-              </g>
-            );
-          })}
-          <path d={areaPath} fill="url(#cg)" />
-          <path d={linePath} fill="none" stroke="#2dd4bf" strokeWidth="1.5" strokeLinejoin="round" />
-          {points.map((t, i) => (
-            <g key={t.id}>
-              <circle cx={px(i)} cy={py(t.balance)} r={hovered === i ? 4 : 2.5}
-                fill={hovered === i ? '#fff' : '#2dd4bf'} stroke={hovered === i ? '#2dd4bf' : 'none'} strokeWidth="1.5" />
-              <circle cx={px(i)} cy={py(t.balance)} r={14} fill="transparent" className="cursor-pointer"
-                onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} />
-            </g>
-          ))}
-          {[0, Math.floor(points.length / 2), points.length - 1]
-            .filter((i, idx, arr) => arr.indexOf(i) === idx && points[i])
-            .map((i) => (
-              <text key={i} x={px(i)} y={H - 4} textAnchor="middle" fontSize="9" fill="#4b5563">
-                {new Date(points[i].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
-              </text>
-            ))}
-        </svg>
-      </div>
-    );
-  }
-
-  const maxAmt = Math.max(...sorted.map((t) => t.amount), 1);
-  const barW = Math.max(6, Math.floor(cW / sorted.length) - 3);
-  const hovTx = hovered != null ? sorted[hovered] : null;
-
-  return (
-    <div className="relative select-none">
-      {hovTx && hovered != null && (
-        <div
-          className="absolute z-10 pointer-events-none bg-[#1a1d24] border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
-          style={{ left: `${((PL + (hovered + 0.5) * (cW / sorted.length)) / W) * 100}%`, top: '-8px', transform: 'translate(-50%, -100%)' }}
-        >
-          <p className="text-gray-500 mb-0.5">{new Date(hovTx.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
-          <p className="text-gray-300 truncate max-w-40 mb-0.5">{hovTx.description}</p>
-          <p className={`font-mono font-semibold ${hovTx.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}>
-            {hovTx.type === 'credit' ? '+' : '−'}{fmtA(hovTx.amount)}
-          </p>
-        </div>
-      )}
-      <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
-        {[0.5, 1].map((r) => {
-          const gy = PT + cH - r * cH;
-          return <line key={r} x1={PL} y1={gy} x2={W - PR} y2={gy} stroke="#ffffff0d" strokeWidth="1" />;
-        })}
-        <line x1={PL} y1={PT + cH} x2={W - PR} y2={PT + cH} stroke="#ffffff15" strokeWidth="1" />
-        {sorted.map((t, i) => {
-          const bH = Math.max(2, (t.amount / maxAmt) * cH);
-          const cx = PL + (i + 0.5) * (cW / sorted.length);
-          return (
-            <g key={t.id}>
-              <rect x={cx - barW / 2} y={PT + cH - bH} width={barW} height={bH}
-                fill={t.type === 'credit' ? '#2dd4bf' : '#f87171'} rx="2" opacity={hovered === i ? 1 : 0.65} />
-              <rect x={cx - Math.max(barW, 18) / 2} y={PT} width={Math.max(barW, 18)} height={cH}
-                fill="transparent" className="cursor-pointer"
-                onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} />
-            </g>
-          );
-        })}
-        {[0, Math.floor(sorted.length / 2), sorted.length - 1]
-          .filter((i, idx, arr) => arr.indexOf(i) === idx && sorted[i])
-          .map((i) => (
-            <text key={i} x={PL + (i + 0.5) * (cW / sorted.length)} y={H - 4} textAnchor="middle" fontSize="9" fill="#4b5563">
-              {new Date(sorted[i].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
-            </text>
-          ))}
-      </svg>
-    </div>
-  );
-}
+import { useTranslations } from 'next-intl';
+import { Account, DisplayTransaction, fmt, fmtDate, accountLabel, lastFour } from '@/features/dashboard/types';
+import { AccountChart } from '@/features/dashboard/components/AccountChart';
+import { fetchAccountTransactions } from '@/features/dashboard/api';
+import { useStatement } from '@/features/statements/StatementContext';
+import {
+  NewsDetailModal,
+  NEWS_STATUS_CONFIG,
+  type NewsItem,
+} from '@/features/feed/components/NewsDetailModal';
 
 // ── Period filter ─────────────────────────────────────────────────────────────
 
 type Period = 'day' | 'week' | 'month' | 'year' | 'all';
 
-const PERIODS: { key: Period; label: string }[] = [
-  { key: 'day',   label: 'Jour'    },
-  { key: 'week',  label: 'Semaine' },
-  { key: 'month', label: 'Mois'    },
-  { key: 'year',  label: 'Année'   },
-  { key: 'all',   label: 'Tout'    },
-];
+const PERIODS: Period[] = ['day', 'week', 'month', 'year', 'all'];
 
 function filterByPeriod(txns: DisplayTransaction[], p: Period): DisplayTransaction[] {
   if (p === 'all') return txns;
@@ -179,9 +33,11 @@ function filterByPeriod(txns: DisplayTransaction[], p: Period): DisplayTransacti
 type Props = {
   accounts: Account[];
   selectedAccountId: string | null;
+  onTransferCompleteAction?: () => void | Promise<void>;
 };
 
-export function TransactionsSection({ accounts, selectedAccountId }: Props) {
+export function TransactionsSection({ accounts, selectedAccountId, onTransferCompleteAction }: Props) {
+  const t = useTranslations('dashboard.transactions');
   const [transactions, setTransactions] = useState<DisplayTransaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState<Period>('month');
@@ -192,6 +48,9 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
   const [transferSourceId, setTransferSourceId] = useState<string | null>(null);
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
+  const [txDetail, setTxDetail] = useState<NewsItem | null>(null);
+
+  const statement = useStatement();
 
   const selectedAccount = selectedAccountId
     ? accounts.find((a) => a.id === selectedAccountId) ?? null
@@ -205,28 +64,7 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
   const loadActivities = async (acc: Account) => {
     setLoading(true);
     try {
-      const isInvestment = acc.accountType === 'investment' || acc.type === 'investment';
-      const url = isInvestment
-        ? `/api/trading/activities/${acc.id}`
-        : `/api/transactions/account/${acc.id}?limit=500`;
-
-      const res = await fetch(url, { credentials: 'include' });
-      if (!res.ok) { setTransactions([]); return; }
-
-      const data = await res.json();
-      const raw: Array<Record<string, unknown>> = Array.isArray(data) ? data : (data.transactions ?? []);
-
-      setTransactions(raw.map((t) => {
-        const rawAmount = t.amount as number;
-        return {
-          id: t.id as string,
-          date: (t.date as string) || new Date().toISOString(),
-          description: (t.description as string) || '',
-          amount: Math.abs(rawAmount),
-          type: rawAmount >= 0 ? ('credit' as const) : ('debit' as const),
-          balance: t.balance != null ? (t.balance as number) : undefined,
-        };
-      }));
+      setTransactions(await fetchAccountTransactions(acc));
     } catch {
       setTransactions([]);
     } finally {
@@ -243,11 +81,57 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccountId]);
 
+  // Alimente le préremplissage de la popup « Statement » : compte sélectionné,
+  // filtre de période actif et bornes des transactions chargées
+  useEffect(() => {
+    if (!statement) return;
+    const dates = transactions.map((t) => t.date).sort();
+    statement.setStatementPrefill({
+      accountId: selectedAccountId,
+      period,
+      txRange: dates.length ? { first: dates[0], last: dates[dates.length - 1] } : null,
+    });
+  }, [statement, selectedAccountId, period, transactions]);
+
+  // Ouvre la popup de détail (réutilise la modale des news de virement) en
+  // synthétisant une news TRANSFER à partir de la transaction
+  const openTransactionDetail = (tx: DisplayTransaction) => {
+    if (!selectedAccount) return;
+    const isCredit = tx.type === 'credit';
+    const accName = selectedAccount.name || `${accountLabel(selectedAccount)} (…${lastFour(selectedAccount)})`;
+    setTxDetail({
+      id: tx.id,
+      authorId: null,
+      userId: null,
+      title: tx.description || t('transactionFallback'),
+      subtitle: null,
+      content: tx.description || '',
+      status: 'TRANSACTION',
+      createdAt: tx.date,
+      archivedAt: null,
+      metadata: {
+        kind: 'TRANSFER',
+        direction: isCredit ? 'IN' : 'OUT',
+        status: 'COMPLETED',
+        amount: tx.amount,
+        currency: 'EUR',
+        fees: 0,
+        transactionId: tx.id,
+        executedAt: tx.date,
+        sourceAccountName: isCredit ? null : accName,
+        sourceIban: isCredit ? null : selectedAccount.iban ?? null,
+        destinationAccountName: isCredit ? accName : null,
+        destinationIban: isCredit ? selectedAccount.iban ?? null : null,
+        description: tx.description || null,
+      },
+    });
+  };
+
   const handleTransfer = async () => {
     if (!transferSource || !selectedAccount || !transferAmount) return;
     const amount = parseFloat(transferAmount);
-    if (isNaN(amount) || amount <= 0) { setTransferError('Montant invalide'); return; }
-    if (amount > transferSource.balance) { setTransferError('Fonds insuffisants'); return; }
+    if (isNaN(amount) || amount <= 0) { setTransferError(t('invalidAmount')); return; }
+    if (amount > transferSource.balance) { setTransferError(t('insufficientFunds')); return; }
 
     const sourceType =
       transferSource.accountType === 'investment' || transferSource.type === 'investment'
@@ -269,14 +153,16 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
         }),
       });
       const data = await res.json();
-      if (!data.success) { setTransferError(data.error || 'Échec du virement'); return; }
+      if (!data.success) { setTransferError(data.error || t('transferFailed')); return; }
 
       setShowTransfer(false);
       setTransferAmount('');
+      // Rafraîchissement ciblé : transactions du compte + données du dashboard
+      // (soldes), sans reload complet de la page.
       await loadActivities(selectedAccount);
-      window.location.reload();
+      await onTransferCompleteAction?.();
     } catch {
-      setTransferError('Erreur réseau');
+      setTransferError(t('networkError'));
     } finally {
       setTransferLoading(false);
     }
@@ -289,14 +175,14 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-          Transactions
+          {t('title')}
           {selectedAccount && (
             <span className="text-teal-400 font-normal text-xs">— {accountLabel(selectedAccount)}</span>
           )}
         </h3>
 
         <div className="flex items-center gap-1 bg-black/20 rounded-lg p-0.5">
-          {PERIODS.map(({ key, label }) => (
+          {PERIODS.map((key) => (
             <button
               key={key}
               onClick={() => setPeriod(key)}
@@ -306,7 +192,7 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              {label}
+              {t(`periods.${key}`)}
             </button>
           ))}
         </div>
@@ -331,7 +217,7 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
               onClick={() => { setShowTransfer((v) => !v); setTransferError(null); }}
               className="text-xs px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30 transition"
             >
-              + Alimenter
+              {t('topUp')}
             </button>
           )}
         </div>
@@ -341,7 +227,7 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
       {showTransfer && selectedAccount && sourceOptions.length > 0 && (
         <div className="px-5 py-4 border-b border-white/5 bg-teal-950/30">
           <p className="text-teal-300 text-xs mb-2 font-medium">
-            Depuis → vers {accountLabel(selectedAccount)}
+            {t('fromTo', { account: accountLabel(selectedAccount) })}
           </p>
           <div className="flex items-center gap-2">
             <select
@@ -354,7 +240,7 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
               ))}
             </select>
             <input
-              type="number" min="1" step="0.01" placeholder="Montant (€)"
+              type="number" min="1" step="0.01" placeholder={t('amountPlaceholder')}
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
               className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
@@ -364,13 +250,13 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
               disabled={transferLoading || !transferAmount}
               className="px-4 py-1.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {transferLoading ? '...' : 'Virer'}
+              {transferLoading ? '...' : t('transfer')}
             </button>
             <button
               onClick={() => { setShowTransfer(false); setTransferError(null); setTransferAmount(''); }}
               className="text-gray-500 text-xs hover:text-gray-300 transition"
             >
-              Annuler
+              {t('cancel')}
             </button>
           </div>
           {transferError && <p className="text-red-400 text-xs mt-2">{transferError}</p>}
@@ -379,26 +265,30 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
 
       {/* Content */}
       {loading ? (
-        <div className="px-5 py-10 text-center text-gray-600 text-sm">Loading...</div>
+        <div className="px-5 py-10 text-center text-gray-600 text-sm">{t('loading')}</div>
       ) : showChart ? (
         <div className="px-5 py-4">
           <AccountChart transactions={displayed} currentBalance={selectedAccount?.balance} />
         </div>
       ) : displayed.length === 0 ? (
-        <div className="px-5 py-10 text-center text-gray-600 text-sm">No transactions for this account</div>
+        <div className="px-5 py-10 text-center text-gray-600 text-sm">{t('empty')}</div>
       ) : (
         <table className="w-full text-sm">
           <thead>
             <tr>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">Date</th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">Description</th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">Category</th>
-              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">Amount</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.date')}</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.description')}</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.category')}</th>
+              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.amount')}</th>
             </tr>
           </thead>
           <tbody>
             {displayed.map((tx) => (
-              <tr key={tx.id} className="border-t border-white/4 hover:bg-white/2 transition-colors">
+              <tr
+                key={tx.id}
+                onClick={() => openTransactionDetail(tx)}
+                className="border-t border-white/4 hover:bg-teal-500/5 transition-colors cursor-pointer"
+              >
                 <td className="px-5 py-3 text-gray-500 text-xs whitespace-nowrap">{fmtDate(tx.date)}</td>
                 <td className="px-5 py-3 text-gray-200 text-xs">{tx.description}</td>
                 <td className="px-5 py-3 text-gray-500 text-xs capitalize">{tx.type}</td>
@@ -409,6 +299,15 @@ export function TransactionsSection({ accounts, selectedAccountId }: Props) {
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Détail d'une transaction : réutilise la popup des news de virement */}
+      {txDetail && (
+        <NewsDetailModal
+          item={txDetail}
+          cfg={NEWS_STATUS_CONFIG.TRANSACTION}
+          onCloseAction={() => setTxDetail(null)}
+        />
       )}
     </div>
   );

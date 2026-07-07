@@ -13,7 +13,7 @@ const INITIAL_ACCOUNT_DATA = {
 export default function DashboardPage() {
   const params = useParams();
   const locale = (params?.locale as string) || 'en';
-  const { accountData } = useDashboardData(INITIAL_ACCOUNT_DATA, locale);
+  const { accountData, refresh } = useDashboardData(INITIAL_ACCOUNT_DATA, locale);
   const totalBalance = accountData.accounts.reduce((sum, acc) => sum + (acc.balance || 0), 0);
 
   return (
@@ -21,6 +21,7 @@ export default function DashboardPage() {
       accountData={accountData}
       totalBalance={totalBalance}
       locale={locale}
+      onRefreshAction={refresh}
     />
   );
 }

@@ -1,8 +1,10 @@
 'use client';
 
-import { useEffect, useState, type JSX, type ReactNode } from 'react';
+import { useState, type JSX, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { ModalShell } from '@/components/ui/ModalShell';
+import { generateReceiptPdf } from '@/features/feed/generateReceiptPdf';
 
 export type NewsStatus =
   | 'SECURITY'
@@ -53,6 +55,79 @@ function getTransferMetadata(item: NewsItem): TransferMetadata | null {
 }
 
 export type NewsStatusConfig = { label: string; bg: string; color: string; icon: JSX.Element };
+
+export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
+  SECURITY: {
+    label: 'Security',
+    bg: 'bg-rose-500/15',
+    color: '#f43f5e',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        <circle cx="12" cy="16" r="1" fill="#f43f5e" />
+      </svg>
+    ),
+  },
+  TRANSACTION: {
+    label: 'Transaction',
+    bg: 'bg-cyan-500/15',
+    color: '#06b6d4',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 6v6l4 2" />
+        <polyline points="16 8 12 6 8 8" />
+      </svg>
+    ),
+  },
+  PAYMENT: {
+    label: 'Payment',
+    bg: 'bg-emerald-500/15',
+    color: '#10b981',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+        <path d="M18 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0z" />
+      </svg>
+    ),
+  },
+  ACCOUNT: {
+    label: 'Account',
+    bg: 'bg-blue-500/15',
+    color: '#3b82f6',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        <circle cx="12" cy="2" r="1" fill="#3b82f6" />
+      </svg>
+    ),
+  },
+  SYSTEM: {
+    label: 'System',
+    bg: 'bg-violet-500/15',
+    color: '#8b5cf6',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+        <polyline points="7 8 12 13 17 8" />
+      </svg>
+    ),
+  },
+  INFORMATION: {
+    label: 'Info',
+    bg: 'bg-amber-500/15',
+    color: '#f59e0b',
+    icon: (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 11l19-9-9 19-2-8-8-2z" />
+      </svg>
+    ),
+  },
+};
 
 // Le contenu stocke les images inline sous la forme `![image](url)`
 const NEWS_IMAGE_REGEX = /!\[[^\]]*\]\(([^)\s]+)\)/g;
@@ -136,20 +211,23 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
   const t = useTranslations('feed.detail.transfer');
   const tDetail = useTranslations('feed.detail');
   const router = useRouter();
+  const locale = useLocale();
   const [copied, setCopied] = useState(false);
 
   const isIncoming = meta.direction === 'IN';
-  const amount = (meta.amount ?? 0).toLocaleString('fr-FR', {
+  const numberLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
+  const amount = (meta.amount ?? 0).toLocaleString(numberLocale, {
     style: 'currency',
     currency: meta.currency ?? 'EUR',
   });
-  const fees = (meta.fees ?? 0).toLocaleString('fr-FR', {
+  const fees = (meta.fees ?? 0).toLocaleString(numberLocale, {
     style: 'currency',
     currency: meta.currency ?? 'EUR',
   });
-  const executedAt = new Date(meta.executedAt ?? item.createdAt).toLocaleString('fr-FR', {
-    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
+  const executedAt = new Date(meta.executedAt ?? item.createdAt).toLocaleString(
+    locale === 'fr' ? 'fr-FR' : 'en-US',
+    { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' },
+  );
 
   const copyIban = async () => {
     if (!meta.destinationIban) return;
@@ -160,8 +238,8 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
     } catch {}
   };
 
-  const downloadReceipt = () => {
-    const rows: [string, string | null | undefined][] = [
+  const downloadReceipt = async () => {
+    const allRows: [string, string | null | undefined][] = [
       [t(isIncoming ? 'received' : 'sent'), amount],
       [t('dateTime'), executedAt],
       [t('status'), t('completed')],
@@ -174,24 +252,22 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
       [t('transactionId'), meta.transactionId],
       [t('fees'), fees],
     ];
-    const text = [
-      '=== ForReal Bank — ' + t(isIncoming ? 'received' : 'sent') + ' ===',
-      '',
-      ...rows.filter(([, v]) => v).map(([k, v]) => `${k} : ${v}`),
-    ].join('\n');
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `recu-virement-${meta.transactionId ?? item.id}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    await generateReceiptPdf({
+      title: t(isIncoming ? 'received' : 'sent'),
+      amount: `${isIncoming ? '+' : '-'} ${amount}`,
+      rows: allRows.filter((entry): entry is [string, string] => Boolean(entry[1])),
+      generatedAt: new Date().toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+      }),
+      fileName: `recu-virement-${meta.transactionId ?? item.id}.pdf`,
+    });
   };
 
   return (
     <div className="space-y-4">
       <div className="text-center py-3">
-        <p className="text-3xl font-bold text-teal-300 tracking-tight">
+        <p className={`text-3xl font-bold tracking-tight ${isIncoming ? 'text-teal-300' : 'text-red-400'}`}>
           {isIncoming ? '+' : '-'} {amount}
         </p>
         <p className="text-gray-400 text-xs mt-1.5">{t(isIncoming ? 'received' : 'sent')}</p>
@@ -252,7 +328,7 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
           {t('downloadReceipt')}
         </button>
         <button
-          onClick={() => router.push('/transfer')}
+          onClick={() => router.push(`/${locale}/dashboard/transfer`)}
           className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-teal-500/40 text-teal-300 text-xs font-semibold hover:bg-teal-500/10 transition"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
@@ -279,27 +355,11 @@ type NewsDetailModalProps = {
 
 export function NewsDetailModal({ item, cfg, loading, error, onCloseAction }: NewsDetailModalProps) {
   const t = useTranslations('feed.detail');
+  const locale = useLocale();
   const transfer = item ? getTransferMetadata(item) : null;
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCloseAction();
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onCloseAction]);
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      onClick={onCloseAction}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div
-        className="w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-[#14161c] rounded-2xl border border-white/8 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <ModalShell onCloseAction={onCloseAction} cardClassName="max-h-[85vh] overflow-y-auto">
         <div className="sticky top-0 flex items-center justify-between gap-3 px-5 py-4 bg-[#14161c]/95 backdrop-blur border-b border-white/5">
           <div className="flex items-center gap-3 min-w-0">
             {cfg && (
@@ -313,7 +373,7 @@ export function NewsDetailModal({ item, cfg, loading, error, onCloseAction }: Ne
               </h2>
               {item && (
                 <p className="text-gray-500 text-[11px] mt-0.5">
-                  {new Date(item.createdAt).toLocaleString('fr-FR', {
+                  {new Date(item.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
                   })}
                 </p>
@@ -387,7 +447,6 @@ export function NewsDetailModal({ item, cfg, loading, error, onCloseAction }: Ne
             </>
           )}
         </div>
-      </div>
-    </div>
+    </ModalShell>
   );
 }

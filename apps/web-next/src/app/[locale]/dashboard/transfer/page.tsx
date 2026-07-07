@@ -3,31 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-
-type AccountItemWithIban = {
-  id: string;
-  name: string;
-  balance: number;
-  type: 'checking' | 'savings' | 'brokerage';
-  iban?: string;
-};
-
-type AccountsResponse = {
-  bankAccounts: Array<{
-    id: string;
-    name: string;
-    balance: number;
-    iban: string;
-    type: 'checking' | 'savings';
-  }>;
-  brokerageAccounts: Array<{
-    id: string;
-    name: string;
-    balance: number;
-    iban: string;
-    type: 'checking';
-  }>;
-};
+import type { Account } from '@/features/dashboard/types';
+import { fetchAccounts } from '@/features/dashboard/api';
 
 export default function DashboardTransferPage() {
   const params = useParams();
@@ -35,7 +12,7 @@ export default function DashboardTransferPage() {
   const tAccount = useTranslations('account');
   const common = useTranslations('common');
 
-  const [accounts, setAccounts] = useState<AccountItemWithIban[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [sourceAccountId, setSourceAccountId] = useState<string>('');
   const [destinationAccountId, setDestinationAccountId] = useState<string>('');
   const [destinationIban, setDestinationIban] = useState<string>('');
@@ -48,23 +25,7 @@ export default function DashboardTransferPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`/api/accounts`);
-        const data: AccountsResponse = await res.json();
-        const bank: AccountItemWithIban[] = (data.bankAccounts || []).map((acc) => ({
-          id: acc.id,
-          name: acc.name,
-          balance: Number(acc.balance),
-          type: acc.type,
-          iban: acc.iban,
-        }));
-        const broker: AccountItemWithIban[] = (data.brokerageAccounts || []).map((acc) => ({
-          id: acc.id,
-          name: acc.name,
-          balance: Number(acc.balance),
-          type: 'brokerage' as const,
-          iban: acc.iban,
-        }));
-        const list = [...bank, ...broker];
+        const list = await fetchAccounts();
         setAccounts(list);
         const defaultSrc = list.find((a) => a.type === 'checking') || list[0];
         if (defaultSrc) setSourceAccountId(defaultSrc.id);
@@ -88,7 +49,10 @@ export default function DashboardTransferPage() {
 
     try {
       const body: Record<string, unknown> = {
-        sourceType: accounts.find((a) => a.id === sourceAccountId)?.type === 'brokerage' ? 'brokerage' : 'bank',
+        sourceType:
+          accounts.find((a) => a.id === sourceAccountId)?.accountType === 'investment'
+            ? 'investment'
+            : 'bank',
         sourceAccountId,
         amount: Number(amount),
         description: description || 'Transfer',
@@ -106,14 +70,14 @@ export default function DashboardTransferPage() {
       });
       const json = await res.json();
       if (!json.success) {
-        setError(json.error || 'Transfer failed');
+        setError(json.error || tAccount('transferFailed'));
       } else {
-        setSuccess('Transfer completed successfully');
+        setSuccess(tAccount('transferSuccess'));
         setAmount('');
         setDescription('');
       }
     } catch {
-      setError('Transfer failed');
+      setError(tAccount('transferFailed'));
     } finally {
       setLoading(false);
     }
@@ -139,7 +103,7 @@ export default function DashboardTransferPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="bg-[#111318] rounded-2xl p-5 border border-white/5">
-          <label className="block text-xs text-gray-400 mb-2">Source account</label>
+          <label className="block text-xs text-gray-400 mb-2">{tAccount('sourceAccount')}</label>
           <select
             className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
             value={sourceAccountId}
@@ -154,7 +118,7 @@ export default function DashboardTransferPage() {
         </div>
 
         <div className="bg-[#111318] rounded-2xl p-5 border border-white/5">
-          <label className="block text-xs text-gray-400 mb-2">Destination</label>
+          <label className="block text-xs text-gray-400 mb-2">{tAccount('destination')}</label>
           <select
             className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
             value={destinationAccountId}
@@ -168,7 +132,7 @@ export default function DashboardTransferPage() {
               }
             }}
           >
-            <option value="external">External (IBAN)</option>
+            <option value="external">{tAccount('externalIban')}</option>
             {validDestinations.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name} · {a.type}
@@ -208,7 +172,7 @@ export default function DashboardTransferPage() {
               className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Transfer description"
+              placeholder={tAccount('transferDescription')}
             />
           </div>
         </div>
@@ -218,7 +182,7 @@ export default function DashboardTransferPage() {
           disabled={loading || !amount}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-gray-900 font-semibold text-sm hover:from-teal-400 hover:to-cyan-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Processing...' : tAccount('transferButton')}
+          {loading ? tAccount('processing') : tAccount('transferButton')}
         </button>
       </form>
     </div>
