@@ -5,6 +5,7 @@ RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 WORKDIR /usr/src/app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json tsconfig.json ./
+COPY scripts/setup-git-hooks.cjs scripts/setup-git-hooks.cjs
 COPY apps/api-nest/package.json apps/api-nest/package.json
 COPY packages/domain/package.json packages/domain/package.json
 COPY packages/application/package.json packages/application/package.json

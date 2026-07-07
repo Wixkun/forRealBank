@@ -7,6 +7,10 @@ for (const hook of ['.githooks/pre-commit', '.githooks/pre-push']) {
   }
 }
 
+if (!fs.existsSync('.git')) {
+  process.exit(0);
+}
+
 try {
   execFileSync('git', ['config', 'core.hooksPath', '.githooks'], {
     stdio: 'ignore',

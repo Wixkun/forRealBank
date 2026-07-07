@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 RUN corepack enable && corepack prepare pnpm@10.18.0 --activate
 
 COPY pnpm-lock.yaml* package.json pnpm-workspace.yaml ./
+COPY scripts/setup-git-hooks.cjs scripts/setup-git-hooks.cjs
 
 COPY apps/web-next/package.json apps/web-next/package.json
 
