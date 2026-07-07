@@ -6,11 +6,10 @@ import { useSSE } from '@/hooks/useSSE';
 import { CreateNewsInlineForm } from '@/features/feed/components/CreateNewsInlineForm';
 import {
   NewsDetailModal,
+  NEWS_STATUS_CONFIG as STATUS_CONFIG,
   stripNewsImages,
   newsHasImage,
   type NewsItem,
-  type NewsStatus,
-  type NewsStatusConfig,
 } from '@/features/feed/components/NewsDetailModal';
 
 interface NewsFeedProps {
@@ -18,79 +17,6 @@ interface NewsFeedProps {
   userRoles?: string[] | null;
   userId?: string | null;
 }
-
-const STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
-  SECURITY: {
-    label: 'Security',
-    bg: 'bg-rose-500/15',
-    color: '#f43f5e',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-        <circle cx="12" cy="16" r="1" fill="#f43f5e" />
-      </svg>
-    ),
-  },
-  TRANSACTION: {
-    label: 'Transaction',
-    bg: 'bg-cyan-500/15',
-    color: '#06b6d4',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 6v6l4 2" />
-        <polyline points="16 8 12 6 8 8" />
-      </svg>
-    ),
-  },
-  PAYMENT: {
-    label: 'Payment',
-    bg: 'bg-emerald-500/15',
-    color: '#10b981',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-        <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-        <path d="M18 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0z" />
-      </svg>
-    ),
-  },
-  ACCOUNT: {
-    label: 'Account',
-    bg: 'bg-blue-500/15',
-    color: '#3b82f6',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        <circle cx="12" cy="2" r="1" fill="#3b82f6" />
-      </svg>
-    ),
-  },
-  SYSTEM: {
-    label: 'System',
-    bg: 'bg-violet-500/15',
-    color: '#8b5cf6',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2" />
-        <path d="M8 21h8M12 17v4" />
-        <polyline points="7 8 12 13 17 8" />
-      </svg>
-    ),
-  },
-  INFORMATION: {
-    label: 'Info',
-    bg: 'bg-amber-500/15',
-    color: '#f59e0b',
-    icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 11l19-9-9 19-2-8-8-2z" />
-      </svg>
-    ),
-  },
-};
 
 const timeAgo = (dateStr: string) => {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -397,7 +323,8 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };

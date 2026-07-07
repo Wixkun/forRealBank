@@ -1,17 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
+import type { Account } from '@/features/dashboard/types';
+import { fetchAccounts } from '@/features/dashboard/api';
 
 const DASHBOARD_CONFIG = {
   RECENT_TRANSACTIONS_LIMIT: 5,
 } as const;
-
-interface Account {
-  id: string;
-  name: string;
-  balance: number;
-  iban?: string;
-  type: string;
-  accountType?: 'banking' | 'investment';
-}
 
 interface Transaction {
   id: string;
@@ -49,40 +42,9 @@ export function useDashboardData(initialData: AccountData, locale: string) {
 
       const userData = await userResponse.json();
 
-      const accountsResponse = await fetch(`${apiUrl}/accounts`, {
-        credentials: 'include',
-        next: { revalidate: 30 },
-      });
-
-      if (!accountsResponse.ok) return;
-
-      const accountsData = await accountsResponse.json();
-
-      const bankAccounts = (accountsData.accounts || []).map(
-        (acc: Record<string, unknown>) => ({
-          id: acc.id as string,
-          name: acc.name as string,
-          balance: acc.balance as number,
-          iban: acc.iban as string | undefined,
-          type: (acc.type as string) || 'checking',
-          accountType: 'banking' as const,
-        }),
-      );
-
-      const investmentAccounts = (accountsData.investmentAccounts || []).map(
-        (acc: Record<string, unknown>) => ({
-          id: acc.id as string,
-          name: acc.name as string,
-          balance: acc.totalValue as number,
-          iban: undefined,
-          type: 'investment',
-          accountType: 'investment' as const,
-        }),
-      );
-
       const newData: AccountData = {
         user: userData.user,
-        accounts: [...bankAccounts, ...investmentAccounts],
+        accounts: await fetchAccounts(),
         recentTransactions: [],
       };
 

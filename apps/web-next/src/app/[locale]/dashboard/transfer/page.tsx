@@ -3,31 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-
-type AccountItemWithIban = {
-  id: string;
-  name: string;
-  balance: number;
-  type: 'checking' | 'savings' | 'brokerage';
-  iban?: string;
-};
-
-type AccountsResponse = {
-  bankAccounts: Array<{
-    id: string;
-    name: string;
-    balance: number;
-    iban: string;
-    type: 'checking' | 'savings';
-  }>;
-  brokerageAccounts: Array<{
-    id: string;
-    name: string;
-    balance: number;
-    iban: string;
-    type: 'checking';
-  }>;
-};
+import type { Account } from '@/features/dashboard/types';
+import { fetchAccounts } from '@/features/dashboard/api';
 
 export default function DashboardTransferPage() {
   const params = useParams();
@@ -35,7 +12,7 @@ export default function DashboardTransferPage() {
   const tAccount = useTranslations('account');
   const common = useTranslations('common');
 
-  const [accounts, setAccounts] = useState<AccountItemWithIban[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [sourceAccountId, setSourceAccountId] = useState<string>('');
   const [destinationAccountId, setDestinationAccountId] = useState<string>('');
   const [destinationIban, setDestinationIban] = useState<string>('');
@@ -48,23 +25,7 @@ export default function DashboardTransferPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`/api/accounts`);
-        const data: AccountsResponse = await res.json();
-        const bank: AccountItemWithIban[] = (data.bankAccounts || []).map((acc) => ({
-          id: acc.id,
-          name: acc.name,
-          balance: Number(acc.balance),
-          type: acc.type,
-          iban: acc.iban,
-        }));
-        const broker: AccountItemWithIban[] = (data.brokerageAccounts || []).map((acc) => ({
-          id: acc.id,
-          name: acc.name,
-          balance: Number(acc.balance),
-          type: 'brokerage' as const,
-          iban: acc.iban,
-        }));
-        const list = [...bank, ...broker];
+        const list = await fetchAccounts();
         setAccounts(list);
         const defaultSrc = list.find((a) => a.type === 'checking') || list[0];
         if (defaultSrc) setSourceAccountId(defaultSrc.id);
@@ -88,7 +49,10 @@ export default function DashboardTransferPage() {
 
     try {
       const body: Record<string, unknown> = {
-        sourceType: accounts.find((a) => a.id === sourceAccountId)?.type === 'brokerage' ? 'brokerage' : 'bank',
+        sourceType:
+          accounts.find((a) => a.id === sourceAccountId)?.accountType === 'investment'
+            ? 'investment'
+            : 'bank',
         sourceAccountId,
         amount: Number(amount),
         description: description || 'Transfer',

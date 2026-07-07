@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationCenter } from '@/features/notifications/components/NotificationCenter';
+import { useStatement } from '@/features/statements/StatementContext';
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 
@@ -279,6 +280,7 @@ function IconDownload() {
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { user } = useAuth();
+  const statement = useStatement();
   const router = useRouter();
   const pathname = usePathname() ?? '';
   const params = useParams();
@@ -408,7 +410,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <button className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-gray-300 hover:bg-white/5 transition-colors flex items-center gap-1.5">
+            <button
+              onClick={() => statement?.openStatement()}
+              className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-gray-300 hover:bg-white/5 transition-colors flex items-center gap-1.5"
+            >
               <IconDownload /> Statement
             </button>
             {user?.id && <NotificationCenter userId={user.id} />}
