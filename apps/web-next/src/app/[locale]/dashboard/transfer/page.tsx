@@ -70,14 +70,14 @@ export default function DashboardTransferPage() {
       });
       const json = await res.json();
       if (!json.success) {
-        setError(json.error || 'Transfer failed');
+        setError(json.error || tAccount('transferFailed'));
       } else {
-        setSuccess('Transfer completed successfully');
+        setSuccess(tAccount('transferSuccess'));
         setAmount('');
         setDescription('');
       }
     } catch {
-      setError('Transfer failed');
+      setError(tAccount('transferFailed'));
     } finally {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function DashboardTransferPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="bg-[#111318] rounded-2xl p-5 border border-white/5">
-          <label className="block text-xs text-gray-400 mb-2">Source account</label>
+          <label className="block text-xs text-gray-400 mb-2">{tAccount('sourceAccount')}</label>
           <select
             className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
             value={sourceAccountId}
@@ -118,7 +118,7 @@ export default function DashboardTransferPage() {
         </div>
 
         <div className="bg-[#111318] rounded-2xl p-5 border border-white/5">
-          <label className="block text-xs text-gray-400 mb-2">Destination</label>
+          <label className="block text-xs text-gray-400 mb-2">{tAccount('destination')}</label>
           <select
             className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
             value={destinationAccountId}
@@ -132,7 +132,7 @@ export default function DashboardTransferPage() {
               }
             }}
           >
-            <option value="external">External (IBAN)</option>
+            <option value="external">{tAccount('externalIban')}</option>
             {validDestinations.map((a) => (
               <option key={a.id} value={a.id}>
                 {a.name} · {a.type}
@@ -172,7 +172,7 @@ export default function DashboardTransferPage() {
               className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Transfer description"
+              placeholder={tAccount('transferDescription')}
             />
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function DashboardTransferPage() {
           disabled={loading || !amount}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-gray-900 font-semibold text-sm hover:from-teal-400 hover:to-cyan-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Processing...' : tAccount('transferButton')}
+          {loading ? tAccount('processing') : tAccount('transferButton')}
         </button>
       </form>
     </div>

@@ -9,9 +9,17 @@ import {
 } from '@forreal/application';
 import { INewsRepository, NewsSource, NewsStatus } from '@forreal/domain';
 
+// Signal de changement du fil : userId null = changement public (tout le
+// monde relit sa liste), sinon seul l'utilisateur concerné est notifié.
+// Le sujet ne transporte JAMAIS le contenu d'une news : chaque connexion SSE
+// relit sa propre liste filtrée côté serveur (confidentialité).
+export interface NewsChangeEvent {
+  userId: string | null;
+}
+
 @Injectable()
 export class NewsService {
-  private newsChangeSubject = new Subject<unknown>();
+  private newsChangeSubject = new Subject<NewsChangeEvent>();
 
   constructor(
     @Inject(CreateNewsUseCase) private readonly createNewsUC: CreateNewsUseCase,
@@ -65,7 +73,8 @@ export class NewsService {
       userId: params.targetUserId,
       metadata: params.metadata ?? null,
     });
-    this.newsChangeSubject.next(result);
+    // News privée : ne notifier que son destinataire
+    this.newsChangeSubject.next({ userId: params.targetUserId });
     return result;
   }
 
@@ -139,8 +148,7 @@ export class NewsService {
     return this.newsChangeSubject.asObservable();
   }
 
-  private async broadcastUpdate(userId?: string | null) {
-    const allNews = await this.listNewsUC.execute({ limit: 20, offset: 0, userId });
-    this.newsChangeSubject.next(allNews);
+  private async broadcastUpdate(userId: string | null = null) {
+    this.newsChangeSubject.next({ userId });
   }
 }

@@ -215,17 +215,19 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
   const [copied, setCopied] = useState(false);
 
   const isIncoming = meta.direction === 'IN';
-  const amount = (meta.amount ?? 0).toLocaleString('fr-FR', {
+  const numberLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
+  const amount = (meta.amount ?? 0).toLocaleString(numberLocale, {
     style: 'currency',
     currency: meta.currency ?? 'EUR',
   });
-  const fees = (meta.fees ?? 0).toLocaleString('fr-FR', {
+  const fees = (meta.fees ?? 0).toLocaleString(numberLocale, {
     style: 'currency',
     currency: meta.currency ?? 'EUR',
   });
-  const executedAt = new Date(meta.executedAt ?? item.createdAt).toLocaleString('fr-FR', {
-    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
+  const executedAt = new Date(meta.executedAt ?? item.createdAt).toLocaleString(
+    locale === 'fr' ? 'fr-FR' : 'en-US',
+    { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' },
+  );
 
   const copyIban = async () => {
     if (!meta.destinationIban) return;
@@ -353,6 +355,7 @@ type NewsDetailModalProps = {
 
 export function NewsDetailModal({ item, cfg, loading, error, onCloseAction }: NewsDetailModalProps) {
   const t = useTranslations('feed.detail');
+  const locale = useLocale();
   const transfer = item ? getTransferMetadata(item) : null;
 
   return (
@@ -370,7 +373,7 @@ export function NewsDetailModal({ item, cfg, loading, error, onCloseAction }: Ne
               </h2>
               {item && (
                 <p className="text-gray-500 text-[11px] mt-0.5">
-                  {new Date(item.createdAt).toLocaleString('fr-FR', {
+                  {new Date(item.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                     day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
                   })}
                 </p>

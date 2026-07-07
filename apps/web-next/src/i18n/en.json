@@ -87,6 +87,39 @@
     "accountTypes": {
       "checking": "Checking Account",
       "savings": "Savings"
+    },
+    "transactions": {
+      "title": "Transactions",
+      "periods": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month",
+        "year": "Year",
+        "all": "All"
+      },
+      "topUp": "+ Top up",
+      "fromTo": "From → to {account}",
+      "amountPlaceholder": "Amount (€)",
+      "transfer": "Transfer",
+      "cancel": "Cancel",
+      "invalidAmount": "Invalid amount",
+      "insufficientFunds": "Insufficient funds",
+      "transferFailed": "Transfer failed",
+      "networkError": "Network error",
+      "loading": "Loading…",
+      "empty": "No transactions for this account",
+      "transactionFallback": "Transaction",
+      "columns": {
+        "date": "Date",
+        "description": "Description",
+        "category": "Category",
+        "amount": "Amount"
+      }
+    },
+    "chart": {
+      "noData": "Not enough data",
+      "currentBalance": "Current balance",
+      "balance": "Balance: {value}"
     }
   },
   "account": {
@@ -105,6 +138,12 @@
     "transferTo": "Transfer to",
     "transferDescription": "Description",
     "transferButton": "Send Transfer",
+    "sourceAccount": "Source account",
+    "destination": "Destination",
+    "externalIban": "External (IBAN)",
+    "transferSuccess": "Transfer completed successfully",
+    "transferFailed": "Transfer failed",
+    "processing": "Processing…",
     "deposit": "Deposit",
     "withdraw": "Withdraw",
     "transactionTypes": {
@@ -356,6 +395,26 @@
     }
   },
   "feed": {
+    "list": {
+      "title": "News",
+      "archivedTitle": "Archived",
+      "back": "← Back",
+      "archivedCount": "Archived ({count})",
+      "select": "Select",
+      "cancel": "Cancel",
+      "hintArchive": "archive",
+      "hintDelete": "delete",
+      "archive": "Archive",
+      "delete": "Delete",
+      "unarchive": "Unarchive",
+      "emptyArchived": "No archived items",
+      "empty": "No news",
+      "selected": "{count} selected",
+      "justNow": "just now",
+      "minutesAgo": "{count}m",
+      "hoursAgo": "{count}h",
+      "daysAgo": "{count}d"
+    },
     "title": "Bank news",
     "confirmDelete": "Delete this news item?",
     "empty": "No news yet",
@@ -420,6 +479,49 @@
         "downloadReceipt": "Download receipt",
         "redoTransfer": "Make another transfer"
       }
+    }
+  },
+  "statements": {
+    "title": "Account statement",
+    "close": "Close",
+    "account": "Account",
+    "loadingAccounts": "Loading…",
+    "shortcuts": "Shortcuts",
+    "thisMonth": "This month",
+    "lastMonth": "Last month",
+    "thisYear": "This year",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "invalidRange": "The start date must be before the end date.",
+    "loadError": "Unable to load accounts.",
+    "generateError": "Statement generation failed. Please try again.",
+    "download": "Download statement",
+    "generating": "Generating…",
+    "cancel": "Cancel",
+    "pdf": {
+      "editedOn": "Issued on {date}",
+      "title": "Account statement",
+      "holder": "Account holder",
+      "account": "Account",
+      "iban": "IBAN",
+      "currency": "Currency",
+      "currentBalance": "Current balance",
+      "period": "Period",
+      "periodValue": "from {start} to {end}",
+      "openingBalance": "Opening balance",
+      "totalCredits": "Total credits",
+      "totalDebits": "Total debits",
+      "closingBalance": "Closing balance",
+      "colDate": "Date",
+      "colDescription": "Description",
+      "colCategory": "Category",
+      "colAmount": "Amount",
+      "colBalance": "Balance",
+      "credit": "Credit",
+      "debit": "Debit",
+      "noTransactions": "No transactions for this period.",
+      "footer": "ForRealBank — Account statement",
+      "page": "Page {current}/{total}"
     }
   },
   "notifications": {

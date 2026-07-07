@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import type { DisplayTransaction } from '@/features/dashboard/types';
 
 type ChartPoint = DisplayTransaction & { balance: number };
@@ -12,12 +13,15 @@ export function AccountChart({ transactions, currentBalance }: {
   currentBalance?: number;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const t = useTranslations('dashboard.chart');
+  const locale = useLocale();
+  const dateLocale = locale === 'fr' ? 'fr-FR' : 'en-US';
 
   const fmtA = (v: number) =>
-    new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+    new Intl.NumberFormat(dateLocale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
 
   if (transactions.length === 0) {
-    return <div className="flex items-center justify-center h-28 text-gray-600 text-sm">Pas assez de données</div>;
+    return <div className="flex items-center justify-center h-28 text-gray-600 text-sm">{t('noData')}</div>;
   }
 
   const sorted = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -33,7 +37,7 @@ export function AccountChart({ transactions, currentBalance }: {
     if (currentBalance != null && last && Math.abs(currentBalance - last.balance) > 0.01) {
       points = [...points, {
         id: '__now__', date: new Date().toISOString().split('T')[0],
-        description: 'Solde actuel', amount: 0, type: 'credit' as const, balance: currentBalance,
+        description: t('currentBalance'), amount: 0, type: 'credit' as const, balance: currentBalance,
       }];
     }
 
@@ -53,7 +57,7 @@ export function AccountChart({ transactions, currentBalance }: {
             className="absolute z-10 pointer-events-none bg-[#1a1d24] border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
             style={{ left: `${(px(hovered) / W) * 100}%`, top: '-8px', transform: 'translate(-50%, -100%)' }}
           >
-            <p className="text-gray-500 mb-0.5">{new Date(hovPt.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+            <p className="text-gray-500 mb-0.5">{new Date(hovPt.date).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })}</p>
             {hovPt.id !== '__now__' && (
               <>
                 <p className="text-gray-300 truncate max-w-40 mb-0.5">{hovPt.description}</p>
@@ -62,7 +66,7 @@ export function AccountChart({ transactions, currentBalance }: {
                 </p>
               </>
             )}
-            <p className="text-white font-mono font-semibold mt-0.5">Solde : {fmtA(hovPt.balance)}</p>
+            <p className="text-white font-mono font-semibold mt-0.5">{t('balance', { value: fmtA(hovPt.balance) })}</p>
           </div>
         )}
         <svg width="100%" viewBox={`0 0 ${W} ${H}`} className="overflow-visible">
@@ -95,7 +99,7 @@ export function AccountChart({ transactions, currentBalance }: {
             .filter((i, idx, arr) => arr.indexOf(i) === idx && points[i])
             .map((i) => (
               <text key={i} x={px(i)} y={H - 4} textAnchor="middle" fontSize="9" fill="#4b5563">
-                {new Date(points[i].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                {new Date(points[i].date).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short' })}
               </text>
             ))}
         </svg>
@@ -114,7 +118,7 @@ export function AccountChart({ transactions, currentBalance }: {
           className="absolute z-10 pointer-events-none bg-[#1a1d24] border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
           style={{ left: `${((PL + (hovered + 0.5) * (cW / sorted.length)) / W) * 100}%`, top: '-8px', transform: 'translate(-50%, -100%)' }}
         >
-          <p className="text-gray-500 mb-0.5">{new Date(hovTx.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+          <p className="text-gray-500 mb-0.5">{new Date(hovTx.date).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: 'numeric' })}</p>
           <p className="text-gray-300 truncate max-w-40 mb-0.5">{hovTx.description}</p>
           <p className={`font-mono font-semibold ${hovTx.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}>
             {hovTx.type === 'credit' ? '+' : '−'}{fmtA(hovTx.amount)}
@@ -144,7 +148,7 @@ export function AccountChart({ transactions, currentBalance }: {
           .filter((i, idx, arr) => arr.indexOf(i) === idx && sorted[i])
           .map((i) => (
             <text key={i} x={PL + (i + 0.5) * (cW / sorted.length)} y={H - 4} textAnchor="middle" fontSize="9" fill="#4b5563">
-              {new Date(sorted[i].date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+              {new Date(sorted[i].date).toLocaleDateString(dateLocale, { day: '2-digit', month: 'short' })}
             </text>
           ))}
       </svg>

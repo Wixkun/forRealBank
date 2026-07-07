@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useSSE } from '@/hooks/useSSE';
 import { CreateNewsInlineForm } from '@/features/feed/components/CreateNewsInlineForm';
@@ -18,16 +19,6 @@ interface NewsFeedProps {
   userId?: string | null;
 }
 
-const timeAgo = (dateStr: string) => {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return "à l'instant";
-  if (m < 60) return `${m}m`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h`;
-  return `${Math.floor(h / 24)}j`;
-};
-
 const DRAG_THRESHOLD = 75;
 
 const CLICK_THRESHOLD = 6;
@@ -41,11 +32,22 @@ interface DraggableNewsItemProps {
 }
 
 function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: DraggableNewsItemProps) {
+  const t = useTranslations('feed.list');
   const [translateX, setTranslateX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [exiting, setExiting] = useState(false);
   const startXRef = useRef(0);
   const cfg = STATUS_CONFIG[item.status] ?? STATUS_CONFIG.INFORMATION;
+
+  const timeAgo = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return t('justNow');
+    if (m < 60) return t('minutesAgo', { count: m });
+    const h = Math.floor(m / 60);
+    if (h < 24) return t('hoursAgo', { count: h });
+    return t('daysAgo', { count: Math.floor(h / 24) });
+  };
 
   const handlePointerDown = (e: React.PointerEvent) => {
     startXRef.current = e.clientX;
@@ -96,14 +98,14 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
           <path d="M19 6l-1 14H6L5 6" />
           <path d="M10 11v6M14 11v6" />
         </svg>
-        <span className="text-red-400 text-xs font-semibold">Supprimer</span>
+        <span className="text-red-400 text-xs font-semibold">{t('delete')}</span>
       </div>
 
       <div
         className="absolute inset-0 rounded-xl flex items-center justify-end pr-4 gap-2"
         style={{ opacity: isLeft ? progress : 0, background: `rgba(34,197,94,${0.15 * progress})` }}
       >
-        <span className="text-green-400 text-xs font-semibold">Archiver</span>
+        <span className="text-green-400 text-xs font-semibold">{t('archive')}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round">
           <path d="M21 8v13H3V8" /><path d="M1 3h22v5H1z" /><path d="M10 12h4" />
         </svg>
@@ -165,6 +167,7 @@ function saveHiddenIds(ids: Set<string>) {
 }
 
 export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = null }: NewsFeedProps) {
+  const t = useTranslations('feed.list');
   const [news, setNews] = useState<NewsItem[]>([]);
   const [archived, setArchived] = useState<NewsItem[]>([]);
   const [showArchived, setShowArchived] = useState(false);
@@ -346,7 +349,7 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <h3 className="font-semibold text-white text-sm">{showArchived ? 'Archivés' : 'Actualités'}</h3>
+          <h3 className="font-semibold text-white text-sm">{showArchived ? t('archivedTitle') : t('title')}</h3>
           {!showArchived && news.length > 0 && (
             <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-full font-bold leading-none">{news.length}</span>
           )}
@@ -354,7 +357,7 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
         <div className="flex items-center gap-3">
           {!selectionMode && (
             <button onClick={() => setShowArchived((v) => !v)} className="text-gray-500 hover:text-gray-300 text-[11px] transition-colors">
-              {showArchived ? '← Retour' : `Archivés (${archived.length})`}
+              {showArchived ? t('back') : t('archivedCount', { count: archived.length })}
             </button>
           )}
           {displayedNews.length > 0 && (
@@ -362,7 +365,7 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
               onClick={() => (selectionMode ? exitSelection() : setSelectionMode(true))}
               className={`text-[11px] transition ${selectionMode ? 'text-gray-500 hover:text-gray-300' : 'text-cyan-400 hover:text-cyan-300'}`}
             >
-              {selectionMode ? 'Annuler' : 'Sélectionner'}
+              {selectionMode ? t('cancel') : t('select')}
             </button>
           )}
         </div>
@@ -370,16 +373,16 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
 
       {!showArchived && !selectionMode && news.length > 0 && (
         <p className="text-gray-700 text-[10px] mb-2.5 flex items-center gap-1.5">
-          <span className="text-green-700">←</span> archiver
+          <span className="text-green-700">←</span> {t('hintArchive')}
           <span className="mx-1 text-gray-800">·</span>
-          supprimer <span className="text-red-800">→</span>
+          {t('hintDelete')} <span className="text-red-800">→</span>
         </p>
       )}
 
       <div className="space-y-2">
         {displayedNews.length === 0 ? (
           <div className="py-8 text-center text-gray-600 text-xs">
-            {showArchived ? 'Aucun élément archivé' : 'Aucune actualité'}
+            {showArchived ? t('emptyArchived') : t('empty')}
           </div>
         ) : showArchived ? (
           archived.map((item) => {
@@ -402,7 +405,7 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
                   <p className="text-gray-600 text-[11px] mt-0.5 line-clamp-1">{item.subtitle || stripNewsImages(item.content)}</p>
                 </div>
                 {!selectionMode && (
-                  <button onClick={(e) => { e.stopPropagation(); handleUnarchive(item.id); }} title="Désarchiver" className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5">↩</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleUnarchive(item.id); }} title={t('unarchive')} className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5">↩</button>
                 )}
               </div>
             );
@@ -438,14 +441,14 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
 
       {selectionMode && selectedIds.size > 0 && (
         <div className="mt-3 p-3 bg-[#1a1d24] rounded-xl border border-white/8 flex items-center justify-between gap-2">
-          <span className="text-gray-400 text-[11px]">{selectedIds.size} sélectionné{selectedIds.size > 1 ? 's' : ''}</span>
+          <span className="text-gray-400 text-[11px]">{t('selected', { count: selectedIds.size })}</span>
           <div className="flex items-center gap-2">
             {showArchived ? (
-              <button onClick={handleBulkUnarchive} className="text-[11px] px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 transition">Désarchiver</button>
+              <button onClick={handleBulkUnarchive} className="text-[11px] px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 transition">{t('unarchive')}</button>
             ) : (
-              <button onClick={handleBulkArchive} className="text-[11px] px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition">Archiver</button>
+              <button onClick={handleBulkArchive} className="text-[11px] px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition">{t('archive')}</button>
             )}
-            <button onClick={handleBulkDelete} className="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition">Supprimer</button>
+            <button onClick={handleBulkDelete} className="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition">{t('delete')}</button>
           </div>
         </div>
       )}

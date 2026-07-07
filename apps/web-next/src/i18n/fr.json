@@ -87,6 +87,39 @@
     "accountTypes": {
       "checking": "Compte Principal",
       "savings": "Épargne"
+    },
+    "transactions": {
+      "title": "Transactions",
+      "periods": {
+        "day": "Jour",
+        "week": "Semaine",
+        "month": "Mois",
+        "year": "Année",
+        "all": "Tout"
+      },
+      "topUp": "+ Alimenter",
+      "fromTo": "Depuis → vers {account}",
+      "amountPlaceholder": "Montant (€)",
+      "transfer": "Virer",
+      "cancel": "Annuler",
+      "invalidAmount": "Montant invalide",
+      "insufficientFunds": "Fonds insuffisants",
+      "transferFailed": "Échec du virement",
+      "networkError": "Erreur réseau",
+      "loading": "Chargement…",
+      "empty": "Aucune transaction pour ce compte",
+      "transactionFallback": "Transaction",
+      "columns": {
+        "date": "Date",
+        "description": "Description",
+        "category": "Catégorie",
+        "amount": "Montant"
+      }
+    },
+    "chart": {
+      "noData": "Pas assez de données",
+      "currentBalance": "Solde actuel",
+      "balance": "Solde : {value}"
     }
   },
   "account": {
@@ -105,6 +138,12 @@
     "transferTo": "Destinataire",
     "transferDescription": "Description",
     "transferButton": "Envoyer le virement",
+    "sourceAccount": "Compte source",
+    "destination": "Destination",
+    "externalIban": "Externe (IBAN)",
+    "transferSuccess": "Virement effectué avec succès",
+    "transferFailed": "Échec du virement",
+    "processing": "Traitement…",
     "deposit": "Dépôt",
     "withdraw": "Retrait",
     "transactionTypes": {
@@ -357,6 +396,26 @@
     }
   },
   "feed": {
+    "list": {
+      "title": "Actualités",
+      "archivedTitle": "Archivés",
+      "back": "← Retour",
+      "archivedCount": "Archivés ({count})",
+      "select": "Sélectionner",
+      "cancel": "Annuler",
+      "hintArchive": "archiver",
+      "hintDelete": "supprimer",
+      "archive": "Archiver",
+      "delete": "Supprimer",
+      "unarchive": "Désarchiver",
+      "emptyArchived": "Aucun élément archivé",
+      "empty": "Aucune actualité",
+      "selected": "{count} sélectionné{count, plural, one {} other {s}}",
+      "justNow": "à l'instant",
+      "minutesAgo": "{count}m",
+      "hoursAgo": "{count}h",
+      "daysAgo": "{count}j"
+    },
     "title": "Actualités de la banque",
     "confirmDelete": "Supprimer cette actualité ?",
     "empty": "Aucune actualité pour le moment",
@@ -421,6 +480,49 @@
         "downloadReceipt": "Télécharger le reçu",
         "redoTransfer": "Refaire un virement"
       }
+    }
+  },
+  "statements": {
+    "title": "Relevé de compte",
+    "close": "Fermer",
+    "account": "Compte",
+    "loadingAccounts": "Chargement…",
+    "shortcuts": "Raccourcis",
+    "thisMonth": "Ce mois-ci",
+    "lastMonth": "Mois dernier",
+    "thisYear": "Cette année",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "invalidRange": "La date de début doit précéder la date de fin.",
+    "loadError": "Impossible de charger les comptes.",
+    "generateError": "La génération du relevé a échoué. Veuillez réessayer.",
+    "download": "Télécharger le relevé",
+    "generating": "Génération…",
+    "cancel": "Annuler",
+    "pdf": {
+      "editedOn": "Édité le {date}",
+      "title": "Relevé de compte",
+      "holder": "Titulaire",
+      "account": "Compte",
+      "iban": "IBAN",
+      "currency": "Devise",
+      "currentBalance": "Solde actuel",
+      "period": "Période",
+      "periodValue": "du {start} au {end}",
+      "openingBalance": "Solde d'ouverture",
+      "totalCredits": "Total crédits",
+      "totalDebits": "Total débits",
+      "closingBalance": "Solde final",
+      "colDate": "Date",
+      "colDescription": "Description",
+      "colCategory": "Catégorie",
+      "colAmount": "Montant",
+      "colBalance": "Solde",
+      "credit": "Crédit",
+      "debit": "Débit",
+      "noTransactions": "Aucune transaction sur cette période.",
+      "footer": "ForRealBank — Relevé de compte",
+      "page": "Page {current}/{total}"
     }
   },
   "notifications": {

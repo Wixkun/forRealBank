@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
 import { ModalShell } from '@/components/ui/ModalShell';
 import type { Account } from '@/features/dashboard/types';
 import { accountLabel, lastFour } from '@/features/dashboard/types';
@@ -41,18 +42,18 @@ function initialRange(prefill: StatementPrefill): { start: string; end: string }
   }
 }
 
-type QuickRange = { label: string; range: () => { start: string; end: string } };
+type QuickRange = { key: 'thisMonth' | 'lastMonth' | 'thisYear'; range: () => { start: string; end: string } };
 
 const QUICK_RANGES: QuickRange[] = [
   {
-    label: 'Ce mois-ci',
+    key: 'thisMonth',
     range: () => {
       const now = new Date();
       return { start: toInputDate(new Date(now.getFullYear(), now.getMonth(), 1)), end: toInputDate(now) };
     },
   },
   {
-    label: 'Mois dernier',
+    key: 'lastMonth',
     range: () => {
       const now = new Date();
       return {
@@ -62,7 +63,7 @@ const QUICK_RANGES: QuickRange[] = [
     },
   },
   {
-    label: 'Cette année',
+    key: 'thisYear',
     range: () => {
       const now = new Date();
       return { start: toInputDate(new Date(now.getFullYear(), 0, 1)), end: toInputDate(now) };
@@ -77,6 +78,9 @@ export function StatementModal({ prefill, onCloseAction }: {
   prefill: StatementPrefill;
   onCloseAction: () => void;
 }) {
+  const t = useTranslations('statements');
+  const tPdf = useTranslations('statements.pdf');
+  const locale = useLocale();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [clientName, setClientName] = useState('');
   const [accountId, setAccountId] = useState(prefill.accountId ?? '');
@@ -100,11 +104,11 @@ export function StatementModal({ prefill, onCloseAction }: {
           if (!cancelled && me?.user) setClientName(`${me.user.firstName} ${me.user.lastName}`.trim());
         }
       } catch {
-        if (!cancelled) setError('Impossible de charger les comptes.');
+        if (!cancelled) setError(t('loadError'));
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [t]);
 
   const selectedAccount = accounts.find((a) => a.id === accountId) ?? null;
   const datesValid = Boolean(start && end && start <= end);
@@ -134,10 +138,12 @@ export function StatementModal({ prefill, onCloseAction }: {
         periodStart,
         periodEnd: new Date(`${end}T00:00:00`),
         transactions,
+        dateLocale: locale === 'fr' ? 'fr-FR' : 'en-US',
+        t: (key, values) => tPdf(key, values),
       });
       onCloseAction();
     } catch {
-      setError('La génération du relevé a échoué. Veuillez réessayer.');
+      setError(t('generateError'));
     } finally {
       setGenerating(false);
     }
@@ -155,12 +161,12 @@ export function StatementModal({ prefill, onCloseAction }: {
                 <line x1="8" y1="17" x2="13" y2="17" />
               </svg>
             </div>
-            <h2 className="text-white text-sm font-semibold">Relevé de compte</h2>
+            <h2 className="text-white text-sm font-semibold">{t('title')}</h2>
           </div>
           <button
             onClick={onCloseAction}
             className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition"
-            aria-label="Fermer"
+            aria-label={t('close')}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -171,13 +177,13 @@ export function StatementModal({ prefill, onCloseAction }: {
 
         <div className="px-5 py-4 space-y-4">
           <div>
-            <label className="block text-gray-500 text-[11px] mb-1.5">Compte</label>
+            <label className="block text-gray-500 text-[11px] mb-1.5">{t('account')}</label>
             <select
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
               className={inputClass}
             >
-              {accounts.length === 0 && <option value="">Chargement…</option>}
+              {accounts.length === 0 && <option value="">{t('loadingAccounts')}</option>}
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>
                   {accountLabel(a)} (…{lastFour(a)}) — {a.name}
@@ -187,16 +193,16 @@ export function StatementModal({ prefill, onCloseAction }: {
           </div>
 
           <div>
-            <label className="block text-gray-500 text-[11px] mb-1.5">Raccourcis</label>
+            <label className="block text-gray-500 text-[11px] mb-1.5">{t('shortcuts')}</label>
             <div className="flex flex-wrap gap-2">
               {QUICK_RANGES.map((q) => (
                 <button
-                  key={q.label}
+                  key={q.key}
                   type="button"
                   onClick={() => setRange(q.range())}
                   className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white/5 text-gray-300 border border-white/10 hover:bg-teal-500/15 hover:text-teal-300 hover:border-teal-500/30 transition"
                 >
-                  {q.label}
+                  {t(q.key)}
                 </button>
               ))}
             </div>
@@ -204,7 +210,7 @@ export function StatementModal({ prefill, onCloseAction }: {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-gray-500 text-[11px] mb-1.5">Date de début</label>
+              <label className="block text-gray-500 text-[11px] mb-1.5">{t('startDate')}</label>
               <input
                 type="date"
                 value={start}
@@ -214,7 +220,7 @@ export function StatementModal({ prefill, onCloseAction }: {
               />
             </div>
             <div>
-              <label className="block text-gray-500 text-[11px] mb-1.5">Date de fin</label>
+              <label className="block text-gray-500 text-[11px] mb-1.5">{t('endDate')}</label>
               <input
                 type="date"
                 value={end}
@@ -226,7 +232,7 @@ export function StatementModal({ prefill, onCloseAction }: {
           </div>
 
           {!datesValid && start && end && (
-            <p className="text-amber-300 text-xs">La date de début doit précéder la date de fin.</p>
+            <p className="text-amber-300 text-xs">{t('invalidRange')}</p>
           )}
           {error && <p className="text-red-400 text-xs">{error}</p>}
         </div>
@@ -242,13 +248,13 @@ export function StatementModal({ prefill, onCloseAction }: {
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            {generating ? 'Génération…' : 'Télécharger le relevé'}
+            {generating ? t('generating') : t('download')}
           </button>
           <button
             onClick={onCloseAction}
             className="px-5 py-2.5 rounded-lg bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition"
           >
-            Annuler
+            {t('cancel')}
           </button>
         </div>
     </ModalShell>

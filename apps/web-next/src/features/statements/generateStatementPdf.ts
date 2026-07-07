@@ -1,6 +1,12 @@
 import type { DisplayTransaction } from '@/features/dashboard/types';
 import { cleanPdfText as clean, PDF_COLORS, type PdfRgb } from '@/lib/pdf';
 
+// Traducteur scopé sur « statements.pdf » fourni par l'appelant (next-intl)
+export type StatementPdfTranslator = (
+  key: string,
+  values?: Record<string, string | number>,
+) => string;
+
 export interface StatementPdfInput {
   clientName: string;
   accountLabel: string; // Checking / Savings / Investment
@@ -13,6 +19,8 @@ export interface StatementPdfInput {
   periodEnd: Date;
   // Transactions de la période, triées par date croissante
   transactions: DisplayTransaction[];
+  dateLocale: string; // ex: fr-FR / en-US
+  t: StatementPdfTranslator;
 }
 
 const PAGE_MARGIN = 48;
@@ -30,10 +38,11 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
   const pageHeight = doc.internal.pageSize.getHeight();
   const contentWidth = pageWidth - PAGE_MARGIN * 2;
 
+  const t = (key: string, values?: Record<string, string | number>) => clean(input.t(key, values));
   const money = (n: number) =>
-    clean(n.toLocaleString('fr-FR', { style: 'currency', currency: input.currency }));
-  const dateFr = (d: Date) =>
-    d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    clean(n.toLocaleString(input.dateLocale, { style: 'currency', currency: input.currency }));
+  const fmtDate = (d: Date) =>
+    d.toLocaleDateString(input.dateLocale, { day: '2-digit', month: '2-digit', year: 'numeric' });
 
   const totalCredits = input.transactions
     .filter((t) => t.type === 'credit')
@@ -60,10 +69,10 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...GRAY);
-  doc.text(clean(`Édité le ${dateFr(new Date())}`), pageWidth - PAGE_MARGIN, y, { align: 'right' });
+  doc.text(t('editedOn', { date: fmtDate(new Date()) }), pageWidth - PAGE_MARGIN, y, { align: 'right' });
   y += 18;
   doc.setFontSize(11);
-  doc.text(clean('Relevé de compte'), PAGE_MARGIN, y);
+  doc.text(t('title'), PAGE_MARGIN, y);
   y += 14;
   doc.setDrawColor(...LINE);
   doc.line(PAGE_MARGIN, y, pageWidth - PAGE_MARGIN, y);
@@ -71,12 +80,12 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
 
   // ── Informations client / compte ───────────────────────────────────────────
   const info: [string, string][] = [
-    ['Titulaire', input.clientName],
-    ['Compte', `${input.accountName} — ${input.maskedNumber}`],
-    ['IBAN', input.iban ?? '—'],
-    ['Devise', input.currency],
-    ['Solde actuel', money(input.currentBalance)],
-    ['Période', `du ${dateFr(input.periodStart)} au ${dateFr(input.periodEnd)}`],
+    [t('holder'), input.clientName],
+    [t('account'), `${input.accountName} — ${input.maskedNumber}`],
+    [t('iban'), input.iban ?? '—'],
+    [t('currency'), input.currency],
+    [t('currentBalance'), money(input.currentBalance)],
+    [t('period'), t('periodValue', { start: fmtDate(input.periodStart), end: fmtDate(input.periodEnd) })],
   ];
   const colWidth = contentWidth / 2;
   info.forEach(([label, value], i) => {
@@ -92,11 +101,11 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
   y += Math.ceil(info.length / 2) * 30 + 8;
 
   // ── Résumé de la période ───────────────────────────────────────────────────
-  const summary: { label: string; value: string; color: [number, number, number] }[] = [
-    { label: "Solde d'ouverture", value: openingBalance != null ? money(openingBalance) : '—', color: DARK },
-    { label: 'Total crédits', value: `+ ${money(totalCredits)}`, color: TEAL },
-    { label: 'Total débits', value: `- ${money(totalDebits)}`, color: RED },
-    { label: 'Solde final', value: closingBalance != null ? money(closingBalance) : '—', color: DARK },
+  const summary: { label: string; value: string; color: PdfRgb }[] = [
+    { label: t('openingBalance'), value: openingBalance != null ? money(openingBalance) : '—', color: DARK },
+    { label: t('totalCredits'), value: `+ ${money(totalCredits)}`, color: TEAL },
+    { label: t('totalDebits'), value: `- ${money(totalDebits)}`, color: RED },
+    { label: t('closingBalance'), value: closingBalance != null ? money(closingBalance) : '—', color: DARK },
   ];
   const boxHeight = 52;
   doc.setDrawColor(...LINE);
@@ -118,11 +127,11 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
 
   // ── Tableau des transactions ───────────────────────────────────────────────
   const cols = [
-    { header: 'Date', width: 64, align: 'left' as const },
-    { header: 'Description', width: 197, align: 'left' as const },
-    { header: 'Catégorie', width: 60, align: 'left' as const },
-    { header: 'Montant', width: 90, align: 'right' as const },
-    { header: 'Solde', width: 88, align: 'right' as const },
+    { header: t('colDate'), width: 64, align: 'left' as const },
+    { header: t('colDescription'), width: 197, align: 'left' as const },
+    { header: t('colCategory'), width: 60, align: 'left' as const },
+    { header: t('colAmount'), width: 90, align: 'right' as const },
+    { header: t('colBalance'), width: 88, align: 'right' as const },
   ];
   const colX: number[] = [];
   let acc = PAGE_MARGIN;
@@ -158,7 +167,7 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(...GRAY);
-    doc.text('Aucune transaction sur cette période.', pageWidth / 2, y, { align: 'center' });
+    doc.text(t('noTransactions'), pageWidth / 2, y, { align: 'center' });
   } else {
     doc.setFont('helvetica', 'normal');
     input.transactions.forEach((tx, index) => {
@@ -176,10 +185,10 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
       const textY = y + 13;
       doc.setFontSize(8.5);
       doc.setTextColor(...DARK);
-      doc.text(dateFr(new Date(tx.date)), colX[0] + 8, textY);
+      doc.text(fmtDate(new Date(tx.date)), colX[0] + 8, textY);
       doc.text(descLines, colX[1] + 8, textY);
       doc.setTextColor(...GRAY);
-      doc.text(tx.type === 'credit' ? 'Crédit' : 'Débit', colX[2] + 8, textY);
+      doc.text(tx.type === 'credit' ? t('credit') : t('debit'), colX[2] + 8, textY);
       doc.setTextColor(...(tx.type === 'credit' ? TEAL : RED));
       doc.text(
         `${tx.type === 'credit' ? '+' : '-'} ${money(tx.amount)}`,
@@ -208,8 +217,8 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...GRAY);
-    doc.text(clean('ForRealBank — Relevé de compte'), PAGE_MARGIN, pageHeight - 32);
-    doc.text(`Page ${i}/${pageCount}`, pageWidth - PAGE_MARGIN, pageHeight - 32, { align: 'right' });
+    doc.text(t('footer'), PAGE_MARGIN, pageHeight - 32);
+    doc.text(t('page', { current: i, total: pageCount }), pageWidth - PAGE_MARGIN, pageHeight - 32, { align: 'right' });
   }
 
   const pad = (n: number) => String(n).padStart(2, '0');

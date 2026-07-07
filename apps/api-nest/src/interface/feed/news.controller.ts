@@ -7,7 +7,7 @@ import { diskStorage } from 'multer';
 import type { Request as ExpressRequest } from 'express';
 import { extname } from 'path';
 import { randomUUID } from 'crypto';
-import { Observable, interval, map, switchMap, merge } from 'rxjs';
+import { Observable, filter, interval, map, switchMap, merge } from 'rxjs';
 import { NewsService } from './news.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
@@ -227,10 +227,19 @@ export class NewsController {
   @UseGuards(OptionalJwtGuard)
   stream(@Req() req: Request): Observable<MessageEvent> {
     const userId = optionalUserId(req);
+    // Confidentialité : le flux n'envoie jamais de payload brut partagé.
+    // Chaque connexion relit SA liste (filtrée par userId côté serveur),
+    // déclenchée par un signal ciblé (news privée → destinataire seul,
+    // changement public → tout le monde) ou par le poll de secours.
     return merge(
-      this.newsService.getNewsChangeObservable(),
-      interval(5000).pipe(switchMap(async () => this.newsService.listNews(20, 0, userId))),
-    ).pipe(map((news) => ({ data: news }) as MessageEvent));
+      this.newsService
+        .getNewsChangeObservable()
+        .pipe(filter((event) => event.userId === null || event.userId === userId)),
+      interval(5000),
+    ).pipe(
+      switchMap(async () => this.newsService.listNews(20, 0, userId)),
+      map((news) => ({ data: news }) as MessageEvent),
+    );
   }
 
   // ─── Lecture d'une news par id (déclaré en dernier : ':id' est un catch-all) ─

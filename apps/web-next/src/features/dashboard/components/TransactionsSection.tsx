@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Account, DisplayTransaction, fmt, fmtDate, accountLabel, lastFour } from '@/features/dashboard/types';
 import { AccountChart } from '@/features/dashboard/components/AccountChart';
 import { fetchAccountTransactions } from '@/features/dashboard/api';
@@ -15,13 +16,7 @@ import {
 
 type Period = 'day' | 'week' | 'month' | 'year' | 'all';
 
-const PERIODS: { key: Period; label: string }[] = [
-  { key: 'day',   label: 'Jour'    },
-  { key: 'week',  label: 'Semaine' },
-  { key: 'month', label: 'Mois'    },
-  { key: 'year',  label: 'Année'   },
-  { key: 'all',   label: 'Tout'    },
-];
+const PERIODS: Period[] = ['day', 'week', 'month', 'year', 'all'];
 
 function filterByPeriod(txns: DisplayTransaction[], p: Period): DisplayTransaction[] {
   if (p === 'all') return txns;
@@ -42,6 +37,7 @@ type Props = {
 };
 
 export function TransactionsSection({ accounts, selectedAccountId, onTransferCompleteAction }: Props) {
+  const t = useTranslations('dashboard.transactions');
   const [transactions, setTransactions] = useState<DisplayTransaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [period, setPeriod] = useState<Period>('month');
@@ -107,7 +103,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
       id: tx.id,
       authorId: null,
       userId: null,
-      title: tx.description || 'Transaction',
+      title: tx.description || t('transactionFallback'),
       subtitle: null,
       content: tx.description || '',
       status: 'TRANSACTION',
@@ -134,8 +130,8 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
   const handleTransfer = async () => {
     if (!transferSource || !selectedAccount || !transferAmount) return;
     const amount = parseFloat(transferAmount);
-    if (isNaN(amount) || amount <= 0) { setTransferError('Montant invalide'); return; }
-    if (amount > transferSource.balance) { setTransferError('Fonds insuffisants'); return; }
+    if (isNaN(amount) || amount <= 0) { setTransferError(t('invalidAmount')); return; }
+    if (amount > transferSource.balance) { setTransferError(t('insufficientFunds')); return; }
 
     const sourceType =
       transferSource.accountType === 'investment' || transferSource.type === 'investment'
@@ -157,7 +153,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
         }),
       });
       const data = await res.json();
-      if (!data.success) { setTransferError(data.error || 'Échec du virement'); return; }
+      if (!data.success) { setTransferError(data.error || t('transferFailed')); return; }
 
       setShowTransfer(false);
       setTransferAmount('');
@@ -166,7 +162,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
       await loadActivities(selectedAccount);
       await onTransferCompleteAction?.();
     } catch {
-      setTransferError('Erreur réseau');
+      setTransferError(t('networkError'));
     } finally {
       setTransferLoading(false);
     }
@@ -179,14 +175,14 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-          Transactions
+          {t('title')}
           {selectedAccount && (
             <span className="text-teal-400 font-normal text-xs">— {accountLabel(selectedAccount)}</span>
           )}
         </h3>
 
         <div className="flex items-center gap-1 bg-black/20 rounded-lg p-0.5">
-          {PERIODS.map(({ key, label }) => (
+          {PERIODS.map((key) => (
             <button
               key={key}
               onClick={() => setPeriod(key)}
@@ -196,7 +192,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              {label}
+              {t(`periods.${key}`)}
             </button>
           ))}
         </div>
@@ -221,7 +217,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
               onClick={() => { setShowTransfer((v) => !v); setTransferError(null); }}
               className="text-xs px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30 transition"
             >
-              + Alimenter
+              {t('topUp')}
             </button>
           )}
         </div>
@@ -231,7 +227,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
       {showTransfer && selectedAccount && sourceOptions.length > 0 && (
         <div className="px-5 py-4 border-b border-white/5 bg-teal-950/30">
           <p className="text-teal-300 text-xs mb-2 font-medium">
-            Depuis → vers {accountLabel(selectedAccount)}
+            {t('fromTo', { account: accountLabel(selectedAccount) })}
           </p>
           <div className="flex items-center gap-2">
             <select
@@ -244,7 +240,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
               ))}
             </select>
             <input
-              type="number" min="1" step="0.01" placeholder="Montant (€)"
+              type="number" min="1" step="0.01" placeholder={t('amountPlaceholder')}
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
               className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
@@ -254,13 +250,13 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
               disabled={transferLoading || !transferAmount}
               className="px-4 py-1.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {transferLoading ? '...' : 'Virer'}
+              {transferLoading ? '...' : t('transfer')}
             </button>
             <button
               onClick={() => { setShowTransfer(false); setTransferError(null); setTransferAmount(''); }}
               className="text-gray-500 text-xs hover:text-gray-300 transition"
             >
-              Annuler
+              {t('cancel')}
             </button>
           </div>
           {transferError && <p className="text-red-400 text-xs mt-2">{transferError}</p>}
@@ -269,21 +265,21 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
 
       {/* Content */}
       {loading ? (
-        <div className="px-5 py-10 text-center text-gray-600 text-sm">Loading...</div>
+        <div className="px-5 py-10 text-center text-gray-600 text-sm">{t('loading')}</div>
       ) : showChart ? (
         <div className="px-5 py-4">
           <AccountChart transactions={displayed} currentBalance={selectedAccount?.balance} />
         </div>
       ) : displayed.length === 0 ? (
-        <div className="px-5 py-10 text-center text-gray-600 text-sm">No transactions for this account</div>
+        <div className="px-5 py-10 text-center text-gray-600 text-sm">{t('empty')}</div>
       ) : (
         <table className="w-full text-sm">
           <thead>
             <tr>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">Date</th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">Description</th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">Category</th>
-              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">Amount</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.date')}</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.description')}</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.category')}</th>
+              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.amount')}</th>
             </tr>
           </thead>
           <tbody>
