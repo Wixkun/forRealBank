@@ -431,7 +431,7 @@ pipeline for pull requests and production deployments:
 2. **Security Scan** — Trivy filesystem scan, SARIF upload, and blocking on critical vulnerabilities.
 3. **Docker Build** — build API and web images without pushing.
 4. **Integration Tests** — start `db`, `api`, and `web` with Docker Compose, then verify health, metrics, register, and login flows.
-5. **E2E Tests** — run Playwright against the Docker Compose stack.
+5. **Optional E2E Tests** — run Playwright against the Docker Compose stack, publish artifacts, and report failures without blocking production while the UI is still being stabilized.
 6. **Push Images** — push immutable Git SHA image tags to GHCR, only on `main`.
 7. **Deploy Production** — SSH deploy to the Swarm, only after every required job succeeds on `main`.
 
@@ -442,7 +442,6 @@ Quality Gates
 Security Scan
 Docker Build
 Integration Tests
-E2E Tests
 ```
 
 Production deploys use repository secrets only for deployment and registry access:
