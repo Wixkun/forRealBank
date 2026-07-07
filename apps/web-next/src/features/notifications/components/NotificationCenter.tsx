@@ -14,8 +14,14 @@ interface NotificationCenterProps {
 export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, isMarkAllLoading } =
-    useNotifications({ apiUrl });
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    isMarkAllLoading,
+  } = useNotifications({ apiUrl });
   const t = useTranslations('notifications');
   const locale = useLocale();
   const { theme, mounted } = useTheme();
@@ -94,13 +100,19 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
             currentTheme === 'dark' ? 'bg-gray-950 border-gray-800' : 'bg-white border-gray-200'
           }`}
         >
-          <div className={`p-4 border-b ${currentTheme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+          <div
+            className={`p-4 border-b ${currentTheme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}
+          >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className={`font-semibold text-lg ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <h3
+                  className={`font-semibold text-lg ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                >
                   {t('title')}
                 </h3>
-                <p className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                <p
+                  className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                >
                   {t('unreadCount', { count: unreadCount })}
                 </p>
               </div>
@@ -126,12 +138,16 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
 
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 && (
-              <div className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div
+                className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+              >
                 {t('empty')}
               </div>
             )}
             {notifications.length > 0 && unreadNotifications.length === 0 && (
-              <div className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              <div
+                className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+              >
                 {t('emptyUnread')}
               </div>
             )}
@@ -149,36 +165,58 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h4 className={`font-semibold text-sm mb-1 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h4
+                          className={`font-semibold text-sm mb-1 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                        >
                           {notif.title}
                           {notif.unreadCount > 1 && (
-                            <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
-                              currentTheme === 'dark' ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-700'
-                            }`}>
+                            <span
+                              className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
+                                currentTheme === 'dark'
+                                  ? 'bg-blue-900 text-blue-300'
+                                  : 'bg-blue-100 text-blue-700'
+                              }`}
+                            >
                               {notif.unreadCount}
                             </span>
                           )}
                         </h4>
-                        <p className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
+                        <p
+                          className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+                        >
                           {notif.content}
                         </p>
-                        <div className={`flex items-center gap-2 text-xs ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                          <span className={`px-2 py-1 rounded ${currentTheme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-200'}`}>
+                        <div
+                          className={`flex items-center gap-2 text-xs ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                        >
+                          <span
+                            className={`px-2 py-1 rounded ${currentTheme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-200'}`}
+                          >
                             {notif.type}
                           </span>
                           <span>
                             {new Date(notif.updatedAt ?? notif.createdAt).toLocaleString(locale, {
-                              day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                              day: 'numeric',
+                              month: 'short',
+                              hour: '2-digit',
+                              minute: '2-digit',
                             })}
                           </span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'}`} />
+                        <div
+                          className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'}`}
+                        />
                         <button
-                          onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteNotification(notif.id);
+                          }}
                           className={`text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition ${
-                            currentTheme === 'dark' ? 'hover:bg-gray-800 text-gray-500 hover:text-gray-300' : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
+                            currentTheme === 'dark'
+                              ? 'hover:bg-gray-800 text-gray-500 hover:text-gray-300'
+                              : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
                           }`}
                           aria-label="Supprimer"
                         >

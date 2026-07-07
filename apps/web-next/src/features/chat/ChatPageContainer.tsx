@@ -12,9 +12,7 @@ interface ChatPageContainerProps {
   initialConversations: ConversationData[];
 }
 
-export default function ChatPageContainer({
-  initialConversations,
-}: ChatPageContainerProps) {
+export default function ChatPageContainer({ initialConversations }: ChatPageContainerProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { user, isLoading: userLoading } = useAuth();

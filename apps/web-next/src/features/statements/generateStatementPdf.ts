@@ -30,7 +30,6 @@ const { teal: TEAL, dark: DARK, gray: GRAY, red: RED, line: LINE } = PDF_COLORS;
 const HEADER_FILL: PdfRgb = [240, 243, 246];
 const ZEBRA_FILL: PdfRgb = [249, 250, 251];
 
-
 export async function generateStatementPdf(input: StatementPdfInput): Promise<void> {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF({ unit: 'pt', format: 'a4' });
@@ -69,7 +68,9 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...GRAY);
-  doc.text(t('editedOn', { date: fmtDate(new Date()) }), pageWidth - PAGE_MARGIN, y, { align: 'right' });
+  doc.text(t('editedOn', { date: fmtDate(new Date()) }), pageWidth - PAGE_MARGIN, y, {
+    align: 'right',
+  });
   y += 18;
   doc.setFontSize(11);
   doc.text(t('title'), PAGE_MARGIN, y);
@@ -85,7 +86,10 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
     [t('iban'), input.iban ?? '—'],
     [t('currency'), input.currency],
     [t('currentBalance'), money(input.currentBalance)],
-    [t('period'), t('periodValue', { start: fmtDate(input.periodStart), end: fmtDate(input.periodEnd) })],
+    [
+      t('period'),
+      t('periodValue', { start: fmtDate(input.periodStart), end: fmtDate(input.periodEnd) }),
+    ],
   ];
   const colWidth = contentWidth / 2;
   info.forEach(([label, value], i) => {
@@ -102,10 +106,18 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
 
   // ── Résumé de la période ───────────────────────────────────────────────────
   const summary: { label: string; value: string; color: PdfRgb }[] = [
-    { label: t('openingBalance'), value: openingBalance != null ? money(openingBalance) : '—', color: DARK },
+    {
+      label: t('openingBalance'),
+      value: openingBalance != null ? money(openingBalance) : '—',
+      color: DARK,
+    },
     { label: t('totalCredits'), value: `+ ${money(totalCredits)}`, color: TEAL },
     { label: t('totalDebits'), value: `- ${money(totalDebits)}`, color: RED },
-    { label: t('closingBalance'), value: closingBalance != null ? money(closingBalance) : '—', color: DARK },
+    {
+      label: t('closingBalance'),
+      value: closingBalance != null ? money(closingBalance) : '—',
+      color: DARK,
+    },
   ];
   const boxHeight = 52;
   doc.setDrawColor(...LINE);
@@ -113,7 +125,8 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
   const cellWidth = contentWidth / summary.length;
   summary.forEach((cell, i) => {
     const x = PAGE_MARGIN + i * cellWidth + 12;
-    if (i > 0) doc.line(PAGE_MARGIN + i * cellWidth, y + 8, PAGE_MARGIN + i * cellWidth, y + boxHeight - 8);
+    if (i > 0)
+      doc.line(PAGE_MARGIN + i * cellWidth, y + 8, PAGE_MARGIN + i * cellWidth, y + boxHeight - 8);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(...GRAY);
@@ -197,12 +210,9 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
         { align: 'right' },
       );
       doc.setTextColor(...DARK);
-      doc.text(
-        tx.balance != null ? money(tx.balance) : '—',
-        colX[4] + cols[4].width - 8,
-        textY,
-        { align: 'right' },
-      );
+      doc.text(tx.balance != null ? money(tx.balance) : '—', colX[4] + cols[4].width - 8, textY, {
+        align: 'right',
+      });
 
       y += rowHeight;
       doc.setDrawColor(...LINE);
@@ -218,7 +228,12 @@ export async function generateStatementPdf(input: StatementPdfInput): Promise<vo
     doc.setFontSize(7.5);
     doc.setTextColor(...GRAY);
     doc.text(t('footer'), PAGE_MARGIN, pageHeight - 32);
-    doc.text(t('page', { current: i, total: pageCount }), pageWidth - PAGE_MARGIN, pageHeight - 32, { align: 'right' });
+    doc.text(
+      t('page', { current: i, total: pageCount }),
+      pageWidth - PAGE_MARGIN,
+      pageHeight - 32,
+      { align: 'right' },
+    );
   }
 
   const pad = (n: number) => String(n).padStart(2, '0');

@@ -37,12 +37,7 @@ function defaultWsUrl(): string {
   return current.toString();
 }
 
-export function useChat({
-  conversationId,
-  userId,
-  apiUrl = '/api',
-  wsUrl,
-}: UseChatOptions) {
+export function useChat({ conversationId, userId, apiUrl = '/api', wsUrl }: UseChatOptions) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
@@ -148,7 +143,13 @@ export function useChat({
       },
       [emit, conversationId, userId],
     ),
-    startTyping: useCallback(() => emit('typing_start', { conversationId, userId }), [emit, conversationId, userId]),
-    stopTyping: useCallback(() => emit('typing_stop', { conversationId, userId }), [emit, conversationId, userId]),
+    startTyping: useCallback(
+      () => emit('typing_start', { conversationId, userId }),
+      [emit, conversationId, userId],
+    ),
+    stopTyping: useCallback(
+      () => emit('typing_stop', { conversationId, userId }),
+      [emit, conversationId, userId],
+    ),
   };
 }

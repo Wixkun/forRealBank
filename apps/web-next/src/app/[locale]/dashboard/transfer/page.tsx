@@ -44,8 +44,13 @@ export default function DashboardTransferPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sourceAccountId) { setError(common('error')); return; }
-    setError(''); setSuccess(''); setLoading(true);
+    if (!sourceAccountId) {
+      setError(common('error'));
+      return;
+    }
+    setError('');
+    setSuccess('');
+    setLoading(true);
 
     try {
       const body: Record<string, unknown> = {
@@ -166,7 +171,9 @@ export default function DashboardTransferPage() {
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-2">{tAccount('transferDescription')}</label>
+            <label className="block text-xs text-gray-400 mb-2">
+              {tAccount('transferDescription')}
+            </label>
             <input
               type="text"
               className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"

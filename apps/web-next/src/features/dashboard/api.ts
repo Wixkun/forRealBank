@@ -6,16 +6,14 @@ export async function fetchAccounts(): Promise<Account[]> {
   if (!res.ok) throw new Error(`Failed to load accounts (${res.status})`);
   const data = await res.json();
 
-  const bankAccounts: Account[] = (data.accounts || []).map(
-    (acc: Record<string, unknown>) => ({
-      id: acc.id as string,
-      name: acc.name as string,
-      balance: acc.balance as number,
-      iban: acc.iban as string | undefined,
-      type: (acc.type as string) || 'checking',
-      accountType: 'banking' as const,
-    }),
-  );
+  const bankAccounts: Account[] = (data.accounts || []).map((acc: Record<string, unknown>) => ({
+    id: acc.id as string,
+    name: acc.name as string,
+    balance: acc.balance as number,
+    iban: acc.iban as string | undefined,
+    type: (acc.type as string) || 'checking',
+    accountType: 'banking' as const,
+  }));
 
   const investmentAccounts: Account[] = (data.investmentAccounts || []).map(
     (acc: Record<string, unknown>) => ({
@@ -43,7 +41,9 @@ export async function fetchAccountTransactions(account: Account): Promise<Displa
   if (!res.ok) throw new Error(`Failed to load transactions (${res.status})`);
 
   const data = await res.json();
-  const raw: Array<Record<string, unknown>> = Array.isArray(data) ? data : (data.transactions ?? []);
+  const raw: Array<Record<string, unknown>> = Array.isArray(data)
+    ? data
+    : (data.transactions ?? []);
 
   return raw.map((t) => {
     const rawAmount = t.amount as number;

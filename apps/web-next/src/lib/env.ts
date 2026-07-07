@@ -37,4 +37,3 @@ export function buildApiUrl(base: string, endpoint: string): string {
   }
   return `${cleanBase}${cleanEndpoint}`;
 }
-

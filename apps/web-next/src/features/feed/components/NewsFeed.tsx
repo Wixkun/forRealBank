@@ -91,9 +91,20 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
     >
       <div
         className="absolute inset-0 rounded-xl flex items-center justify-start pl-4 gap-2"
-        style={{ opacity: isRight ? progress : 0, background: `rgba(239,68,68,${0.15 * progress})` }}
+        style={{
+          opacity: isRight ? progress : 0,
+          background: `rgba(239,68,68,${0.15 * progress})`,
+        }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2.5" strokeLinecap="round">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#f87171"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        >
           <polyline points="3 6 5 6 21 6" />
           <path d="M19 6l-1 14H6L5 6" />
           <path d="M10 11v6M14 11v6" />
@@ -106,14 +117,27 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
         style={{ opacity: isLeft ? progress : 0, background: `rgba(34,197,94,${0.15 * progress})` }}
       >
         <span className="text-green-400 text-xs font-semibold">{t('archive')}</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4ade80" strokeWidth="2.5" strokeLinecap="round">
-          <path d="M21 8v13H3V8" /><path d="M1 3h22v5H1z" /><path d="M10 12h4" />
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#4ade80"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        >
+          <path d="M21 8v13H3V8" />
+          <path d="M1 3h22v5H1z" />
+          <path d="M10 12h4" />
         </svg>
       </div>
 
       <div
         className="relative flex items-start gap-3 p-3.5 bg-[#1a1d24] rounded-xl border border-white/4 cursor-pointer select-none hover:border-white/10 transition-colors"
-        style={{ transform: `translateX(${translateX}px)`, transition: isDragging ? 'none' : 'transform 240ms cubic-bezier(0.25,0.46,0.45,0.94)' }}
+        style={{
+          transform: `translateX(${translateX}px)`,
+          transition: isDragging ? 'none' : 'transform 240ms cubic-bezier(0.25,0.46,0.45,0.94)',
+        }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -124,8 +148,12 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <span className="text-white text-xs font-semibold leading-snug truncate">{item.title}</span>
-            <span className="text-gray-600 text-[10px] whitespace-nowrap shrink-0 mt-0.5">{timeAgo(item.createdAt)}</span>
+            <span className="text-white text-xs font-semibold leading-snug truncate">
+              {item.title}
+            </span>
+            <span className="text-gray-600 text-[10px] whitespace-nowrap shrink-0 mt-0.5">
+              {timeAgo(item.createdAt)}
+            </span>
           </div>
           <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed pr-1">
             {item.subtitle || stripNewsImages(item.content)}
@@ -133,14 +161,34 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
         </div>
         <div className="flex items-center gap-1.5 shrink-0 mt-1.5">
           {newsHasImage(item) && (
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-gray-600"
+            >
               <rect x="3" y="3" width="18" height="18" rx="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
               <polyline points="21 15 16 10 5 21" />
             </svg>
           )}
           {isNew && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-gray-700"
+          >
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </div>
@@ -166,7 +214,11 @@ function saveHiddenIds(ids: Set<string>) {
   } catch {}
 }
 
-export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = null }: NewsFeedProps) {
+export default function NewsFeed({
+  apiUrl = '/api',
+  userRoles = null,
+  userId = null,
+}: NewsFeedProps) {
   const t = useTranslations('feed.list');
   const [news, setNews] = useState<NewsItem[]>([]);
   const [archived, setArchived] = useState<NewsItem[]>([]);
@@ -174,7 +226,11 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
   const [seenIds, setSeenIds] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [detail, setDetail] = useState<{ item: NewsItem | null; loading: boolean; error: string | null } | null>(null);
+  const [detail, setDetail] = useState<{
+    item: NewsItem | null;
+    loading: boolean;
+    error: string | null;
+  } | null>(null);
   const removedIdsRef = useRef<Set<string>>(new Set());
 
   const router = useRouter();
@@ -217,7 +273,9 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
         if (!cancelled) setDetail({ item: null, loading: false, error: 'NOT_FOUND' });
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [newsIdParam, apiUrl]);
 
   useEffect(() => {
@@ -261,7 +319,9 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
     }
   }, [apiUrl]);
 
-  useEffect(() => { loadNews(); }, [loadNews]);
+  useEffect(() => {
+    loadNews();
+  }, [loadNews]);
 
   useEffect(() => {
     if (news.length > 0 && seenIds.size === 0) {
@@ -332,10 +392,25 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
     });
   };
 
-  const exitSelection = () => { setSelectionMode(false); setSelectedIds(new Set()); };
-  const handleBulkDelete = async () => { const ids = [...selectedIds]; exitSelection(); await Promise.all(ids.map((id) => handleDelete(id))); };
-  const handleBulkArchive = async () => { const ids = [...selectedIds]; exitSelection(); await Promise.all(ids.map((id) => handleArchive(id))); };
-  const handleBulkUnarchive = async () => { const ids = [...selectedIds]; exitSelection(); await Promise.all(ids.map((id) => handleUnarchive(id))); };
+  const exitSelection = () => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  };
+  const handleBulkDelete = async () => {
+    const ids = [...selectedIds];
+    exitSelection();
+    await Promise.all(ids.map((id) => handleDelete(id)));
+  };
+  const handleBulkArchive = async () => {
+    const ids = [...selectedIds];
+    exitSelection();
+    await Promise.all(ids.map((id) => handleArchive(id)));
+  };
+  const handleBulkUnarchive = async () => {
+    const ids = [...selectedIds];
+    exitSelection();
+    await Promise.all(ids.map((id) => handleUnarchive(id)));
+  };
 
   const displayedNews = showArchived ? archived : news;
 
@@ -349,14 +424,21 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <h3 className="font-semibold text-white text-sm">{showArchived ? t('archivedTitle') : t('title')}</h3>
+          <h3 className="font-semibold text-white text-sm">
+            {showArchived ? t('archivedTitle') : t('title')}
+          </h3>
           {!showArchived && news.length > 0 && (
-            <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-full font-bold leading-none">{news.length}</span>
+            <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-full font-bold leading-none">
+              {news.length}
+            </span>
           )}
         </div>
         <div className="flex items-center gap-3">
           {!selectionMode && (
-            <button onClick={() => setShowArchived((v) => !v)} className="text-gray-500 hover:text-gray-300 text-[11px] transition-colors">
+            <button
+              onClick={() => setShowArchived((v) => !v)}
+              className="text-gray-500 hover:text-gray-300 text-[11px] transition-colors"
+            >
               {showArchived ? t('back') : t('archivedCount', { count: archived.length })}
             </button>
           )}
@@ -395,17 +477,34 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
                 className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${selected ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-[#1a1d24]/50 border-white/4 hover:border-white/10'}`}
               >
                 {selectionMode && (
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}>
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}
+                  >
                     {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
                 )}
-                <div className={`rounded-lg flex items-center justify-center shrink-0 ${cfg.bg} ${selectionMode ? 'w-7 h-7' : 'w-8 h-8'}`}>{cfg.icon}</div>
+                <div
+                  className={`rounded-lg flex items-center justify-center shrink-0 ${cfg.bg} ${selectionMode ? 'w-7 h-7' : 'w-8 h-8'}`}
+                >
+                  {cfg.icon}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-xs font-medium truncate">{item.title}</p>
-                  <p className="text-gray-600 text-[11px] mt-0.5 line-clamp-1">{item.subtitle || stripNewsImages(item.content)}</p>
+                  <p className="text-gray-600 text-[11px] mt-0.5 line-clamp-1">
+                    {item.subtitle || stripNewsImages(item.content)}
+                  </p>
                 </div>
                 {!selectionMode && (
-                  <button onClick={(e) => { e.stopPropagation(); handleUnarchive(item.id); }} title={t('unarchive')} className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5">↩</button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUnarchive(item.id);
+                    }}
+                    title={t('unarchive')}
+                    className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5"
+                  >
+                    ↩
+                  </button>
                 )}
               </div>
             );
@@ -421,19 +520,36 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
                   onClick={() => toggleSelect(item.id)}
                   className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors select-none ${selected ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-[#1a1d24] border-white/4'}`}
                 >
-                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}>
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}
+                  >
                     {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}>{cfg.icon}</div>
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}
+                  >
+                    {cfg.icon}
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-semibold leading-snug truncate">{item.title}</p>
-                    <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed">{item.subtitle || stripNewsImages(item.content)}</p>
+                    <p className="text-white text-xs font-semibold leading-snug truncate">
+                      {item.title}
+                    </p>
+                    <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed">
+                      {item.subtitle || stripNewsImages(item.content)}
+                    </p>
                   </div>
                 </div>
               );
             }
             return (
-              <DraggableNewsItem key={item.id} item={item} onArchive={handleArchive} onDelete={handleDelete} onOpen={openNews} isNew={!seenIds.has(item.id)} />
+              <DraggableNewsItem
+                key={item.id}
+                item={item}
+                onArchive={handleArchive}
+                onDelete={handleDelete}
+                onOpen={openNews}
+                isNew={!seenIds.has(item.id)}
+              />
             );
           })
         )}
@@ -441,14 +557,31 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
 
       {selectionMode && selectedIds.size > 0 && (
         <div className="mt-3 p-3 bg-[#1a1d24] rounded-xl border border-white/8 flex items-center justify-between gap-2">
-          <span className="text-gray-400 text-[11px]">{t('selected', { count: selectedIds.size })}</span>
+          <span className="text-gray-400 text-[11px]">
+            {t('selected', { count: selectedIds.size })}
+          </span>
           <div className="flex items-center gap-2">
             {showArchived ? (
-              <button onClick={handleBulkUnarchive} className="text-[11px] px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 transition">{t('unarchive')}</button>
+              <button
+                onClick={handleBulkUnarchive}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 transition"
+              >
+                {t('unarchive')}
+              </button>
             ) : (
-              <button onClick={handleBulkArchive} className="text-[11px] px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition">{t('archive')}</button>
+              <button
+                onClick={handleBulkArchive}
+                className="text-[11px] px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition"
+              >
+                {t('archive')}
+              </button>
             )}
-            <button onClick={handleBulkDelete} className="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition">{t('delete')}</button>
+            <button
+              onClick={handleBulkDelete}
+              className="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition"
+            >
+              {t('delete')}
+            </button>
           </div>
         </div>
       )}
@@ -456,7 +589,9 @@ export default function NewsFeed({ apiUrl = '/api', userRoles = null, userId = n
       {detail && (
         <NewsDetailModal
           item={detail.item}
-          cfg={detail.item ? (STATUS_CONFIG[detail.item.status] ?? STATUS_CONFIG.INFORMATION) : null}
+          cfg={
+            detail.item ? (STATUS_CONFIG[detail.item.status] ?? STATUS_CONFIG.INFORMATION) : null
+          }
           loading={detail.loading}
           error={detail.error}
           onCloseAction={closeDetail}

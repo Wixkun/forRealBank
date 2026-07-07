@@ -42,7 +42,9 @@ export async function apiFetch<T>(endpoint: string, init?: RequestInit): Promise
   });
 
   const contentType = res.headers.get('content-type') || '';
-  const payload = contentType.includes('application/json') ? await res.json().catch(() => null) : await res.text();
+  const payload = contentType.includes('application/json')
+    ? await res.json().catch(() => null)
+    : await res.text();
 
   if (!res.ok) {
     const message =

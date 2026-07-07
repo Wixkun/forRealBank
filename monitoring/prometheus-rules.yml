@@ -1,0 +1,129 @@
+groups:
+  - name: forrealbank-service-alerts
+    rules:
+      - alert: ForRealBankApiDown
+        expr: up{job="forrealbank-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: ForRealBank API is down
+          description: Prometheus cannot scrape the API metrics endpoint for more than 2 minutes.
+
+      - alert: MonitoringTargetDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: warning
+          service: monitoring
+        annotations:
+          summary: Monitoring target is down
+          description: The target {{ $labels.job }} on {{ $labels.instance }} has been down for more than 5 minutes.
+
+      - alert: HighHttp5xxRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total[5m])), 1)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: High API 5xx error rate
+          description: More than 5% of API requests are returning 5xx responses over 5 minutes.
+
+      - alert: HighHttpLatencyP95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: High API P95 latency
+          description: API P95 latency is above 1 second for more than 5 minutes.
+
+      - alert: ApplicationErrorsDetected
+        expr: sum(rate(app_errors_total[5m])) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: Application errors detected
+          description: Application error metrics are increasing over the last 5 minutes.
+
+  - name: forrealbank-host-alerts
+    rules:
+      - alert: HostHighCpuUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: host
+        annotations:
+          summary: High host CPU usage
+          description: Host {{ $labels.instance }} CPU usage is above 85% for more than 10 minutes.
+
+      - alert: HostHighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: host
+        annotations:
+          summary: High host memory usage
+          description: Host {{ $labels.instance }} memory usage is above 85% for more than 10 minutes.
+
+      - alert: HostDiskSpaceLow
+        expr: |
+          (
+            1 - (
+              node_filesystem_avail_bytes{fstype!~"tmpfs|overlay|squashfs|proc|sysfs|devtmpfs"}
+              /
+              node_filesystem_size_bytes{fstype!~"tmpfs|overlay|squashfs|proc|sysfs|devtmpfs"}
+            )
+          ) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          service: host
+        annotations:
+          summary: Host disk space is low
+          description: Host {{ $labels.instance }} filesystem {{ $labels.mountpoint }} is more than 85% full.
+
+  - name: forrealbank-container-alerts
+    rules:
+      - alert: ContainerHighCpuUsage
+        expr: sum by (instance, name) (rate(container_cpu_usage_seconds_total{name!=""}[5m])) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          service: container
+        annotations:
+          summary: High container CPU usage
+          description: Container {{ $labels.name }} on {{ $labels.instance }} is using more than 0.8 CPU cores for more than 10 minutes.
+
+      - alert: ContainerHighMemoryUsage
+        expr: |
+          (
+            container_memory_usage_bytes{name!=""}
+            /
+            container_spec_memory_limit_bytes{name!=""}
+          ) * 100 > 85
+          and
+          container_spec_memory_limit_bytes{name!=""} > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: container
+        annotations:
+          summary: High container memory usage
+          description: Container {{ $labels.name }} on {{ $labels.instance }} is using more than 85% of its memory limit.

@@ -20,7 +20,8 @@ const STATUS_OPTIONS: { value: NewsStatus; label: string; color: string; dot: st
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGES = 10;
 const MAX_IMAGE_DIMENSION = 1600;
-const EDITOR_IMG_CLASS = 'my-2 max-w-full max-h-48 h-auto rounded-lg border border-white/10 object-contain';
+const EDITOR_IMG_CLASS =
+  'my-2 max-w-full max-h-48 h-auto rounded-lg border border-white/10 object-contain';
 
 // Redimensionne côté client avant envoi : limite la plus grande dimension et
 // ré-encode en webp. On garde l'original si le résultat n'est pas plus léger.
@@ -38,7 +39,9 @@ async function downscaleImage(file: File): Promise<File> {
   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
   canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/webp', 0.85));
+  const blob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/webp', 0.85),
+  );
   if (!blob || blob.size >= file.size) return file;
   return new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' });
 }
@@ -183,7 +186,10 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
     // Place le point d'insertion à l'endroit du drop quand le navigateur le permet
     type CaretDoc = Document & {
       caretRangeFromPoint?: (x: number, y: number) => Range | null;
-      caretPositionFromPoint?: (x: number, y: number) => { offsetNode: Node; offset: number } | null;
+      caretPositionFromPoint?: (
+        x: number,
+        y: number,
+      ) => { offsetNode: Node; offset: number } | null;
     };
     const doc = document as CaretDoc;
     const sel = window.getSelection();
@@ -340,7 +346,16 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
                 aria-label="Emoji"
                 title="Emoji"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <circle cx="12" cy="12" r="10" />
                   <path d="M8 14s1.5 2 4 2 4-2 4-2" />
                   <line x1="9" y1="9" x2="9.01" y2="9" />
@@ -354,7 +369,16 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
                 aria-label="Image"
                 title="Image"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <rect x="3" y="3" width="18" height="18" rx="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
                   <polyline points="21 15 16 10 5 21" />
@@ -384,10 +408,15 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
               onInput={syncHasContent}
               onPaste={handlePaste}
               onDrop={handleDrop}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDragOver(true);
+              }}
               onDragLeave={() => setDragOver(false)}
               className={`w-full bg-black/30 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none min-h-24 whitespace-pre-wrap wrap-break-word transition-colors ${
-                dragOver ? 'border-teal-500/60 bg-teal-500/5' : 'border-white/10 focus:border-teal-500/50'
+                dragOver
+                  ? 'border-teal-500/60 bg-teal-500/5'
+                  : 'border-white/10 focus:border-teal-500/50'
               }`}
             />
             {!hasContent && (

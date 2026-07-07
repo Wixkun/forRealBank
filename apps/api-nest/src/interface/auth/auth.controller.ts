@@ -92,7 +92,9 @@ export class AuthController {
     try {
       enforceLoginRateLimit(req);
 
-      const candidate = await this.userRepository.findByEmail(dto.email.trim().toLowerCase()).catch(() => null);
+      const candidate = await this.userRepository
+        .findByEmail(dto.email.trim().toLowerCase())
+        .catch(() => null);
       if (candidate?.isBanned) {
         this.monitoring.recordLoginAttempt('failure');
         throw new ForbiddenException('Account banned');

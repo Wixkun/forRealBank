@@ -26,13 +26,16 @@ export class NewsRepository implements INewsRepository {
   }
 
   async save(news: News): Promise<void> {
-    await this.repo.update({ id: news.id }, {
-      title: news.title,
-      subtitle: news.subtitle,
-      content: news.content,
-      status: news.status,
-      userId: news.userId,
-    });
+    await this.repo.update(
+      { id: news.id },
+      {
+        title: news.title,
+        subtitle: news.subtitle,
+        content: news.content,
+        status: news.status,
+        userId: news.userId,
+      },
+    );
   }
 
   async create(params: {
@@ -75,7 +78,13 @@ export class NewsRepository implements INewsRepository {
     includeArchived?: boolean;
     archivedOnly?: boolean;
   }): Promise<News[]> {
-    const { limit = 20, offset = 0, userId, includeArchived = false, archivedOnly = false } = params ?? {};
+    const {
+      limit = 20,
+      offset = 0,
+      userId,
+      includeArchived = false,
+      archivedOnly = false,
+    } = params ?? {};
 
     if (archivedOnly && !userId) return [];
 

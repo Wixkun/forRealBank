@@ -31,24 +31,60 @@ export class News {
     private readonly _metadata: Record<string, unknown> | null = null,
   ) {}
 
-  get id() { return this._id; }
-  get authorId() { return this._authorId; }
-  get title() { return this._title; }
-  get content() { return this._content; }
-  get createdAt() { return this._createdAt; }
-  get status() { return this._status; }
-  get userId() { return this._userId; }
-  get archivedAt() { return this._archivedAt; }
-  get isArchived() { return this._archivedAt !== null; }
-  get source() { return this._source; }
-  get isActive() { return this._isActive; }
-  get imageUrl() { return this._imageUrl; }
-  get subtitle() { return this._subtitle; }
-  get metadata() { return this._metadata; }
+  get id() {
+    return this._id;
+  }
+  get authorId() {
+    return this._authorId;
+  }
+  get title() {
+    return this._title;
+  }
+  get content() {
+    return this._content;
+  }
+  get createdAt() {
+    return this._createdAt;
+  }
+  get status() {
+    return this._status;
+  }
+  get userId() {
+    return this._userId;
+  }
+  get archivedAt() {
+    return this._archivedAt;
+  }
+  get isArchived() {
+    return this._archivedAt !== null;
+  }
+  get source() {
+    return this._source;
+  }
+  get isActive() {
+    return this._isActive;
+  }
+  get imageUrl() {
+    return this._imageUrl;
+  }
+  get subtitle() {
+    return this._subtitle;
+  }
+  get metadata() {
+    return this._metadata;
+  }
 
-  updateTitle(title: string) { this._title = title; }
-  updateSubtitle(subtitle: string | null) { this._subtitle = subtitle; }
-  updateContent(content: string) { this._content = content; }
+  updateTitle(title: string) {
+    this._title = title;
+  }
+  updateSubtitle(subtitle: string | null) {
+    this._subtitle = subtitle;
+  }
+  updateContent(content: string) {
+    this._content = content;
+  }
 
-  hasAuthor(): boolean { return this._authorId !== null; }
+  hasAuthor(): boolean {
+    return this._authorId !== null;
+  }
 }

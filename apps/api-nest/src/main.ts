@@ -67,7 +67,7 @@ async function bootstrap() {
 }
 
 void bootstrap().catch((err) => {
-  const message = err instanceof Error ? err.stack ?? err.message : String(err);
+  const message = err instanceof Error ? (err.stack ?? err.message) : String(err);
   Logger.error(message, undefined, 'Bootstrap');
   process.exit(1);
 });

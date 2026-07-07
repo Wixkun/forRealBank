@@ -1,13 +1,14 @@
-version: "3.9"
+version: '3.9'
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:${PROMETHEUS_IMAGE_TAG:-v2.55.1}
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --web.enable-lifecycle
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus-rules.yml:/etc/prometheus/rules/forrealbank.yml:ro
       - prometheus_data:/prometheus
     networks:
       - monitoring_net
@@ -17,6 +18,7 @@ services:
       placement:
         constraints:
           - node.role == manager
+          - node.labels.monitoring == true
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -34,8 +36,91 @@ services:
           cpus: '0.10'
           memory: 128M
 
+  alertmanager:
+    image: prom/alertmanager:${ALERTMANAGER_IMAGE_TAG:-v0.27.0}
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+      - --storage.path=/alertmanager
+    volumes:
+      - ./monitoring/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager_data:/alertmanager
+    networks:
+      - monitoring_net
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.monitoring == true
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 30s
+      update_config:
+        parallelism: 1
+        delay: 10s
+        order: stop-first
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+
+  node_exporter:
+    image: prom/node-exporter:${NODE_EXPORTER_IMAGE_TAG:-v1.8.2}
+    command:
+      - --path.rootfs=/host
+      - --collector.filesystem.mount-points-exclude=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($$|/)
+      - --collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$$
+    volumes:
+      - /:/host:ro,rslave
+    networks:
+      - monitoring_net
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      resources:
+        limits:
+          cpus: '0.20'
+          memory: 128M
+        reservations:
+          cpus: '0.02'
+          memory: 32M
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:${CADVISOR_IMAGE_TAG:-v0.49.1}
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=15s
+      - --store_container_labels=false
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    networks:
+      - monitoring_net
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+      resources:
+        limits:
+          cpus: '0.40'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:${GRAFANA_IMAGE_TAG:-11.5.2}
     environment:
       GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
       GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
@@ -58,6 +143,7 @@ services:
       placement:
         constraints:
           - node.role == manager
+          - node.labels.monitoring == true
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -70,11 +156,10 @@ services:
       resources:
         limits:
           cpus: '0.75'
-          memory: 768M
+          memory: 1024M
         reservations:
           cpus: '0.10'
-          memory: 128M
-          
+          memory: 256M
 
 networks:
   monitoring_net:
@@ -86,6 +171,8 @@ networks:
 
 volumes:
   prometheus_data:
+    driver: local
+  alertmanager_data:
     driver: local
   grafana_data:
     driver: local

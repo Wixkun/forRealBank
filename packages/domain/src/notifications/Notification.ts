@@ -19,22 +19,52 @@ export class Notification {
     private _unreadCount: number = 1,
   ) {}
 
-  get id() { return this._id; }
-  get userId() { return this._userId; }
-  get title() { return this._title; }
-  get content() { return this._content; }
-  get type() { return this._type; }
-  get createdAt() { return this._createdAt; }
-  get readAt() { return this._readAt; }
-  get updatedAt() { return this._updatedAt; }
-  get targetType() { return this._targetType; }
-  get targetId() { return this._targetId; }
-  get targetUrl() { return this._targetUrl; }
-  get groupKey() { return this._groupKey; }
-  get oldestUnreadMessageId() { return this._oldestUnreadMessageId; }
-  get unreadCount() { return this._unreadCount; }
+  get id() {
+    return this._id;
+  }
+  get userId() {
+    return this._userId;
+  }
+  get title() {
+    return this._title;
+  }
+  get content() {
+    return this._content;
+  }
+  get type() {
+    return this._type;
+  }
+  get createdAt() {
+    return this._createdAt;
+  }
+  get readAt() {
+    return this._readAt;
+  }
+  get updatedAt() {
+    return this._updatedAt;
+  }
+  get targetType() {
+    return this._targetType;
+  }
+  get targetId() {
+    return this._targetId;
+  }
+  get targetUrl() {
+    return this._targetUrl;
+  }
+  get groupKey() {
+    return this._groupKey;
+  }
+  get oldestUnreadMessageId() {
+    return this._oldestUnreadMessageId;
+  }
+  get unreadCount() {
+    return this._unreadCount;
+  }
 
-  isRead(): boolean { return this._readAt !== null; }
+  isRead(): boolean {
+    return this._readAt !== null;
+  }
 
   markAsRead(at = new Date()): void {
     if (!this._readAt) {

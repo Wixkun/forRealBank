@@ -34,12 +34,7 @@ export class MonitoringMiddleware implements NestMiddleware {
       const durationSeconds = durationMs / 1000;
       const statusCode = this.statusCode;
 
-      monitoring.recordHttpRequest(
-        req.method,
-        normalizedRoute,
-        statusCode,
-        durationSeconds,
-      );
+      monitoring.recordHttpRequest(req.method, normalizedRoute, statusCode, durationSeconds);
 
       return originalSend(data);
     };

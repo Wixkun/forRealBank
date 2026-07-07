@@ -14,10 +14,7 @@ import {
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [
-    AuthModule,
-    TypeOrmModule.forFeature([NotificationEntity, UserEntity]),
-  ],
+  imports: [AuthModule, TypeOrmModule.forFeature([NotificationEntity, UserEntity])],
   controllers: [NotificationsController],
   providers: [
     { provide: INotificationRepository, useClass: NotificationRepository },

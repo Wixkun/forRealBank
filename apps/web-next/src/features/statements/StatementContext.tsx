@@ -1,6 +1,14 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { StatementModal } from '@/features/statements/StatementModal';
 
 export type StatementPeriod = 'day' | 'week' | 'month' | 'year' | 'all';

@@ -26,6 +26,10 @@ export interface INotificationRepository {
   countUnread(userId: string): Promise<number>;
   markAsRead(id: string, userId: string): Promise<void>;
   markAllAsRead(userId: string): Promise<number>;
-  findUnreadByGroupKey(userId: string, type: NotificationType, groupKey: string): Promise<Notification | null>;
+  findUnreadByGroupKey(
+    userId: string,
+    type: NotificationType,
+    groupKey: string,
+  ): Promise<Notification | null>;
   incrementGrouped(id: string, title: string, content: string): Promise<void>;
 }

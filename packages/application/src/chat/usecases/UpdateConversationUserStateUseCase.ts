@@ -10,11 +10,7 @@ export class UpdateConversationUserStateUseCase {
     private readonly notificationRepository: INotificationRepository,
   ) {}
 
-  async execute(input: {
-    userId: string;
-    conversationId: string;
-    lastReadMessageId: string;
-  }) {
+  async execute(input: { userId: string; conversationId: string; lastReadMessageId: string }) {
     await this.conversationUserStateRepository.upsert({
       userId: input.userId,
       conversationId: input.conversationId,

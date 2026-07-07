@@ -9,13 +9,27 @@ export class ConversationNotificationSettings {
     private _updatedAt: Date,
   ) {}
 
-  get id() { return this._id; }
-  get userId() { return this._userId; }
-  get conversationId() { return this._conversationId; }
-  get muted() { return this._muted; }
-  get mutedUntil() { return this._mutedUntil; }
-  get createdAt() { return this._createdAt; }
-  get updatedAt() { return this._updatedAt; }
+  get id() {
+    return this._id;
+  }
+  get userId() {
+    return this._userId;
+  }
+  get conversationId() {
+    return this._conversationId;
+  }
+  get muted() {
+    return this._muted;
+  }
+  get mutedUntil() {
+    return this._mutedUntil;
+  }
+  get createdAt() {
+    return this._createdAt;
+  }
+  get updatedAt() {
+    return this._updatedAt;
+  }
 
   // muted=true, mutedUntil=null → muted indefinitely
   // muted=true, mutedUntil > now → muted temporarily

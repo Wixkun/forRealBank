@@ -2,18 +2,19 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NewsEntity } from '@forreal/infrastructure-typeorm';
-import { randomUUID } from 'crypto';
 
 const SEED_NEWS = [
   {
     title: 'Maintenance planifiée',
-    content: 'Une maintenance technique est prévue cette nuit de 2h à 4h. Certains services seront temporairement indisponibles.',
+    content:
+      'Une maintenance technique est prévue cette nuit de 2h à 4h. Certains services seront temporairement indisponibles.',
     status: 'SYSTEM',
     source: 'MANUAL',
   },
   {
     title: 'Nouvelle réglementation bancaire',
-    content: 'À compter du 1er juillet, de nouvelles règles s\'appliquent aux virements internationaux. Consultez notre guide pour en savoir plus.',
+    content:
+      "À compter du 1er juillet, de nouvelles règles s'appliquent aux virements internationaux. Consultez notre guide pour en savoir plus.",
     status: 'INFORMATION',
     source: 'MANUAL',
   },

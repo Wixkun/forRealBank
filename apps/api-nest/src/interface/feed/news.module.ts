@@ -10,7 +10,11 @@ import {
   RoleEntity,
 } from '@forreal/infrastructure-typeorm';
 import { INewsRepository, IUserRepository, INotificationRepository } from '@forreal/domain';
-import { NewsRepository, UserRepository, NotificationRepository } from '@forreal/infrastructure-typeorm';
+import {
+  NewsRepository,
+  UserRepository,
+  NotificationRepository,
+} from '@forreal/infrastructure-typeorm';
 import {
   CreateNewsUseCase,
   ListNewsUseCase,
@@ -26,7 +30,13 @@ import { NewsSeed } from './news.seed';
 @Module({
   imports: [
     AuthModule,
-    TypeOrmModule.forFeature([NewsEntity, UserNewsStatusEntity, UserEntity, RoleEntity, NotificationEntity]),
+    TypeOrmModule.forFeature([
+      NewsEntity,
+      UserNewsStatusEntity,
+      UserEntity,
+      RoleEntity,
+      NotificationEntity,
+    ]),
   ],
   controllers: [NewsController],
   providers: [
@@ -38,7 +48,8 @@ import { NewsSeed } from './news.seed';
     { provide: INotificationRepository, useClass: NotificationRepository },
     {
       provide: CreateNewsUseCase,
-      useFactory: (newsRepo, userRepo, notifRepo) => new CreateNewsUseCase(newsRepo, userRepo, notifRepo),
+      useFactory: (newsRepo, userRepo, notifRepo) =>
+        new CreateNewsUseCase(newsRepo, userRepo, notifRepo),
       inject: [INewsRepository, IUserRepository, INotificationRepository],
     },
     {

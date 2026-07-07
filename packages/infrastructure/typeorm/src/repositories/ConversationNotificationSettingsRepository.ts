@@ -8,7 +8,9 @@ import {
 import { ConversationNotificationSettingsEntity } from '../entities/ConversationNotificationSettingsEntity';
 import { v4 as uuidv4 } from 'uuid';
 
-function toDomain(entity: ConversationNotificationSettingsEntity): ConversationNotificationSettings {
+function toDomain(
+  entity: ConversationNotificationSettingsEntity,
+): ConversationNotificationSettings {
   return new ConversationNotificationSettings(
     entity.id,
     entity.userId,
@@ -21,9 +23,7 @@ function toDomain(entity: ConversationNotificationSettingsEntity): ConversationN
 }
 
 @Injectable()
-export class ConversationNotificationSettingsRepository
-  implements IConversationNotificationSettingsRepository
-{
+export class ConversationNotificationSettingsRepository implements IConversationNotificationSettingsRepository {
   constructor(
     @InjectRepository(ConversationNotificationSettingsEntity)
     private readonly repo: Repository<ConversationNotificationSettingsEntity>,

@@ -18,9 +18,7 @@ interface UseConversationsOptions {
   apiUrl?: string;
 }
 
-export function useConversations({
-  apiUrl = '/api',
-}: UseConversationsOptions = {}) {
+export function useConversations({ apiUrl = '/api' }: UseConversationsOptions = {}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

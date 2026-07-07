@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Account, DisplayTransaction, fmt, fmtDate, accountLabel, lastFour } from '@/features/dashboard/types';
+import {
+  Account,
+  DisplayTransaction,
+  fmt,
+  fmtDate,
+  accountLabel,
+  lastFour,
+} from '@/features/dashboard/types';
 import { AccountChart } from '@/features/dashboard/components/AccountChart';
 import { fetchAccountTransactions } from '@/features/dashboard/api';
 import { useStatement } from '@/features/statements/StatementContext';
@@ -21,10 +28,10 @@ const PERIODS: Period[] = ['day', 'week', 'month', 'year', 'all'];
 function filterByPeriod(txns: DisplayTransaction[], p: Period): DisplayTransaction[] {
   if (p === 'all') return txns;
   const cutoff = new Date();
-  if (p === 'day')   cutoff.setDate(cutoff.getDate() - 1);
-  if (p === 'week')  cutoff.setDate(cutoff.getDate() - 7);
+  if (p === 'day') cutoff.setDate(cutoff.getDate() - 1);
+  if (p === 'week') cutoff.setDate(cutoff.getDate() - 7);
   if (p === 'month') cutoff.setMonth(cutoff.getMonth() - 1);
-  if (p === 'year')  cutoff.setFullYear(cutoff.getFullYear() - 1);
+  if (p === 'year') cutoff.setFullYear(cutoff.getFullYear() - 1);
   return txns.filter((t) => new Date(t.date) >= cutoff);
 }
 
@@ -36,7 +43,11 @@ type Props = {
   onTransferCompleteAction?: () => void | Promise<void>;
 };
 
-export function TransactionsSection({ accounts, selectedAccountId, onTransferCompleteAction }: Props) {
+export function TransactionsSection({
+  accounts,
+  selectedAccountId,
+  onTransferCompleteAction,
+}: Props) {
   const t = useTranslations('dashboard.transactions');
   const [transactions, setTransactions] = useState<DisplayTransaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -53,13 +64,13 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
   const statement = useStatement();
 
   const selectedAccount = selectedAccountId
-    ? accounts.find((a) => a.id === selectedAccountId) ?? null
+    ? (accounts.find((a) => a.id === selectedAccountId) ?? null)
     : null;
 
   const sourceOptions = accounts.filter((a) => a.id !== selectedAccountId);
   const transferSource = transferSourceId
-    ? accounts.find((a) => a.id === transferSourceId) ?? null
-    : sourceOptions[0] ?? null;
+    ? (accounts.find((a) => a.id === transferSourceId) ?? null)
+    : (sourceOptions[0] ?? null);
 
   const loadActivities = async (acc: Account) => {
     setLoading(true);
@@ -78,7 +89,7 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
     setTransferError(null);
     setTransferSourceId(null);
     loadActivities(selectedAccount);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedAccountId]);
 
   // Alimente le préremplissage de la popup « Statement » : compte sélectionné,
@@ -98,7 +109,8 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
   const openTransactionDetail = (tx: DisplayTransaction) => {
     if (!selectedAccount) return;
     const isCredit = tx.type === 'credit';
-    const accName = selectedAccount.name || `${accountLabel(selectedAccount)} (…${lastFour(selectedAccount)})`;
+    const accName =
+      selectedAccount.name || `${accountLabel(selectedAccount)} (…${lastFour(selectedAccount)})`;
     setTxDetail({
       id: tx.id,
       authorId: null,
@@ -119,9 +131,9 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
         transactionId: tx.id,
         executedAt: tx.date,
         sourceAccountName: isCredit ? null : accName,
-        sourceIban: isCredit ? null : selectedAccount.iban ?? null,
+        sourceIban: isCredit ? null : (selectedAccount.iban ?? null),
         destinationAccountName: isCredit ? accName : null,
-        destinationIban: isCredit ? selectedAccount.iban ?? null : null,
+        destinationIban: isCredit ? (selectedAccount.iban ?? null) : null,
         description: tx.description || null,
       },
     });
@@ -130,12 +142,19 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
   const handleTransfer = async () => {
     if (!transferSource || !selectedAccount || !transferAmount) return;
     const amount = parseFloat(transferAmount);
-    if (isNaN(amount) || amount <= 0) { setTransferError(t('invalidAmount')); return; }
-    if (amount > transferSource.balance) { setTransferError(t('insufficientFunds')); return; }
+    if (isNaN(amount) || amount <= 0) {
+      setTransferError(t('invalidAmount'));
+      return;
+    }
+    if (amount > transferSource.balance) {
+      setTransferError(t('insufficientFunds'));
+      return;
+    }
 
     const sourceType =
       transferSource.accountType === 'investment' || transferSource.type === 'investment'
-        ? 'investment' : 'bank';
+        ? 'investment'
+        : 'bank';
 
     setTransferLoading(true);
     setTransferError(null);
@@ -153,7 +172,10 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
         }),
       });
       const data = await res.json();
-      if (!data.success) { setTransferError(data.error || t('transferFailed')); return; }
+      if (!data.success) {
+        setTransferError(data.error || t('transferFailed'));
+        return;
+      }
 
       setShowTransfer(false);
       setTransferAmount('');
@@ -177,7 +199,9 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
         <h3 className="font-semibold text-white text-sm flex items-center gap-2">
           {t('title')}
           {selectedAccount && (
-            <span className="text-teal-400 font-normal text-xs">— {accountLabel(selectedAccount)}</span>
+            <span className="text-teal-400 font-normal text-xs">
+              — {accountLabel(selectedAccount)}
+            </span>
           )}
         </h3>
 
@@ -200,21 +224,38 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
         <div className="flex items-center gap-2">
           {selectedAccount && (
             <button
-              onClick={() => { setShowChart((v) => !v); setShowTransfer(false); }}
+              onClick={() => {
+                setShowChart((v) => !v);
+                setShowTransfer(false);
+              }}
               className={`w-7 h-7 flex items-center justify-center rounded-lg border transition ${
                 showChart
                   ? 'bg-teal-500/30 border-teal-500/50 text-teal-300'
                   : 'border-white/10 text-gray-500 hover:text-teal-300 hover:border-teal-500/30'
               }`}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" />
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
               </svg>
             </button>
           )}
           {selectedAccount && sourceOptions.length > 0 && (
             <button
-              onClick={() => { setShowTransfer((v) => !v); setTransferError(null); }}
+              onClick={() => {
+                setShowTransfer((v) => !v);
+                setTransferError(null);
+              }}
               className="text-xs px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30 transition"
             >
               {t('topUp')}
@@ -236,11 +277,16 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
               className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-teal-500/50"
             >
               {sourceOptions.map((a) => (
-                <option key={a.id} value={a.id}>{accountLabel(a)} — {fmt(a.balance)}</option>
+                <option key={a.id} value={a.id}>
+                  {accountLabel(a)} — {fmt(a.balance)}
+                </option>
               ))}
             </select>
             <input
-              type="number" min="1" step="0.01" placeholder={t('amountPlaceholder')}
+              type="number"
+              min="1"
+              step="0.01"
+              placeholder={t('amountPlaceholder')}
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
               className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
@@ -253,7 +299,11 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
               {transferLoading ? '...' : t('transfer')}
             </button>
             <button
-              onClick={() => { setShowTransfer(false); setTransferError(null); setTransferAmount(''); }}
+              onClick={() => {
+                setShowTransfer(false);
+                setTransferError(null);
+                setTransferAmount('');
+              }}
               className="text-gray-500 text-xs hover:text-gray-300 transition"
             >
               {t('cancel')}
@@ -276,10 +326,18 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
         <table className="w-full text-sm">
           <thead>
             <tr>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.date')}</th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.description')}</th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.category')}</th>
-              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">{t('columns.amount')}</th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">
+                {t('columns.date')}
+              </th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">
+                {t('columns.description')}
+              </th>
+              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">
+                {t('columns.category')}
+              </th>
+              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">
+                {t('columns.amount')}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -289,11 +347,16 @@ export function TransactionsSection({ accounts, selectedAccountId, onTransferCom
                 onClick={() => openTransactionDetail(tx)}
                 className="border-t border-white/4 hover:bg-teal-500/5 transition-colors cursor-pointer"
               >
-                <td className="px-5 py-3 text-gray-500 text-xs whitespace-nowrap">{fmtDate(tx.date)}</td>
+                <td className="px-5 py-3 text-gray-500 text-xs whitespace-nowrap">
+                  {fmtDate(tx.date)}
+                </td>
                 <td className="px-5 py-3 text-gray-200 text-xs">{tx.description}</td>
                 <td className="px-5 py-3 text-gray-500 text-xs capitalize">{tx.type}</td>
-                <td className={`px-5 py-3 text-right font-mono text-xs font-semibold ${tx.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}>
-                  {tx.type === 'credit' ? '+' : '-'}{fmt(Math.abs(tx.amount))}
+                <td
+                  className={`px-5 py-3 text-right font-mono text-xs font-semibold ${tx.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}
+                >
+                  {tx.type === 'credit' ? '+' : '-'}
+                  {fmt(Math.abs(tx.amount))}
                 </td>
               </tr>
             ))}

@@ -87,7 +87,9 @@ export default function DirectorPage() {
       const first = (u.firstName || '').toLowerCase();
       const last = (u.lastName || '').toLowerCase();
       const full = `${first} ${last}`.trim();
-      return email.includes(term) || first.includes(term) || last.includes(term) || full.includes(term);
+      return (
+        email.includes(term) || first.includes(term) || last.includes(term) || full.includes(term)
+      );
     });
     setItems(filtered);
   }, [q, serverItems]);
@@ -250,7 +252,9 @@ export default function DirectorPage() {
                 items.map((u) => (
                   <tr
                     key={u.id}
-                    className={theme === 'dark' ? 'border-t border-gray-800' : 'border-t border-gray-200'}
+                    className={
+                      theme === 'dark' ? 'border-t border-gray-800' : 'border-t border-gray-200'
+                    }
                   >
                     <td className="p-3">{u.email}</td>
                     <td className="p-3">{(u.firstName || '') + ' ' + (u.lastName || '')}</td>

@@ -145,7 +145,10 @@ export class TransactionsController {
 
     try {
       const amount = Number(body.amount);
-      const formattedAmount = amount.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+      const formattedAmount = amount.toLocaleString('fr-FR', {
+        style: 'currency',
+        currency: 'EUR',
+      });
 
       const sourceAccount =
         body.sourceType === 'bank'
@@ -178,7 +181,9 @@ export class TransactionsController {
         fees: 0,
         transactionId,
         executedAt: now.toISOString(),
-        sourceAccountName: sourceAccount?.name ?? (body.sourceType === 'investment' ? 'Compte Investissement' : null),
+        sourceAccountName:
+          sourceAccount?.name ??
+          (body.sourceType === 'investment' ? 'Compte Investissement' : null),
         sourceIban: sourceAccount?.iban ?? null,
         destinationAccountName: destinationAccount?.name ?? null,
         destinationIban: destinationAccount?.iban ?? body.destinationIban ?? null,
@@ -220,7 +225,8 @@ export class TransactionsController {
         await notifications.create({
           userId: destinationAccount.userId,
           title: 'Virement reçu',
-          content: `Vous avez reçu un virement de ${formattedAmount}. ${body.description || ''}`.trim(),
+          content:
+            `Vous avez reçu un virement de ${formattedAmount}. ${body.description || ''}`.trim(),
           type: NotificationType.TRANSACTION,
           targetType: NotificationTargetType.NEWS,
           targetId: recipientNews.id,

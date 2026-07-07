@@ -1,10 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
-    const apiUrl =
-      process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
 
     const cookieStore = await cookies();
     const cookieHeader = cookieStore.toString();

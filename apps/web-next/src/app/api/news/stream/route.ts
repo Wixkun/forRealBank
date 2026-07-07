@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
-import { NextRequest } from 'next/server';
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   const cookieStore = await cookies();
   const cookieHeader = cookieStore.toString();
 

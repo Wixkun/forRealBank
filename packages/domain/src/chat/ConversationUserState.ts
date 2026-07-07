@@ -9,13 +9,27 @@ export class ConversationUserState {
     private _updatedAt: Date,
   ) {}
 
-  get id() { return this._id; }
-  get userId() { return this._userId; }
-  get conversationId() { return this._conversationId; }
-  get lastReadMessageId() { return this._lastReadMessageId; }
-  get lastReadAt() { return this._lastReadAt; }
-  get createdAt() { return this._createdAt; }
-  get updatedAt() { return this._updatedAt; }
+  get id() {
+    return this._id;
+  }
+  get userId() {
+    return this._userId;
+  }
+  get conversationId() {
+    return this._conversationId;
+  }
+  get lastReadMessageId() {
+    return this._lastReadMessageId;
+  }
+  get lastReadAt() {
+    return this._lastReadAt;
+  }
+  get createdAt() {
+    return this._createdAt;
+  }
+  get updatedAt() {
+    return this._updatedAt;
+  }
 
   markRead(messageId: string): void {
     this._lastReadMessageId = messageId;

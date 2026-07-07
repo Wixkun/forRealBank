@@ -1,10 +1,5 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import {
-  Counter,
-  Histogram,
-  register,
-  collectDefaultMetrics,
-} from 'prom-client';
+import { Counter, Histogram, register, collectDefaultMetrics } from 'prom-client';
 
 @Injectable()
 export class MonitoringService implements OnModuleInit {
@@ -56,11 +51,7 @@ export class MonitoringService implements OnModuleInit {
     }
   }
 
-  private getOrCreateCounter(
-    name: string,
-    help: string,
-    labelNames: string[],
-  ): Counter {
+  private getOrCreateCounter(name: string, help: string, labelNames: string[]): Counter {
     const existing = register.getSingleMetric(name);
     if (existing) {
       return existing as Counter;

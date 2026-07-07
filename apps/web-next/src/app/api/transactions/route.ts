@@ -18,17 +18,14 @@ export async function GET(request: Request) {
 
     console.log('[API Routes] /api/transactions - Making request to NestJS...');
     const apiUrl = process.env.API_URL || 'http://localhost:3001/api';
-    const response = await fetch(
-      `${apiUrl}/transactions/recent?limit=${limit}`,
-      {
-        method: 'GET',
-        headers: {
-          Cookie: `access_token=${token}`,
-          'Content-Type': 'application/json',
-        },
-        cache: 'no-store',
+    const response = await fetch(`${apiUrl}/transactions/recent?limit=${limit}`, {
+      method: 'GET',
+      headers: {
+        Cookie: `access_token=${token}`,
+        'Content-Type': 'application/json',
       },
-    );
+      cache: 'no-store',
+    });
 
     console.log('[API Routes] /api/transactions - Response status:', response.status);
 

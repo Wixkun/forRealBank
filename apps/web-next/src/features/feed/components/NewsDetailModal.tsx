@@ -62,7 +62,16 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
     bg: 'bg-rose-500/15',
     color: '#f43f5e',
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#f43f5e"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
         <circle cx="12" cy="16" r="1" fill="#f43f5e" />
@@ -74,7 +83,16 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
     bg: 'bg-cyan-500/15',
     color: '#06b6d4',
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#06b6d4"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <circle cx="12" cy="12" r="9" />
         <path d="M12 6v6l4 2" />
         <polyline points="16 8 12 6 8 8" />
@@ -86,7 +104,16 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
     bg: 'bg-emerald-500/15',
     color: '#10b981',
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#10b981"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
         <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
         <path d="M18 12a2 2 0 1 0 4 0 2 2 0 0 0-4 0z" />
@@ -98,7 +125,16 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
     bg: 'bg-blue-500/15',
     color: '#3b82f6',
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#3b82f6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         <circle cx="12" cy="2" r="1" fill="#3b82f6" />
@@ -110,7 +146,16 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
     bg: 'bg-violet-500/15',
     color: '#8b5cf6',
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#8b5cf6"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <rect x="2" y="3" width="20" height="14" rx="2" />
         <path d="M8 21h8M12 17v4" />
         <polyline points="7 8 12 13 17 8" />
@@ -122,7 +167,16 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
     bg: 'bg-amber-500/15',
     color: '#f59e0b',
     icon: (
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <svg
+        width="17"
+        height="17"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="#f59e0b"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
         <path d="M3 11l19-9-9 19-2-8-8-2z" />
       </svg>
     ),
@@ -149,7 +203,10 @@ export function splitNewsContent(content: string): ContentSegment[] {
 }
 
 export function stripNewsImages(content: string): string {
-  return content.replace(NEWS_IMAGE_REGEX, '').replace(/\n{2,}/g, '\n').trim();
+  return content
+    .replace(NEWS_IMAGE_REGEX, '')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
 }
 
 export function newsHasImage(item: Pick<NewsItem, 'content' | 'imageUrl'>): boolean {
@@ -163,7 +220,14 @@ const maskIban = (iban: string) => {
   return `${clean.slice(0, 4)} **** **** ${clean.slice(-4)}`;
 };
 
-function Tile({ icon, label, value, sub, valueClass, action }: {
+function Tile({
+  icon,
+  label,
+  value,
+  sub,
+  valueClass,
+  action,
+}: {
   icon: ReactNode;
   label: string;
   value: string;
@@ -187,23 +251,82 @@ function Tile({ icon, label, value, sub, valueClass, action }: {
 }
 
 const tileIcon = (paths: ReactNode) => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg
+    width="15"
+    height="15"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     {paths}
   </svg>
 );
 
 const ICONS = {
-  calendar: tileIcon(<><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></>),
-  clock: tileIcon(<><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>),
-  card: tileIcon(<><rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2" y1="10" x2="22" y2="10" /></>),
-  user: tileIcon(<><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>),
-  iban: tileIcon(<><rect x="3" y="3" width="18" height="18" rx="4" /><path d="M8 15V9M12 9v6M16 9h-1.5a1.5 1.5 0 0 0 0 3H16m0 0v3" /></>),
-  file: tileIcon(<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="13" y2="17" /></>),
-  id: tileIcon(<><circle cx="12" cy="12" r="3" /><circle cx="12" cy="12" r="7" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></>),
-  receipt: tileIcon(<><path d="M4 2v20l2-1.5L8 22l2-1.5L12 22l2-1.5L16 22l2-1.5L20 22V2l-2 1.5L16 2l-2 1.5L12 2l-2 1.5L8 2 6 3.5 4 2z" /><line x1="8" y1="9" x2="16" y2="9" /><line x1="8" y1="13" x2="16" y2="13" /></>),
+  calendar: tileIcon(
+    <>
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </>,
+  ),
+  clock: tileIcon(
+    <>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </>,
+  ),
+  card: tileIcon(
+    <>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <line x1="2" y1="10" x2="22" y2="10" />
+    </>,
+  ),
+  user: tileIcon(
+    <>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </>,
+  ),
+  iban: tileIcon(
+    <>
+      <rect x="3" y="3" width="18" height="18" rx="4" />
+      <path d="M8 15V9M12 9v6M16 9h-1.5a1.5 1.5 0 0 0 0 3H16m0 0v3" />
+    </>,
+  ),
+  file: tileIcon(
+    <>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="8" y1="13" x2="16" y2="13" />
+      <line x1="8" y1="17" x2="13" y2="17" />
+    </>,
+  ),
+  id: tileIcon(
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <circle cx="12" cy="12" r="7" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </>,
+  ),
+  receipt: tileIcon(
+    <>
+      <path d="M4 2v20l2-1.5L8 22l2-1.5L12 22l2-1.5L16 22l2-1.5L20 22V2l-2 1.5L16 2l-2 1.5L12 2l-2 1.5L8 2 6 3.5 4 2z" />
+      <line x1="8" y1="9" x2="16" y2="9" />
+      <line x1="8" y1="13" x2="16" y2="13" />
+    </>,
+  ),
 };
 
-function TransferDetailBody({ item, meta, onCloseAction }: {
+function TransferDetailBody({
+  item,
+  meta,
+  onCloseAction,
+}: {
   item: NewsItem;
   meta: TransferMetadata;
   onCloseAction: () => void;
@@ -258,7 +381,11 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
       amount: `${isIncoming ? '+' : '-'} ${amount}`,
       rows: allRows.filter((entry): entry is [string, string] => Boolean(entry[1])),
       generatedAt: new Date().toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
-        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       }),
       fileName: `recu-virement-${meta.transactionId ?? item.id}.pdf`,
     });
@@ -267,7 +394,9 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
   return (
     <div className="space-y-4">
       <div className="text-center py-3">
-        <p className={`text-3xl font-bold tracking-tight ${isIncoming ? 'text-teal-300' : 'text-red-400'}`}>
+        <p
+          className={`text-3xl font-bold tracking-tight ${isIncoming ? 'text-teal-300' : 'text-red-400'}`}
+        >
           {isIncoming ? '+' : '-'} {amount}
         </p>
         <p className="text-gray-400 text-xs mt-1.5">{t(isIncoming ? 'received' : 'sent')}</p>
@@ -275,9 +404,19 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <Tile icon={ICONS.calendar} label={t('dateTime')} value={executedAt} />
-        <Tile icon={ICONS.clock} label={t('status')} value={t('completed')} valueClass="text-teal-300" />
+        <Tile
+          icon={ICONS.clock}
+          label={t('status')}
+          value={t('completed')}
+          valueClass="text-teal-300"
+        />
         {meta.sourceAccountName && (
-          <Tile icon={ICONS.card} label={t('sourceAccount')} value={meta.sourceAccountName} sub={meta.sourceIban} />
+          <Tile
+            icon={ICONS.card}
+            label={t('sourceAccount')}
+            value={meta.sourceAccountName}
+            sub={meta.sourceIban}
+          />
         )}
         {(meta.destinationAccountName || meta.destinationIban) && (
           <Tile
@@ -302,9 +441,30 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
                 className="p-1.5 rounded text-gray-500 hover:text-teal-300 hover:bg-white/5 transition shrink-0"
               >
                 {copied ? (
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 ) : (
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+                  <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
                 )}
               </button>
             }
@@ -324,14 +484,39 @@ function TransferDetailBody({ item, meta, onCloseAction }: {
           onClick={downloadReceipt}
           className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
           {t('downloadReceipt')}
         </button>
         <button
           onClick={() => router.push(`/${locale}/dashboard/transfer`)}
           className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-teal-500/40 text-teal-300 text-xs font-semibold hover:bg-teal-500/10 transition"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
           {t('redoTransfer')}
         </button>
         <button
@@ -353,100 +538,134 @@ type NewsDetailModalProps = {
   onCloseAction: () => void;
 };
 
-export function NewsDetailModal({ item, cfg, loading, error, onCloseAction }: NewsDetailModalProps) {
+export function NewsDetailModal({
+  item,
+  cfg,
+  loading,
+  error,
+  onCloseAction,
+}: NewsDetailModalProps) {
   const t = useTranslations('feed.detail');
   const locale = useLocale();
   const transfer = item ? getTransferMetadata(item) : null;
 
   return (
     <ModalShell onCloseAction={onCloseAction} cardClassName="max-h-[85vh] overflow-y-auto">
-        <div className="sticky top-0 flex items-center justify-between gap-3 px-5 py-4 bg-[#14161c]/95 backdrop-blur border-b border-white/5">
-          <div className="flex items-center gap-3 min-w-0">
-            {cfg && (
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}>
-                {cfg.icon}
-              </div>
+      <div className="sticky top-0 flex items-center justify-between gap-3 px-5 py-4 bg-[#14161c]/95 backdrop-blur border-b border-white/5">
+        <div className="flex items-center gap-3 min-w-0">
+          {cfg && (
+            <div
+              className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${cfg.bg}`}
+            >
+              {cfg.icon}
+            </div>
+          )}
+          <div className="min-w-0">
+            <h2 className="text-white text-sm font-semibold leading-snug truncate">
+              {item?.title ?? (loading ? t('loading') : t('notFoundTitle'))}
+            </h2>
+            {item && (
+              <p className="text-gray-500 text-[11px] mt-0.5">
+                {new Date(item.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
             )}
-            <div className="min-w-0">
-              <h2 className="text-white text-sm font-semibold leading-snug truncate">
-                {item?.title ?? (loading ? t('loading') : t('notFoundTitle'))}
-              </h2>
-              {item && (
-                <p className="text-gray-500 text-[11px] mt-0.5">
-                  {new Date(item.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
-                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
-                  })}
-                </p>
+          </div>
+        </div>
+        {transfer && (
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/15 text-teal-300 text-[11px] font-semibold shrink-0 ml-auto">
+            {t('transfer.completed')}
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="8.5 12.5 11 15 15.5 9.5" />
+            </svg>
+          </span>
+        )}
+        <button
+          onClick={onCloseAction}
+          className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition shrink-0"
+          aria-label={t('close')}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="px-5 py-4">
+        {loading && <p className="text-gray-500 text-xs py-6 text-center">{t('loading')}</p>}
+
+        {!loading && error && (
+          <p className="text-red-300 text-xs py-6 text-center">{t('notFound')}</p>
+        )}
+
+        {!loading && !error && item && transfer && (
+          <TransferDetailBody item={item} meta={transfer} onCloseAction={onCloseAction} />
+        )}
+
+        {!loading && !error && item && !transfer && (
+          <>
+            {item.archivedAt && (
+              <p className="mb-3 text-[11px] px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
+                {t('archived')}
+              </p>
+            )}
+            {item.subtitle && (
+              <p className="text-gray-300 text-sm font-medium mb-3">{item.subtitle}</p>
+            )}
+            {item.imageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.imageUrl}
+                alt=""
+                className="mb-3 max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/5 mx-auto"
+              />
+            )}
+            <div className="space-y-3">
+              {splitNewsContent(item.content).map((segment, i) =>
+                segment.type === 'text' ? (
+                  <p
+                    key={i}
+                    className="text-gray-400 text-[13px] leading-relaxed whitespace-pre-wrap wrap-break-word"
+                  >
+                    {segment.value}
+                  </p>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={segment.value}
+                    alt=""
+                    className="max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/5 mx-auto"
+                  />
+                ),
               )}
             </div>
-          </div>
-          {transfer && (
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/15 text-teal-300 text-[11px] font-semibold shrink-0 ml-auto">
-              {t('transfer.completed')}
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><circle cx="12" cy="12" r="9" /><polyline points="8.5 12.5 11 15 15.5 9.5" /></svg>
-            </span>
-          )}
-          <button
-            onClick={onCloseAction}
-            className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition shrink-0"
-            aria-label={t('close')}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-
-        <div className="px-5 py-4">
-          {loading && <p className="text-gray-500 text-xs py-6 text-center">{t('loading')}</p>}
-
-          {!loading && error && (
-            <p className="text-red-300 text-xs py-6 text-center">{t('notFound')}</p>
-          )}
-
-          {!loading && !error && item && transfer && (
-            <TransferDetailBody item={item} meta={transfer} onCloseAction={onCloseAction} />
-          )}
-
-          {!loading && !error && item && !transfer && (
-            <>
-              {item.archivedAt && (
-                <p className="mb-3 text-[11px] px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
-                  {t('archived')}
-                </p>
-              )}
-              {item.subtitle && (
-                <p className="text-gray-300 text-sm font-medium mb-3">{item.subtitle}</p>
-              )}
-              {item.imageUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.imageUrl}
-                  alt=""
-                  className="mb-3 max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/5 mx-auto"
-                />
-              )}
-              <div className="space-y-3">
-                {splitNewsContent(item.content).map((segment, i) =>
-                  segment.type === 'text' ? (
-                    <p key={i} className="text-gray-400 text-[13px] leading-relaxed whitespace-pre-wrap wrap-break-word">
-                      {segment.value}
-                    </p>
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={i}
-                      src={segment.value}
-                      alt=""
-                      className="max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/5 mx-auto"
-                    />
-                  ),
-                )}
-              </div>
-            </>
-          )}
-        </div>
+          </>
+        )}
+      </div>
     </ModalShell>
   );
 }

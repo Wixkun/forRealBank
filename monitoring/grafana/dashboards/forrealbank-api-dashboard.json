@@ -55,9 +55,7 @@
         "reduceOptions": {
           "values": false,
           "fields": "",
-          "calcs": [
-            "lastNotNull"
-          ]
+          "calcs": ["lastNotNull"]
         },
         "showThresholdLabels": false,
         "showThresholdMarkers": true,
@@ -534,11 +532,7 @@
   "refresh": "10s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": [
-    "forrealbank",
-    "api",
-    "monitoring"
-  ],
+  "tags": ["forrealbank", "api", "monitoring"],
   "templating": {
     "list": []
   },

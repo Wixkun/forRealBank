@@ -59,9 +59,7 @@ export function useNotifications({
       });
       setNotifications((prev) =>
         prev.map((n) =>
-          n.id === notificationId
-            ? { ...n, isRead: true, readAt: new Date().toISOString() }
-            : n,
+          n.id === notificationId ? { ...n, isRead: true, readAt: new Date().toISOString() } : n,
         ),
       );
     } catch (err) {
@@ -77,9 +75,7 @@ export function useNotifications({
         credentials: 'include',
       });
       const nowIso = new Date().toISOString();
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, isRead: true, readAt: nowIso })),
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true, readAt: nowIso })));
     } catch (err) {
       console.error('Failed to mark all notifications as read:', err);
     } finally {

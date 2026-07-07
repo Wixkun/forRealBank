@@ -24,12 +24,15 @@ type DashboardContentProps = {
   onRefreshAction?: () => void | Promise<void>;
 };
 
-export function DashboardContent({ accountData, totalBalance, onRefreshAction }: DashboardContentProps) {
+export function DashboardContent({
+  accountData,
+  totalBalance,
+  onRefreshAction,
+}: DashboardContentProps) {
   const { user } = useAuth();
 
   const isStaff =
-    (user?.roles?.includes('ADVISOR') ?? false) ||
-    (user?.roles?.includes('DIRECTOR') ?? false);
+    (user?.roles?.includes('ADVISOR') ?? false) || (user?.roles?.includes('DIRECTOR') ?? false);
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 

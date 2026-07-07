@@ -29,4 +29,3 @@ export function isStrongPassword(password: string): boolean {
   const c = checkPasswordStrength(password);
   return c.minLength && c.hasLower && c.hasUpper && c.hasDigit && c.hasSymbol;
 }
-

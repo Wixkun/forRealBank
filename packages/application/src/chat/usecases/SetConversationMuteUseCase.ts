@@ -1,9 +1,7 @@
 import { IConversationNotificationSettingsRepository } from '@forreal/domain';
 
 export class SetConversationMuteUseCase {
-  constructor(
-    private readonly settingsRepository: IConversationNotificationSettingsRepository,
-  ) {}
+  constructor(private readonly settingsRepository: IConversationNotificationSettingsRepository) {}
 
   async execute(input: {
     userId: string;

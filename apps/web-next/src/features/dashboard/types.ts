@@ -29,5 +29,4 @@ export const accountLabel = (acc: Account) => {
   return 'Checking';
 };
 
-export const lastFour = (acc: Account) =>
-  (acc.iban ?? acc.id).slice(-4).toUpperCase();
+export const lastFour = (acc: Account) => (acc.iban ?? acc.id).slice(-4).toUpperCase();

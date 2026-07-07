@@ -31,17 +31,20 @@ ForRealBank is a comprehensive fintech solution offering:
 ## Technology Stack
 
 ### Backend
+
 - **Framework**: [NestJS](https://nestjs.com) — TypeScript-first Node.js framework
-- **Runtime**: Node.js 22+ 
+- **Runtime**: Node.js 22+
 - **Package Manager**: [pnpm](https://pnpm.io) — Fast, disk space efficient package manager
 
 ### Frontend
+
 - **Framework**: [Next.js 14+](https://nextjs.org) — React with TypeScript
 - **Styling**: TailwindCSS
 - **E2E Testing**: Playwright
 - **Internationalization**: i18n
 
 ### Database & Infrastructure
+
 - **Database**: PostgreSQL 16
 - **Database Client**: TypeORM
 - **Monitoring**: Prometheus + Grafana
@@ -49,6 +52,7 @@ ForRealBank is a comprehensive fintech solution offering:
 - **Security**: JWT, bcrypt, UUID generation
 
 ### Architecture Pattern
+
 - **Monorepo**: pnpm workspaces with shared packages
 - **Clean Architecture**: Domain → Application → Infrastructure layers
 - **Package Structure**:
@@ -244,14 +248,14 @@ docker compose -f docker-compose.dev.yml up --build
 
 The Docker Compose stack includes:
 
-| Service | Port | Purpose |
-|---------|------|---------|
-| PostgreSQL | 5432 | Primary database |
-| PgAdmin | 8080 | Database management UI |
-| API (NestJS) | 3001 | REST API backend |
-| Web (Next.js) | 3000 | Frontend application |
-| Prometheus | 9090 | Metrics collection |
-| Grafana | 3002 | Dashboards & visualization |
+| Service       | Port | Purpose                    |
+| ------------- | ---- | -------------------------- |
+| PostgreSQL    | 5432 | Primary database           |
+| PgAdmin       | 8080 | Database management UI     |
+| API (NestJS)  | 3001 | REST API backend           |
+| Web (Next.js) | 3000 | Frontend application       |
+| Prometheus    | 9090 | Metrics collection         |
+| Grafana       | 3002 | Dashboards & visualization |
 
 ### Stopping Services
 
@@ -261,6 +265,93 @@ docker compose stop
 
 # Stop and remove containers (remove volumes)
 docker compose down -v
+```
+
+## Production Swarm
+
+The production target is a 5-node Docker Swarm:
+
+| Role    | Count | Purpose                                           |
+| ------- | ----- | ------------------------------------------------- |
+| Manager | 3     | Swarm quorum and stateful single-replica services |
+| Worker  | 2     | Stateless API and web replicas                    |
+
+Before deploying the stacks, label the manager that owns the local persistent volumes:
+
+```bash
+docker node update --label-add storage=db vps-07331c93-vps-ovh-net
+docker node update --label-add ingress=traefik vps-07331c93-vps-ovh-net
+docker node update --label-add monitoring=true vps-07331c93-vps-ovh-net
+```
+
+These labels intentionally pin local-volume services:
+
+| Label             | Services                                                                 | Local volumes                                                                           |
+| ----------------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| `storage=db`      | `forrealbank_db`, `forrealbank_db_backup`                                | `forrealbank_dbdata`, `forrealbank_db_backups`                                          |
+| `ingress=traefik` | `proxy_traefik`                                                          | `proxy_traefik_letsencrypt`                                                             |
+| `monitoring=true` | `monitoring_prometheus`, `monitoring_alertmanager`, `monitoring_grafana` | `monitoring_prometheus_data`, `monitoring_alertmanager_data`, `monitoring_grafana_data` |
+
+API and web images are deployed with immutable Git SHA tags. The CI pipeline pushes:
+
+```text
+ghcr.io/wixkun/forrealbank/api:<git-sha>
+ghcr.io/wixkun/forrealbank/web:<git-sha>
+```
+
+Third-party runtime images are pinned to version tags instead of `latest`:
+
+```text
+prom/prometheus:v2.55.1
+grafana/grafana:11.5.2
+```
+
+The deploy job exports `IMAGE_TAG=${{ github.sha }}` before running `deploy.sh`. For a manual deploy, set it explicitly:
+
+```bash
+export IMAGE_TAG="$(git rev-parse HEAD)"
+bash deploy.sh
+```
+
+The API is constrained to workers with `max_replicas_per_node: 1`, so the two replicas run as `1 + 1` across the two workers. The web service has three replicas on two workers, so a normal placement is `2 + 1`.
+
+### PostgreSQL Backups
+
+The `forrealbank_db_backup` service runs next to PostgreSQL on the `storage=db` node. It writes custom-format `pg_dump` files to the local Docker volume `forrealbank_db_backups`.
+
+Defaults:
+
+| Variable                  | Default | Meaning                               |
+| ------------------------- | ------- | ------------------------------------- |
+| `BACKUP_INTERVAL_SECONDS` | `86400` | Run one backup every 24 hours         |
+| `BACKUP_RETENTION_DAYS`   | `7`     | Delete backup files older than 7 days |
+
+List backups from the DB storage node:
+
+```bash
+docker run --rm -v forrealbank_db_backups:/backups alpine ls -lh /backups
+```
+
+Test a restore without touching production data:
+
+```bash
+docker run --rm \
+  -v forrealbank_db_backups:/backups \
+  -v forrealbank_db_restore_test:/var/lib/postgresql/data \
+  -e POSTGRES_PASSWORD=restore-test \
+  -d --name frb-restore-test postgres:16
+
+docker exec frb-restore-test sh -c 'until pg_isready -U postgres; do sleep 1; done'
+
+docker exec -i frb-restore-test pg_restore \
+  -U postgres \
+  -d postgres \
+  --clean \
+  --if-exists \
+  /backups/<backup-file>.dump
+
+docker rm -f frb-restore-test
+docker volume rm forrealbank_db_restore_test
 ```
 
 ## Testing
@@ -278,6 +369,7 @@ pnpm --filter web-next test
 ### Integration Tests
 
 The CI pipeline runs integration tests using docker-compose to verify:
+
 - Database connectivity
 - API responsiveness
 - Service communication
@@ -310,6 +402,7 @@ pnpm --filter web-next test -- --ui
 3. **Include token** → `Authorization: Bearer <token>`
 
 Example request:
+
 ```bash
 curl -H "Authorization: Bearer ${TOKEN}" \
   http://localhost:3001/api/users/me
@@ -331,16 +424,69 @@ curl http://localhost:3001/metrics
 
 ## CI/CD Pipeline
 
-GitHub Actions workflow (`.github/workflows/ci.yml`):
+GitHub Actions workflow (`.github/workflows/ci.yml`) is designed as a blocking
+pipeline for pull requests and production deployments:
 
-1. **Lint & Test** — ESLint, Prettier, unit tests
-2. **Security** — Trivy vulnerability scanning
-3. **Build Images** — Docker images for API & Web
-4. **Integration Tests** — docker-compose health checks
-5. **E2E Tests** — Playwright browser tests
-6. **Push to Registry** — GHCR (main branch only)
+1. **Quality Gates** — install dependencies, check Prettier formatting, lint, run TypeScript checks, run unit tests, and build the monorepo.
+2. **Security Scan** — Trivy filesystem scan, SARIF upload, and blocking on critical vulnerabilities.
+3. **Docker Build** — build API and web images without pushing.
+4. **Integration Tests** — start `db`, `api`, and `web` with Docker Compose, then verify health, metrics, register, and login flows.
+5. **E2E Tests** — run Playwright against the Docker Compose stack.
+6. **Push Images** — push immutable Git SHA image tags to GHCR, only on `main`.
+7. **Deploy Production** — SSH deploy to the Swarm, only after every required job succeeds on `main`.
+
+PRs should require these GitHub checks before merge:
+
+```text
+Quality Gates
+Security Scan
+Docker Build
+Integration Tests
+E2E Tests
+```
+
+Production deploys use repository secrets only for deployment and registry access:
+
+```text
+VPS_HOST
+VPS_PORT
+VPS_USER
+VPS_SSH_KEY
+GHCR_USERNAME
+GHCR_PASSWORD
+```
+
+CI test environment variables are non-secret and are defined in the workflow itself.
 
 See [CI/CD Documentation](https://github.com/Wixkun/forRealBank/wiki/CI-CD) for details.
+
+## Git Hooks
+
+Git hooks are versioned in `.githooks/` and installed by:
+
+```bash
+pnpm prepare
+```
+
+Hook behavior:
+
+| Hook         | Checks                                             |
+| ------------ | -------------------------------------------------- |
+| `pre-commit` | `pnpm format:check`, `pnpm lint`, `pnpm typecheck` |
+| `pre-push`   | `pnpm ci:verify`                                   |
+
+Useful local commands:
+
+```bash
+pnpm format
+pnpm format:check
+pnpm lint
+pnpm lint:fix
+pnpm typecheck
+pnpm test:unit
+pnpm test:e2e
+pnpm ci:verify
+```
 
 ## Monitoring
 
@@ -354,6 +500,51 @@ See [CI/CD Documentation](https://github.com/Wixkun/forRealBank/wiki/CI-CD) for 
 
 - UI: `http://localhost:3002`
 - Pre-configured dashboards for API metrics
+
+### Swarm Observability
+
+The production monitoring stack includes:
+
+| Component     | Purpose                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| Prometheus    | Scrapes API, host, container, and alert metrics                           |
+| Grafana       | Dashboards for API, infrastructure, containers, and firing alerts         |
+| Alertmanager  | Receives Prometheus alerts; default receiver is intentionally local/no-op |
+| node-exporter | Host CPU, memory, disk, and filesystem metrics on every node              |
+| cAdvisor      | Container CPU and memory metrics on every node                            |
+
+Prometheus alert rules are defined in `monitoring/prometheus-rules.yml`.
+
+Current base alerts:
+
+| Alert                       | Signal                                  |
+| --------------------------- | --------------------------------------- |
+| `ForRealBankApiDown`        | API metrics endpoint is unavailable     |
+| `MonitoringTargetDown`      | Any Prometheus target is down           |
+| `HighHttp5xxRate`           | API 5xx rate is above 5%                |
+| `HighHttpLatencyP95`        | API P95 latency is above 1s             |
+| `ApplicationErrorsDetected` | Application error counter is increasing |
+| `HostHighCpuUsage`          | Host CPU usage is above 85%             |
+| `HostHighMemoryUsage`       | Host memory usage is above 85%          |
+| `HostDiskSpaceLow`          | Host filesystem usage is above 85%      |
+| `ContainerHighCpuUsage`     | Container CPU usage is high             |
+| `ContainerHighMemoryUsage`  | Container memory usage is high          |
+
+After deploying, check targets in Prometheus:
+
+```bash
+docker service ls
+docker service ps monitoring_node_exporter
+docker service ps monitoring_cadvisor
+docker service ps monitoring_alertmanager
+```
+
+Grafana provisions two dashboards from files:
+
+```text
+ForRealBank API Monitoring
+ForRealBank Infrastructure & Alerts
+```
 
 ## License
 

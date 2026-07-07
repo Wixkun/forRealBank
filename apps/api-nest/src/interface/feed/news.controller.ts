@@ -1,6 +1,21 @@
 import {
-  Controller, Get, Post, Body, Param, Query, Inject,
-  Sse, Delete, UseGuards, UseInterceptors, UploadedFiles, Req, BadRequestException, NotFoundException, Patch, HttpCode,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Inject,
+  Sse,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+  Req,
+  BadRequestException,
+  NotFoundException,
+  Patch,
+  HttpCode,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -21,24 +36,34 @@ const IMAGE_MIME_TYPES = /^image\/(jpeg|png|gif|webp)$/;
 
 // `image` : champ legacy (une seule image hors contenu)
 // `images` : images intégrées au contenu, référencées par `(cid:N)` dans le texte
-const newsImageInterceptor = FileFieldsInterceptor([
-  { name: 'image', maxCount: 1 },
-  { name: 'images', maxCount: 10 },
-], {
-  storage: diskStorage({
-    destination: NEWS_UPLOADS_DIR,
-    filename: (_req: ExpressRequest, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) =>
-      cb(null, `${randomUUID()}${extname(file.originalname)}`),
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req: ExpressRequest, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
-    if (!IMAGE_MIME_TYPES.test(file.mimetype)) {
-      cb(new BadRequestException('INVALID_IMAGE_TYPE'), false);
-      return;
-    }
-    cb(null, true);
+const newsImageInterceptor = FileFieldsInterceptor(
+  [
+    { name: 'image', maxCount: 1 },
+    { name: 'images', maxCount: 10 },
+  ],
+  {
+    storage: diskStorage({
+      destination: NEWS_UPLOADS_DIR,
+      filename: (
+        _req: ExpressRequest,
+        file: Express.Multer.File,
+        cb: (error: Error | null, filename: string) => void,
+      ) => cb(null, `${randomUUID()}${extname(file.originalname)}`),
+    }),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (
+      _req: ExpressRequest,
+      file: Express.Multer.File,
+      cb: (error: Error | null, acceptFile: boolean) => void,
+    ) => {
+      if (!IMAGE_MIME_TYPES.test(file.mimetype)) {
+        cb(new BadRequestException('INVALID_IMAGE_TYPE'), false);
+        return;
+      }
+      cb(null, true);
+    },
   },
-});
+);
 
 // RolesGuard peuple req.auth.userId (lookup DB complet).
 // JwtAuthGuard seul peuple req.user.id (payload JWT, pas de DB).
@@ -83,7 +108,12 @@ export class NewsController {
     const imageUrl = legacyImage ? buildNewsImageUrl(legacyImage.filename) : null;
     const content = resolveInlineImages(body.content, files?.images ?? []);
     return this.newsService.createManualNews(
-      userId, body.title, content, body.status, imageUrl, body.subtitle?.trim() || null,
+      userId,
+      body.title,
+      content,
+      body.status,
+      imageUrl,
+      body.subtitle?.trim() || null,
     );
   }
 
@@ -102,7 +132,12 @@ export class NewsController {
     const imageUrl = legacyImage ? buildNewsImageUrl(legacyImage.filename) : null;
     const content = resolveInlineImages(body.content, files?.images ?? []);
     return this.newsService.createManualNews(
-      userId, body.title, content, body.status, imageUrl, body.subtitle?.trim() || null,
+      userId,
+      body.title,
+      content,
+      body.status,
+      imageUrl,
+      body.subtitle?.trim() || null,
     );
   }
 
@@ -205,10 +240,7 @@ export class NewsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
-  async update(
-    @Param('id') id: string,
-    @Body() body: { title?: string; content?: string },
-  ) {
+  async update(@Param('id') id: string, @Body() body: { title?: string; content?: string }) {
     return this.newsService.updateNews(id, { title: body.title, content: body.content });
   }
 

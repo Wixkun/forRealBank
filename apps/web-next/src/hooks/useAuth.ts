@@ -32,18 +32,16 @@ export function useAuth() {
   const isPublicAllowedWhenBanned = useMemo(() => {
     // Mode strict: seule la landing + la page /banned restent accessibles.
     const p = pathname || '';
-    return (
-      p === `/${locale}` ||
-      p === `/${locale}/` ||
-      p.startsWith(`/${locale}/banned`)
-    );
+    return p === `/${locale}` || p === `/${locale}/` || p.startsWith(`/${locale}/banned`);
   }, [pathname, locale]);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        const data = await apiFetch<{ success: boolean; user: User }>(`/auth/me`, { method: 'GET' });
+        const data = await apiFetch<{ success: boolean; user: User }>(`/auth/me`, {
+          method: 'GET',
+        });
         setUser(data.user || null);
         setIsAuthenticated(true);
         setBannedCookie('0');

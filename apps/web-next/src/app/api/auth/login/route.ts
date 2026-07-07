@@ -5,8 +5,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     console.log('[Auth Login] Received body:', JSON.stringify(body));
 
-    const apiUrl =
-      process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
     const fullUrl = `${apiUrl}/auth/login`;
 
     console.log('[Auth Login] POST request to:', fullUrl);

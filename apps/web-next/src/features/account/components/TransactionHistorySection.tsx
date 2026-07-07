@@ -36,9 +36,15 @@ export function TransactionHistorySection({
 
   const filteredTransactions = transactions.filter((t) => {
     if (filter === 'all') return true;
-    if (filter === 'credits') return t.type === 'credit' || t.type === 'deposit' || (t.type === 'transfer' && t.amount > 0);
+    if (filter === 'credits')
+      return t.type === 'credit' || t.type === 'deposit' || (t.type === 'transfer' && t.amount > 0);
     if (filter === 'debits')
-      return t.type === 'debit' || t.type === 'withdrawal' || t.type === 'payment' || (t.type === 'transfer' && t.amount < 0);
+      return (
+        t.type === 'debit' ||
+        t.type === 'withdrawal' ||
+        t.type === 'payment' ||
+        (t.type === 'transfer' && t.amount < 0)
+      );
     return true;
   });
 

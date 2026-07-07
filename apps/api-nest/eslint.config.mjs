@@ -35,6 +35,6 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
 
       '@typescript-eslint/require-await': 'off',
-    }
+    },
   },
 );

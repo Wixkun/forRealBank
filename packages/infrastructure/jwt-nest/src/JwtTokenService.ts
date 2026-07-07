@@ -10,7 +10,9 @@ export class JwtTokenService implements ITokenService {
   constructor() {
     this.secret = resolveEnvSecret('JWT_SECRET') ?? 'fallback';
     if (!this.secret) {
-      throw new Error('[JwtTokenService] Missing JWT_SECRET (or JWT_SECRET_FILE) in environment variables');
+      throw new Error(
+        '[JwtTokenService] Missing JWT_SECRET (or JWT_SECRET_FILE) in environment variables',
+      );
     }
 
     this.signOpts = {};

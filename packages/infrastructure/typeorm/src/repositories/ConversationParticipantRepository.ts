@@ -67,7 +67,10 @@ export class ConversationParticipantRepository implements IConversationParticipa
         conversation,
         user,
       });
-      return { participant: ConversationParticipantMapper.toDomain(insertedEntity), inserted: true };
+      return {
+        participant: ConversationParticipantMapper.toDomain(insertedEntity),
+        inserted: true,
+      };
     }
 
     const existing = await this.repo.findOne({

@@ -12,8 +12,7 @@ export const PDF_COLORS = {
 
 // Les polices standard Helvetica ne couvrent ni la flèche « → » ni les
 // espaces fines insérées par les formats fr-FR
-export const cleanPdfText = (s: string) =>
-  s.replace(/→/g, '->').replace(/[  ]/g, ' ');
+export const cleanPdfText = (s: string) => s.replace(/→/g, '->').replace(/[  ]/g, ' ');
 
 export const pdfMoney = (n: number, currency = 'EUR') =>
   cleanPdfText(n.toLocaleString('fr-FR', { style: 'currency', currency }));
