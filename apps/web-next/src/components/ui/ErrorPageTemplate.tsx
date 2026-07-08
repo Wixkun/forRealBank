@@ -43,7 +43,7 @@ export function ErrorPageTemplate({
     <div
       className={`min-h-screen flex items-center justify-center transition-colors ${
         currentTheme === 'dark'
-          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-slate-900'
+          ? 'bg-surface-0'
           : 'bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50'
       }`}
     >
@@ -52,8 +52,8 @@ export function ErrorPageTemplate({
           <h1
             className={`text-[150px] font-bold leading-none select-none ${
               currentTheme === 'dark'
-                ? 'bg-gradient-to-r from-teal-400 via-cyan-300 to-teal-500 bg-clip-text text-transparent'
-                : 'bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-600 bg-clip-text text-transparent'
+                ? 'bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent'
+                : 'bg-gradient-to-r from-teal-600 to-teal-800 bg-clip-text text-transparent'
             }`}
             style={{
               textShadow:
@@ -72,7 +72,7 @@ export function ErrorPageTemplate({
           ></div>
           <div
             className={`absolute -bottom-10 -right-10 w-40 h-40 rounded-full blur-3xl ${
-              currentTheme === 'dark' ? 'bg-cyan-500/20' : 'bg-cyan-400/30'
+              currentTheme === 'dark' ? 'bg-primary/20' : 'bg-teal-400/30'
             }`}
           ></div>
         </div>
@@ -87,7 +87,7 @@ export function ErrorPageTemplate({
 
         <p
           className={`text-lg mb-8 max-w-md mx-auto ${
-            currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+            currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-600'
           }`}
         >
           {description}
@@ -110,8 +110,8 @@ export function ErrorPageTemplate({
             href={effectivePrimaryHref}
             className={`px-8 py-3 rounded-full font-medium transition-all shadow-lg ${
               currentTheme === 'dark'
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-white'
-                : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white'
+                ? 'bg-primary hover:bg-primary-hover text-white'
+                : 'bg-primary hover:bg-teal-700 text-white'
             }`}
           >
             {primaryButton.text}
@@ -122,7 +122,7 @@ export function ErrorPageTemplate({
               onClick={secondaryButton.onClick}
               className={`px-8 py-3 rounded-full font-medium transition-all border ${
                 currentTheme === 'dark'
-                  ? 'border-gray-700 text-gray-300 hover:bg-gray-800'
+                  ? 'border-white/10 text-fg-secondary hover:bg-white/5'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-100'
               }`}
             >

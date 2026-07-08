@@ -12,7 +12,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
       <h1
-        className="absolute text-[16vw] font-serif font-bold select-none tracking-[0.05em]
+        className="absolute text-[16vw] font-bold select-none tracking-[0.05em]
         bg-gradient-to-b from-white via-teal-200 to-teal-300
         text-transparent bg-clip-text opacity-70"
       >

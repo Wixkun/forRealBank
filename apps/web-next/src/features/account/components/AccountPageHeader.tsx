@@ -34,7 +34,7 @@ export function AccountPageHeader({
           <div className="flex items-center gap-6">
             <Link
               href={`/${locale}/dashboard`}
-              className="text-2xl font-bold bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent hover:from-teal-300 hover:to-cyan-400 transition-all"
+              className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent hover:from-teal-200 hover:to-teal-400 transition-all"
             >
               Avenir
             </Link>
@@ -69,7 +69,7 @@ export function AccountPageHeader({
               >
                 {labels.balance}
               </p>
-              <p className="text-3xl font-bold bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
+              <p className="text-3xl font-bold bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent">
                 {balance}
               </p>
             </div>

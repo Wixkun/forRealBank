@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center 
-      bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800 
+      bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800
       bg-cover bg-center relative"
       style={{ backgroundImage: "url('/wallpaper.jpeg')" }}
     >
@@ -36,9 +36,9 @@ export default function ForgotPasswordPage() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 
-            hover:from-teal-400 hover:to-cyan-500 transition 
-            text-white font-semibold py-2 rounded-lg shadow-lg"
+            className="w-full bg-primary hover:bg-primary-hover transition
+            text-white font-semibold py-2 rounded-lg shadow-lg
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             Send Reset Link
           </button>

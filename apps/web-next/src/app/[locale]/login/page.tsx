@@ -138,9 +138,9 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-teal-500 to-cyan-600 
-            hover:from-teal-400 hover:to-cyan-500 transition 
+          className="w-full bg-primary hover:bg-primary-hover transition
             text-white font-semibold py-2 rounded-lg shadow-lg
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60
             disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? t('loading') : t('submit')}
@@ -161,7 +161,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
           <div className="text-white">Loading...</div>
         </div>
       }

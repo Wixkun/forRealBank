@@ -107,10 +107,10 @@ export default function DashboardTransferPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="bg-[#111318] rounded-2xl p-5 border border-white/5">
-          <label className="block text-xs text-gray-400 mb-2">{tAccount('sourceAccount')}</label>
+        <div className="bg-surface-1 rounded-2xl p-5 border border-white/5">
+          <label className="block text-xs text-fg-muted mb-2">{tAccount('sourceAccount')}</label>
           <select
-            className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
+            className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
             value={sourceAccountId}
             onChange={(e) => setSourceAccountId(e.target.value)}
           >
@@ -122,10 +122,10 @@ export default function DashboardTransferPage() {
           </select>
         </div>
 
-        <div className="bg-[#111318] rounded-2xl p-5 border border-white/5">
-          <label className="block text-xs text-gray-400 mb-2">{tAccount('destination')}</label>
+        <div className="bg-surface-1 rounded-2xl p-5 border border-white/5">
+          <label className="block text-xs text-fg-muted mb-2">{tAccount('destination')}</label>
           <select
-            className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
+            className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
             value={destinationAccountId}
             onChange={(e) => {
               const val = e.target.value;
@@ -148,7 +148,7 @@ export default function DashboardTransferPage() {
           {(destinationAccountId === 'external' || !destinationAccountId) && (
             <input
               type="text"
-              className="w-full mt-3 p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
+              className="w-full mt-3 p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
               value={destinationIban}
               onChange={(e) => setDestinationIban(e.target.value)}
               placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
@@ -156,27 +156,27 @@ export default function DashboardTransferPage() {
           )}
         </div>
 
-        <div className="bg-[#111318] rounded-2xl p-5 border border-white/5 space-y-4">
+        <div className="bg-surface-1 rounded-2xl p-5 border border-white/5 space-y-4">
           <div>
-            <label className="block text-xs text-gray-400 mb-2">{tAccount('transferAmount')}</label>
+            <label className="block text-xs text-fg-muted mb-2">{tAccount('transferAmount')}</label>
             <input
               type="number"
               min="0.01"
               step="0.01"
               required
-              className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
+              className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-400 mb-2">
+            <label className="block text-xs text-fg-muted mb-2">
               {tAccount('transferDescription')}
             </label>
             <input
               type="text"
-              className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-teal-500/50"
+              className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={tAccount('transferDescription')}
@@ -187,7 +187,7 @@ export default function DashboardTransferPage() {
         <button
           type="submit"
           disabled={loading || !amount}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-500 text-gray-900 font-semibold text-sm hover:from-teal-400 hover:to-cyan-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? tAccount('processing') : tAccount('transferButton')}
         </button>

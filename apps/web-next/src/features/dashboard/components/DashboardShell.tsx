@@ -345,16 +345,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0d0f14] text-white">
+    <div className="flex h-screen overflow-hidden bg-surface-0 text-white">
       {/* ── Sidebar ─────────────────────────────────────────────────── */}
-      <aside className="w-56 shrink-0 bg-[#111318] flex flex-col border-r border-white/5">
+      <aside className="w-56 shrink-0 bg-surface-1 flex flex-col border-r border-white/5">
         <div className="p-5 flex items-center gap-3 border-b border-white/5">
-          <div className="w-9 h-9 rounded-lg bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-sm font-bold text-gray-900 shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-primary ring-1 ring-white/10 flex items-center justify-center text-sm font-bold text-white shrink-0">
             FR
           </div>
           <div className="min-w-0">
             <div className="font-semibold text-sm text-white truncate">ForRealBank</div>
-            <div className="text-[10px] text-gray-400">Institutional Portal</div>
+            <div className="text-xs text-fg-muted">Institutional Portal</div>
           </div>
         </div>
 
@@ -367,18 +367,18 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActive(item.href)
-                  ? 'bg-linear-to-r from-teal-500/20 to-cyan-500/10 text-cyan-400 border border-teal-500/20'
+                  ? 'bg-primary/15 text-tertiary border border-primary/40'
                   : item.disabled
-                    ? 'text-gray-600 cursor-not-allowed'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5 cursor-pointer'
+                    ? 'text-fg-subtle cursor-not-allowed'
+                    : 'text-fg-muted hover:text-white hover:bg-white/5 cursor-pointer'
               }`}
             >
-              <span className={isActive(item.href) ? 'text-cyan-400' : 'text-current'}>
+              <span className={isActive(item.href) ? 'text-tertiary' : 'text-current'}>
                 {item.icon}
               </span>
               <span className="flex-1 text-left">{item.label}</span>
               {item.badge && (
-                <span className="text-[9px] bg-cyan-500 text-gray-900 px-1.5 py-0.5 rounded-full font-bold leading-none">
+                <span className="text-xs bg-secondary text-white px-1.5 py-0.5 rounded-full font-bold leading-none">
                   {item.badge}
                 </span>
               )}
@@ -389,7 +389,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <div className="p-3 border-t border-white/5">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-fg-muted hover:text-white hover:bg-white/5 transition-colors"
           >
             <IconLogout />
             <span>Logout</span>
@@ -402,25 +402,25 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         {/* Top bar */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/5 shrink-0">
           <div>
-            <p className="text-white text-sm font-medium">
+            <p className="text-white text-base font-medium">
               Welcome back, {user?.firstName || '...'}
             </p>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-fg-muted text-xs mt-0.5">
               Here&apos;s your financial overview for today.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => statement?.openStatement()}
-              className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-gray-300 hover:bg-white/5 transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-fg-secondary hover:bg-white/5 transition-colors flex items-center gap-1.5"
             >
               <IconDownload /> Statement
             </button>
             {user?.id && <NotificationCenter userId={user.id} />}
-            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gray-400 hover:bg-white/10 transition">
+            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-fg-muted hover:bg-white/10 transition">
               <IconSettings />
             </button>
-            <div className="w-8 h-8 rounded-full bg-linear-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-xs font-bold text-gray-900">
+            <div className="w-8 h-8 rounded-full bg-primary ring-1 ring-white/10 flex items-center justify-center text-xs font-bold text-white">
               {initials}
             </div>
           </div>
@@ -433,7 +433,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
           {/* ── Right panel ──────────────────────────────────────────── */}
           <aside className="w-72 shrink-0 border-l border-white/5 overflow-y-auto p-5 space-y-5">
-            <div className="bg-[#111318] rounded-2xl border border-white/5 p-4">
+            <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
               <h3 className="font-semibold text-white text-sm mb-4">Quick Actions</h3>
               <div className="grid grid-cols-2 gap-2.5">
                 {quickActions.map((action) => (
@@ -446,29 +446,29 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                       action.disabled
                         ? 'cursor-not-allowed opacity-50 bg-white/4 border-white/5'
                         : isActive(action.href)
-                          ? 'cursor-pointer bg-teal-500/10 border-teal-500/30'
+                          ? 'cursor-pointer bg-primary/15 border-primary/40'
                           : 'cursor-pointer bg-white/4 hover:bg-white/8 border-white/5'
                     }`}
                   >
-                    <span className="text-cyan-400">{action.icon}</span>
-                    <span className="text-xs text-gray-300">{action.label}</span>
+                    <span className="text-tertiary">{action.icon}</span>
+                    <span className="text-xs text-fg-secondary">{action.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="bg-[#111318] rounded-2xl border border-white/5 p-4">
+            <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-white text-sm">Upcoming Payments</h3>
-                <span className="text-gray-500">
+                <span className="text-fg-muted">
                   <IconCalendar />
                 </span>
               </div>
               <div className="py-8 text-center">
-                <p className="text-gray-600 text-xs">No upcoming payments</p>
-                <p className="text-gray-700 text-[10px] mt-1">Feature coming soon</p>
+                <p className="text-fg-muted text-xs">No upcoming payments</p>
+                <p className="text-fg-muted text-xs mt-1">Feature coming soon</p>
               </div>
-              <button className="w-full py-2.5 rounded-xl bg-linear-to-r from-teal-500 to-cyan-500 text-gray-900 font-semibold text-xs hover:from-teal-400 hover:to-cyan-400 transition-all">
+              <button className="w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all">
                 Schedule Payment
               </button>
             </div>

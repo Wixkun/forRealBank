@@ -89,9 +89,9 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
           onClick={() => setAction('buy')}
           className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
             action === 'buy'
-              ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white'
+              ? 'bg-primary text-white'
               : currentTheme === 'dark'
-                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                ? 'bg-white/5 text-fg-secondary hover:bg-white/10'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -102,9 +102,9 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
           onClick={() => setAction('sell')}
           className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
             action === 'sell'
-              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white'
+              ? 'bg-rose-600 text-white'
               : currentTheme === 'dark'
-                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                ? 'bg-white/5 text-fg-secondary hover:bg-white/10'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
@@ -180,9 +180,9 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
                 key={type}
                 className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer text-center ${
                   orderType === type
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-primary text-white'
                     : currentTheme === 'dark'
-                      ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                      ? 'bg-white/5 text-fg-secondary hover:bg-white/10'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -229,8 +229,8 @@ export function TradeFormCard({ onTrade, labels, defaultSymbol }: TradeFormCardP
           disabled={isSubmitting}
           className={`w-full font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed ${
             action === 'buy'
-              ? 'bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white'
-              : 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white'
+              ? 'bg-primary hover:bg-primary-hover text-white'
+              : 'bg-rose-600 hover:bg-rose-500 text-white'
           }`}
         >
           {isSubmitting ? 'Processing...' : labels.placeOrder}

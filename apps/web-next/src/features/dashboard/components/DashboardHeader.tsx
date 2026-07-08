@@ -41,7 +41,7 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
       <header className="border-b border-gray-700/50 bg-black/40 backdrop-blur-lg sticky top-0 z-50 shadow-xl">
         <div className="max-w-6xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-semibold bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-semibold bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent">
               <button
                 type="button"
                 onClick={handleDashboard}
@@ -67,7 +67,7 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
         <div className="flex items-center justify-between">
           <h1
             className={`text-2xl font-semibold bg-gradient-to-r ${
-              theme === 'dark' ? 'from-teal-400 to-cyan-300' : 'from-teal-600 to-cyan-600'
+              theme === 'dark' ? 'from-teal-300 to-teal-500' : 'from-teal-600 to-teal-800'
             } bg-clip-text text-transparent`}
           >
             <button
@@ -111,8 +111,8 @@ export function DashboardHeader({ userName, userId }: DashboardHeaderProps) {
             <button
               className={`w-10 h-10 rounded-full flex items-center justify-center transition shadow-lg ${
                 theme === 'dark'
-                  ? 'bg-gradient-to-br from-teal-500 to-cyan-400 hover:from-teal-400 hover:to-cyan-300'
-                  : 'bg-gradient-to-br from-teal-400 to-cyan-400 hover:from-teal-500 hover:to-cyan-500'
+                  ? 'bg-primary hover:bg-primary-hover ring-1 ring-white/10'
+                  : 'bg-primary hover:bg-primary-hover'
               }`}
             >
               <span className="text-base" title={userName || 'Profile'}>

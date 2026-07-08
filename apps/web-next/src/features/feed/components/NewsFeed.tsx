@@ -133,7 +133,7 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
       </div>
 
       <div
-        className="relative flex items-start gap-3 p-3.5 bg-[#1a1d24] rounded-xl border border-white/4 cursor-pointer select-none hover:border-white/10 transition-colors"
+        className="relative flex items-start gap-3 p-3.5 bg-surface-2 rounded-xl border border-white/4 cursor-pointer select-none hover:border-white/10 transition-colors"
         style={{
           transform: `translateX(${translateX}px)`,
           transition: isDragging ? 'none' : 'transform 240ms cubic-bezier(0.25,0.46,0.45,0.94)',
@@ -148,14 +148,14 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <span className="text-white text-xs font-semibold leading-snug truncate">
+            <span className="text-white text-sm font-semibold leading-snug truncate">
               {item.title}
             </span>
-            <span className="text-gray-600 text-[10px] whitespace-nowrap shrink-0 mt-0.5">
+            <span className="text-fg-muted text-xs whitespace-nowrap shrink-0 mt-0.5">
               {timeAgo(item.createdAt)}
             </span>
           </div>
-          <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed pr-1">
+          <p className="text-fg-muted text-xs mt-0.5 line-clamp-1 leading-relaxed pr-1">
             {item.subtitle || stripNewsImages(item.content)}
           </p>
         </div>
@@ -170,14 +170,14 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="text-gray-600"
+              className="text-fg-muted"
             >
               <rect x="3" y="3" width="18" height="18" rx="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
               <polyline points="21 15 16 10 5 21" />
             </svg>
           )}
-          {isNew && <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
+          {isNew && <div className="w-1.5 h-1.5 rounded-full bg-tertiary" />}
           <svg
             width="12"
             height="12"
@@ -187,7 +187,7 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-gray-700"
+            className="text-fg-muted"
           >
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -424,11 +424,11 @@ export default function NewsFeed({
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <h3 className="font-semibold text-white text-sm">
+          <h3 className="font-semibold text-white text-base">
             {showArchived ? t('archivedTitle') : t('title')}
           </h3>
           {!showArchived && news.length > 0 && (
-            <span className="text-[10px] bg-cyan-500/20 text-cyan-400 px-1.5 py-0.5 rounded-full font-bold leading-none">
+            <span className="text-xs bg-secondary/20 text-secondary px-1.5 py-0.5 rounded-full font-bold leading-none">
               {news.length}
             </span>
           )}
@@ -437,7 +437,7 @@ export default function NewsFeed({
           {!selectionMode && (
             <button
               onClick={() => setShowArchived((v) => !v)}
-              className="text-gray-500 hover:text-gray-300 text-[11px] transition-colors"
+              className="text-fg-muted hover:text-fg-secondary text-xs transition-colors"
             >
               {showArchived ? t('back') : t('archivedCount', { count: archived.length })}
             </button>
@@ -445,7 +445,7 @@ export default function NewsFeed({
           {displayedNews.length > 0 && (
             <button
               onClick={() => (selectionMode ? exitSelection() : setSelectionMode(true))}
-              className={`text-[11px] transition ${selectionMode ? 'text-gray-500 hover:text-gray-300' : 'text-cyan-400 hover:text-cyan-300'}`}
+              className={`text-xs transition ${selectionMode ? 'text-fg-muted hover:text-fg-secondary' : 'text-tertiary hover:text-teal-300'}`}
             >
               {selectionMode ? t('cancel') : t('select')}
             </button>
@@ -454,16 +454,16 @@ export default function NewsFeed({
       </div>
 
       {!showArchived && !selectionMode && news.length > 0 && (
-        <p className="text-gray-700 text-[10px] mb-2.5 flex items-center gap-1.5">
-          <span className="text-green-700">←</span> {t('hintArchive')}
-          <span className="mx-1 text-gray-800">·</span>
-          {t('hintDelete')} <span className="text-red-800">→</span>
+        <p className="text-fg-muted text-xs mb-2.5 flex items-center gap-1.5">
+          <span className="text-green-500">←</span> {t('hintArchive')}
+          <span className="mx-1 text-fg-subtle">·</span>
+          {t('hintDelete')} <span className="text-red-400">→</span>
         </p>
       )}
 
       <div className="space-y-2">
         {displayedNews.length === 0 ? (
-          <div className="py-8 text-center text-gray-600 text-xs">
+          <div className="py-8 text-center text-fg-muted text-xs">
             {showArchived ? t('emptyArchived') : t('empty')}
           </div>
         ) : showArchived ? (
@@ -474,11 +474,11 @@ export default function NewsFeed({
               <div
                 key={item.id}
                 onClick={() => (selectionMode ? toggleSelect(item.id) : openNews(item))}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${selected ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-[#1a1d24]/50 border-white/4 hover:border-white/10'}`}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${selected ? 'bg-primary/10 border-primary/40' : 'bg-surface-2/50 border-white/4 hover:border-white/10'}`}
               >
                 {selectionMode && (
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${selected ? 'border-tertiary bg-tertiary' : 'border-fg-subtle'}`}
                   >
                     {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
@@ -489,8 +489,8 @@ export default function NewsFeed({
                   {cfg.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-gray-400 text-xs font-medium truncate">{item.title}</p>
-                  <p className="text-gray-600 text-[11px] mt-0.5 line-clamp-1">
+                  <p className="text-fg-secondary text-sm font-medium truncate">{item.title}</p>
+                  <p className="text-fg-muted text-xs mt-0.5 line-clamp-1">
                     {item.subtitle || stripNewsImages(item.content)}
                   </p>
                 </div>
@@ -501,7 +501,7 @@ export default function NewsFeed({
                       handleUnarchive(item.id);
                     }}
                     title={t('unarchive')}
-                    className="text-gray-700 hover:text-cyan-400 text-[10px] transition shrink-0 mt-0.5"
+                    className="text-fg-muted hover:text-tertiary text-xs transition shrink-0 mt-0.5"
                   >
                     ↩
                   </button>
@@ -518,10 +518,10 @@ export default function NewsFeed({
                 <div
                   key={item.id}
                   onClick={() => toggleSelect(item.id)}
-                  className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors select-none ${selected ? 'bg-cyan-500/10 border-cyan-500/30' : 'bg-[#1a1d24] border-white/4'}`}
+                  className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors select-none ${selected ? 'bg-primary/10 border-primary/40' : 'bg-surface-2 border-white/4'}`}
                 >
                   <div
-                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selected ? 'border-cyan-400 bg-cyan-400' : 'border-gray-600'}`}
+                    className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selected ? 'border-tertiary bg-tertiary' : 'border-fg-subtle'}`}
                   >
                     {selected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
@@ -531,10 +531,10 @@ export default function NewsFeed({
                     {cfg.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-semibold leading-snug truncate">
+                    <p className="text-white text-sm font-semibold leading-snug truncate">
                       {item.title}
                     </p>
-                    <p className="text-gray-400 text-[11px] mt-0.5 line-clamp-1 leading-relaxed">
+                    <p className="text-fg-muted text-xs mt-0.5 line-clamp-1 leading-relaxed">
                       {item.subtitle || stripNewsImages(item.content)}
                     </p>
                   </div>
@@ -556,29 +556,29 @@ export default function NewsFeed({
       </div>
 
       {selectionMode && selectedIds.size > 0 && (
-        <div className="mt-3 p-3 bg-[#1a1d24] rounded-xl border border-white/8 flex items-center justify-between gap-2">
-          <span className="text-gray-400 text-[11px]">
+        <div className="mt-3 p-3 bg-surface-2 rounded-xl border border-white/8 flex items-center justify-between gap-2">
+          <span className="text-fg-muted text-xs">
             {t('selected', { count: selectedIds.size })}
           </span>
           <div className="flex items-center gap-2">
             {showArchived ? (
               <button
                 onClick={handleBulkUnarchive}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 transition"
+                className="text-xs px-2.5 py-1 rounded-lg bg-secondary/15 text-secondary hover:bg-secondary/25 transition"
               >
                 {t('unarchive')}
               </button>
             ) : (
               <button
                 onClick={handleBulkArchive}
-                className="text-[11px] px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition"
+                className="text-xs px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition"
               >
                 {t('archive')}
               </button>
             )}
             <button
               onClick={handleBulkDelete}
-              className="text-[11px] px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition"
+              className="text-xs px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition"
             >
               {t('delete')}
             </button>

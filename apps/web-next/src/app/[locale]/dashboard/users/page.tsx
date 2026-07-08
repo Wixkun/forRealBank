@@ -11,7 +11,7 @@ export default function DashboardUsersPage() {
   if (!isAdvisor && !isDirector) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500 text-sm">Access restricted</p>
+        <p className="text-fg-muted text-sm">Access restricted</p>
       </div>
     );
   }
@@ -19,12 +19,12 @@ export default function DashboardUsersPage() {
   return (
     <div className="max-w-3xl">
       <h1 className="text-xl font-semibold text-white mb-2">Users</h1>
-      <p className="text-gray-500 text-sm mb-6">
+      <p className="text-fg-muted text-sm mb-6">
         {isDirector ? 'Manage all clients and advisors.' : 'Manage your clients.'}
       </p>
 
-      <div className="bg-[#111318] rounded-2xl border border-white/5 p-8 text-center">
-        <p className="text-gray-600 text-sm">User management — coming soon</p>
+      <div className="bg-surface-1 rounded-2xl border border-white/5 p-8 text-center">
+        <p className="text-fg-muted text-sm">User management — coming soon</p>
       </div>
     </div>
   );

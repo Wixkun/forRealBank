@@ -98,9 +98,7 @@ export function MarketAssetCard({
           ) : (
             <div
               className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                currentTheme === 'dark'
-                  ? 'bg-gradient-to-br from-teal-500/20 to-cyan-500/20'
-                  : 'bg-gradient-to-br from-teal-500/10 to-cyan-500/10'
+                currentTheme === 'dark' ? 'bg-primary/15' : 'bg-primary/10'
               }`}
             >
               <Icon name={assetIcons[assetType]} className="text-teal-400" />
@@ -152,11 +150,11 @@ export function MarketAssetCard({
         </div>
       </div>
 
-      {volume && <div className="mt-3 mb-4 text-xs text-gray-500">24h Vol: {volume}</div>}
+      {volume && <div className="mt-3 mb-4 text-xs text-fg-muted">24h Vol: {volume}</div>}
 
       <button
         onClick={() => onTrade(symbol)}
-        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-semibold transition-all hover:scale-[1.01]"
+        className="w-full py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold transition-all hover:scale-[1.01]"
       >
         {labels.trade}
       </button>

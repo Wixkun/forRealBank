@@ -40,7 +40,7 @@ export function PortfolioCard({
       </div>
 
       <div className="relative">
-        <p className="text-teal-300/60 text-xs font-mono tracking-widest uppercase mb-2">
+        <p className="text-teal-300/80 text-xs font-mono tracking-widest uppercase mb-2">
           Total Portfolio Balance
         </p>
         <h2 className="text-4xl font-bold text-white font-mono mb-6 tracking-tight">
@@ -62,8 +62,8 @@ export function PortfolioCard({
                   }`}
                 >
                   <p
-                    className={`text-[11px] font-mono truncate transition-colors ${
-                      isSelected ? 'text-teal-300' : 'text-teal-200/50 group-hover:text-teal-300/70'
+                    className={`text-xs font-mono truncate transition-colors ${
+                      isSelected ? 'text-teal-300' : 'text-teal-200/70 group-hover:text-teal-300/90'
                     }`}
                   >
                     {accountLabel(acc)} (···{lastFour(acc)})
@@ -76,7 +76,7 @@ export function PortfolioCard({
             })}
           </div>
         ) : (
-          <p className="text-teal-200/40 text-sm">No accounts yet</p>
+          <p className="text-teal-200/70 text-sm">No accounts yet</p>
         )}
       </div>
     </div>

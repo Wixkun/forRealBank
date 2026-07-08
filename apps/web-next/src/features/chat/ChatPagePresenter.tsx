@@ -56,7 +56,7 @@ export default function ChatPagePresenter({
       <div
         className={`min-h-screen flex items-center justify-center ${
           theme === 'dark'
-            ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+            ? 'bg-surface-0'
             : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
@@ -75,7 +75,7 @@ export default function ChatPagePresenter({
       <div
         className={`min-h-screen flex items-center justify-center ${
           theme === 'dark'
-            ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+            ? 'bg-surface-0'
             : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
@@ -90,7 +90,7 @@ export default function ChatPagePresenter({
     <div
       className={`min-h-screen flex flex-col ${
         theme === 'dark'
-          ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900'
+          ? 'bg-surface-0'
           : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
       }`}
     >
@@ -205,7 +205,7 @@ export default function ChatPagePresenter({
                 >
                   <svg
                     className={`mx-auto h-12 w-12 mb-3 ${
-                      theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                      theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'
                     }`}
                     fill="none"
                     viewBox="0 0 24 24"
@@ -237,7 +237,7 @@ export default function ChatPagePresenter({
                 >
                   <svg
                     className={`mx-auto h-12 w-12 mb-3 ${
-                      theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                      theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'
                     }`}
                     fill="none"
                     viewBox="0 0 24 24"

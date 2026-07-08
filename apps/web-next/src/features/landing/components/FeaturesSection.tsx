@@ -20,12 +20,12 @@ export function FeaturesSection({ title, subtitle, features }: FeaturesSectionPr
     >
       <div className="">
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-serif font-bold mb-4">
-            <span className="bg-gradient-to-r from-white via-teal-100 to-cyan-200 bg-clip-text text-transparent">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4">
+            <span className="bg-gradient-to-r from-white via-teal-100 to-teal-300 bg-clip-text text-transparent">
               {title}
             </span>
           </h2>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">{subtitle}</p>
+          <p className="text-gray-300 text-lg max-w-2xl mx-auto">{subtitle}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

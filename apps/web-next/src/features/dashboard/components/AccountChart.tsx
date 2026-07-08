@@ -29,7 +29,7 @@ export function AccountChart({
 
   if (transactions.length === 0) {
     return (
-      <div className="flex items-center justify-center h-28 text-gray-600 text-sm">
+      <div className="flex items-center justify-center h-28 text-fg-muted text-sm">
         {t('noData')}
       </div>
     );
@@ -81,14 +81,14 @@ export function AccountChart({
       <div className="relative select-none">
         {hovPt && hovered != null && (
           <div
-            className="absolute z-10 pointer-events-none bg-[#1a1d24] border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
+            className="absolute z-10 pointer-events-none bg-surface-2 border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
             style={{
               left: `${(px(hovered) / W) * 100}%`,
               top: '-8px',
               transform: 'translate(-50%, -100%)',
             }}
           >
-            <p className="text-gray-500 mb-0.5">
+            <p className="text-fg-muted mb-0.5">
               {new Date(hovPt.date).toLocaleDateString(dateLocale, {
                 day: '2-digit',
                 month: 'short',
@@ -97,9 +97,9 @@ export function AccountChart({
             </p>
             {hovPt.id !== '__now__' && (
               <>
-                <p className="text-gray-300 truncate max-w-40 mb-0.5">{hovPt.description}</p>
+                <p className="text-fg-secondary truncate max-w-40 mb-0.5">{hovPt.description}</p>
                 <p
-                  className={`font-mono font-semibold ${hovPt.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}
+                  className={`font-mono font-semibold ${hovPt.type === 'credit' ? 'text-tertiary' : 'text-red-400'}`}
                 >
                   {hovPt.type === 'credit' ? '+' : '−'}
                   {fmtA(hovPt.amount)}
@@ -123,7 +123,7 @@ export function AccountChart({
             return (
               <g key={r}>
                 <line x1={PL} y1={gy} x2={W - PR} y2={gy} stroke="#ffffff0d" strokeWidth="1" />
-                <text x={PL - 5} y={gy + 4} textAnchor="end" fontSize="9" fill="#4b5563">
+                <text x={PL - 5} y={gy + 4} textAnchor="end" fontSize="10" fill="#98a2b3">
                   {fmtA(minB + r * range)}
                 </text>
               </g>
@@ -161,7 +161,7 @@ export function AccountChart({
           {[0, Math.floor(points.length / 2), points.length - 1]
             .filter((i, idx, arr) => arr.indexOf(i) === idx && points[i])
             .map((i) => (
-              <text key={i} x={px(i)} y={H - 4} textAnchor="middle" fontSize="9" fill="#4b5563">
+              <text key={i} x={px(i)} y={H - 4} textAnchor="middle" fontSize="10" fill="#98a2b3">
                 {new Date(points[i].date).toLocaleDateString(dateLocale, {
                   day: '2-digit',
                   month: 'short',
@@ -181,23 +181,23 @@ export function AccountChart({
     <div className="relative select-none">
       {hovTx && hovered != null && (
         <div
-          className="absolute z-10 pointer-events-none bg-[#1a1d24] border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
+          className="absolute z-10 pointer-events-none bg-surface-2 border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
           style={{
             left: `${((PL + (hovered + 0.5) * (cW / sorted.length)) / W) * 100}%`,
             top: '-8px',
             transform: 'translate(-50%, -100%)',
           }}
         >
-          <p className="text-gray-500 mb-0.5">
+          <p className="text-fg-muted mb-0.5">
             {new Date(hovTx.date).toLocaleDateString(dateLocale, {
               day: '2-digit',
               month: 'short',
               year: 'numeric',
             })}
           </p>
-          <p className="text-gray-300 truncate max-w-40 mb-0.5">{hovTx.description}</p>
+          <p className="text-fg-secondary truncate max-w-40 mb-0.5">{hovTx.description}</p>
           <p
-            className={`font-mono font-semibold ${hovTx.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}
+            className={`font-mono font-semibold ${hovTx.type === 'credit' ? 'text-tertiary' : 'text-red-400'}`}
           >
             {hovTx.type === 'credit' ? '+' : '−'}
             {fmtA(hovTx.amount)}
@@ -247,8 +247,8 @@ export function AccountChart({
               x={PL + (i + 0.5) * (cW / sorted.length)}
               y={H - 4}
               textAnchor="middle"
-              fontSize="9"
-              fill="#4b5563"
+              fontSize="10"
+              fill="#98a2b3"
             >
               {new Date(sorted[i].date).toLocaleDateString(dateLocale, {
                 day: '2-digit',

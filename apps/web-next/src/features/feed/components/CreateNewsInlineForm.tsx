@@ -275,13 +275,13 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
 
   return (
     <>
-      <h3 className="text-sm font-semibold text-white mb-3">{t('title')}</h3>
+      <h3 className="text-base font-semibold text-white mb-3">{t('title')}</h3>
 
       {message && (
         <div
           className={`mb-3 text-xs px-3 py-2 rounded-lg border ${
             message.ok
-              ? 'bg-teal-500/10 border-teal-500/30 text-teal-300'
+              ? 'bg-primary/10 border-primary/40 text-tertiary'
               : 'bg-red-500/10 border-red-500/30 text-red-300'
           }`}
         >
@@ -291,17 +291,17 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
-          <label className="block text-[11px] text-gray-500 mb-1.5">Type d&apos;actualité</label>
+          <label className="block text-xs text-fg-muted mb-1.5">Type d&apos;actualité</label>
           <div className="flex flex-wrap gap-1.5">
             {STATUS_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
                 onClick={() => setStatus(opt.value)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
                   status === opt.value
                     ? `${opt.color} border-current bg-white/5`
-                    : 'text-gray-600 border-white/5 hover:text-gray-400 hover:border-white/10'
+                    : 'text-fg-muted border-white/5 hover:text-fg-secondary hover:border-white/10'
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
@@ -312,11 +312,11 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
         </div>
 
         <div>
-          <label className="block text-[11px] text-gray-500 mb-1.5">{t('fields.title')}</label>
+          <label className="block text-xs text-fg-muted mb-1.5">{t('fields.title')}</label>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
             required
             maxLength={120}
             placeholder="Titre de l'actualité"
@@ -324,11 +324,11 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
         </div>
 
         <div>
-          <label className="block text-[11px] text-gray-500 mb-1.5">{t('fields.subtitle')}</label>
+          <label className="block text-xs text-fg-muted mb-1.5">{t('fields.subtitle')}</label>
           <input
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
             required
             maxLength={180}
             placeholder="Résumé affiché dans le fil"
@@ -337,12 +337,12 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
 
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-[11px] text-gray-500">{t('fields.content')}</label>
+            <label className="block text-xs text-fg-muted">{t('fields.content')}</label>
             <div className="flex items-center gap-1 relative" ref={emojiPickerWrapperRef}>
               <button
                 type="button"
                 onClick={() => setShowEmojiPicker((v) => !v)}
-                className="p-1 rounded text-gray-500 hover:text-gray-300 hover:bg-white/5 transition"
+                className="p-1 rounded text-fg-muted hover:text-fg-secondary hover:bg-white/5 transition"
                 aria-label="Emoji"
                 title="Emoji"
               >
@@ -365,7 +365,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
               <button
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
-                className="p-1 rounded text-gray-500 hover:text-gray-300 hover:bg-white/5 transition"
+                className="p-1 rounded text-fg-muted hover:text-fg-secondary hover:bg-white/5 transition"
                 aria-label="Image"
                 title="Image"
               >
@@ -415,23 +415,23 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
               onDragLeave={() => setDragOver(false)}
               className={`w-full bg-black/30 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none min-h-24 whitespace-pre-wrap wrap-break-word transition-colors ${
                 dragOver
-                  ? 'border-teal-500/60 bg-teal-500/5'
-                  : 'border-white/10 focus:border-teal-500/50'
+                  ? 'border-primary/60 bg-primary/5'
+                  : 'border-white/10 focus:border-primary/60'
               }`}
             />
             {!hasContent && (
-              <div className="absolute top-2 left-3 text-sm text-gray-600 pointer-events-none">
+              <div className="absolute top-2 left-3 text-sm text-fg-subtle pointer-events-none">
                 Contenu du message...
               </div>
             )}
           </div>
-          <p className="mt-1 text-[10px] text-gray-600">{t('editorHint')}</p>
+          <p className="mt-1 text-xs text-fg-muted">{t('editorHint')}</p>
         </div>
 
         <button
           type="submit"
           disabled={submitting || !title || !subtitle || !hasContent}
-          className="px-4 py-2 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? t('submitLoading') : t('submit')}
         </button>

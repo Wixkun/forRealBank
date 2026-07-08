@@ -44,9 +44,7 @@ export function TransactionListItem({
       <div className="flex items-center gap-4 flex-1">
         <div
           className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-            isCredit
-              ? 'bg-gradient-to-br from-teal-500/20 to-cyan-500/20'
-              : 'bg-gradient-to-br from-gray-500/20 to-gray-600/20'
+            isCredit ? 'bg-primary/15' : 'bg-white/8'
           }`}
         >
           <Icon
