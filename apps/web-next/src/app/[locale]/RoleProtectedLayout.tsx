@@ -33,7 +33,7 @@ export function RoleProtectedLayout({ children, allowedRoles }: RoleProtectedLay
 
   if (isLoading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-teal-950 via-teal-900 to-cyan-800">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-teal-950 via-teal-900 to-teal-800">
         <div className="text-white text-lg">{t('authChecking')}</div>
       </div>
     );

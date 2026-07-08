@@ -80,15 +80,15 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
   },
   TRANSACTION: {
     label: 'Transaction',
-    bg: 'bg-cyan-500/15',
-    color: '#06b6d4',
+    bg: 'bg-secondary/15',
+    color: '#0891b2',
     icon: (
       <svg
         width="17"
         height="17"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#06b6d4"
+        stroke="#0891b2"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -122,22 +122,22 @@ export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
   },
   ACCOUNT: {
     label: 'Account',
-    bg: 'bg-blue-500/15',
-    color: '#3b82f6',
+    bg: 'bg-secondary/15',
+    color: '#0891b2',
     icon: (
       <svg
         width="17"
         height="17"
         viewBox="0 0 24 24"
         fill="none"
-        stroke="#3b82f6"
+        stroke="#0891b2"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       >
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        <circle cx="12" cy="2" r="1" fill="#3b82f6" />
+        <circle cx="12" cy="2" r="1" fill="#0891b2" />
       </svg>
     ),
   },
@@ -237,13 +237,13 @@ function Tile({
 }) {
   return (
     <div className="flex items-start gap-3 p-3 rounded-xl bg-white/3 border border-white/5">
-      <div className="w-8 h-8 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0 text-teal-400">
+      <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0 text-tertiary">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-gray-500 text-[10px] mb-0.5">{label}</p>
+        <p className="text-fg-muted text-xs mb-0.5">{label}</p>
         <p className={`text-xs font-medium break-all ${valueClass ?? 'text-white'}`}>{value}</p>
-        {sub && <p className="text-gray-600 text-[10px] mt-0.5 break-all">{sub}</p>}
+        {sub && <p className="text-fg-muted text-xs mt-0.5 break-all">{sub}</p>}
       </div>
       {action}
     </div>
@@ -399,7 +399,7 @@ function TransferDetailBody({
         >
           {isIncoming ? '+' : '-'} {amount}
         </p>
-        <p className="text-gray-400 text-xs mt-1.5">{t(isIncoming ? 'received' : 'sent')}</p>
+        <p className="text-fg-muted text-xs mt-1.5">{t(isIncoming ? 'received' : 'sent')}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -438,7 +438,7 @@ function TransferDetailBody({
               <button
                 onClick={copyIban}
                 title={copied ? t('copied') : t('copyIban')}
-                className="p-1.5 rounded text-gray-500 hover:text-teal-300 hover:bg-white/5 transition shrink-0"
+                className="p-1.5 rounded text-fg-muted hover:text-tertiary hover:bg-white/5 transition shrink-0"
               >
                 {copied ? (
                   <svg
@@ -482,7 +482,7 @@ function TransferDetailBody({
       <div className="flex flex-wrap gap-2 pt-1">
         <button
           onClick={downloadReceipt}
-          className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition"
+          className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition"
         >
           <svg
             width="13"
@@ -502,7 +502,7 @@ function TransferDetailBody({
         </button>
         <button
           onClick={() => router.push(`/${locale}/dashboard/transfer`)}
-          className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-teal-500/40 text-teal-300 text-xs font-semibold hover:bg-teal-500/10 transition"
+          className="flex-1 min-w-40 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-primary/40 text-tertiary text-xs font-semibold hover:bg-primary/10 transition"
         >
           <svg
             width="13"
@@ -521,7 +521,7 @@ function TransferDetailBody({
         </button>
         <button
           onClick={onCloseAction}
-          className="px-5 py-2.5 rounded-lg bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition"
+          className="px-5 py-2.5 rounded-lg bg-white/5 text-fg-secondary text-xs font-semibold hover:bg-white/10 transition"
         >
           {tDetail('close')}
         </button>
@@ -561,11 +561,11 @@ export function NewsDetailModal({
             </div>
           )}
           <div className="min-w-0">
-            <h2 className="text-white text-sm font-semibold leading-snug truncate">
+            <h2 className="text-white text-base font-semibold leading-snug truncate">
               {item?.title ?? (loading ? t('loading') : t('notFoundTitle'))}
             </h2>
             {item && (
-              <p className="text-gray-500 text-[11px] mt-0.5">
+              <p className="text-fg-muted text-xs mt-0.5">
                 {new Date(item.createdAt).toLocaleString(locale === 'fr' ? 'fr-FR' : 'en-US', {
                   day: 'numeric',
                   month: 'long',
@@ -578,7 +578,7 @@ export function NewsDetailModal({
           </div>
         </div>
         {transfer && (
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-500/15 text-teal-300 text-[11px] font-semibold shrink-0 ml-auto">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 text-tertiary text-xs font-semibold shrink-0 ml-auto">
             {t('transfer.completed')}
             <svg
               width="12"
@@ -596,7 +596,7 @@ export function NewsDetailModal({
         )}
         <button
           onClick={onCloseAction}
-          className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition shrink-0"
+          className="p-1.5 rounded-lg text-fg-muted hover:text-white hover:bg-white/5 transition shrink-0"
           aria-label={t('close')}
         >
           <svg
@@ -615,7 +615,7 @@ export function NewsDetailModal({
       </div>
 
       <div className="px-5 py-4">
-        {loading && <p className="text-gray-500 text-xs py-6 text-center">{t('loading')}</p>}
+        {loading && <p className="text-fg-muted text-xs py-6 text-center">{t('loading')}</p>}
 
         {!loading && error && (
           <p className="text-red-300 text-xs py-6 text-center">{t('notFound')}</p>
@@ -628,12 +628,12 @@ export function NewsDetailModal({
         {!loading && !error && item && !transfer && (
           <>
             {item.archivedAt && (
-              <p className="mb-3 text-[11px] px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
+              <p className="mb-3 text-xs px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
                 {t('archived')}
               </p>
             )}
             {item.subtitle && (
-              <p className="text-gray-300 text-sm font-medium mb-3">{item.subtitle}</p>
+              <p className="text-fg-secondary text-sm font-medium mb-3">{item.subtitle}</p>
             )}
             {item.imageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -648,7 +648,7 @@ export function NewsDetailModal({
                 segment.type === 'text' ? (
                   <p
                     key={i}
-                    className="text-gray-400 text-[13px] leading-relaxed whitespace-pre-wrap wrap-break-word"
+                    className="text-fg-muted text-sm leading-relaxed whitespace-pre-wrap wrap-break-word"
                   >
                     {segment.value}
                   </p>

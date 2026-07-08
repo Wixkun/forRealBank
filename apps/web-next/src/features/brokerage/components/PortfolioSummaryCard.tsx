@@ -37,10 +37,10 @@ export function PortfolioSummaryCard({
           : 'bg-gradient-to-br from-white via-teal-50/30 to-white border-gray-200'
       }`}
     >
-      <p className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+      <p className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-600'}`}>
         {labels.totalValue}
       </p>
-      <p className="text-4xl font-bold mb-6 bg-gradient-to-r from-teal-400 to-cyan-500 bg-clip-text text-transparent">
+      <p className="text-4xl font-bold mb-6 bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent">
         {totalValue}
       </p>
 

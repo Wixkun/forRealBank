@@ -78,7 +78,7 @@ const QUICK_RANGES: QuickRange[] = [
 ];
 
 const inputClass =
-  'w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-teal-500/50 [color-scheme:dark]';
+  'w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary/60 [color-scheme:dark]';
 
 export function StatementModal({
   prefill,
@@ -167,7 +167,7 @@ export function StatementModal({
     <ModalShell onCloseAction={onCloseAction} maxWidthClass="max-w-md">
       <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/5">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-teal-500/10 flex items-center justify-center text-teal-400">
+          <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center text-tertiary">
             <svg
               width="16"
               height="16"
@@ -188,7 +188,7 @@ export function StatementModal({
         </div>
         <button
           onClick={onCloseAction}
-          className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition"
+          className="p-1.5 rounded-lg text-fg-muted hover:text-white hover:bg-white/5 transition"
           aria-label={t('close')}
         >
           <svg
@@ -208,7 +208,7 @@ export function StatementModal({
 
       <div className="px-5 py-4 space-y-4">
         <div>
-          <label className="block text-gray-500 text-[11px] mb-1.5">{t('account')}</label>
+          <label className="block text-fg-muted text-xs mb-1.5">{t('account')}</label>
           <select
             value={accountId}
             onChange={(e) => setAccountId(e.target.value)}
@@ -224,14 +224,14 @@ export function StatementModal({
         </div>
 
         <div>
-          <label className="block text-gray-500 text-[11px] mb-1.5">{t('shortcuts')}</label>
+          <label className="block text-fg-muted text-xs mb-1.5">{t('shortcuts')}</label>
           <div className="flex flex-wrap gap-2">
             {QUICK_RANGES.map((q) => (
               <button
                 key={q.key}
                 type="button"
                 onClick={() => setRange(q.range())}
-                className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white/5 text-gray-300 border border-white/10 hover:bg-teal-500/15 hover:text-teal-300 hover:border-teal-500/30 transition"
+                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 text-fg-secondary border border-white/10 hover:bg-primary/15 hover:text-tertiary hover:border-primary/40 transition"
               >
                 {t(q.key)}
               </button>
@@ -241,7 +241,7 @@ export function StatementModal({
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-gray-500 text-[11px] mb-1.5">{t('startDate')}</label>
+            <label className="block text-fg-muted text-xs mb-1.5">{t('startDate')}</label>
             <input
               type="date"
               value={start}
@@ -251,7 +251,7 @@ export function StatementModal({
             />
           </div>
           <div>
-            <label className="block text-gray-500 text-[11px] mb-1.5">{t('endDate')}</label>
+            <label className="block text-fg-muted text-xs mb-1.5">{t('endDate')}</label>
             <input
               type="date"
               value={end}
@@ -272,7 +272,7 @@ export function StatementModal({
         <button
           onClick={handleDownload}
           disabled={generating || !selectedAccount || !datesValid}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg
             width="13"
@@ -292,7 +292,7 @@ export function StatementModal({
         </button>
         <button
           onClick={onCloseAction}
-          className="px-5 py-2.5 rounded-lg bg-white/5 text-gray-300 text-xs font-semibold hover:bg-white/10 transition"
+          className="px-5 py-2.5 rounded-lg bg-white/5 text-fg-secondary text-xs font-semibold hover:bg-white/10 transition"
         >
           {t('cancel')}
         </button>

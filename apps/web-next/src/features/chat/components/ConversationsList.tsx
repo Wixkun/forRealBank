@@ -72,7 +72,7 @@ export default function ConversationsList({
         </h2>
         <div className="relative">
           <svg
-            className={`absolute left-3 top-3 h-5 w-5 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}
+            className={`absolute left-3 top-3 h-5 w-5 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -116,7 +116,7 @@ export default function ConversationsList({
           >
             <div>
               <svg
-                className={`mx-auto h-12 w-12 mb-3 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}
+                className={`mx-auto h-12 w-12 mb-3 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

@@ -58,9 +58,7 @@ export function PositionCard({
         <div className="flex items-center gap-3">
           <div
             className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-              currentTheme === 'dark'
-                ? 'bg-gradient-to-br from-teal-500/20 to-cyan-500/20'
-                : 'bg-gradient-to-br from-teal-500/10 to-cyan-500/10'
+              currentTheme === 'dark' ? 'bg-primary/15' : 'bg-primary/10'
             }`}
           >
             <Icon name={assetIcons[assetType]} className="text-teal-400" />

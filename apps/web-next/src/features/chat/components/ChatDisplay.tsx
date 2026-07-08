@@ -130,7 +130,7 @@ export default function ChatDisplay({
         }`}
       >
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-white font-semibold">
+          <div className="h-10 w-10 rounded-full bg-primary ring-1 ring-white/10 flex items-center justify-center text-white font-semibold">
             {firstLetter}
           </div>
           <div>
@@ -170,7 +170,7 @@ export default function ChatDisplay({
           <div className="flex items-center justify-center h-full">
             <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
               <svg
-                className={`mx-auto h-12 w-12 mb-3 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}
+                className={`mx-auto h-12 w-12 mb-3 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -185,7 +185,7 @@ export default function ChatDisplay({
               <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : ''}`}>
                 {t('display.empty.title')}
               </p>
-              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}>
                 {t('display.empty.subtitle')}
               </p>
             </div>
@@ -214,7 +214,7 @@ export default function ChatDisplay({
                     <div
                       className={`max-w-xs px-4 py-3 rounded-lg ${
                         isOwnMessage
-                          ? 'bg-teal-500 text-white rounded-br-none'
+                          ? 'bg-primary text-white rounded-br-none'
                           : isDirector
                             ? 'bg-red-500 text-white rounded-bl-none'
                             : theme === 'dark'

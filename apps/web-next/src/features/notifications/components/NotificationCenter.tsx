@@ -97,11 +97,11 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
       {isOpen && (
         <div
           className={`absolute right-0 mt-2 w-96 rounded-lg shadow-xl border z-50 ${
-            currentTheme === 'dark' ? 'bg-gray-950 border-gray-800' : 'bg-white border-gray-200'
+            currentTheme === 'dark' ? 'bg-surface-1 border-white/10' : 'bg-white border-gray-200'
           }`}
         >
           <div
-            className={`p-4 border-b ${currentTheme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}
+            className={`p-4 border-b ${currentTheme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -111,7 +111,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                   {t('title')}
                 </h3>
                 <p
-                  className={`text-sm ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                  className={`text-sm ${currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
                 >
                   {t('unreadCount', { count: unreadCount })}
                 </p>
@@ -124,10 +124,10 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                   `text-sm px-3 py-1 rounded border transition ` +
                   (unreadCount === 0 || isMarkAllLoading
                     ? currentTheme === 'dark'
-                      ? 'text-gray-500 border-gray-800 cursor-not-allowed'
+                      ? 'text-fg-subtle border-white/10 cursor-not-allowed'
                       : 'text-gray-400 border-gray-200 cursor-not-allowed'
                     : currentTheme === 'dark'
-                      ? 'text-gray-200 border-gray-700 hover:bg-gray-800/60'
+                      ? 'text-fg-secondary border-white/10 hover:bg-white/5'
                       : 'text-gray-700 border-gray-300 hover:bg-gray-50')
                 }
               >
@@ -139,14 +139,14 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
           <div className="max-h-96 overflow-y-auto">
             {notifications.length === 0 && (
               <div
-                className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                className={`p-8 text-center ${currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
               >
                 {t('empty')}
               </div>
             )}
             {notifications.length > 0 && unreadNotifications.length === 0 && (
               <div
-                className={`p-8 text-center ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                className={`p-8 text-center ${currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
               >
                 {t('emptyUnread')}
               </div>
@@ -159,7 +159,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                     onClick={() => handleNotificationClick(notif)}
                     className={`p-4 border-b cursor-pointer transition ${
                       currentTheme === 'dark'
-                        ? 'border-gray-800 hover:bg-gray-900/50 bg-blue-950/20'
+                        ? 'border-white/10 hover:bg-white/5 bg-primary/10'
                         : 'border-gray-200 hover:bg-gray-50 bg-blue-50'
                     }`}
                   >
@@ -173,7 +173,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                             <span
                               className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${
                                 currentTheme === 'dark'
-                                  ? 'bg-blue-900 text-blue-300'
+                                  ? 'bg-secondary/25 text-cyan-300'
                                   : 'bg-blue-100 text-blue-700'
                               }`}
                             >
@@ -182,15 +182,15 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                           )}
                         </h4>
                         <p
-                          className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+                          className={`text-sm mb-2 ${currentTheme === 'dark' ? 'text-fg-secondary' : 'text-gray-700'}`}
                         >
                           {notif.content}
                         </p>
                         <div
-                          className={`flex items-center gap-2 text-xs ${currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}
+                          className={`flex items-center gap-2 text-xs ${currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
                         >
                           <span
-                            className={`px-2 py-1 rounded ${currentTheme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-200'}`}
+                            className={`px-2 py-1 rounded ${currentTheme === 'dark' ? 'bg-white/8 text-fg-secondary' : 'bg-gray-200'}`}
                           >
                             {notif.type}
                           </span>
@@ -206,7 +206,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                       </div>
                       <div className="flex items-center gap-2">
                         <div
-                          className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'}`}
+                          className={`w-2 h-2 rounded-full mt-1 ${currentTheme === 'dark' ? 'bg-tertiary' : 'bg-blue-500'}`}
                         />
                         <button
                           onClick={(e) => {
@@ -215,7 +215,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                           }}
                           className={`text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition ${
                             currentTheme === 'dark'
-                              ? 'hover:bg-gray-800 text-gray-500 hover:text-gray-300'
+                              ? 'hover:bg-white/10 text-fg-muted hover:text-fg-secondary'
                               : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
                           }`}
                           aria-label="Supprimer"

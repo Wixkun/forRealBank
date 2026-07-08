@@ -29,10 +29,10 @@ export function LanguageSwitcher({ theme = 'dark' }: LanguageSwitcherProps) {
         className={`px-3 py-1 rounded-md text-sm font-medium transition ${
           locale === 'fr'
             ? theme === 'dark'
-              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-              : 'bg-teal-500 text-white'
+              ? 'bg-primary/15 text-tertiary border border-primary/40'
+              : 'bg-primary text-white'
             : theme === 'dark'
-              ? 'text-gray-400 hover:text-gray-200'
+              ? 'text-fg-muted hover:text-fg-secondary'
               : 'text-gray-600 hover:text-gray-900'
         }`}
         aria-label="Français"
@@ -44,10 +44,10 @@ export function LanguageSwitcher({ theme = 'dark' }: LanguageSwitcherProps) {
         className={`px-3 py-1 rounded-md text-sm font-medium transition ${
           locale === 'en'
             ? theme === 'dark'
-              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-              : 'bg-teal-500 text-white'
+              ? 'bg-primary/15 text-tertiary border border-primary/40'
+              : 'bg-primary text-white'
             : theme === 'dark'
-              ? 'text-gray-400 hover:text-gray-200'
+              ? 'text-fg-muted hover:text-fg-secondary'
               : 'text-gray-600 hover:text-gray-900'
         }`}
         aria-label="English"

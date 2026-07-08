@@ -66,9 +66,9 @@ export function TransactionHistorySection({
               onClick={() => setFilter(filterType)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 filter === filterType
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white'
+                  ? 'bg-primary text-white'
                   : currentTheme === 'dark'
-                    ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    ? 'bg-white/5 text-fg-secondary hover:bg-white/10'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >

@@ -73,7 +73,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
         <div className="text-white text-lg">{tCommon('loadingAccount')}</div>
       </div>
     );
@@ -81,7 +81,7 @@ export default function AccountPage() {
 
   if (error || !account) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-cyan-800">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
         <div className="text-white">
           <div className="text-lg mb-2">{tCommon('errorLoadingAccount')}</div>
           <div className="text-sm text-gray-300">ID: {accountId}</div>

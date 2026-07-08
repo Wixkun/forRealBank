@@ -96,7 +96,7 @@ export default function DirectorPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-900 via-gray-800 to-slate-900">
+      <div className="min-h-screen bg-surface-0">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-gray-400">{t('loading')}</div>
         </div>
@@ -162,7 +162,7 @@ export default function DirectorPage() {
     <div
       className={`min-h-screen transition-colors ${
         theme === 'dark'
-          ? 'bg-linear-to-br from-gray-900 via-gray-800 to-slate-900 text-white'
+          ? 'bg-surface-0 text-white'
           : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50 text-gray-900'
       }`}
     >

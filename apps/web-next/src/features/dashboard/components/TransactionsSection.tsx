@@ -193,13 +193,13 @@ export function TransactionsSection({
   const displayed = filterByPeriod(transactions, period);
 
   return (
-    <div className="bg-[#111318] rounded-2xl border border-white/5">
+    <div className="bg-surface-1 rounded-2xl border border-white/5">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
-        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+        <h3 className="font-semibold text-white text-base flex items-center gap-2">
           {t('title')}
           {selectedAccount && (
-            <span className="text-teal-400 font-normal text-xs">
+            <span className="text-tertiary font-normal text-xs">
               — {accountLabel(selectedAccount)}
             </span>
           )}
@@ -212,8 +212,8 @@ export function TransactionsSection({
               onClick={() => setPeriod(key)}
               className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                 period === key
-                  ? 'bg-teal-500/25 text-teal-300 border border-teal-500/30'
-                  : 'text-gray-500 hover:text-gray-300'
+                  ? 'bg-primary/15 text-tertiary border border-primary/40'
+                  : 'text-fg-muted hover:text-fg-secondary'
               }`}
             >
               {t(`periods.${key}`)}
@@ -230,8 +230,8 @@ export function TransactionsSection({
               }}
               className={`w-7 h-7 flex items-center justify-center rounded-lg border transition ${
                 showChart
-                  ? 'bg-teal-500/30 border-teal-500/50 text-teal-300'
-                  : 'border-white/10 text-gray-500 hover:text-teal-300 hover:border-teal-500/30'
+                  ? 'bg-primary/20 border-primary/50 text-tertiary'
+                  : 'border-white/10 text-fg-muted hover:text-tertiary hover:border-primary/40'
               }`}
             >
               <svg
@@ -256,7 +256,7 @@ export function TransactionsSection({
                 setShowTransfer((v) => !v);
                 setTransferError(null);
               }}
-              className="text-xs px-3 py-1 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30 transition"
+              className="text-xs px-3 py-1 rounded-lg bg-primary/15 text-tertiary hover:bg-primary/25 border border-primary/40 transition"
             >
               {t('topUp')}
             </button>
@@ -267,14 +267,14 @@ export function TransactionsSection({
       {/* Inline transfer form */}
       {showTransfer && selectedAccount && sourceOptions.length > 0 && (
         <div className="px-5 py-4 border-b border-white/5 bg-teal-950/30">
-          <p className="text-teal-300 text-xs mb-2 font-medium">
+          <p className="text-tertiary text-xs mb-2 font-medium">
             {t('fromTo', { account: accountLabel(selectedAccount) })}
           </p>
           <div className="flex items-center gap-2">
             <select
               value={transferSourceId ?? sourceOptions[0]?.id ?? ''}
               onChange={(e) => setTransferSourceId(e.target.value)}
-              className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-teal-500/50"
+              className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-primary/60"
             >
               {sourceOptions.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -289,12 +289,12 @@ export function TransactionsSection({
               placeholder={t('amountPlaceholder')}
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
-              className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-teal-500/50"
+              className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
             />
             <button
               onClick={handleTransfer}
               disabled={transferLoading || !transferAmount}
-              className="px-4 py-1.5 rounded-lg bg-teal-500 text-gray-900 text-xs font-semibold hover:bg-teal-400 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-hover transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {transferLoading ? '...' : t('transfer')}
             </button>
@@ -304,7 +304,7 @@ export function TransactionsSection({
                 setTransferError(null);
                 setTransferAmount('');
               }}
-              className="text-gray-500 text-xs hover:text-gray-300 transition"
+              className="text-fg-muted text-xs hover:text-fg-secondary transition"
             >
               {t('cancel')}
             </button>
@@ -315,27 +315,27 @@ export function TransactionsSection({
 
       {/* Content */}
       {loading ? (
-        <div className="px-5 py-10 text-center text-gray-600 text-sm">{t('loading')}</div>
+        <div className="px-5 py-10 text-center text-fg-muted text-sm">{t('loading')}</div>
       ) : showChart ? (
         <div className="px-5 py-4">
           <AccountChart transactions={displayed} currentBalance={selectedAccount?.balance} />
         </div>
       ) : displayed.length === 0 ? (
-        <div className="px-5 py-10 text-center text-gray-600 text-sm">{t('empty')}</div>
+        <div className="px-5 py-10 text-center text-fg-muted text-sm">{t('empty')}</div>
       ) : (
         <table className="w-full text-sm">
           <thead>
             <tr>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">
+              <th className="text-left px-5 py-2.5 text-fg-muted text-xs font-medium">
                 {t('columns.date')}
               </th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">
+              <th className="text-left px-5 py-2.5 text-fg-muted text-xs font-medium">
                 {t('columns.description')}
               </th>
-              <th className="text-left px-5 py-2.5 text-gray-600 text-xs font-medium">
+              <th className="text-left px-5 py-2.5 text-fg-muted text-xs font-medium">
                 {t('columns.category')}
               </th>
-              <th className="text-right px-5 py-2.5 text-gray-600 text-xs font-medium">
+              <th className="text-right px-5 py-2.5 text-fg-muted text-xs font-medium">
                 {t('columns.amount')}
               </th>
             </tr>
@@ -345,15 +345,15 @@ export function TransactionsSection({
               <tr
                 key={tx.id}
                 onClick={() => openTransactionDetail(tx)}
-                className="border-t border-white/4 hover:bg-teal-500/5 transition-colors cursor-pointer"
+                className="border-t border-white/4 hover:bg-primary/5 transition-colors cursor-pointer"
               >
-                <td className="px-5 py-3 text-gray-500 text-xs whitespace-nowrap">
+                <td className="px-5 py-3 text-fg-muted text-xs whitespace-nowrap">
                   {fmtDate(tx.date)}
                 </td>
-                <td className="px-5 py-3 text-gray-200 text-xs">{tx.description}</td>
-                <td className="px-5 py-3 text-gray-500 text-xs capitalize">{tx.type}</td>
+                <td className="px-5 py-3 text-fg-secondary text-sm">{tx.description}</td>
+                <td className="px-5 py-3 text-fg-muted text-xs capitalize">{tx.type}</td>
                 <td
-                  className={`px-5 py-3 text-right font-mono text-xs font-semibold ${tx.type === 'credit' ? 'text-teal-400' : 'text-red-400'}`}
+                  className={`px-5 py-3 text-right font-mono text-sm font-semibold ${tx.type === 'credit' ? 'text-tertiary' : 'text-red-400'}`}
                 >
                   {tx.type === 'credit' ? '+' : '-'}
                   {fmt(Math.abs(tx.amount))}

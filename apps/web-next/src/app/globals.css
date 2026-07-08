@@ -1,28 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap');
 @import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Charte graphique */
+  --color-primary: #0d9488; /* boutons, états actifs, bordures actives */
+  --color-primary-hover: #14b8a6;
+  --color-secondary: #0891b2; /* accents secondaires uniquement */
+  --color-tertiary: #2dd4bf; /* états positifs, petits accents lumineux */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Surfaces */
+  --color-surface-0: #0d0f14; /* fond app */
+  --color-surface-1: #111318; /* cartes, sidebar */
+  --color-surface-2: #1a1d24; /* lignes, items imbriqués */
+  --color-surface-3: #232732; /* hover */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Hiérarchie texte */
+  --color-fg: #f2f4f8;
+  --color-fg-secondary: #c3cad5;
+  --color-fg-muted: #98a2b3; /* plancher pour les métadonnées sur fond sombre */
+  --color-fg-subtle: #667085; /* disabled / placeholder uniquement */
+
+  /* Polices */
+  --font-sans: var(--font-hanken), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Petites tailles légèrement agrandies pour la lisibilité */
+  --text-xs: 0.8125rem; /* 13px */
+  --text-xs--line-height: 1.25rem;
+  --text-sm: 0.9375rem; /* 15px */
+  --text-sm--line-height: 1.375rem;
 }
 
 body {
-  font-family: 'Playfair Display', serif;
-  background-color: #0d0f14;
+  font-family: var(--font-sans);
+  background-color: var(--color-surface-0);
+  color: var(--color-fg);
 }
 
 @keyframes row-enter {
