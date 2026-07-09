@@ -72,10 +72,10 @@ export default function GroupChatPage() {
 
   if (isLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t('loading')}</p>
+          <p className="text-fg-muted">{t('loading')}</p>
         </div>
       </div>
     );
@@ -83,18 +83,18 @@ export default function GroupChatPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center text-gray-700">{chatT('loginRequired')}</div>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center text-fg-muted">{chatT('loginRequired')}</div>
       </div>
     );
   }
 
   if (!conversationId) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <svg
-            className="mx-auto h-12 w-12 text-gray-400"
+            className="mx-auto h-12 w-12 text-fg-muted"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -106,31 +106,29 @@ export default function GroupChatPage() {
               d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
             />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">{t('empty.title')}</h3>
-          <p className="mt-1 text-sm text-gray-500">{t('empty.description')}</p>
+          <h3 className="mt-2 text-sm font-medium text-white">{t('empty.title')}</h3>
+          <p className="mt-1 text-sm text-fg-muted">{t('empty.description')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className=" py-6 px-4 sm:px-6 lg:px-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">{t('title')}</h1>
-          <p className="mt-2 text-sm text-gray-600">{t('subtitle')}</p>
-        </div>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-white mb-1">{t('title')}</h1>
+        <p className="text-sm text-fg-muted">{t('subtitle')}</p>
+      </div>
 
-        <div
-          className="bg-white rounded-lg shadow-lg overflow-hidden"
-          style={{ height: 'calc(100vh - 200px)' }}
-        >
-          <GroupConversation
-            conversationId={conversationId}
-            userId={user.id}
-            participants={participants}
-          />
-        </div>
+      <div
+        className="bg-surface-1 rounded-2xl border border-white/5 overflow-hidden"
+        style={{ height: 'calc(100vh - 260px)' }}
+      >
+        <GroupConversation
+          conversationId={conversationId}
+          userId={user.id}
+          participants={participants}
+        />
       </div>
     </div>
   );

@@ -1,9 +1,7 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useMarketData } from '@/features/market/useMarketData';
-import Link from 'next/link';
 import { MarketAssetsListSection } from '@/features/market/components/MarketAssetsListSection';
 import { TradeModal } from '@/features/market/components/TradeModal';
 
@@ -15,7 +13,6 @@ type MarketAsset = {
 };
 
 type MarketPageContentProps = {
-  locale: string;
   assets: MarketAsset[];
   translations: {
     title: string;
@@ -43,9 +40,7 @@ type MarketPageContentProps = {
   };
 };
 
-export function MarketPageContent({ locale, assets, translations }: MarketPageContentProps) {
-  const { theme, mounted, toggleTheme } = useTheme();
-  const currentTheme = mounted ? theme : 'dark';
+export function MarketPageContent({ assets, translations }: MarketPageContentProps) {
   const [tradeOpen, setTradeOpen] = useState(false);
   const [tradeSymbol, setTradeSymbol] = useState<string | undefined>(undefined);
   const [logoMap, setLogoMap] = useState<Record<string, string | undefined>>({});
@@ -130,79 +125,17 @@ export function MarketPageContent({ locale, assets, translations }: MarketPageCo
     });
   }, [assets, marketData, logoMap]);
 
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className={`min-h-screen transition-colors ${
-        currentTheme === 'dark'
-          ? 'bg-gradient-to-br from-gray-950 via-gray-900 to-black'
-          : 'bg-gradient-to-br from-gray-50 via-white to-gray-100'
-      }`}
-    >
-      <header
-        className={`border-b transition-colors ${
-          currentTheme === 'dark' ? 'bg-gray-900/80 border-gray-800' : 'bg-white border-gray-200'
-        } backdrop-blur-sm sticky top-0 z-50`}
-      >
-        <div className=" px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <Link
-                href={`/${locale}/dashboard`}
-                className="text-2xl font-bold bg-gradient-to-r from-teal-300 to-teal-500 bg-clip-text text-transparent hover:from-teal-200 hover:to-teal-400 transition-all"
-              >
-                Avenir
-              </Link>
-
-              <div className="flex items-center gap-3">
-                <div
-                  className={`h-8 w-px ${currentTheme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`}
-                />
-                <div>
-                  <h1
-                    className={`text-xl font-semibold ${
-                      currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
-                    }`}
-                  >
-                    {translations.title}
-                  </h1>
-                  <p
-                    className={`text-sm ${
-                      currentTheme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                    }`}
-                  >
-                    {translations.subtitle}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {loading && <div className="text-xs text-teal-400 animate-pulse">Updating...</div>}
-              <button
-                onClick={toggleTheme}
-                className={`p-3 rounded-xl transition-all hover:scale-110 ${
-                  currentTheme === 'dark'
-                    ? 'bg-gray-800 hover:bg-gray-700'
-                    : 'bg-gray-100 hover:bg-gray-200'
-                }`}
-                aria-label="Toggle theme"
-              >
-                <span className="text-xl">{currentTheme === 'dark' ? '☀️' : '🌙'}</span>
-              </button>
-            </div>
-          </div>
+    <div>
+      <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+        <div>
+          <h1 className="text-xl font-semibold text-white mb-1">{translations.title}</h1>
+          <p className="text-fg-muted text-sm">{translations.subtitle}</p>
         </div>
-      </header>
+        {loading && <div className="text-xs text-teal-400 animate-pulse">Updating...</div>}
+      </div>
 
-      <main className=" px-6 py-8">
+      <div>
         <MarketAssetsListSection
           assets={updatedAssets}
           onTrade={(symbol) => {
@@ -236,7 +169,7 @@ export function MarketPageContent({ locale, assets, translations }: MarketPageCo
             orderTypes: translations.orderTypes,
           }}
         />
-      </main>
+      </div>
     </div>
   );
 }

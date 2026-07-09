@@ -9,7 +9,7 @@ type PageProps = {
   }>;
 };
 
-export default async function MarketPage({ params }: PageProps) {
+export default async function DashboardMarketPage({ params }: PageProps) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'market' });
 

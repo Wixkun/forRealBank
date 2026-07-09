@@ -1,6 +1,5 @@
 'use client';
 
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import { MarketPageContent } from '@/features/market/components/MarketPageContent';
 
 type MarketAsset = {
@@ -40,9 +39,5 @@ type MarketPageWrapperProps = {
 };
 
 export function MarketPageWrapper(props: MarketPageWrapperProps) {
-  return (
-    <ThemeProvider>
-      <MarketPageContent {...props} />
-    </ThemeProvider>
-  );
+  return <MarketPageContent {...props} />;
 }

@@ -305,7 +305,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const navItems: NavItem[] = [
     { icon: <IconDashboard />, label: t('nav.dashboard'), href: `/${locale}/dashboard` },
-    { icon: <IconTrading />, label: t('nav.trading'), href: `/${locale}/market` },
+    { icon: <IconTrading />, label: t('nav.trading'), href: `/${locale}/dashboard/market` },
     ...(!isAdvisor && !isDirector
       ? [{ icon: <IconBeneficiaires />, label: t('nav.beneficiaries'), href: '#', disabled: true }]
       : []),

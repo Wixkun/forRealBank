@@ -32,7 +32,7 @@ const nextConfig = {
 
       {
         source: '/:locale(fr|en)/advisor/chat',
-        destination: '/:locale/chat/manage',
+        destination: '/:locale/dashboard/messages/manage',
         permanent: false,
       },
     ];
