@@ -305,11 +305,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const navItems: NavItem[] = [
     { icon: <IconDashboard />, label: t('nav.dashboard'), href: `/${locale}/dashboard` },
-    { icon: <IconTrading />, label: t('nav.trading'), href: `/${locale}/dashboard/market` },
+    { icon: <IconTrading />, label: t('nav.trading'), href: `/${locale}/dashboard/trading` },
     ...(!isAdvisor && !isDirector
-      ? [{ icon: <IconBeneficiaires />, label: t('nav.beneficiaries'), href: '#', disabled: true }]
+      ? [
+          {
+            icon: <IconBeneficiaires />,
+            label: t('nav.beneficiaries'),
+            href: `/${locale}/dashboard/beneficiaries`,
+          },
+        ]
       : []),
-    { icon: <IconAnalytics />, label: t('nav.analytics'), href: '#', disabled: true },
+    { icon: <IconAnalytics />, label: t('nav.analytics'), href: `/${locale}/dashboard/analytics` },
     { icon: <IconMessage />, label: t('nav.messages'), href: `/${locale}/dashboard/messages` },
     ...(isAdvisor || isDirector
       ? [{ icon: <IconUsersGroup />, label: t('nav.users'), href: `/${locale}/dashboard/users` }]

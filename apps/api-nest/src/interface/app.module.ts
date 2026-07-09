@@ -23,7 +23,6 @@ import { NewsModule } from './feed/news.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { TransactionsModule } from './transactions/transactions.module';
-import { MarketModule } from './market/market.module';
 import { TradingModule } from './trading/trading.module';
 
 @Module({
@@ -49,7 +48,6 @@ import { TradingModule } from './trading/trading.module';
     NotificationsModule,
     AccountsModule,
     TransactionsModule,
-    MarketModule,
     TradingModule,
     MetricsModule,
   ],

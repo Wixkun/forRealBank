@@ -200,69 +200,6 @@
       "period": "Period"
     }
   },
-  "brokerage": {
-    "title": "Brokerage Account",
-    "portfolio": "Portfolio",
-    "totalValue": "Total Value",
-    "dayChange": "Today's Change",
-    "positions": "Positions",
-    "noPositions": "No positions yet",
-    "symbol": "Symbol",
-    "quantity": "Quantity",
-    "avgPrice": "Avg Price",
-    "currentPrice": "Current Price",
-    "gainLoss": "Gain/Loss",
-    "trade": "Trade",
-    "buy": "Buy",
-    "sell": "Sell",
-    "tradeSymbol": "Symbol",
-    "tradeQuantity": "Quantity",
-    "tradePrice": "Price",
-    "tradeTotal": "Total",
-    "placeOrder": "Place Order",
-    "orderHistory": "Order History",
-    "noOrders": "No orders yet",
-    "assetTypes": {
-      "stock": "Stock",
-      "crypto": "Crypto",
-      "etf": "ETF",
-      "commodity": "Commodity"
-    },
-    "orderTypes": {
-      "market": "Market",
-      "limit": "Limit",
-      "stop": "Stop"
-    },
-    "orderStatus": {
-      "pending": "Pending",
-      "executed": "Executed",
-      "cancelled": "Cancelled"
-    }
-  },
-  "market": {
-    "title": "Market Overview",
-    "subtitle": "Explore and trade assets",
-    "filters": {
-      "all": "All Assets",
-      "stocks": "Stocks",
-      "crypto": "Crypto",
-      "etf": "ETFs",
-      "commodities": "Commodities"
-    },
-    "trade": "Trade",
-    "buy": "Buy",
-    "sell": "Sell",
-    "tradeSymbol": "Symbol",
-    "tradeQuantity": "Quantity",
-    "orderType": "Order Type",
-    "tradePrice": "Price",
-    "placeOrder": "Place Order",
-    "orderTypes": {
-      "market": "Market",
-      "limit": "Limit",
-      "stop": "Stop"
-    }
-  },
   "errors": {
     "404": {
       "title": "404",
