@@ -15,7 +15,7 @@
     "dev:local:poll:webpack": "pnpm --parallel --filter api-nest --filter web-next dev:poll:webpack",
     "lint": "pnpm -r --if-present lint",
     "lint:fix": "pnpm -r --if-present lint:fix",
-    "format": "prettier --write .",
+    "format": "pnpm prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --if-present typecheck",
     "test:unit": "pnpm -r --if-present test:unit",
