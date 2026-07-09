@@ -443,7 +443,7 @@
         "subtitle": "Subtitle",
         "content": "Content"
       },
-      "editorHint": "Drag and drop or paste (Ctrl+V) an image directly into the content",
+      "editorHint": "Drag and drop or paste an image directly into the content",
       "submit": "Publish",
       "submitLoading": "Sending…",
       "messages": {

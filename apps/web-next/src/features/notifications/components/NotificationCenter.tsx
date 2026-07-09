@@ -70,12 +70,12 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`relative p-2 rounded-full transition ${
-          currentTheme === 'dark' ? 'hover:bg-gray-800/60' : 'hover:bg-gray-100'
+          currentTheme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-100'
         }`}
         aria-label={t('ariaLabel')}
       >
         <svg
-          className={`w-6 h-6 ${currentTheme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}
+          className={`w-6 h-6 ${currentTheme === 'dark' ? 'text-fg-secondary' : 'text-gray-700'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -127,7 +127,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                       ? 'text-fg-subtle border-white/10 cursor-not-allowed'
                       : 'text-gray-400 border-gray-200 cursor-not-allowed'
                     : currentTheme === 'dark'
-                      ? 'text-fg-secondary border-white/10 hover:bg-white/5'
+                      ? 'text-tertiary border-primary/30 hover:bg-primary/10'
                       : 'text-gray-700 border-gray-300 hover:bg-gray-50')
                 }
               >
@@ -157,7 +157,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                   <div
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className={`p-4 border-b cursor-pointer transition ${
+                    className={`group p-4 border-b cursor-pointer transition ${
                       currentTheme === 'dark'
                         ? 'border-white/10 hover:bg-white/5 bg-primary/10'
                         : 'border-gray-200 hover:bg-gray-50 bg-blue-50'

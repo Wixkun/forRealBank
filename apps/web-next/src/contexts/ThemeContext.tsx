@@ -12,26 +12,42 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark');
+type ThemeProviderProps = {
+  children: ReactNode;
+  /**
+   * Pins the theme and skips the localStorage/toggle sync. Used by surfaces
+   * (e.g. the dashboard shell) that don't expose a theme switch yet and must
+   * not inherit a stray preference saved by another page sharing the same
+   * localStorage key. Drop this prop once that surface gets its own toggle.
+   */
+  forcedTheme?: Theme;
+};
+
+export function ThemeProvider({ children, forcedTheme }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(forcedTheme ?? 'dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    if (forcedTheme) {
+      setMounted(true);
+      return;
+    }
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     if (savedTheme) {
       setTheme(savedTheme);
     }
     setMounted(true);
-  }, []);
+  }, [forcedTheme]);
 
   const toggleTheme = () => {
+    if (forcedTheme) return;
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
+    <ThemeContext.Provider value={{ theme: forcedTheme ?? theme, toggleTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );
