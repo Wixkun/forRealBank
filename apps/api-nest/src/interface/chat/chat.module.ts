@@ -3,11 +3,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
+import { ChatFilesService } from './chat-files.service';
+import { ChatClusterBus } from './chat-cluster.bus';
 import {
   AdvisorClientEntity,
   ConversationEntity,
   ConversationParticipantEntity,
   MessageEntity,
+  ChatFileEntity,
   UserEntity,
   RoleEntity,
   NotificationEntity,
@@ -63,6 +66,7 @@ import { AuthModule } from '../auth/auth.module';
       ConversationEntity,
       ConversationParticipantEntity,
       MessageEntity,
+      ChatFileEntity,
       UserEntity,
       RoleEntity,
       NotificationEntity,
@@ -74,6 +78,8 @@ import { AuthModule } from '../auth/auth.module';
   providers: [
     ChatService,
     ChatGateway,
+    ChatFilesService,
+    ChatClusterBus,
     { provide: IConversationRepository, useClass: ConversationRepository },
     { provide: IMessageRepository, useClass: MessageRepository },
     { provide: IConversationParticipantRepository, useClass: ConversationParticipantRepository },

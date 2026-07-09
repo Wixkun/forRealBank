@@ -120,6 +120,44 @@
       "noData": "Not enough data",
       "currentBalance": "Current balance",
       "balance": "Balance: {value}"
+    },
+    "shell": {
+      "welcomeBack": "Welcome back, {name}",
+      "overviewSubtitle": "Here's your financial overview for today.",
+      "statement": "Statement",
+      "nav": {
+        "dashboard": "Dashboard",
+        "trading": "Trading",
+        "beneficiaries": "Beneficiaries",
+        "analytics": "Analytics",
+        "messages": "Messages",
+        "users": "Users",
+        "admin": "Admin"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "transfer": "Transfer",
+        "payBill": "Pay Bill",
+        "cards": "Cards",
+        "more": "More"
+      },
+      "upcomingPayments": {
+        "title": "Upcoming Payments",
+        "empty": "No upcoming payments",
+        "comingSoon": "Feature coming soon",
+        "schedule": "Schedule Payment"
+      }
+    },
+    "portfolioCard": {
+      "totalBalance": "Total Portfolio Balance",
+      "noAccounts": "No accounts yet",
+      "copyIban": "Copy IBAN",
+      "ibanCopied": "IBAN copied",
+      "accountTypes": {
+        "checking": "Checking",
+        "savings": "Savings",
+        "investment": "Investment"
+      }
     }
   },
   "account": {
@@ -344,6 +382,10 @@
       "empty": "No conversations",
       "emptySearch": "No conversations found",
       "clearSearch": "Clear search",
+      "preview": {
+        "image": "📷 Image",
+        "file": "📄 File"
+      },
       "relative": {
         "justNow": "Just now",
         "minutesAgo": "{count}m ago",
@@ -365,6 +407,24 @@
         "placeholder": "Type your message..."
       },
       "send": "Send",
+      "composer": {
+        "emojiButton": "Add an emoji",
+        "attachButton": "Attach a file",
+        "removeAttachment": "Remove attachment",
+        "sending": "Sending...",
+        "dropHint": "Drop your files here",
+        "hint": "Enter to send • Shift+Enter for a new line",
+        "errors": {
+          "invalidType": "Unsupported format. Images and PDF only.",
+          "imageTooLarge": "Image too large (max 5 MB).",
+          "fileTooLarge": "File too large (max 10 MB).",
+          "tooMany": "Maximum {count} attachments per message.",
+          "uploadFailed": "File upload failed. Please try again."
+        }
+      },
+      "attachment": {
+        "imageAlt": "Attached image"
+      },
       "groupMembers": "{count} members",
       "typing": "{name} is typing..."
     },

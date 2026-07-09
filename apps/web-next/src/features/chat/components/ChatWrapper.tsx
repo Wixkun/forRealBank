@@ -11,7 +11,11 @@ type ChatWrapperProps = {
 export function ChatWrapper({ initialConversations = [] }: ChatWrapperProps) {
   return (
     <ThemeProvider>
-      <ChatPage initialConversations={initialConversations} />
+      {/* Hors du shell dashboard, la page doit fournir elle-même sa hauteur :
+          le présentateur est en h-full et suppose un parent dimensionné. */}
+      <div className="h-dvh">
+        <ChatPage initialConversations={initialConversations} />
+      </div>
     </ThemeProvider>
   );
 }

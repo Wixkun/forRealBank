@@ -10,6 +10,8 @@ export * from './entities/CardEntity';
 export * from './entities/ConversationEntity';
 export * from './entities/ConversationParticipantEntity';
 export * from './entities/MessageEntity';
+export * from './entities/ChatFileEntity';
+export * from './entities/NewsFileEntity';
 export * from './entities/NotificationEntity';
 export * from './entities/RoleEntity';
 export * from './entities/TradingOrderEntity';

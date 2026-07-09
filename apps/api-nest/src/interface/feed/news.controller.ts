@@ -12,44 +12,38 @@ import {
   UseInterceptors,
   UploadedFiles,
   Req,
+  Res,
   BadRequestException,
   NotFoundException,
   Patch,
   HttpCode,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import type { Request as ExpressRequest } from 'express';
-import { extname } from 'path';
-import { randomUUID } from 'crypto';
+import { memoryStorage } from 'multer';
+import type { Request as ExpressRequest, Response } from 'express';
 import { Observable, filter, interval, map, switchMap, merge } from 'rxjs';
 import { NewsService } from './news.service';
+import { NewsFilesService } from './news-files.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { type NewsStatus, RoleName } from '@forreal/domain';
 import type { Request } from 'express';
-import { NEWS_UPLOADS_DIR, buildNewsImageUrl } from './news-uploads.constants';
 
 const IMAGE_MIME_TYPES = /^image\/(jpeg|png|gif|webp)$/;
 
 // `image` : champ legacy (une seule image hors contenu)
 // `images` : images intégrées au contenu, référencées par `(cid:N)` dans le texte
+// Stockage en mémoire puis en base : en cluster (replicas sans volume
+// partagé), le disque local d'une instance n'est pas visible des autres.
 const newsImageInterceptor = FileFieldsInterceptor(
   [
     { name: 'image', maxCount: 1 },
     { name: 'images', maxCount: 10 },
   ],
   {
-    storage: diskStorage({
-      destination: NEWS_UPLOADS_DIR,
-      filename: (
-        _req: ExpressRequest,
-        file: Express.Multer.File,
-        cb: (error: Error | null, filename: string) => void,
-      ) => cb(null, `${randomUUID()}${extname(file.originalname)}`),
-    }),
+    storage: memoryStorage(),
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (
       _req: ExpressRequest,
@@ -81,16 +75,19 @@ type NewsUploadedFiles = { image?: Express.Multer.File[]; images?: Express.Multe
 
 // Le front référence les images inline par `(cid:N)` (index dans le champ `images`) ;
 // une fois les fichiers stockés, on substitue leur URL publique dans le contenu.
-function resolveInlineImages(content: string, images: Express.Multer.File[]): string {
+function resolveInlineImages(content: string, imageUrls: string[]): string {
   return (content ?? '').replace(/\(cid:(\d+)\)/g, (match, idx: string) => {
-    const file = images[Number(idx)];
-    return file ? `(${buildNewsImageUrl(file.filename)})` : match;
+    const url = imageUrls[Number(idx)];
+    return url ? `(${url})` : match;
   });
 }
 
 @Controller('news')
 export class NewsController {
-  constructor(@Inject(NewsService) private readonly newsService: NewsService) {}
+  constructor(
+    @Inject(NewsService) private readonly newsService: NewsService,
+    @Inject(NewsFilesService) private readonly newsFilesService: NewsFilesService,
+  ) {}
 
   // ─── Création manuelle (DIRECTOR / ADVISOR uniquement) ───────────────────
 
@@ -104,9 +101,8 @@ export class NewsController {
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    const legacyImage = files?.image?.[0];
-    const imageUrl = legacyImage ? buildNewsImageUrl(legacyImage.filename) : null;
-    const content = resolveInlineImages(body.content, files?.images ?? []);
+    const { imageUrl, inlineUrls } = await this.storeNewsImages(files, userId);
+    const content = resolveInlineImages(body.content, inlineUrls);
     return this.newsService.createManualNews(
       userId,
       body.title,
@@ -128,9 +124,8 @@ export class NewsController {
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
-    const legacyImage = files?.image?.[0];
-    const imageUrl = legacyImage ? buildNewsImageUrl(legacyImage.filename) : null;
-    const content = resolveInlineImages(body.content, files?.images ?? []);
+    const { imageUrl, inlineUrls } = await this.storeNewsImages(files, userId);
+    const content = resolveInlineImages(body.content, inlineUrls);
     return this.newsService.createManualNews(
       userId,
       body.title,
@@ -139,6 +134,33 @@ export class NewsController {
       imageUrl,
       body.subtitle?.trim() || null,
     );
+  }
+
+  // Stocke en base l'image legacy et les images inline ; retourne leurs URLs.
+  private async storeNewsImages(files: NewsUploadedFiles | undefined, userId: string) {
+    const legacyImage = files?.image?.[0];
+    const [legacyUrl] = legacyImage
+      ? await this.newsFilesService.saveAll([legacyImage], userId)
+      : [];
+    const inlineUrls = files?.images?.length
+      ? await this.newsFilesService.saveAll(files.images, userId)
+      : [];
+    return { imageUrl: legacyUrl ?? null, inlineUrls };
+  }
+
+  // ─── Lecture d'une image (public, comme l'ancien statique /uploads/news) ─
+
+  @Get('files/:id')
+  async getFile(@Param('id') id: string, @Res() res: Response) {
+    const file = await this.newsFilesService.findById(id);
+    res.set({
+      'Content-Type': file.mimeType,
+      'Content-Length': String(file.data.length),
+      'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(file.name)}`,
+      'Cache-Control': 'public, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    res.send(file.data);
   }
 
   // ─── Lecture du fil ──────────────────────────────────────────────────────
