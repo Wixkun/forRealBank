@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { NotificationCenter } from '@/features/notifications/components/NotificationCenter';
 import { useStatement } from '@/features/statements/StatementContext';
@@ -279,6 +280,8 @@ function IconDownload() {
 // ── Shell ─────────────────────────────────────────────────────────────────────
 
 export function DashboardShell({ children }: { children: ReactNode }) {
+  const t = useTranslations('dashboard.shell');
+  const tCommon = useTranslations('common');
   const { user } = useAuth();
   const statement = useStatement();
   const router = useRouter();
@@ -301,18 +304,24 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   };
 
   const navItems: NavItem[] = [
-    { icon: <IconDashboard />, label: 'Dashboard', href: `/${locale}/dashboard` },
-    { icon: <IconTrading />, label: 'Trading', href: `/${locale}/market` },
+    { icon: <IconDashboard />, label: t('nav.dashboard'), href: `/${locale}/dashboard` },
+    { icon: <IconTrading />, label: t('nav.trading'), href: `/${locale}/dashboard/trading` },
     ...(!isAdvisor && !isDirector
-      ? [{ icon: <IconBeneficiaires />, label: 'Bénéficiaires', href: '#', disabled: true }]
+      ? [
+          {
+            icon: <IconBeneficiaires />,
+            label: t('nav.beneficiaries'),
+            href: `/${locale}/dashboard/beneficiaries`,
+          },
+        ]
       : []),
-    { icon: <IconAnalytics />, label: 'Analytics', href: '#', disabled: true },
-    { icon: <IconMessage />, label: 'Messages', href: `/${locale}/dashboard/messages` },
+    { icon: <IconAnalytics />, label: t('nav.analytics'), href: `/${locale}/dashboard/analytics` },
+    { icon: <IconMessage />, label: t('nav.messages'), href: `/${locale}/dashboard/messages` },
     ...(isAdvisor || isDirector
-      ? [{ icon: <IconUsersGroup />, label: 'Users', href: `/${locale}/dashboard/users` }]
+      ? [{ icon: <IconUsersGroup />, label: t('nav.users'), href: `/${locale}/dashboard/users` }]
       : []),
     ...(isDirector
-      ? [{ icon: <IconAdmin />, label: 'Admin', href: `/${locale}/dashboard/admin` }]
+      ? [{ icon: <IconAdmin />, label: t('nav.admin'), href: `/${locale}/dashboard/admin` }]
       : []),
   ];
 
@@ -324,10 +333,14 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   };
 
   const quickActions: QuickAction[] = [
-    { icon: <IconTransfer />, label: 'Transfer', href: `/${locale}/dashboard/transfer` },
-    { icon: <IconPayBill />, label: 'Pay Bill', href: '#', disabled: true },
-    { icon: <IconCard />, label: 'Cards', href: '#', disabled: true },
-    { icon: <IconMore />, label: 'More', href: '#', disabled: true },
+    {
+      icon: <IconTransfer />,
+      label: t('quickActions.transfer'),
+      href: `/${locale}/dashboard/transfer`,
+    },
+    { icon: <IconPayBill />, label: t('quickActions.payBill'), href: '#', disabled: true },
+    { icon: <IconCard />, label: t('quickActions.cards'), href: '#', disabled: true },
+    { icon: <IconMore />, label: t('quickActions.more'), href: '#', disabled: true },
   ];
 
   const isActive = (href: string) => {
@@ -392,7 +405,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-fg-muted hover:text-white hover:bg-white/5 transition-colors"
           >
             <IconLogout />
-            <span>Logout</span>
+            <span>{tCommon('logout')}</span>
           </button>
         </div>
       </aside>
@@ -403,18 +416,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-white/5 shrink-0">
           <div>
             <p className="text-white text-base font-medium">
-              Welcome back, {user?.firstName || '...'}
+              {t('welcomeBack', { name: user?.firstName || '...' })}
             </p>
-            <p className="text-fg-muted text-xs mt-0.5">
-              Here&apos;s your financial overview for today.
-            </p>
+            <p className="text-fg-muted text-xs mt-0.5">{t('overviewSubtitle')}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => statement?.openStatement()}
               className="px-3 py-1.5 rounded-lg border border-white/10 text-xs text-fg-secondary hover:bg-white/5 transition-colors flex items-center gap-1.5"
             >
-              <IconDownload /> Statement
+              <IconDownload /> {t('statement')}
             </button>
             {user?.id && <NotificationCenter userId={user.id} />}
             <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-fg-muted hover:bg-white/10 transition">
@@ -429,12 +440,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         {/* Content row */}
         <div className="flex-1 flex overflow-hidden">
           {/* Center — only this part changes on navigation */}
-          <main className="flex-1 overflow-y-auto p-6 space-y-5">{children}</main>
+          <main className="flex-1 overflow-y-auto scrollbar-slim p-6 space-y-5">{children}</main>
 
           {/* ── Right panel ──────────────────────────────────────────── */}
-          <aside className="w-72 shrink-0 border-l border-white/5 overflow-y-auto p-5 space-y-5">
+          <aside className="w-72 shrink-0 border-l border-white/5 overflow-y-auto scrollbar-slim p-5 space-y-5">
             <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
-              <h3 className="font-semibold text-white text-sm mb-4">Quick Actions</h3>
+              <h3 className="font-semibold text-white text-sm mb-4">{t('quickActions.title')}</h3>
               <div className="grid grid-cols-2 gap-2.5">
                 {quickActions.map((action) => (
                   <button
@@ -459,17 +470,17 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
             <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-white text-sm">Upcoming Payments</h3>
+                <h3 className="font-semibold text-white text-sm">{t('upcomingPayments.title')}</h3>
                 <span className="text-fg-muted">
                   <IconCalendar />
                 </span>
               </div>
               <div className="py-8 text-center">
-                <p className="text-fg-muted text-xs">No upcoming payments</p>
-                <p className="text-fg-muted text-xs mt-1">Feature coming soon</p>
+                <p className="text-fg-muted text-xs">{t('upcomingPayments.empty')}</p>
+                <p className="text-fg-muted text-xs mt-1">{t('upcomingPayments.comingSoon')}</p>
               </div>
               <button className="w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all">
-                Schedule Payment
+                {t('upcomingPayments.schedule')}
               </button>
             </div>
           </aside>

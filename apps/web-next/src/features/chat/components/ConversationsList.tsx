@@ -5,6 +5,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Conversation, useConversations } from '@/features/chat/useConversations';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
+import { formatMessagePreview } from '@/features/chat/attachments';
 
 interface ConversationsListProps {
   selectedConversationId?: string;
@@ -98,7 +99,7 @@ export default function ConversationsList({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-slim">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -185,7 +186,10 @@ export default function ConversationsList({
                           theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
                         }`}
                       >
-                        {conversation.lastMessage}
+                        {formatMessagePreview(conversation.lastMessage, {
+                          image: t('list.preview.image'),
+                          file: t('list.preview.file'),
+                        })}
                       </p>
                     )}
                   </div>

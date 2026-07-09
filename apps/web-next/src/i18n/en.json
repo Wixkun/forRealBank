@@ -57,7 +57,8 @@
       "accountLocked": "Too many failed attempts. Your account is temporarily locked. Please try again later.",
       "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
       "loginFailed": "Login failed",
-      "genericError": "An error occurred during login"
+      "genericError": "An error occurred during login",
+      "forgotPassword": "Forgot your password?"
     },
     "register": {
       "title": "Create an account",
@@ -120,6 +121,44 @@
       "noData": "Not enough data",
       "currentBalance": "Current balance",
       "balance": "Balance: {value}"
+    },
+    "shell": {
+      "welcomeBack": "Welcome back, {name}",
+      "overviewSubtitle": "Here's your financial overview for today.",
+      "statement": "Statement",
+      "nav": {
+        "dashboard": "Dashboard",
+        "trading": "Trading",
+        "beneficiaries": "Beneficiaries",
+        "analytics": "Analytics",
+        "messages": "Messages",
+        "users": "Users",
+        "admin": "Admin"
+      },
+      "quickActions": {
+        "title": "Quick Actions",
+        "transfer": "Transfer",
+        "payBill": "Pay Bill",
+        "cards": "Cards",
+        "more": "More"
+      },
+      "upcomingPayments": {
+        "title": "Upcoming Payments",
+        "empty": "No upcoming payments",
+        "comingSoon": "Feature coming soon",
+        "schedule": "Schedule Payment"
+      }
+    },
+    "portfolioCard": {
+      "totalBalance": "Total Portfolio Balance",
+      "noAccounts": "No accounts yet",
+      "copyIban": "Copy IBAN",
+      "ibanCopied": "IBAN copied",
+      "accountTypes": {
+        "checking": "Checking",
+        "savings": "Savings",
+        "investment": "Investment"
+      }
     }
   },
   "account": {
@@ -159,69 +198,6 @@
       "credits": "Credits",
       "debits": "Debits",
       "period": "Period"
-    }
-  },
-  "brokerage": {
-    "title": "Brokerage Account",
-    "portfolio": "Portfolio",
-    "totalValue": "Total Value",
-    "dayChange": "Today's Change",
-    "positions": "Positions",
-    "noPositions": "No positions yet",
-    "symbol": "Symbol",
-    "quantity": "Quantity",
-    "avgPrice": "Avg Price",
-    "currentPrice": "Current Price",
-    "gainLoss": "Gain/Loss",
-    "trade": "Trade",
-    "buy": "Buy",
-    "sell": "Sell",
-    "tradeSymbol": "Symbol",
-    "tradeQuantity": "Quantity",
-    "tradePrice": "Price",
-    "tradeTotal": "Total",
-    "placeOrder": "Place Order",
-    "orderHistory": "Order History",
-    "noOrders": "No orders yet",
-    "assetTypes": {
-      "stock": "Stock",
-      "crypto": "Crypto",
-      "etf": "ETF",
-      "commodity": "Commodity"
-    },
-    "orderTypes": {
-      "market": "Market",
-      "limit": "Limit",
-      "stop": "Stop"
-    },
-    "orderStatus": {
-      "pending": "Pending",
-      "executed": "Executed",
-      "cancelled": "Cancelled"
-    }
-  },
-  "market": {
-    "title": "Market Overview",
-    "subtitle": "Explore and trade assets",
-    "filters": {
-      "all": "All Assets",
-      "stocks": "Stocks",
-      "crypto": "Crypto",
-      "etf": "ETFs",
-      "commodities": "Commodities"
-    },
-    "trade": "Trade",
-    "buy": "Buy",
-    "sell": "Sell",
-    "tradeSymbol": "Symbol",
-    "tradeQuantity": "Quantity",
-    "orderType": "Order Type",
-    "tradePrice": "Price",
-    "placeOrder": "Place Order",
-    "orderTypes": {
-      "market": "Market",
-      "limit": "Limit",
-      "stop": "Stop"
     }
   },
   "errors": {
@@ -344,6 +320,10 @@
       "empty": "No conversations",
       "emptySearch": "No conversations found",
       "clearSearch": "Clear search",
+      "preview": {
+        "image": "📷 Image",
+        "file": "📄 File"
+      },
       "relative": {
         "justNow": "Just now",
         "minutesAgo": "{count}m ago",
@@ -365,28 +345,26 @@
         "placeholder": "Type your message..."
       },
       "send": "Send",
+      "composer": {
+        "emojiButton": "Add an emoji",
+        "attachButton": "Attach a file",
+        "removeAttachment": "Remove attachment",
+        "sending": "Sending...",
+        "dropHint": "Drop your files here",
+        "hint": "Enter to send • Shift+Enter for a new line",
+        "errors": {
+          "invalidType": "Unsupported format. Images and PDF only.",
+          "imageTooLarge": "Image too large (max 5 MB).",
+          "fileTooLarge": "File too large (max 10 MB).",
+          "tooMany": "Maximum {count} attachments per message.",
+          "uploadFailed": "File upload failed. Please try again."
+        }
+      },
+      "attachment": {
+        "imageAlt": "Attached image"
+      },
       "groupMembers": "{count} members",
       "typing": "{name} is typing..."
-    },
-    "group": {
-      "loading": "Loading group conversation...",
-      "title": "Group chat",
-      "subtitle": "Collaborate in real time. The director is visually highlighted.",
-      "empty": {
-        "title": "No group conversation",
-        "description": "You are not participating in a group conversation yet."
-      }
-    },
-    "manage": {
-      "title": "Manage chat",
-      "conversationIdLabel": "Conversation ID",
-      "conversationIdPlaceholder": "Conversation UUID",
-      "open": "Open"
-    },
-    "groupConversation": {
-      "title": "Group conversation",
-      "unknownUser": "User",
-      "participantsCount": "{count} participant{count, plural, one {} other {s}}"
     },
     "errors": {
       "fetchAdvisor": "Unable to fetch the advisor",

@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { NewsService } from './news.service';
 import { NewsController } from './news.controller';
+import { NewsFilesService } from './news-files.service';
 import {
   NewsEntity,
+  NewsFileEntity,
   UserNewsStatusEntity,
   UserEntity,
   NotificationEntity,
@@ -32,6 +34,7 @@ import { NewsSeed } from './news.seed';
     AuthModule,
     TypeOrmModule.forFeature([
       NewsEntity,
+      NewsFileEntity,
       UserNewsStatusEntity,
       UserEntity,
       RoleEntity,
@@ -41,6 +44,7 @@ import { NewsSeed } from './news.seed';
   controllers: [NewsController],
   providers: [
     NewsService,
+    NewsFilesService,
     RolesGuard,
     OptionalJwtGuard,
     { provide: INewsRepository, useClass: NewsRepository },

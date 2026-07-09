@@ -73,6 +73,30 @@ CREATE TABLE IF NOT EXISTS messages (
     read_at timestamptz NULL
 );
 
+-- Images des Actualités. Stockées en base et non sur disque : accessibles
+-- depuis tous les replicas API du cluster.
+CREATE TABLE IF NOT EXISTS news_files (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    uploader_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name text NOT NULL,
+    mime_type text NOT NULL,
+    size int NOT NULL,
+    data bytea NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Pièces jointes de la messagerie (images, PDF). Stockées en base et non sur
+-- disque : accessibles depuis tous les replicas API du cluster.
+CREATE TABLE IF NOT EXISTS chat_files (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    uploader_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name text NOT NULL,
+    mime_type text NOT NULL,
+    size int NOT NULL,
+    data bytea NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- Préférences de notifications par conversation et par utilisateur
 -- muted = false                        → notifications activées
 -- muted = true  AND muted_until IS NULL → désactivé définitivement

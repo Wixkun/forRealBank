@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import EmojiPicker, { type EmojiClickData, Theme } from 'emoji-picker-react';
+import { downscaleImage, MAX_IMAGE_BYTES } from '@/lib/uploads/images';
 
 type NewsStatus =
   | 'SECURITY'
@@ -17,34 +18,9 @@ const STATUS_OPTIONS: { value: NewsStatus; label: string; color: string; dot: st
   { value: 'SYSTEM', label: 'Système', color: 'text-violet-400', dot: 'bg-violet-400' },
 ];
 
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 const MAX_IMAGES = 10;
-const MAX_IMAGE_DIMENSION = 1600;
 const EDITOR_IMG_CLASS =
   'my-2 max-w-full max-h-48 h-auto rounded-lg border border-white/10 object-contain';
-
-// Redimensionne côté client avant envoi : limite la plus grande dimension et
-// ré-encode en webp. On garde l'original si le résultat n'est pas plus léger.
-async function downscaleImage(file: File): Promise<File> {
-  if (file.type === 'image/gif') return file; // préserve l'animation
-  let bitmap: ImageBitmap;
-  try {
-    bitmap = await createImageBitmap(file);
-  } catch {
-    return file;
-  }
-  const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(bitmap.width, bitmap.height));
-  if (scale === 1 && file.size <= 500 * 1024) return file;
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, 'image/webp', 0.85),
-  );
-  if (!blob || blob.size >= file.size) return file;
-  return new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' });
-}
 
 // Sérialise le contenu de l'éditeur en texte brut avec marqueurs `![image](src)`.
 function serializeNode(node: Node): string {

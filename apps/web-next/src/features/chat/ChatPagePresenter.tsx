@@ -54,7 +54,7 @@ export default function ChatPagePresenter({
   if (isLoading) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${
+        className={`h-full flex items-center justify-center ${
           theme === 'dark' ? 'bg-surface-0' : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
@@ -71,7 +71,7 @@ export default function ChatPagePresenter({
   if (!user) {
     return (
       <div
-        className={`min-h-screen flex items-center justify-center ${
+        className={`h-full flex items-center justify-center ${
           theme === 'dark' ? 'bg-surface-0' : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
@@ -83,14 +83,16 @@ export default function ChatPagePresenter({
   }
 
   return (
+    // h-full (et non min-h-screen) : la page occupe exactement la hauteur
+    // disponible dans le shell, seuls les blocs internes scrollent.
     <div
-      className={`min-h-screen flex flex-col ${
+      className={`h-full min-h-0 flex flex-col ${
         theme === 'dark' ? 'bg-surface-0' : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
       }`}
     >
-      <main className="flex-1 px-6 py-6 overflow-hidden">
+      <main className="flex-1 min-h-0 overflow-hidden">
         <div
-          className={`rounded-lg shadow-lg overflow-hidden flex h-full border ${
+          className={`rounded-lg shadow-lg overflow-hidden flex h-full min-h-0 border ${
             theme === 'dark' ? 'bg-surface-1 border-white/5' : 'bg-white border-transparent'
           }`}
         >
@@ -107,7 +109,9 @@ export default function ChatPagePresenter({
             />
           </div>
 
-          <div className={`flex-1 flex flex-col ${theme === 'dark' ? 'bg-surface-1' : 'bg-white'}`}>
+          <div
+            className={`flex-1 min-h-0 flex flex-col ${theme === 'dark' ? 'bg-surface-1' : 'bg-white'}`}
+          >
             {(isAdvisor || isDirector) && (
               <div
                 className={`p-4 border-b flex flex-col gap-2 ${
@@ -130,7 +134,7 @@ export default function ChatPagePresenter({
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto scrollbar-slim">
                   {clientsList.map((client) => {
                     const already = hasPrivateConversationWith(client.id);
                     const existingConvId = openConversationWith(client.id);
@@ -193,7 +197,7 @@ export default function ChatPagePresenter({
                 conversation={conversations.find((c) => c.id === conversationId)}
               />
             ) : conversations.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex-1 flex items-center justify-center">
                 <div
                   className={`text-center ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
                 >
@@ -225,7 +229,7 @@ export default function ChatPagePresenter({
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex-1 flex items-center justify-center">
                 <div
                   className={`text-center ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
                 >

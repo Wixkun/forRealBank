@@ -25,15 +25,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (
-    pathname === `/${locale}/news` ||
-    pathname.startsWith(`/${locale}/news/manage`) ||
-    pathname === `/${locale}/notifications` ||
-    pathname.startsWith(`/${locale}/news/create`)
-  ) {
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
-  }
-
   return intlMiddleware(request);
 }
 

@@ -57,7 +57,8 @@
       "accountLocked": "Trop de tentatives échouées. Votre compte est temporairement verrouillé. Veuillez réessayer plus tard.",
       "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
       "loginFailed": "La connexion a échoué",
-      "genericError": "Une erreur est survenue lors de la connexion"
+      "genericError": "Une erreur est survenue lors de la connexion",
+      "forgotPassword": "Mot de passe oublié ?"
     },
     "register": {
       "title": "Créer un compte",
@@ -120,6 +121,44 @@
       "noData": "Pas assez de données",
       "currentBalance": "Solde actuel",
       "balance": "Solde : {value}"
+    },
+    "shell": {
+      "welcomeBack": "Bon retour, {name}",
+      "overviewSubtitle": "Voici votre aperçu financier du jour.",
+      "statement": "Relevé",
+      "nav": {
+        "dashboard": "Tableau de bord",
+        "trading": "Trading",
+        "beneficiaries": "Bénéficiaires",
+        "analytics": "Analyse",
+        "messages": "Messages",
+        "users": "Utilisateurs",
+        "admin": "Admin"
+      },
+      "quickActions": {
+        "title": "Actions rapides",
+        "transfer": "Virement",
+        "payBill": "Payer une facture",
+        "cards": "Cartes",
+        "more": "Plus"
+      },
+      "upcomingPayments": {
+        "title": "Paiements à venir",
+        "empty": "Aucun paiement à venir",
+        "comingSoon": "Fonctionnalité à venir",
+        "schedule": "Planifier un paiement"
+      }
+    },
+    "portfolioCard": {
+      "totalBalance": "Solde total du portefeuille",
+      "noAccounts": "Aucun compte pour le moment",
+      "copyIban": "Copier l'IBAN",
+      "ibanCopied": "IBAN copié",
+      "accountTypes": {
+        "checking": "Compte courant",
+        "savings": "Épargne",
+        "investment": "Investissement"
+      }
     }
   },
   "account": {
@@ -159,70 +198,6 @@
       "credits": "Crédits",
       "debits": "Débits",
       "period": "Période"
-    }
-  },
-  "brokerage": {
-    "title": "Compte de courtage",
-    "portfolio": "Portefeuille",
-    "totalValue": "Valeur totale",
-    "totalGain": "Gain/Perte total",
-    "dayChange": "Variation du jour",
-    "positions": "Positions",
-    "noPositions": "Aucune position pour le moment",
-    "symbol": "Symbole",
-    "quantity": "Quantité",
-    "avgPrice": "Prix moyen",
-    "currentPrice": "Prix actuel",
-    "gainLoss": "Gain/Perte",
-    "trade": "Trader",
-    "buy": "Acheter",
-    "sell": "Vendre",
-    "tradeSymbol": "Symbole",
-    "tradeQuantity": "Quantité",
-    "tradePrice": "Prix",
-    "tradeTotal": "Total",
-    "placeOrder": "Passer l'ordre",
-    "orderHistory": "Historique des ordres",
-    "noOrders": "Aucun ordre pour le moment",
-    "assetTypes": {
-      "stock": "Action",
-      "crypto": "Crypto",
-      "etf": "ETF",
-      "commodity": "Matière première"
-    },
-    "orderTypes": {
-      "market": "Marché",
-      "limit": "Limite",
-      "stop": "Stop"
-    },
-    "orderStatus": {
-      "pending": "En attente",
-      "executed": "Exécuté",
-      "cancelled": "Annulé"
-    }
-  },
-  "market": {
-    "title": "Vue du marché",
-    "subtitle": "Explorez et tradez des actifs",
-    "filters": {
-      "all": "Tous les actifs",
-      "stocks": "Actions",
-      "crypto": "Crypto",
-      "etf": "ETFs",
-      "commodities": "Matières premières"
-    },
-    "trade": "Trader",
-    "buy": "Acheter",
-    "sell": "Vendre",
-    "tradeSymbol": "Symbole",
-    "tradeQuantity": "Quantité",
-    "orderType": "Type d'ordre",
-    "tradePrice": "Prix",
-    "placeOrder": "Passer l'ordre",
-    "orderTypes": {
-      "market": "Marché",
-      "limit": "Limite",
-      "stop": "Stop"
     }
   },
   "errors": {
@@ -345,6 +320,10 @@
       "empty": "Aucune conversation",
       "emptySearch": "Aucune conversation trouvée",
       "clearSearch": "Effacer la recherche",
+      "preview": {
+        "image": "📷 Image",
+        "file": "📄 Fichier"
+      },
       "relative": {
         "justNow": "À l'instant",
         "minutesAgo": "Il y a {count}m",
@@ -366,33 +345,31 @@
         "placeholder": "Tapez votre message..."
       },
       "send": "Envoyer",
+      "composer": {
+        "emojiButton": "Ajouter un emoji",
+        "attachButton": "Joindre un fichier",
+        "removeAttachment": "Retirer la pièce jointe",
+        "sending": "Envoi...",
+        "dropHint": "Déposez vos fichiers ici",
+        "hint": "Entrée pour envoyer • Maj+Entrée pour une nouvelle ligne",
+        "errors": {
+          "invalidType": "Format non supporté. Images et PDF uniquement.",
+          "imageTooLarge": "Image trop lourde (max 5 Mo).",
+          "fileTooLarge": "Fichier trop lourd (max 10 Mo).",
+          "tooMany": "Maximum {count} pièces jointes par message.",
+          "uploadFailed": "Échec de l'envoi du fichier. Réessayez."
+        }
+      },
+      "attachment": {
+        "imageAlt": "Image jointe"
+      },
       "groupMembers": "{count} membres",
       "typing": "{name} est en train d'écrire..."
-    },
-    "group": {
-      "loading": "Chargement de la discussion de groupe...",
-      "title": "Discussion de groupe",
-      "subtitle": "Collaborez en temps réel. Le directeur est visuellement mis en avant.",
-      "empty": {
-        "title": "Aucune conversation de groupe",
-        "description": "Vous n'êtes pas participant d'une discussion de groupe pour l'instant."
-      }
-    },
-    "manage": {
-      "title": "Gérer le chat",
-      "conversationIdLabel": "ID de la conversation",
-      "conversationIdPlaceholder": "UUID de la conversation",
-      "open": "Ouvrir"
     },
     "errors": {
       "fetchAdvisor": "Impossible de récupérer le conseiller",
       "fetchClients": "Impossible de récupérer vos clients",
       "fetchUsers": "Impossible de récupérer les utilisateurs"
-    },
-    "groupConversation": {
-      "title": "Discussion de groupe",
-      "unknownUser": "Utilisateur",
-      "participantsCount": "{count} participant{count, plural, one {} other {s}}"
     }
   },
   "feed": {

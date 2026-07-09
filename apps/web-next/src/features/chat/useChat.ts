@@ -19,7 +19,7 @@ interface UseChatOptions {
 }
 
 function defaultWsUrl(): string {
-  // En dev, Socket.IO est hébergé par l'API Nest (port 3001), namespace `/chat`.
+  // Socket.IO est hébergé par l'API Nest, namespace `/chat`, path `/api/socket.io`.
   // Si NEXT_PUBLIC_WS_URL est fourni, on le respecte.
   if (typeof window === 'undefined') {
     const apiUrl = process.env.API_URL || 'http://api:3001';
@@ -30,7 +30,9 @@ function defaultWsUrl(): string {
   if (envUrl) return envUrl.replace(/\/$/, '');
 
   const current = new URL(window.location.href);
-  current.port = '3001';
+  // En dev, Next (3000) et l'API (3001) sont deux serveurs distincts.
+  // En prod, Traefik route /api/socket.io vers l'API sur la même origine.
+  if (current.port === '3000') current.port = '3001';
   current.pathname = '/chat';
   current.search = '';
   current.hash = '';

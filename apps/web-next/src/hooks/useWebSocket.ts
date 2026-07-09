@@ -24,7 +24,12 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
 
     const newSocket = io(url, {
       query: { userId },
+      // WebSocket uniquement : en cluster derrière Traefik, le fallback
+      // HTTP-polling exigerait des sessions sticky entre replicas.
       transports: ['websocket'],
+      // Path préfixé /api pour être routé vers l'API par Traefik en prod
+      // (seul PathPrefix(/api) atteint le service api). Identique en dev.
+      path: '/api/socket.io',
     });
 
     if (typeof window !== 'undefined') {

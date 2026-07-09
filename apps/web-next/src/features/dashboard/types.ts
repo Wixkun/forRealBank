@@ -22,11 +22,26 @@ export const fmt = (n: number) =>
 export const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
-export const accountLabel = (acc: Account) => {
-  if (acc.accountType === 'investment' || acc.type === 'investment') return 'Investment';
+export type AccountTypeLabels = {
+  checking: string;
+  savings: string;
+  investment: string;
+};
+
+const defaultAccountTypeLabels: AccountTypeLabels = {
+  checking: 'Checking',
+  savings: 'Savings',
+  investment: 'Investment',
+};
+
+export const accountLabel = (
+  acc: Account,
+  labels: AccountTypeLabels = defaultAccountTypeLabels,
+) => {
+  if (acc.accountType === 'investment' || acc.type === 'investment') return labels.investment;
   const t = (acc.type ?? '').toLowerCase();
-  if (t.includes('saving')) return 'Savings';
-  return 'Checking';
+  if (t.includes('saving')) return labels.savings;
+  return labels.checking;
 };
 
 export const lastFour = (acc: Account) => (acc.iban ?? acc.id).slice(-4).toUpperCase();

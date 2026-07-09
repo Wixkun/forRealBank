@@ -8,10 +8,17 @@ import {
   Patch,
   Inject,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   Req,
+  Res,
   BadRequestException,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
+import type { Request as ExpressRequest, Response } from 'express';
 import type { Request } from 'express';
+import { ChatFilesService } from './chat-files.service';
 import { ConversationType } from '@forreal/domain';
 import { RoleName } from '@forreal/domain';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -30,6 +37,29 @@ import { SetConversationMuteUseCase } from '@forreal/application';
 import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
 import { UpdateConversationUserStateUseCase } from '@forreal/application';
 
+const CHAT_FILE_MIME_TYPES = /^(image\/(jpeg|png|gif|webp)|application\/pdf)$/;
+const MAX_CHAT_FILE_BYTES = 10 * 1024 * 1024;
+const MAX_CHAT_FILES = 5;
+
+// Pièces jointes de messagerie (images + PDF). Stockage en mémoire puis en
+// base : en cluster (replicas sans volume partagé), le disque local d'une
+// instance n'est pas visible des autres.
+const chatFilesInterceptor = FilesInterceptor('files', MAX_CHAT_FILES, {
+  storage: memoryStorage(),
+  limits: { fileSize: MAX_CHAT_FILE_BYTES },
+  fileFilter: (
+    _req: ExpressRequest,
+    file: Express.Multer.File,
+    cb: (error: Error | null, acceptFile: boolean) => void,
+  ) => {
+    if (!CHAT_FILE_MIME_TYPES.test(file.mimetype)) {
+      cb(new BadRequestException('INVALID_FILE_TYPE'), false);
+      return;
+    }
+    cb(null, true);
+  },
+});
+
 function extractUserId(req: Request): string {
   const userId = (req as any).auth?.userId ?? (req as any).user?.id ?? null;
   if (!userId) throw new BadRequestException('Missing auth context');
@@ -39,6 +69,7 @@ function extractUserId(req: Request): string {
 @Controller('chat')
 export class ChatController {
   constructor(
+    @Inject(ChatFilesService) private readonly chatFilesService: ChatFilesService,
     @Inject(CreateConversationUseCase)
     private readonly createConversationUseCase: CreateConversationUseCase,
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
@@ -79,6 +110,31 @@ export class ChatController {
   @Post('messages')
   async postMessage(@Body() body: { conversationId: string; senderId: string; content: string }) {
     return this.sendMessageUseCase.execute(body);
+  }
+
+  @Post('uploads')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(chatFilesInterceptor)
+  async uploadFiles(
+    @UploadedFiles() files: Express.Multer.File[] | undefined,
+    @Req() req: Request,
+  ) {
+    const userId = extractUserId(req);
+    return this.chatFilesService.saveAll(files ?? [], userId);
+  }
+
+  @Get('files/:id')
+  @UseGuards(JwtAuthGuard)
+  async getFile(@Param('id') id: string, @Res() res: Response) {
+    const file = await this.chatFilesService.findById(id);
+    res.set({
+      'Content-Type': file.mimeType,
+      'Content-Length': String(file.data.length),
+      'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(file.name)}`,
+      'Cache-Control': 'private, max-age=31536000, immutable',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    res.send(file.data);
   }
 
   @Get('conversations/:id/messages')
