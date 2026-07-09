@@ -97,6 +97,12 @@ export class User {
     this._lockUntil = undefined;
     this.touch(at);
   }
+  changePassword(passwordHash: string, at = new Date()) {
+    this._passwordHash = passwordHash;
+    this._failedLoginCount = 0;
+    this._lockUntil = undefined;
+    this.touch(at);
+  }
   ban(reason?: string, at = new Date()) {
     this._isBanned = true;
     this._bannedAt = at;

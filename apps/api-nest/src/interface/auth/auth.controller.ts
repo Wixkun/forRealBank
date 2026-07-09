@@ -15,8 +15,11 @@ import {
 import { Response, Request } from 'express';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RegisterUserUseCase } from '@forreal/application';
 import { LoginUserUseCase } from '@forreal/application';
+import { RequestPasswordResetUseCase, ResetPasswordUseCase } from '@forreal/application';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
@@ -55,6 +58,8 @@ export class AuthController {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUserUseCase: LoginUserUseCase,
+    private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
+    private readonly resetPasswordUseCase: ResetPasswordUseCase,
 
     @Inject(ITokenService)
     private readonly tokenService: ITokenService,
@@ -77,6 +82,39 @@ export class AuthController {
       });
 
       return { success: true, message: 'User successfully registered' };
+    } catch (error) {
+      throw AuthErrorMapper.mapToHttpException(error);
+    }
+  }
+
+  @HttpCode(200)
+  @Post('forgot-password')
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    try {
+      await this.requestPasswordResetUseCase.execute({
+        email: dto.email,
+        locale: dto.locale,
+      });
+
+      return {
+        success: true,
+        message: 'If an account exists for this email, a reset link has been sent',
+      };
+    } catch (error) {
+      throw AuthErrorMapper.mapToHttpException(error);
+    }
+  }
+
+  @HttpCode(200)
+  @Post('reset-password')
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    try {
+      await this.resetPasswordUseCase.execute({
+        token: dto.token,
+        password: dto.password,
+      });
+
+      return { success: true, message: 'Password reset successful' };
     } catch (error) {
       throw AuthErrorMapper.mapToHttpException(error);
     }

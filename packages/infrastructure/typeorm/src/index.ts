@@ -3,6 +3,7 @@ export * from './entities/BaseEntity';
 export * from './entities/ImmutableEntity';
 export * from './entities/AdvisorClientEntity';
 export * from './entities/UserEntity';
+export * from './entities/PasswordResetTokenEntity';
 export * from './entities/AccountEntity';
 export * from './entities/BankTransactionEntity';
 export * from './entities/InvestmentAccountEntity';
@@ -26,6 +27,7 @@ export * from './entities/ConversationUserStateEntity';
 // repositories
 export * from './repositories/AdvisorClientRepository';
 export * from './repositories/UserRepository';
+export * from './repositories/PasswordResetTokenRepository';
 export * from './repositories/AccountRepository';
 export * from './repositories/BankTransactionRepository';
 export * from './repositories/InvestmentAccountRepository';

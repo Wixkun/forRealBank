@@ -14,6 +14,7 @@ export enum AuthErrorCode {
   INVALID_CREDENTIALS = 'INVALID_CREDENTIALS',
   WEAK_PASSWORD = 'WEAK_PASSWORD',
   ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
+  INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
 }
 
 type MappedHttpException =
@@ -38,6 +39,7 @@ const ERROR_EXCEPTION_MAP: Partial<
     BadRequestException,
     'Password must be at least 12 characters and include uppercase, lowercase, number and symbol',
   ],
+  [AuthErrorCode.INVALID_RESET_TOKEN]: [BadRequestException, 'Invalid or expired reset token'],
 };
 
 export class AuthErrorMapper {

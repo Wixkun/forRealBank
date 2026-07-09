@@ -40,12 +40,15 @@ export * from './transactions/ports/ITransactionRepository';
 
 // user
 export * from './user/User';
+export * from './user/PasswordResetToken';
 export * from './user/RoleName';
 
 export * from './user/PasswordPolicy';
 
 export * from './user/ports/IUserRepository';
+export * from './user/ports/IPasswordResetTokenRepository';
 export * from './user/ports/IPasswordHasher';
+export * from './user/ports/IEmailService';
 export * from './user/ports/ITokenService';
 export * from './user/ports/IUserIdGenerator';
 export * from './user/ports/ISessionIdGenerator';

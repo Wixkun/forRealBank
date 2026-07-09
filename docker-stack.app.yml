@@ -105,6 +105,16 @@ services:
       JWT_ISSUER: ${JWT_ISSUER:-forrealbank.auth}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-forrealbank.api}
       FRONTEND_ORIGIN: https://for-real.cloud
+      WEB_APP_URL: ${WEB_APP_URL:-https://for-real.cloud}
+      MAILGUN_API_KEY: ${MAILGUN_API_KEY:-}
+      MAILGUN_DOMAIN: ${MAILGUN_DOMAIN:-}
+      MAILGUN_BASE_URL: ${MAILGUN_BASE_URL:-https://api.mailgun.net}
+      MAILGUN_FROM: ${MAILGUN_FROM:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-ForRealBank <no-reply@for-real.cloud>}
     healthcheck:
       test:
         [
