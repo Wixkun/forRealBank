@@ -55,9 +55,7 @@ export default function ChatPagePresenter({
     return (
       <div
         className={`min-h-screen flex items-center justify-center ${
-          theme === 'dark'
-            ? 'bg-surface-0'
-            : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
+          theme === 'dark' ? 'bg-surface-0' : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
         <div className="text-center">
@@ -74,9 +72,7 @@ export default function ChatPagePresenter({
     return (
       <div
         className={`min-h-screen flex items-center justify-center ${
-          theme === 'dark'
-            ? 'bg-surface-0'
-            : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
+          theme === 'dark' ? 'bg-surface-0' : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
         }`}
       >
         <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-700'}`}>
@@ -89,9 +85,7 @@ export default function ChatPagePresenter({
   return (
     <div
       className={`min-h-screen flex flex-col ${
-        theme === 'dark'
-          ? 'bg-surface-0'
-          : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
+        theme === 'dark' ? 'bg-surface-0' : 'bg-linear-to-br from-gray-50 via-blue-50 to-cyan-50'
       }`}
     >
       <main className="flex-1 px-6 py-6 overflow-hidden">
