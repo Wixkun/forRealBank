@@ -61,12 +61,12 @@ export default function ConversationsList({
   return (
     <div
       className={`flex flex-col h-full border-r ${
-        theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+        theme === 'dark' ? 'bg-surface-1 border-white/5' : 'bg-white border-gray-200'
       }`}
     >
-      <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className={`p-4 border-b ${theme === 'dark' ? 'border-white/5' : 'border-gray-200'}`}>
         <h2
-          className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
+          className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
         >
           {t('list.title')}
         </h2>
@@ -89,9 +89,9 @@ export default function ConversationsList({
             placeholder={t('list.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm ${
+            className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm ${
               theme === 'dark'
-                ? 'border-gray-600 bg-gray-800 text-gray-100 placeholder-gray-500'
+                ? 'border-white/10 bg-surface-2 text-white placeholder:text-fg-subtle'
                 : 'border-gray-300 bg-white text-gray-900'
             }`}
           />
@@ -102,8 +102,8 @@ export default function ConversationsList({
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600 mx-auto mb-2"></div>
-              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p className={`text-sm ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-600'}`}>
                 {t('list.loading')}
               </p>
             </div>
@@ -111,7 +111,7 @@ export default function ConversationsList({
         ) : filteredConversations.length === 0 ? (
           <div
             className={`flex items-center justify-center h-full text-center p-4 ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              theme === 'dark' ? 'text-fg-muted' : 'text-gray-500'
             }`}
           >
             <div>
@@ -128,7 +128,7 @@ export default function ConversationsList({
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : ''}`}>
+              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-fg-secondary' : ''}`}>
                 {searchQuery ? t('list.emptySearch') : t('list.empty')}
               </p>
               {searchQuery && (
@@ -136,7 +136,7 @@ export default function ConversationsList({
                   onClick={() => setSearchQuery('')}
                   className={`text-sm mt-2 underline ${
                     theme === 'dark'
-                      ? 'text-teal-400 hover:text-teal-300'
+                      ? 'text-tertiary hover:text-teal-300'
                       : 'text-teal-600 hover:text-teal-700'
                   }`}
                 >
@@ -146,7 +146,7 @@ export default function ConversationsList({
             </div>
           </div>
         ) : (
-          <nav className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+          <nav className={`divide-y ${theme === 'dark' ? 'divide-white/5' : 'divide-gray-200'}`}>
             {filteredConversations.map((conversation) => (
               <button
                 key={conversation.id}
@@ -154,10 +154,10 @@ export default function ConversationsList({
                 className={`w-full text-left p-4 transition-colors border-l-4 ${
                   selectedConversationId === conversation.id
                     ? theme === 'dark'
-                      ? 'bg-teal-900/30 border-teal-500'
+                      ? 'bg-primary/15 border-primary'
                       : 'bg-teal-50 border-teal-600'
                     : theme === 'dark'
-                      ? 'border-transparent hover:bg-gray-800'
+                      ? 'border-transparent hover:bg-white/5'
                       : 'border-transparent hover:bg-gray-50'
                 }`}
               >
@@ -165,7 +165,7 @@ export default function ConversationsList({
                   <div className="flex-1 min-w-0">
                     <h3
                       className={`font-medium truncate text-sm ${
-                        theme === 'dark' ? 'text-gray-100' : 'text-gray-900'
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
                       }`}
                     >
                       {conversation.name}
@@ -173,7 +173,7 @@ export default function ConversationsList({
                     {conversation.description && (
                       <p
                         className={`text-xs truncate mt-1 ${
-                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          theme === 'dark' ? 'text-fg-muted' : 'text-gray-600'
                         }`}
                       >
                         {conversation.description}
@@ -182,7 +182,7 @@ export default function ConversationsList({
                     {conversation.lastMessage && (
                       <p
                         className={`text-xs truncate mt-1 ${
-                          theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                          theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
                         }`}
                       >
                         {conversation.lastMessage}
@@ -191,8 +191,8 @@ export default function ConversationsList({
                   </div>
                   {conversation.lastMessageDate && (
                     <span
-                      className={`text-xs whitespace-nowrap flex-shrink-0 ${
-                        theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                      className={`text-xs whitespace-nowrap shrink-0 ${
+                        theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
                       }`}
                     >
                       {formatDate(conversation.lastMessageDate)}

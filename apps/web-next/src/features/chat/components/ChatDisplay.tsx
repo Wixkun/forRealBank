@@ -121,12 +121,12 @@ export default function ChatDisplay({
   const firstLetter = displayName.charAt(0).toUpperCase();
 
   return (
-    <div className={`flex flex-col h-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+    <div className={`flex flex-col h-full ${theme === 'dark' ? 'bg-surface-1' : 'bg-white'}`}>
       <div
         className={`flex items-center justify-between px-6 py-4 border-b ${
           theme === 'dark'
-            ? 'border-gray-700 bg-gray-700'
-            : 'border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50'
+            ? 'border-white/5 bg-surface-2'
+            : 'border-gray-200 bg-linear-to-r from-teal-50 to-blue-50'
         }`}
       >
         <div className="flex items-center gap-3">
@@ -135,17 +135,17 @@ export default function ChatDisplay({
           </div>
           <div>
             <h3
-              className={`font-semibold text-lg ${theme === 'dark' ? 'text-gray-100' : 'text-gray-900'}`}
+              className={`font-semibold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
             >
               {displayName}
             </h3>
             <div className="flex items-center gap-2">
               {!isGroupChat && (
                 <div
-                  className={`h-2 w-2 rounded-full ${isUserOnline ? 'bg-green-500' : 'bg-gray-400'}`}
+                  className={`h-2 w-2 rounded-full ${isUserOnline ? 'bg-tertiary' : 'bg-fg-subtle'}`}
                 />
               )}
-              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              <p className={`text-sm ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-600'}`}>
                 {displayRole}{' '}
                 {!isGroupChat && `• ${isUserOnline ? t('display.online') : t('display.offline')}`}
               </p>
@@ -164,11 +164,11 @@ export default function ChatDisplay({
       </div>
 
       <div
-        className={`flex-1 overflow-y-auto p-6 space-y-4 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'}`}
+        className={`flex-1 overflow-y-auto p-6 space-y-4 ${theme === 'dark' ? 'bg-surface-1' : 'bg-gray-50'}`}
       >
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
-            <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+            <div className={`text-center ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}>
               <svg
                 className={`mx-auto h-12 w-12 mb-3 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}
                 fill="none"
@@ -182,7 +182,7 @@ export default function ChatDisplay({
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
                 />
               </svg>
-              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : ''}`}>
+              <p className={`text-sm font-medium ${theme === 'dark' ? 'text-fg-secondary' : ''}`}>
                 {t('display.empty.title')}
               </p>
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}>
@@ -206,7 +206,7 @@ export default function ChatDisplay({
                   <div>
                     {isGroupChat && !isOwnMessage && senderName && (
                       <p
-                        className={`text-xs font-semibold mb-1 ml-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}
+                        className={`text-xs font-semibold mb-1 ml-1 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-600'}`}
                       >
                         {senderName} {isDirector && '👑'}
                       </p>
@@ -218,7 +218,7 @@ export default function ChatDisplay({
                           : isDirector
                             ? 'bg-red-500 text-white rounded-bl-none'
                             : theme === 'dark'
-                              ? 'bg-gray-700 text-gray-100 rounded-bl-none border border-gray-600'
+                              ? 'bg-surface-2 text-fg rounded-bl-none border border-white/10'
                               : 'bg-white text-gray-900 rounded-bl-none border border-gray-200'
                       }`}
                     >
@@ -228,7 +228,7 @@ export default function ChatDisplay({
                           isOwnMessage || isDirector
                             ? 'text-opacity-75'
                             : theme === 'dark'
-                              ? 'text-gray-400'
+                              ? 'text-fg-muted'
                               : 'text-gray-500'
                         } mt-1`}
                       >
@@ -247,20 +247,20 @@ export default function ChatDisplay({
                 <div
                   className={`px-4 py-3 rounded-lg rounded-bl-none ${
                     theme === 'dark'
-                      ? 'bg-gray-700 text-gray-100 border border-gray-600'
+                      ? 'bg-surface-2 text-fg border border-white/10'
                       : 'bg-white text-gray-900 border border-gray-200'
                   }`}
                 >
                   <div className="flex gap-2">
                     <div
-                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`}
+                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-fg-subtle' : 'bg-gray-400'}`}
                     />
                     <div
-                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`}
+                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-fg-subtle' : 'bg-gray-400'}`}
                       style={{ animationDelay: '0.1s' }}
                     />
                     <div
-                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-gray-400' : 'bg-gray-400'}`}
+                      className={`h-2 w-2 rounded-full animate-bounce ${theme === 'dark' ? 'bg-fg-subtle' : 'bg-gray-400'}`}
                       style={{ animationDelay: '0.2s' }}
                     />
                   </div>
@@ -275,7 +275,7 @@ export default function ChatDisplay({
       <form
         onSubmit={handleSend}
         className={`px-6 py-4 border-t ${
-          theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'
+          theme === 'dark' ? 'border-white/5 bg-surface-1' : 'border-gray-200 bg-white'
         }`}
       >
         <div className="flex gap-2">
@@ -284,16 +284,16 @@ export default function ChatDisplay({
             value={input}
             onChange={handleInputChange}
             placeholder={t('display.input.placeholder')}
-            className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent ${
+            className={`flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent ${
               theme === 'dark'
-                ? 'border-gray-600 bg-gray-700 text-gray-100 placeholder-gray-500'
+                ? 'border-white/10 bg-surface-2 text-white placeholder:text-fg-subtle'
                 : 'border-gray-300 bg-white text-gray-900'
             }`}
           />
           <button
             type="submit"
             disabled={!input.trim() || !isConnected}
-            className="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium"
           >
             {t('display.send')}
           </button>

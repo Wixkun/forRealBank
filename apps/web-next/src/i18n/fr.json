@@ -444,7 +444,7 @@
         "subtitle": "Sous-titre",
         "content": "Contenu"
       },
-      "editorHint": "Glissez-déposez ou collez (Ctrl+V) une image directement dans le contenu",
+      "editorHint": "Glissez-déposez ou collez une image directement dans le contenu",
       "submit": "Publier",
       "submitLoading": "Envoi…",
       "messages": {

@@ -7,7 +7,7 @@ import { StatementProvider } from '@/features/statements/StatementContext';
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <ProtectedLayout>
-      <ThemeProvider>
+      <ThemeProvider forcedTheme="dark">
         <StatementProvider>
           <DashboardShell>{children}</DashboardShell>
         </StatementProvider>
