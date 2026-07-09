@@ -57,7 +57,8 @@
       "accountLocked": "Trop de tentatives échouées. Votre compte est temporairement verrouillé. Veuillez réessayer plus tard.",
       "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
       "loginFailed": "La connexion a échoué",
-      "genericError": "Une erreur est survenue lors de la connexion"
+      "genericError": "Une erreur est survenue lors de la connexion",
+      "forgotPassword": "Mot de passe oublié ?"
     },
     "register": {
       "title": "Créer un compte",
@@ -429,30 +430,10 @@
       "groupMembers": "{count} membres",
       "typing": "{name} est en train d'écrire..."
     },
-    "group": {
-      "loading": "Chargement de la discussion de groupe...",
-      "title": "Discussion de groupe",
-      "subtitle": "Collaborez en temps réel. Le directeur est visuellement mis en avant.",
-      "empty": {
-        "title": "Aucune conversation de groupe",
-        "description": "Vous n'êtes pas participant d'une discussion de groupe pour l'instant."
-      }
-    },
-    "manage": {
-      "title": "Gérer le chat",
-      "conversationIdLabel": "ID de la conversation",
-      "conversationIdPlaceholder": "UUID de la conversation",
-      "open": "Ouvrir"
-    },
     "errors": {
       "fetchAdvisor": "Impossible de récupérer le conseiller",
       "fetchClients": "Impossible de récupérer vos clients",
       "fetchUsers": "Impossible de récupérer les utilisateurs"
-    },
-    "groupConversation": {
-      "title": "Discussion de groupe",
-      "unknownUser": "Utilisateur",
-      "participantsCount": "{count} participant{count, plural, one {} other {s}}"
     }
   },
   "feed": {

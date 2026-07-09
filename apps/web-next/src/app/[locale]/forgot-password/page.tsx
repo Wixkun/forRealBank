@@ -1,8 +1,11 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function ForgotPasswordPage() {
+  const pathname = usePathname();
+  const locale = pathname.split('/')[1] || 'en';
   const [email, setEmail] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,7 +48,7 @@ export default function ForgotPasswordPage() {
 
           <p className="text-center text-sm text-gray-300 mt-4">
             Remembered your password?{' '}
-            <Link href="/login" className="text-teal-400 hover:underline">
+            <Link href={`/${locale}/login`} className="text-teal-400 hover:underline">
               Back to Login
             </Link>
           </p>

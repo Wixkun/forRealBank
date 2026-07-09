@@ -158,18 +158,9 @@ export default function DashboardAdminPage() {
 
   return (
     <div className="max-w-5xl">
-      <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-white mb-1">{t('title')}</h1>
-          <p className="text-fg-muted text-sm">{t('subtitle')}</p>
-        </div>
-
-        <a
-          className="underline text-sm text-fg-muted hover:text-white"
-          href={`/${locale}/dashboard/messages/manage`}
-        >
-          Chat manage
-        </a>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-white mb-1">{t('title')}</h1>
+        <p className="text-fg-muted text-sm">{t('subtitle')}</p>
       </div>
 
       <div className="flex gap-2">

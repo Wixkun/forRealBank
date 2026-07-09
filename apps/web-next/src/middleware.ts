@@ -25,45 +25,6 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (
-    pathname === `/${locale}/news` ||
-    pathname.startsWith(`/${locale}/news/manage`) ||
-    pathname === `/${locale}/notifications` ||
-    pathname.startsWith(`/${locale}/news/create`)
-  ) {
-    return NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url));
-  }
-
-  if (pathname === `/${locale}/market` || pathname.startsWith(`/${locale}/market/`)) {
-    return NextResponse.redirect(
-      new URL(`/${locale}/dashboard/market${request.nextUrl.search}`, request.url),
-    );
-  }
-
-  if (pathname === `/${locale}/director` || pathname.startsWith(`/${locale}/director/`)) {
-    return NextResponse.redirect(
-      new URL(`/${locale}/dashboard/admin${request.nextUrl.search}`, request.url),
-    );
-  }
-
-  if (pathname.startsWith(`/${locale}/chat/manage`)) {
-    return NextResponse.redirect(
-      new URL(`/${locale}/dashboard/messages/manage${request.nextUrl.search}`, request.url),
-    );
-  }
-
-  if (pathname.startsWith(`/${locale}/chat/group`)) {
-    return NextResponse.redirect(
-      new URL(`/${locale}/dashboard/messages/group${request.nextUrl.search}`, request.url),
-    );
-  }
-
-  if (pathname === `/${locale}/chat`) {
-    return NextResponse.redirect(
-      new URL(`/${locale}/dashboard/messages${request.nextUrl.search}`, request.url),
-    );
-  }
-
   return intlMiddleware(request);
 }
 
