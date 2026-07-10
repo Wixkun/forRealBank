@@ -2,6 +2,7 @@
 import { FormEvent, Suspense, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { buildApiUrl, BROWSER_API_BASE } from '@/lib/env';
 
 function ResetPasswordForm() {
   const pathname = usePathname();
@@ -27,7 +28,7 @@ function ResetPasswordForm() {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch(buildApiUrl(BROWSER_API_BASE, '/auth/reset-password'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),

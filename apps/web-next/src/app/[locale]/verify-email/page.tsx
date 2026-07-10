@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { AuthLayout } from '@/features/auth/components/AuthLayout';
+import { buildApiUrl, BROWSER_API_BASE } from '@/lib/env';
 
 function VerifyEmailContent() {
   const router = useRouter();
@@ -43,7 +44,7 @@ function VerifyEmailContent() {
 
     const verifyEmail = async () => {
       try {
-        const response = await fetch('/api/auth/verify-email', {
+        const response = await fetch(buildApiUrl(BROWSER_API_BASE, '/auth/verify-email'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
