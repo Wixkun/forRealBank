@@ -82,6 +82,70 @@ export class SmtpEmailService implements IEmailService {
     this.logger.log(`Password reset email sent via SMTP to ${input.to}`);
   }
 
+  async sendEmailVerificationEmail(input: {
+    to: string;
+    firstName: string;
+    verificationUrl: string;
+    expiresInHours: number;
+  }): Promise<void> {
+    const mailgunApiKey = resolveEnvSecret('MAILGUN_API_KEY');
+    const mailgunDomain = process.env.MAILGUN_DOMAIN?.trim();
+    const mailgunBaseUrl = process.env.MAILGUN_BASE_URL?.trim();
+    const mailgunFrom =
+      process.env.MAILGUN_FROM?.trim() ||
+      (mailgunDomain ? `ForRealBank <postmaster@${mailgunDomain}>` : undefined);
+
+    if (mailgunApiKey && mailgunDomain && mailgunFrom) {
+      this.logger.log(`Sending verification email via Mailgun to ${input.to}`);
+      const mailgun = new Mailgun(FormData);
+      const client = mailgun.client({
+        username: 'api',
+        key: mailgunApiKey,
+        ...(mailgunBaseUrl ? { url: mailgunBaseUrl } : {}),
+      });
+
+      await client.messages.create(mailgunDomain, {
+        from: mailgunFrom,
+        to: [input.to],
+        subject: 'Confirmez votre adresse email ForRealBank',
+        text: this.buildVerificationTextBody(input),
+        html: this.buildVerificationHtmlBody(input),
+      });
+      this.logger.log(`Verification email sent via Mailgun to ${input.to}`);
+      return;
+    }
+
+    const host = process.env.SMTP_HOST?.trim();
+    const port = Number(process.env.SMTP_PORT ?? 587);
+    const user = process.env.SMTP_USER?.trim();
+    const pass = resolveEnvSecret('SMTP_PASS');
+    const from = process.env.SMTP_FROM?.trim() || 'ForRealBank <no-reply@for-real.cloud>';
+
+    if (!host || !user || !pass) {
+      this.logger.warn(
+        `Email provider is not configured. Verification link for ${input.to}: ${input.verificationUrl}`,
+      );
+      return;
+    }
+
+    this.logger.log(`Sending verification email via SMTP to ${input.to}`);
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+    });
+
+    await transporter.sendMail({
+      from,
+      to: input.to,
+      subject: 'Confirmez votre adresse email ForRealBank',
+      text: this.buildVerificationTextBody(input),
+      html: this.buildVerificationHtmlBody(input),
+    });
+    this.logger.log(`Verification email sent via SMTP to ${input.to}`);
+  }
+
   private buildTextBody(input: {
     firstName: string;
     resetUrl: string;
@@ -109,6 +173,36 @@ export class SmtpEmailService implements IEmailService {
       <p><a href="${escapeHtml(input.resetUrl)}">Reinitialiser mon mot de passe</a></p>
       <p>Ce lien expire dans ${input.expiresInMinutes} minutes.</p>
       <p>Si vous n'etes pas a l'origine de cette demande, ignorez cet email.</p>
+    `;
+  }
+
+  private buildVerificationTextBody(input: {
+    firstName: string;
+    verificationUrl: string;
+    expiresInHours: number;
+  }): string {
+    return [
+      `Bonjour ${input.firstName},`,
+      '',
+      'Merci pour votre inscription sur ForRealBank.',
+      `Confirmez votre adresse email dans les ${input.expiresInHours} heures via ce lien:`,
+      input.verificationUrl,
+      '',
+      "Si vous n'etes pas a l'origine de cette inscription, ignorez cet email.",
+    ].join('\n');
+  }
+
+  private buildVerificationHtmlBody(input: {
+    firstName: string;
+    verificationUrl: string;
+    expiresInHours: number;
+  }): string {
+    return `
+      <p>Bonjour ${escapeHtml(input.firstName)},</p>
+      <p>Merci pour votre inscription sur ForRealBank.</p>
+      <p><a href="${escapeHtml(input.verificationUrl)}">Confirmer mon adresse email</a></p>
+      <p>Ce lien expire dans ${input.expiresInHours} heures.</p>
+      <p>Si vous n'etes pas a l'origine de cette inscription, ignorez cet email.</p>
     `;
   }
 }

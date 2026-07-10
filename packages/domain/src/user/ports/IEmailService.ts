@@ -7,4 +7,10 @@ export interface IEmailService {
     resetUrl: string;
     expiresInMinutes: number;
   }): Promise<void>;
+  sendEmailVerificationEmail(input: {
+    to: string;
+    firstName: string;
+    verificationUrl: string;
+    expiresInHours: number;
+  }): Promise<void>;
 }

@@ -3,6 +3,7 @@ export * from './user/usecases/RegisterUserUseCase';
 export * from './user/usecases/LoginUserUseCase';
 export * from './user/usecases/RequestPasswordResetUseCase';
 export * from './user/usecases/ResetPasswordUseCase';
+export * from './user/usecases/VerifyEmailUseCase';
 export * from './user/usecases/ListUsersUseCase';
 export * from './user/usecases/ListUsersByRoleUseCase';
 export * from './user/usecases/UpdateUserProfileUseCase';

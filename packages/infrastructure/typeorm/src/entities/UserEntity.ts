@@ -24,6 +24,12 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'timestamptz', name: 'last_login_at', nullable: true })
   lastLoginAt!: Date | null;
 
+  @Column({ type: 'boolean', name: 'email_verified', default: false })
+  emailVerified!: boolean;
+
+  @Column({ type: 'timestamptz', name: 'email_verified_at', nullable: true })
+  emailVerifiedAt!: Date | null;
+
   @Column({ default: false, name: 'is_banned' })
   isBanned!: boolean;
 

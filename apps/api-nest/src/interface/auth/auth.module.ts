@@ -10,6 +10,7 @@ import {
   IUserRepository,
   IPasswordHasher,
   IPasswordResetTokenRepository,
+  IEmailVerificationTokenRepository,
   ITokenService,
   IEmailService,
   IUserIdGenerator,
@@ -20,7 +21,9 @@ import {
 
 import {
   PasswordResetTokenEntity,
+  EmailVerificationTokenEntity,
   PasswordResetTokenRepository,
+  EmailVerificationTokenRepository,
   UserEntity,
   RoleEntity,
   UserRepository,
@@ -35,8 +38,10 @@ import {
   LoginUserUseCase,
   RequestPasswordResetUseCase,
   ResetPasswordUseCase,
+  VerifyEmailUseCase,
 } from '@forreal/application';
 import { SmtpEmailService } from './smtp-email.service';
+import { AuthSchemaBootstrapService } from './auth-schema-bootstrap.service';
 
 const registerUserProvider: Provider = {
   provide: RegisterUserUseCase,
@@ -44,8 +49,16 @@ const registerUserProvider: Provider = {
     users: IUserRepository,
     hasher: IPasswordHasher,
     userIdGenerator: IUserIdGenerator,
-  ) => new RegisterUserUseCase(users, hasher, userIdGenerator),
-  inject: [IUserRepository, IPasswordHasher, USER_ID_GENERATOR],
+    verificationTokens: IEmailVerificationTokenRepository,
+    email: IEmailService,
+  ) => new RegisterUserUseCase(users, hasher, userIdGenerator, verificationTokens, email),
+  inject: [
+    IUserRepository,
+    IPasswordHasher,
+    USER_ID_GENERATOR,
+    IEmailVerificationTokenRepository,
+    IEmailService,
+  ],
 };
 
 const loginUserProvider: Provider = {
@@ -79,9 +92,21 @@ const resetPasswordProvider: Provider = {
   inject: [IUserRepository, IPasswordResetTokenRepository, IPasswordHasher],
 };
 
+const verifyEmailProvider: Provider = {
+  provide: VerifyEmailUseCase,
+  useFactory: (users: IUserRepository, verificationTokens: IEmailVerificationTokenRepository) =>
+    new VerifyEmailUseCase(users, verificationTokens),
+  inject: [IUserRepository, IEmailVerificationTokenRepository],
+};
+
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, RoleEntity, PasswordResetTokenEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      RoleEntity,
+      PasswordResetTokenEntity,
+      EmailVerificationTokenEntity,
+    ]),
     PassportModule.register({
       defaultStrategy: 'jwt',
       session: false,
@@ -92,6 +117,7 @@ const resetPasswordProvider: Provider = {
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IPasswordResetTokenRepository, useClass: PasswordResetTokenRepository },
+    { provide: IEmailVerificationTokenRepository, useClass: EmailVerificationTokenRepository },
 
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
@@ -107,6 +133,8 @@ const resetPasswordProvider: Provider = {
     loginUserProvider,
     requestPasswordResetProvider,
     resetPasswordProvider,
+    verifyEmailProvider,
+    AuthSchemaBootstrapService,
   ],
   exports: [ITokenService, JwtAuthGuard],
 })

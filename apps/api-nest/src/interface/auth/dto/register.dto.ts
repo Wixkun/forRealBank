@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, Length, Matches } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, Length, Matches, IsIn } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class RegisterDto {
@@ -23,4 +23,9 @@ export class RegisterDto {
   @Length(1, 100)
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   lastName!: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['fr', 'en'])
+  locale?: string;
 }

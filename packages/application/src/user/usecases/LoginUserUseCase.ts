@@ -33,6 +33,10 @@ export class LoginUserUseCase {
       throw new Error('INVALID_CREDENTIALS');
     }
 
+    if (!user.emailVerified) {
+      throw new Error('EMAIL_NOT_VERIFIED');
+    }
+
     user.markLogin(now);
     await this.userRepository.save(user);
 

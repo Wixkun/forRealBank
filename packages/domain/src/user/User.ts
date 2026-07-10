@@ -11,6 +11,8 @@ export class User {
     private _firstName: string,
     private _lastName: string,
     private _lastLoginAt?: Date,
+    private _emailVerified: boolean = false,
+    private _emailVerifiedAt?: Date,
     private _isBanned: boolean = false,
     private _bannedAt?: Date,
     private _banReason?: string,
@@ -46,6 +48,12 @@ export class User {
   }
   get lastLoginAt() {
     return this._lastLoginAt;
+  }
+  get emailVerified() {
+    return this._emailVerified;
+  }
+  get emailVerifiedAt() {
+    return this._emailVerifiedAt;
   }
   get isBanned() {
     return this._isBanned;
@@ -95,6 +103,11 @@ export class User {
     // reset anti brute-force state on successful login
     this._failedLoginCount = 0;
     this._lockUntil = undefined;
+    this.touch(at);
+  }
+  markEmailVerified(at = new Date()) {
+    this._emailVerified = true;
+    this._emailVerifiedAt = at;
     this.touch(at);
   }
   changePassword(passwordHash: string, at = new Date()) {

@@ -20,12 +20,20 @@ CREATE TABLE IF NOT EXISTS users (
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     last_login_at timestamptz NULL,
+    email_verified boolean NOT NULL DEFAULT false,
+    email_verified_at timestamptz NULL,
     is_banned boolean NOT NULL DEFAULT false,
     banned_at timestamptz NULL,
     ban_reason text NULL,
     failed_login_count int NOT NULL DEFAULT 0,
     lock_until timestamptz NULL
 );
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS email_verified boolean NOT NULL DEFAULT false;
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS email_verified_at timestamptz NULL;
 
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -42,6 +50,22 @@ CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_token_hash
     ON password_reset_tokens(token_hash);
+
+CREATE TABLE IF NOT EXISTS email_verification_tokens (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    token_hash text NOT NULL UNIQUE,
+    expires_at timestamptz NOT NULL,
+    used_at timestamptz NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_user_id
+    ON email_verification_tokens(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_email_verification_tokens_token_hash
+    ON email_verification_tokens(token_hash);
 
 CREATE TABLE IF NOT EXISTS roles (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -391,12 +415,12 @@ ON CONFLICT (name) DO NOTHING;
 -- 1 Director, 1 Advisor, 2 Clients
 -- Passwords: Director@123 / Advisor@123 / Client@123
 
-INSERT INTO users (email, "passwordHash", first_name, last_name)
+INSERT INTO users (email, "passwordHash", first_name, last_name, email_verified, email_verified_at)
 VALUES
-    ('director1@forreal.bank', crypt('Director@123', gen_salt('bf')), 'Diane', 'Director'),
-    ('advisor1@forreal.bank',  crypt('Advisor@123',  gen_salt('bf')), 'Alice', 'Advisor'),
-    ('client1@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Bob',   'Client'),
-    ('client2@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Charlie', 'Client')
+    ('director1@forreal.bank', crypt('Director@123', gen_salt('bf')), 'Diane', 'Director', true, now()),
+    ('advisor1@forreal.bank',  crypt('Advisor@123',  gen_salt('bf')), 'Alice', 'Advisor', true, now()),
+    ('client1@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Bob',   'Client', true, now()),
+    ('client2@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Charlie', 'Client', true, now())
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================================

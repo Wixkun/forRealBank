@@ -64,6 +64,8 @@ export class UserRepository implements IUserRepository {
       firstName: userRecord.firstName,
       lastName: userRecord.lastName,
       lastLoginAt: userRecord.lastLoginAt ?? null,
+      emailVerified: userRecord.emailVerified ?? false,
+      emailVerifiedAt: userRecord.emailVerifiedAt ?? null,
       isBanned: userRecord.isBanned ?? false,
       bannedAt: userRecord.bannedAt ?? null,
       banReason: userRecord.banReason ?? null,

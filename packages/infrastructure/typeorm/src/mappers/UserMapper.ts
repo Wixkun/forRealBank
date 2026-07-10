@@ -25,6 +25,8 @@ export class UserMapper {
     entity.lastName = String(lastName).trim();
 
     entity.lastLoginAt = (user as any).lastLoginAt ?? null;
+    entity.emailVerified = (user as any).emailVerified ?? false;
+    entity.emailVerifiedAt = (user as any).emailVerifiedAt ?? null;
     entity.isBanned = (user as any).isBanned ?? false;
     entity.bannedAt = (user as any).bannedAt ?? null;
     entity.banReason = (user as any).banReason ?? null;
@@ -48,6 +50,8 @@ export class UserMapper {
       entity.firstName,
       entity.lastName,
       entity.lastLoginAt ?? undefined,
+      entity.emailVerified ?? false,
+      entity.emailVerifiedAt ?? undefined,
       entity.isBanned ?? false,
       entity.bannedAt ?? undefined,
       entity.banReason ?? undefined,

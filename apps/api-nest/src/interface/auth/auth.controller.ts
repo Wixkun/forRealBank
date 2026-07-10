@@ -21,6 +21,7 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { RegisterUserUseCase } from '@forreal/application';
 import { LoginUserUseCase } from '@forreal/application';
 import { RequestPasswordResetUseCase, ResetPasswordUseCase } from '@forreal/application';
+import { VerifyEmailUseCase } from '@forreal/application';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
@@ -63,6 +64,7 @@ export class AuthController {
     private readonly loginUserUseCase: LoginUserUseCase,
     private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
+    private readonly verifyEmailUseCase: VerifyEmailUseCase,
 
     @Inject(ITokenService)
     private readonly tokenService: ITokenService,
@@ -82,9 +84,21 @@ export class AuthController {
         password: dto.password,
         firstName: dto.firstName.trim(),
         lastName: dto.lastName.trim(),
+        locale: dto.locale,
       });
 
-      return { success: true, message: 'User successfully registered' };
+      return { success: true, message: 'User successfully registered. Verification email sent.' };
+    } catch (error) {
+      throw AuthErrorMapper.mapToHttpException(error);
+    }
+  }
+
+  @HttpCode(200)
+  @Post('verify-email')
+  async verifyEmail(@Body() dto: { token: string }) {
+    try {
+      await this.verifyEmailUseCase.execute({ token: dto.token });
+      return { success: true, message: 'Email verified successfully' };
     } catch (error) {
       throw AuthErrorMapper.mapToHttpException(error);
     }
@@ -204,6 +218,8 @@ export class AuthController {
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
+          emailVerified: user.emailVerified,
+          emailVerifiedAt: user.emailVerifiedAt,
           roles: Array.from(user.roles),
           lastLoginAt: user.lastLoginAt,
           createdAt: user.createdAt,

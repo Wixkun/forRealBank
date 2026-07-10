@@ -1,18 +1,38 @@
-import { IUserRepository } from '@forreal/domain';
-import { IPasswordHasher } from '@forreal/domain';
-import { User } from '@forreal/domain';
-import { RoleName } from '@forreal/domain';
-import { IUserIdGenerator } from '@forreal/domain';
-import { isStrongPassword } from '@forreal/domain';
+import {
+  EmailVerificationToken,
+  IEmailService,
+  IEmailVerificationTokenRepository,
+  IUserRepository,
+  IPasswordHasher,
+  User,
+  RoleName,
+  IUserIdGenerator,
+  isStrongPassword,
+} from '@forreal/domain';
+import {
+  buildEmailVerificationUrl,
+  createEmailVerificationTokenId,
+  createRawEmailVerificationToken,
+  EMAIL_VERIFICATION_EXPIRY_HOURS,
+  hashEmailVerificationToken,
+} from './email-verification';
 
 export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly passwordHasher: IPasswordHasher,
     private readonly userIdGenerator: IUserIdGenerator,
+    private readonly verificationTokens: IEmailVerificationTokenRepository,
+    private readonly emailService: IEmailService,
   ) {}
 
-  async execute(input: { email: string; password: string; firstName: string; lastName: string }) {
+  async execute(input: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    locale?: string;
+  }) {
     const emailAlreadyUsed = await this.userRepository.existsByEmail(input.email);
     if (emailAlreadyUsed) throw new Error('EMAIL_ALREADY_REGISTERED');
 
@@ -38,10 +58,36 @@ export class RegisterUserUseCase {
       undefined,
       false,
       undefined,
+      false,
+      undefined,
       undefined,
     );
 
     await this.userRepository.save(newUser);
+    const rawToken = createRawEmailVerificationToken();
+    const tokenHash = hashEmailVerificationToken(rawToken);
+    const expiresAt = new Date(
+      creationDate.getTime() + EMAIL_VERIFICATION_EXPIRY_HOURS * 60 * 60 * 1000,
+    );
+
+    await this.verificationTokens.markUserTokensUsed(userId, creationDate);
+    await this.verificationTokens.save(
+      new EmailVerificationToken(
+        createEmailVerificationTokenId(),
+        userId,
+        tokenHash,
+        expiresAt,
+        creationDate,
+      ),
+    );
+
+    await this.emailService.sendEmailVerificationEmail({
+      to: input.email,
+      firstName,
+      verificationUrl: buildEmailVerificationUrl(rawToken, input.locale),
+      expiresInHours: EMAIL_VERIFICATION_EXPIRY_HOURS,
+    });
+
     return { success: true };
   }
 }

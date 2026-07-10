@@ -18,6 +18,20 @@ function LoginForm() {
   const searchParams = useSearchParams();
 
   const locale = pathname.split('/')[1] || 'en';
+  const loginMessages = {
+    registrationSuccess:
+      locale === 'fr'
+        ? 'Inscription reussie. Verifiez votre email avant de vous connecter.'
+        : 'Registration successful. Please verify your email before logging in.',
+    verificationSuccess:
+      locale === 'fr'
+        ? 'Votre email a ete verifie. Vous pouvez maintenant vous connecter.'
+        : 'Your email has been verified. You can now log in.',
+    emailNotVerified:
+      locale === 'fr'
+        ? "Vous devez d'abord verifier votre adresse email avant de vous connecter."
+        : 'You must verify your email address before logging in.',
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -38,9 +52,12 @@ function LoginForm() {
     checkAuth();
 
     if (searchParams?.get('registered') === 'true') {
-      setSuccessMessage(t('registrationSuccess'));
+      setSuccessMessage(loginMessages.registrationSuccess);
     }
-  }, [searchParams, router, locale, t]);
+    if (searchParams?.get('verified') === 'true') {
+      setSuccessMessage(loginMessages.verificationSuccess);
+    }
+  }, [searchParams, router, loginMessages, locale]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -71,6 +88,9 @@ function LoginForm() {
           }
           router.replace(`/${locale}/banned`);
           return;
+        }
+        if (response.status === 403 && message.toLowerCase().includes('verified')) {
+          throw new Error(loginMessages.emailNotVerified);
         }
         if (response.status === 423) {
           throw new Error(t('accountLocked'));
