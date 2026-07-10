@@ -90,9 +90,13 @@ export class NewsService {
     return this.listNewsUC.execute({ limit, offset, userId, includeArchived, archivedOnly });
   }
 
-  async getNewsById(id: string) {
+  async getNewsById(id: string, requestingUserId?: string | null) {
     const news = await this.newsRepo.findById(id);
     if (!news || !news.isActive) return null;
+    // News ciblée (privée) : seul son destinataire peut la consulter. Sinon un
+    // utilisateur pourrait lire les news privées d'autrui (détails de virement,
+    // IBAN…) en devinant leur identifiant.
+    if (news.userId && news.userId !== requestingUserId) return null;
     return {
       id: news.id,
       authorId: news.authorId,

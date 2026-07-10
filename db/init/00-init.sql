@@ -318,6 +318,13 @@ CREATE TABLE IF NOT EXISTS bank_transactions (
     created_at timestamptz NOT NULL DEFAULT now()
 );
 
+-- Clés d'idempotence des virements : empêche qu'une même requête de virement
+-- (double-clic, retry réseau) soit appliquée deux fois.
+CREATE TABLE IF NOT EXISTS transfer_idempotency_keys (
+    key text PRIMARY KEY,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+
 -- Investment cash movements
 CREATE TABLE IF NOT EXISTS investment_transactions (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

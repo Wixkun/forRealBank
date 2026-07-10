@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Req, NotFoundException } from '@nestjs/common';
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -31,7 +31,7 @@ export class AccountsController {
     const userId = (req.user as any).id;
     const account = await this.accountRepo.findOne({ where: { id, userId } });
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundException('Account not found');
     }
     return account;
   }
@@ -51,7 +51,7 @@ export class AccountsController {
     const userId = (req.user as any).id;
     const account = await this.investmentAccountRepo.findOne({ where: { id, userId } });
     if (!account) {
-      throw new Error('Investment account not found');
+      throw new NotFoundException('Investment account not found');
     }
     return account;
   }

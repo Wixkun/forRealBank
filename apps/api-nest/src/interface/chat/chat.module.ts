@@ -55,6 +55,7 @@ import {
   SetConversationMuteUseCase,
   GetConversationNotificationSettingsUseCase,
   UpdateConversationUserStateUseCase,
+  EnsureConversationMemberUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
 
@@ -100,6 +101,12 @@ import { AuthModule } from '../auth/auth.module';
       provide: AddConversationParticipantUseCase,
       useFactory: (repo: IConversationParticipantRepository) =>
         new AddConversationParticipantUseCase(repo),
+      inject: [IConversationParticipantRepository],
+    },
+    {
+      provide: EnsureConversationMemberUseCase,
+      useFactory: (repo: IConversationParticipantRepository) =>
+        new EnsureConversationMemberUseCase(repo),
       inject: [IConversationParticipantRepository],
     },
     {

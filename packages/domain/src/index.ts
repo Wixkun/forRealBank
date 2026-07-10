@@ -37,6 +37,7 @@ export * from './notifications/ports/INotificationRepository';
 
 // transactions
 export * from './transactions/ports/ITransactionRepository';
+export * from './transactions/ports/ITransferGateway';
 
 // user
 export * from './user/User';

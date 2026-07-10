@@ -33,6 +33,7 @@ export * from './repositories/EmailVerificationTokenRepository';
 export * from './repositories/AccountRepository';
 export * from './repositories/BankTransactionRepository';
 export * from './repositories/InvestmentAccountRepository';
+export * from './repositories/TransferGateway';
 export * from './repositories/CardRepository';
 export * from './repositories/ConversationRepository';
 export * from './repositories/ConversationParticipantRepository';

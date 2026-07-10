@@ -1,4 +1,16 @@
-import { Controller, Get, Param, Query, UseGuards, Req, Post, Body, Inject } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  Req,
+  Post,
+  Body,
+  Inject,
+  Headers,
+  NotFoundException,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { randomUUID } from 'crypto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,12 +21,10 @@ import { AccountEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { NotificationEntity } from '@forreal/infrastructure-typeorm';
 import { UserEntity } from '@forreal/infrastructure-typeorm';
-import { AccountRepository } from '@forreal/infrastructure-typeorm';
-import { InvestmentAccountRepository } from '@forreal/infrastructure-typeorm';
-import { BankTransactionRepository } from '@forreal/infrastructure-typeorm';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 import { InitiateTransferUseCase } from '@forreal/application';
+import { TransferDto } from './dto/transfer.dto';
 import { NewsService } from '../feed/news.service';
 import { NewsStatus, NotificationType, NotificationTargetType } from '@forreal/domain';
 
@@ -36,6 +46,8 @@ export class TransactionsController {
     private readonly investmentTxnRepo: Repository<InvestmentTransactionEntity>,
     @Inject(NewsService)
     private readonly newsService: NewsService,
+    @Inject(InitiateTransferUseCase)
+    private readonly initiateTransferUseCase: InitiateTransferUseCase,
   ) {}
 
   @Get('account/:accountId')
@@ -51,7 +63,7 @@ export class TransactionsController {
       where: { id: accountId, userId },
     });
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundException('Account not found');
     }
 
     const queryBuilder = this.transactionRepo
@@ -112,31 +124,20 @@ export class TransactionsController {
   @Post('transfer')
   async initiateTransfer(
     @Req() req: Request,
-    @Body()
-    body: {
-      sourceType: 'bank' | 'investment';
-      sourceAccountId: string;
-      destinationAccountId?: string;
-      destinationIban?: string;
-      amount: number;
-      description?: string;
-    },
+    @Body() dto: TransferDto,
+    @Headers('idempotency-key') idempotencyKey?: string,
   ) {
     const userId = (req.user as any)?.id;
-    const usecase = new InitiateTransferUseCase(
-      new AccountRepository(this.accountRepo),
-      new InvestmentAccountRepository(this.investmentRepo, this.investmentTxnRepo),
-      new BankTransactionRepository(this.transactionRepo),
-    );
 
-    const result = await usecase.execute({
+    const result = await this.initiateTransferUseCase.execute({
       userId,
-      sourceType: body.sourceType,
-      sourceAccountId: body.sourceAccountId,
-      destinationAccountId: body.destinationAccountId,
-      destinationIban: body.destinationIban,
-      amount: Number(body.amount),
-      description: body.description,
+      sourceType: dto.sourceType,
+      sourceAccountId: dto.sourceAccountId,
+      destinationAccountId: dto.destinationAccountId,
+      destinationIban: dto.destinationIban,
+      amount: Number(dto.amount),
+      description: dto.description,
+      idempotencyKey: idempotencyKey?.trim() || null,
     });
 
     if (!result.success) {
@@ -144,24 +145,24 @@ export class TransactionsController {
     }
 
     try {
-      const amount = Number(body.amount);
+      const amount = Number(dto.amount);
       const formattedAmount = amount.toLocaleString('fr-FR', {
         style: 'currency',
         currency: 'EUR',
       });
 
       const sourceAccount =
-        body.sourceType === 'bank'
-          ? await this.accountRepo.findOne({ where: { id: body.sourceAccountId, userId } })
+        dto.sourceType === 'bank'
+          ? await this.accountRepo.findOne({ where: { id: dto.sourceAccountId, userId } })
           : null;
-      const destinationAccount = body.destinationAccountId
+      const destinationAccount = dto.destinationAccountId
         ? await this.accountRepo.findOne({
-            where: { id: body.destinationAccountId },
+            where: { id: dto.destinationAccountId },
             relations: ['user'],
           })
-        : body.destinationIban
+        : dto.destinationIban
           ? await this.accountRepo.findOne({
-              where: { iban: body.destinationIban },
+              where: { iban: dto.destinationIban },
               relations: ['user'],
             })
           : null;
@@ -182,13 +183,12 @@ export class TransactionsController {
         transactionId,
         executedAt: now.toISOString(),
         sourceAccountName:
-          sourceAccount?.name ??
-          (body.sourceType === 'investment' ? 'Compte Investissement' : null),
+          sourceAccount?.name ?? (dto.sourceType === 'investment' ? 'Compte Investissement' : null),
         sourceIban: sourceAccount?.iban ?? null,
         destinationAccountName: destinationAccount?.name ?? null,
-        destinationIban: destinationAccount?.iban ?? body.destinationIban ?? null,
+        destinationIban: destinationAccount?.iban ?? dto.destinationIban ?? null,
         beneficiaryName,
-        description: body.description ?? null,
+        description: dto.description ?? null,
       };
 
       const senderNews = await this.newsService.createAutomaticNews({
@@ -197,8 +197,8 @@ export class TransactionsController {
         subtitle: beneficiaryName
           ? `${formattedAmount} vers ${beneficiaryName}`
           : `Virement de ${formattedAmount}`,
-        content: body.description
-          ? `${body.description} — ${formattedAmount}`
+        content: dto.description
+          ? `${dto.description} — ${formattedAmount}`
           : `Virement de ${formattedAmount} effectué avec succès.`,
         status: NewsStatus.TRANSACTION,
         metadata: { ...transferMetadata, direction: 'OUT' },
@@ -214,8 +214,8 @@ export class TransactionsController {
                 targetUserId: destinationAccount.userId,
                 title: 'Virement reçu',
                 subtitle: `${formattedAmount} reçu sur ${destinationAccount.name}`,
-                content: body.description
-                  ? `${body.description} — ${formattedAmount}`
+                content: dto.description
+                  ? `${dto.description} — ${formattedAmount}`
                   : `Vous avez reçu un virement de ${formattedAmount}.`,
                 status: NewsStatus.TRANSACTION,
                 metadata: { ...transferMetadata, direction: 'IN' },
@@ -226,7 +226,7 @@ export class TransactionsController {
           userId: destinationAccount.userId,
           title: 'Virement reçu',
           content:
-            `Vous avez reçu un virement de ${formattedAmount}. ${body.description || ''}`.trim(),
+            `Vous avez reçu un virement de ${formattedAmount}. ${dto.description || ''}`.trim(),
           type: NotificationType.TRANSACTION,
           targetType: NotificationTargetType.NEWS,
           targetId: recipientNews.id,

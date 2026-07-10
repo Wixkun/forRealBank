@@ -12,7 +12,8 @@ import { Server, Socket } from 'socket.io';
 import { Inject, Logger, OnModuleDestroy } from '@nestjs/common';
 import { SendMessageUseCase } from '@forreal/application';
 import { AddConversationParticipantUseCase } from '@forreal/application';
-import { IMessageRepository } from '@forreal/domain';
+import { EnsureConversationMemberUseCase } from '@forreal/application';
+import { IMessageRepository, ITokenService, IUserRepository } from '@forreal/domain';
 import {
   ChatClusterBus,
   ChatBusMessage,
@@ -34,10 +35,38 @@ interface WireMessage {
 const PRESENCE_HEARTBEAT_MS = 20_000;
 const PRESENCE_TTL_MS = 60_000;
 
+// CORS WebSocket restreint à l'origine frontend configurée (jamais '*').
+function wsCorsOrigins(): string[] {
+  const raw = (process.env.FRONTEND_ORIGIN ?? '').trim();
+  const origins = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return origins.length ? origins : ['http://localhost:3000'];
+}
+
+// Extrait le cookie access_token de l'en-tête Cookie du handshake.
+function extractTokenFromHandshake(socket: Socket): string | null {
+  const cookieHeader = socket.handshake.headers.cookie;
+  if (cookieHeader) {
+    for (const part of cookieHeader.split(';')) {
+      const [name, ...rest] = part.trim().split('=');
+      if (name === 'access_token') return decodeURIComponent(rest.join('='));
+    }
+  }
+  // Fallback explicite (clients ne pouvant pas transmettre le cookie httpOnly).
+  const authToken = socket.handshake.auth?.token;
+  return typeof authToken === 'string' && authToken ? authToken : null;
+}
+
 // Le path est préfixé par /api pour être routable en production : Traefik ne
 // route vers l'API que les requêtes en PathPrefix(/api) (le port 3001 n'est
 // pas exposé). Le client doit utiliser le même path.
-@WebSocketGateway({ cors: { origin: '*' }, namespace: '/chat', path: '/api/socket.io' })
+@WebSocketGateway({
+  cors: { origin: wsCorsOrigins(), credentials: true },
+  namespace: '/chat',
+  path: '/api/socket.io',
+})
 export class ChatGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect, OnModuleDestroy
 {
@@ -58,12 +87,32 @@ export class ChatGateway
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
     @Inject(AddConversationParticipantUseCase)
     private readonly addConversationParticipantUseCase: AddConversationParticipantUseCase,
+    @Inject(EnsureConversationMemberUseCase)
+    private readonly ensureConversationMember: EnsureConversationMemberUseCase,
     @Inject(IMessageRepository) private readonly messageRepository: IMessageRepository,
+    @Inject(ITokenService) private readonly tokenService: ITokenService,
+    @Inject(IUserRepository) private readonly userRepository: IUserRepository,
     @Inject(ChatClusterBus) private readonly bus: ChatClusterBus,
   ) {}
 
   afterInit() {
     this.bus.onMessage((message) => this.handleBusMessage(message));
+
+    // Authentification à la poignée de main : l'identité vient TOUJOURS du JWT
+    // vérifié côté serveur, jamais d'un userId envoyé par le client. Une
+    // connexion sans token valide (ou d'un utilisateur banni) est refusée.
+    this.server.use((socket, next) => {
+      void this.authenticate(extractTokenFromHandshake(socket)).then((result) => {
+        if ('error' in result) {
+          // Message générique : aucune information sensible divulguée au client.
+          next(new Error(result.error));
+          return;
+        }
+        socket.data.userId = result.userId;
+        next();
+      });
+    });
+
     this.presenceHeartbeat = setInterval(() => {
       this.roomMembers.forEach((members, conversationId) => {
         if (members.size > 0) {
@@ -79,6 +128,22 @@ export class ChatGateway
 
   onModuleDestroy() {
     if (this.presenceHeartbeat) clearInterval(this.presenceHeartbeat);
+  }
+
+  // Vérifie un token de handshake et renvoie l'identité serveur. Extrait pour
+  // être testable indépendamment de socket.io.
+  async authenticate(
+    token: string | null,
+  ): Promise<{ userId: string } | { error: 'UNAUTHORIZED' | 'FORBIDDEN' }> {
+    if (!token) return { error: 'UNAUTHORIZED' };
+    const payload = await this.tokenService.verify(token).catch(() => null);
+    if (!payload?.userId) return { error: 'UNAUTHORIZED' };
+
+    const user = await this.userRepository.findById(payload.userId);
+    if (!user) return { error: 'UNAUTHORIZED' };
+    if (user.isBanned) return { error: 'FORBIDDEN' };
+
+    return { userId: user.id };
   }
 
   // ─── Relais des événements publiés par les autres instances ───────────────
@@ -167,9 +232,13 @@ export class ChatGateway
   // ─── Cycle de vie des sockets ──────────────────────────────────────────────
 
   handleConnection(client: Socket) {
-    const userId = client.handshake.query.userId as string;
+    // L'identité a été fixée par le middleware d'authentification (socket.data).
+    const userId = client.data.userId as string | undefined;
     if (userId) {
       this.connectedUsers.set(client.id, { socketId: client.id, userId });
+    } else {
+      // Sécurité : aucune identité vérifiée → on ferme la connexion.
+      client.disconnect(true);
     }
   }
 
@@ -195,8 +264,20 @@ export class ChatGateway
   @SubscribeMessage('join_conversation')
   async handleJoinConversation(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string; userId: string },
+    @MessageBody() data: { conversationId: string },
   ) {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) return { success: false, error: 'UNAUTHORIZED' };
+
+    // Autorisation : on ne peut rejoindre que ses propres conversations.
+    const isMember = await this.ensureConversationMember.isMember({
+      conversationId: data.conversationId,
+      userId,
+    });
+    if (!isMember) {
+      return { success: false, error: 'FORBIDDEN' };
+    }
+
     const roomName = `conversation:${data.conversationId}`;
 
     let socketSet = this.socketRooms.get(client.id);
@@ -219,25 +300,25 @@ export class ChatGateway
       this.roomMembers.set(data.conversationId, members);
     }
 
-    members.add(data.userId);
+    members.add(userId);
 
     this.broadcastPresence(data.conversationId);
 
     try {
       const result = await this.addConversationParticipantUseCase.execute({
         conversationId: data.conversationId,
-        userId: data.userId,
+        userId,
       });
 
       if (result.inserted) {
         this.server.to(roomName).emit('user_joined', {
           conversationId: data.conversationId,
-          userId: data.userId,
+          userId,
         });
         this.bus.publish({
           type: 'user_joined',
           conversationId: data.conversationId,
-          userId: data.userId,
+          userId,
         });
       }
 
@@ -252,12 +333,24 @@ export class ChatGateway
   @SubscribeMessage('send_message')
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string; senderId: string; content: string },
+    @MessageBody() data: { conversationId: string; content: string },
   ) {
+    const senderId = client.data.userId as string | undefined;
+    if (!senderId) return { success: false, error: 'UNAUTHORIZED' };
+
+    // Autorisation : on ne peut écrire que dans une conversation dont on est membre.
+    const isMember = await this.ensureConversationMember.isMember({
+      conversationId: data.conversationId,
+      userId: senderId,
+    });
+    if (!isMember) {
+      return { success: false, error: 'FORBIDDEN' };
+    }
+
     try {
       const messageResult = await this.sendMessageUseCase.execute({
         conversationId: data.conversationId,
-        senderId: data.senderId,
+        senderId,
         content: data.content,
       });
 
@@ -275,7 +368,7 @@ export class ChatGateway
       this.server.to(`conversation:${data.conversationId}`).emit('new_message', wireMessage);
       this.publishNewMessage(wireMessage);
 
-      this.clearTyping(data.conversationId, data.senderId);
+      this.clearTyping(data.conversationId, senderId);
 
       return { success: true, messageId: messageResult.messageId };
     } catch (err) {
@@ -288,23 +381,26 @@ export class ChatGateway
   @SubscribeMessage('typing_start')
   handleTypingStart(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string; userId: string },
+    @MessageBody() data: { conversationId: string },
   ) {
+    const userId = client.data.userId as string | undefined;
+    if (!userId) return { success: false, error: 'UNAUTHORIZED' };
+
     let typingUserIds = this.typingUsers.get(data.conversationId);
     if (!typingUserIds) {
       typingUserIds = new Set<string>();
       this.typingUsers.set(data.conversationId, typingUserIds);
     }
-    typingUserIds.add(data.userId);
+    typingUserIds.add(userId);
 
     client.to(`conversation:${data.conversationId}`).emit('user_typing', {
       conversationId: data.conversationId,
-      userId: data.userId,
+      userId,
     });
     this.bus.publish({
       type: 'user_typing',
       conversationId: data.conversationId,
-      userId: data.userId,
+      userId,
     });
 
     return { success: true };
@@ -313,9 +409,11 @@ export class ChatGateway
   @SubscribeMessage('typing_stop')
   handleTypingStop(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { conversationId: string; userId: string },
+    @MessageBody() data: { conversationId: string },
   ) {
-    this.clearTyping(data.conversationId, data.userId);
+    const userId = client.data.userId as string | undefined;
+    if (!userId) return { success: false, error: 'UNAUTHORIZED' };
+    this.clearTyping(data.conversationId, userId);
     return { success: true };
   }
 

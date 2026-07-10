@@ -13,6 +13,7 @@ import {
   Req,
   Res,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -36,6 +37,15 @@ import { ListUsersByRoleUseCase } from '@forreal/application';
 import { SetConversationMuteUseCase } from '@forreal/application';
 import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
 import { UpdateConversationUserStateUseCase } from '@forreal/application';
+import { EnsureConversationMemberUseCase } from '@forreal/application';
+import {
+  CreateConversationDto,
+  SendMessageDto,
+  AddParticipantDto,
+  LinkAdvisorClientDto,
+  UpdateConversationStateDto,
+  MuteConversationDto,
+} from './dto/chat.dto';
 
 const CHAT_FILE_MIME_TYPES = /^(image\/(jpeg|png|gif|webp)|application\/pdf)$/;
 const MAX_CHAT_FILE_BYTES = 10 * 1024 * 1024;
@@ -67,6 +77,7 @@ function extractUserId(req: Request): string {
 }
 
 @Controller('chat')
+@UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(
     @Inject(ChatFilesService) private readonly chatFilesService: ChatFilesService,
@@ -94,22 +105,40 @@ export class ChatController {
     private readonly getConversationSettingsUC: GetConversationNotificationSettingsUseCase,
     @Inject(UpdateConversationUserStateUseCase)
     private readonly updateConversationStateUC: UpdateConversationUserStateUseCase,
+    @Inject(EnsureConversationMemberUseCase)
+    private readonly ensureConversationMember: EnsureConversationMemberUseCase,
   ) {}
 
+  // Autorisation centralisée : l'utilisateur doit être participant de la
+  // conversation. Lève 403 sinon. Réutilisée par tous les endpoints ciblant
+  // une conversation précise.
+  private async assertConversationMember(conversationId: string, userId: string): Promise<void> {
+    const isMember = await this.ensureConversationMember.isMember({ conversationId, userId });
+    if (!isMember) throw new ForbiddenException('Not a participant of this conversation');
+  }
+
   @Post('conversations')
-  async createConversation(@Body() body: { type: 'PRIVATE' | 'GROUP' }) {
+  async createConversation(@Body() body: CreateConversationDto) {
     const type = body.type === 'PRIVATE' ? ConversationType.PRIVATE : ConversationType.GROUP;
     return this.createConversationUseCase.execute({ type });
   }
 
   @Post('advisor-client')
-  async linkAdvisor(@Body() body: { advisorId: string; clientId: string }) {
+  async linkAdvisor(@Body() body: LinkAdvisorClientDto) {
     return this.linkAdvisorClientUseCase.execute(body);
   }
 
   @Post('messages')
-  async postMessage(@Body() body: { conversationId: string; senderId: string; content: string }) {
-    return this.sendMessageUseCase.execute(body);
+  async postMessage(@Body() body: SendMessageDto, @Req() req: Request) {
+    // Le sender est toujours l'utilisateur authentifié : on n'accepte pas de
+    // senderId arbitraire depuis le corps de la requête (usurpation).
+    const senderId = extractUserId(req);
+    await this.assertConversationMember(body.conversationId, senderId);
+    return this.sendMessageUseCase.execute({
+      conversationId: body.conversationId,
+      senderId,
+      content: body.content,
+    });
   }
 
   @Post('uploads')
@@ -140,9 +169,11 @@ export class ChatController {
   @Get('conversations/:id/messages')
   async getMessages(
     @Param('id') conversationId: string,
+    @Req() req: Request,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
   ) {
+    await this.assertConversationMember(conversationId, extractUserId(req));
     return this.listMessagesUseCase.execute({
       conversationId,
       limit: limit ? +limit : 50,
@@ -155,14 +186,19 @@ export class ChatController {
     return this.markMessageReadUseCase.execute({ messageId });
   }
 
+  // Le :userId de l'URL est ignoré au profit de l'utilisateur authentifié :
+  // on ne peut lister que SES propres conversations (protection IDOR).
   @Get('conversations/group/by-user/:userId')
-  async listGroupConversationsByUser(@Param('userId') userId: string) {
-    return this.listConversationsByUserUseCase.execute({ userId, type: 'GROUP' });
+  async listGroupConversationsByUser(@Req() req: Request) {
+    return this.listConversationsByUserUseCase.execute({
+      userId: extractUserId(req),
+      type: 'GROUP',
+    });
   }
 
   @Get('conversations/by-user/:userId')
-  async listConversationsByUser(@Param('userId') userId: string) {
-    return this.listConversationsByUserUseCase.execute({ userId });
+  async listConversationsByUser(@Req() req: Request) {
+    return this.listConversationsByUserUseCase.execute({ userId: extractUserId(req) });
   }
 
   @Get('advisor/:advisorId/clients')
@@ -183,12 +219,32 @@ export class ChatController {
   }
 
   @Post('conversations/:id/participants')
-  async addParticipant(@Param('id') conversationId: string, @Body() body: { userId: string }) {
+  async addParticipant(
+    @Param('id') conversationId: string,
+    @Body() body: AddParticipantDto,
+    @Req() req: Request,
+  ) {
+    const requesterId = extractUserId(req);
+    const isMember = await this.ensureConversationMember.isMember({
+      conversationId,
+      userId: requesterId,
+    });
+    if (!isMember) {
+      // Exception au contrôle d'appartenance : le créateur peut s'ajouter à une
+      // conversation encore vide (flux de création). Toute autre situation est
+      // refusée (on ne peut pas s'inviter dans la conversation d'autrui).
+      const participants = await this.listParticipantsDetails.execute({ conversationId });
+      const isSelfIntoEmptyConversation = body.userId === requesterId && participants.length === 0;
+      if (!isSelfIntoEmptyConversation) {
+        throw new ForbiddenException('Not a participant of this conversation');
+      }
+    }
     return this.addConversationParticipant.execute({ conversationId, userId: body.userId });
   }
 
   @Get('conversations/:id/participants')
-  async listParticipants(@Param('id') conversationId: string) {
+  async listParticipants(@Param('id') conversationId: string, @Req() req: Request) {
+    await this.assertConversationMember(conversationId, extractUserId(req));
     return this.listParticipantsDetails.execute({ conversationId });
   }
 
@@ -198,10 +254,11 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async muteConversation(
     @Param('id') conversationId: string,
-    @Body() body: { mutedUntil?: string },
+    @Body() body: MuteConversationDto,
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
+    await this.assertConversationMember(conversationId, userId);
     return this.setConversationMuteUC.execute({
       userId,
       conversationId,
@@ -214,6 +271,7 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async unmuteConversation(@Param('id') conversationId: string, @Req() req: Request) {
     const userId = extractUserId(req);
+    await this.assertConversationMember(conversationId, userId);
     return this.setConversationMuteUC.execute({ userId, conversationId, muted: false });
   }
 
@@ -224,6 +282,7 @@ export class ChatController {
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
+    await this.assertConversationMember(conversationId, userId);
     return this.getConversationSettingsUC.execute({ userId, conversationId });
   }
 
@@ -233,10 +292,11 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async updateConversationState(
     @Param('id') conversationId: string,
-    @Body() body: { lastReadMessageId: string },
+    @Body() body: UpdateConversationStateDto,
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
+    await this.assertConversationMember(conversationId, userId);
     return this.updateConversationStateUC.execute({
       userId,
       conversationId,

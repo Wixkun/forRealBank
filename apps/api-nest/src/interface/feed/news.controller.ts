@@ -28,8 +28,9 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { OptionalJwtGuard } from '../auth/optional-jwt.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { type NewsStatus, RoleName } from '@forreal/domain';
+import { RoleName } from '@forreal/domain';
 import type { Request } from 'express';
+import { CreateNewsDto, UpdateNewsDto } from './dto/news.dto';
 
 const IMAGE_MIME_TYPES = /^image\/(jpeg|png|gif|webp)$/;
 
@@ -96,7 +97,7 @@ export class NewsController {
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
   @UseInterceptors(newsImageInterceptor)
   async createManual(
-    @Body() body: { title: string; subtitle?: string; content: string; status?: NewsStatus },
+    @Body() body: CreateNewsDto,
     @UploadedFiles() files: NewsUploadedFiles | undefined,
     @Req() req: Request,
   ) {
@@ -119,7 +120,7 @@ export class NewsController {
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
   @UseInterceptors(newsImageInterceptor)
   async createLegacy(
-    @Body() body: { title: string; subtitle?: string; content: string; status?: NewsStatus },
+    @Body() body: CreateNewsDto,
     @UploadedFiles() files: NewsUploadedFiles | undefined,
     @Req() req: Request,
   ) {
@@ -262,7 +263,7 @@ export class NewsController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
-  async update(@Param('id') id: string, @Body() body: { title?: string; content?: string }) {
+  async update(@Param('id') id: string, @Body() body: UpdateNewsDto) {
     return this.newsService.updateNews(id, { title: body.title, content: body.content });
   }
 
@@ -299,9 +300,9 @@ export class NewsController {
   // ─── Lecture d'une news par id (déclaré en dernier : ':id' est un catch-all) ─
 
   @Get(':id')
-  @UseGuards(OptionalJwtGuard)
-  async getOne(@Param('id') id: string) {
-    const news = await this.newsService.getNewsById(id);
+  @UseGuards(JwtAuthGuard)
+  async getOne(@Param('id') id: string, @Req() req: Request) {
+    const news = await this.newsService.getNewsById(id, extractUserId(req));
     if (!news) throw new NotFoundException('NEWS_NOT_FOUND');
     return news;
   }
