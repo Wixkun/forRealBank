@@ -27,6 +27,8 @@ import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
 import { AuthErrorMapper } from './error-mapper';
 import { MonitoringService } from '../../metrics/monitoring.service';
+import { TwoFactorCodeDto } from './dto/two-factor-code.dto';
+import { TwoFactorService } from './two-factor.service';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const TOKEN_EXPIRY_MS = 15 * 60 * 1000;
@@ -73,6 +75,7 @@ export class AuthController {
     private readonly userRepository: IUserRepository,
 
     private readonly monitoring: MonitoringService,
+    private readonly twoFactorService: TwoFactorService,
   ) {}
 
   @HttpCode(201)
@@ -91,6 +94,14 @@ export class AuthController {
     } catch (error) {
       throw AuthErrorMapper.mapToHttpException(error);
     }
+  }
+
+  private async authenticatedUser(req: Request) {
+    const userId = (req as any).user?.id ?? (req as any).auth?.userId;
+    if (!userId) throw new UnauthorizedException('Missing authentication context');
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UnauthorizedException('User not found');
+    return user;
   }
 
   @HttpCode(200)
@@ -172,7 +183,9 @@ export class AuthController {
       this.monitoring.recordLoginAttempt('success');
       return { success: true, message: 'Login successful' };
     } catch (error) {
-      if (!(error instanceof ForbiddenException)) {
+      const isTwoFactorChallenge =
+        error instanceof Error && error.message === 'TWO_FACTOR_REQUIRED';
+      if (!(error instanceof ForbiddenException) && !isTwoFactorChallenge) {
         this.monitoring.recordLoginAttempt('failure');
       }
       throw AuthErrorMapper.mapToHttpException(error);
@@ -190,6 +203,63 @@ export class AuthController {
     });
 
     return { success: true, message: 'Logout successful' };
+  }
+
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Get('2fa/status')
+  async twoFactorStatus(@Req() req: Request) {
+    const user = await this.authenticatedUser(req);
+    return { enabled: user.twoFactorEnabled };
+  }
+
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/setup')
+  async setupTwoFactor(@Req() req: Request) {
+    const user = await this.authenticatedUser(req);
+    if (user.twoFactorEnabled)
+      throw new HttpException('Two-factor authentication is already enabled', 409);
+
+    const secret = this.twoFactorService.generateSecret();
+    user.beginTwoFactorSetup(this.twoFactorService.encrypt(secret));
+    await this.userRepository.save(user);
+    const setup = await this.twoFactorService.createSetup(secret, user.email);
+
+    return { secret, ...setup };
+  }
+
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/enable')
+  async enableTwoFactor(@Body() dto: TwoFactorCodeDto, @Req() req: Request) {
+    const user = await this.authenticatedUser(req);
+    if (!user.twoFactorSecret)
+      throw new HttpException('Two-factor setup has not been started', 409);
+    if (!(await this.twoFactorService.verify(user.twoFactorSecret, dto.code))) {
+      throw new UnauthorizedException('Invalid two-factor authentication code');
+    }
+
+    user.enableTwoFactor();
+    await this.userRepository.save(user);
+    return { success: true, enabled: true };
+  }
+
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  @Post('2fa/disable')
+  async disableTwoFactor(@Body() dto: TwoFactorCodeDto, @Req() req: Request) {
+    const user = await this.authenticatedUser(req);
+    if (!user.twoFactorEnabled || !user.twoFactorSecret) {
+      throw new HttpException('Two-factor authentication is not enabled', 409);
+    }
+    if (!(await this.twoFactorService.verify(user.twoFactorSecret, dto.code))) {
+      throw new UnauthorizedException('Invalid two-factor authentication code');
+    }
+
+    user.disableTwoFactor();
+    await this.userRepository.save(user);
+    return { success: true, enabled: false };
   }
 
   @HttpCode(200)
@@ -223,6 +293,7 @@ export class AuthController {
           roles: Array.from(user.roles),
           lastLoginAt: user.lastLoginAt,
           createdAt: user.createdAt,
+          twoFactorEnabled: user.twoFactorEnabled,
         },
       };
     } catch (error) {

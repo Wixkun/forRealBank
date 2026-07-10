@@ -33,6 +33,8 @@ export class UserMapper {
 
     entity.failedLoginCount = (user as any).failedLoginCount ?? 0;
     entity.lockUntil = (user as any).lockUntil ?? null;
+    entity.twoFactorSecret = user.twoFactorSecret ?? null;
+    entity.twoFactorEnabled = user.twoFactorEnabled;
 
     return entity;
   }
@@ -58,6 +60,8 @@ export class UserMapper {
 
       entity.failedLoginCount ?? 0,
       entity.lockUntil ?? undefined,
+      entity.twoFactorSecret ?? undefined,
+      entity.twoFactorEnabled ?? false,
     );
 
     Object.setPrototypeOf(user, User.prototype);

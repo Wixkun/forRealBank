@@ -18,6 +18,8 @@ export enum AuthErrorCode {
   ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
   INVALID_RESET_TOKEN = 'INVALID_RESET_TOKEN',
   INVALID_EMAIL_VERIFICATION_TOKEN = 'INVALID_EMAIL_VERIFICATION_TOKEN',
+  TWO_FACTOR_REQUIRED = 'TWO_FACTOR_REQUIRED',
+  INVALID_TWO_FACTOR_CODE = 'INVALID_TWO_FACTOR_CODE',
 }
 
 type MappedHttpException =
@@ -64,6 +66,7 @@ const ERROR_EXCEPTION_MAP: Partial<
 
 export class AuthErrorMapper {
   static mapToHttpException(error: unknown): MappedHttpException {
+    if (error instanceof HttpException) return error;
     if (!(error instanceof Error)) {
       return new InternalServerErrorException('An unexpected error occurred');
     }
@@ -71,6 +74,12 @@ export class AuthErrorMapper {
     const errorMessage = error.message as AuthErrorCode;
     if (errorMessage === AuthErrorCode.ACCOUNT_LOCKED) {
       return new HttpException('Account temporarily locked, try later', 423);
+    }
+    if (errorMessage === AuthErrorCode.TWO_FACTOR_REQUIRED) {
+      return new HttpException('Two-factor authentication code required', 428);
+    }
+    if (errorMessage === AuthErrorCode.INVALID_TWO_FACTOR_CODE) {
+      return new UnauthorizedException('Invalid two-factor authentication code');
     }
 
     const mapped = ERROR_EXCEPTION_MAP[errorMessage];

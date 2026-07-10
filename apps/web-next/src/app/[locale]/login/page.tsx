@@ -10,6 +10,8 @@ function LoginForm() {
   const tCommon = useTranslations('common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [requiresTwoFactor, setRequiresTwoFactor] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -78,6 +80,7 @@ function LoginForm() {
         body: JSON.stringify({
           email,
           password,
+          ...(requiresTwoFactor ? { twoFactorCode } : {}),
         }),
       });
 
@@ -85,6 +88,14 @@ function LoginForm() {
 
       if (!response.ok) {
         const message = (data?.message || data?.error || '').toString();
+        if (response.status === 428) {
+          setRequiresTwoFactor(true);
+          throw new Error(
+            locale === 'fr'
+              ? "Saisissez le code à 6 chiffres de votre application d'authentification."
+              : 'Enter the 6-digit code from your authenticator app.',
+          );
+        }
         if (response.status === 403 && message.toLowerCase().includes('banned')) {
           if (typeof document !== 'undefined') {
             document.cookie = `is_banned=1; path=/; max-age=86400`;
@@ -100,6 +111,11 @@ function LoginForm() {
         }
         if (response.status === 429) {
           throw new Error(t('tooManyAttempts'));
+        }
+        if (requiresTwoFactor && response.status === 401) {
+          throw new Error(
+            locale === 'fr' ? 'Code de sécurité invalide.' : 'Invalid security code.',
+          );
         }
         throw new Error(data.message || t('loginFailed'));
       }
@@ -144,6 +160,27 @@ function LoginForm() {
             required
           />
         </div>
+
+        {requiresTwoFactor && (
+          <div>
+            <label className="block text-sm mb-1 text-gray-200">
+              {locale === 'fr' ? 'Code de sécurité' : 'Security code'}
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              placeholder="123456"
+              value={twoFactorCode}
+              onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-teal-400"
+              autoFocus
+              required
+            />
+          </div>
+        )}
 
         <div>
           <label className="block text-sm mb-1 text-gray-200">{t('password')}</label>

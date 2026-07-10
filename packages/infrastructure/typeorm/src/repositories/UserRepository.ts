@@ -71,6 +71,8 @@ export class UserRepository implements IUserRepository {
       banReason: userRecord.banReason ?? null,
       failedLoginCount: (userRecord as any).failedLoginCount ?? (user as any).failedLoginCount ?? 0,
       lockUntil: (userRecord as any).lockUntil ?? (user as any).lockUntil ?? null,
+      twoFactorSecret: userRecord.twoFactorSecret ?? null,
+      twoFactorEnabled: userRecord.twoFactorEnabled ?? false,
       roles,
     });
 

@@ -11,12 +11,20 @@ export class AuthSchemaBootstrapService implements OnModuleInit {
     const hasEmailVerifiedColumn = await this.hasColumn('users', 'email_verified');
     const hasEmailVerifiedAtColumn = await this.hasColumn('users', 'email_verified_at');
     const hasEmailVerificationTokensTable = await this.hasTable('email_verification_tokens');
+    const hasTwoFactorSecretColumn = await this.hasColumn('users', 'two_factor_secret');
+    const hasTwoFactorEnabledColumn = await this.hasColumn('users', 'two_factor_enabled');
 
-    if (hasEmailVerifiedColumn && hasEmailVerifiedAtColumn && hasEmailVerificationTokensTable) {
+    if (
+      hasEmailVerifiedColumn &&
+      hasEmailVerifiedAtColumn &&
+      hasEmailVerificationTokensTable &&
+      hasTwoFactorSecretColumn &&
+      hasTwoFactorEnabledColumn
+    ) {
       return;
     }
 
-    this.logger.warn('Applying auth schema compatibility patch for email verification');
+    this.logger.warn('Applying authentication schema compatibility patch');
 
     await this.dataSource.transaction(async (manager) => {
       await manager.query(`
@@ -27,6 +35,16 @@ export class AuthSchemaBootstrapService implements OnModuleInit {
       await manager.query(`
         ALTER TABLE users
         ADD COLUMN IF NOT EXISTS email_verified_at timestamptz NULL
+      `);
+
+      await manager.query(`
+        ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS two_factor_secret text NULL
+      `);
+
+      await manager.query(`
+        ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS two_factor_enabled boolean NOT NULL DEFAULT false
       `);
 
       await manager.query(`

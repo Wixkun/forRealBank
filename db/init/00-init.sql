@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS users (
     banned_at timestamptz NULL,
     ban_reason text NULL,
     failed_login_count int NOT NULL DEFAULT 0,
-    lock_until timestamptz NULL
+    lock_until timestamptz NULL,
+    two_factor_secret text NULL,
+    two_factor_enabled boolean NOT NULL DEFAULT false
 );
 
 ALTER TABLE users
@@ -34,6 +36,12 @@ ALTER TABLE users
 
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS email_verified_at timestamptz NULL;
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS two_factor_secret text NULL;
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS two_factor_enabled boolean NOT NULL DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS password_reset_tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

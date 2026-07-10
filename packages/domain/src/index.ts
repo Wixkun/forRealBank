@@ -54,3 +54,4 @@ export * from './user/ports/IEmailService';
 export * from './user/ports/ITokenService';
 export * from './user/ports/IUserIdGenerator';
 export * from './user/ports/ISessionIdGenerator';
+export * from './user/ports/ITwoFactorVerifier';

@@ -428,7 +428,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               <IconDownload /> {t('statement')}
             </button>
             {user?.id && <NotificationCenter userId={user.id} />}
-            <button className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-fg-muted hover:bg-white/10 transition">
+            <button
+              onClick={() => router.push(`/${locale}/dashboard/security`)}
+              aria-label={locale === 'fr' ? 'Paramètres de sécurité' : 'Security settings'}
+              className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-fg-muted hover:bg-white/10 transition"
+            >
               <IconSettings />
             </button>
             <div className="w-8 h-8 rounded-full bg-primary ring-1 ring-white/10 flex items-center justify-center text-xs font-bold text-white">

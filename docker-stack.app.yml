@@ -157,7 +157,7 @@ services:
       update_config:
         parallelism: 1
         delay: 10s
-        order: start-first
+        order: stop-first
       resources:
         limits:
           cpus: '1.00'

@@ -3,6 +3,7 @@ import {
   IPasswordHasher,
   ITokenService,
   ISessionIdGenerator,
+  ITwoFactorVerifier,
 } from '@forreal/domain';
 
 export class LoginUserUseCase {
@@ -11,9 +12,10 @@ export class LoginUserUseCase {
     private readonly passwordHasher: IPasswordHasher,
     private readonly tokenService: ITokenService,
     private readonly sessionIdGenerator: ISessionIdGenerator,
+    private readonly twoFactorVerifier: ITwoFactorVerifier,
   ) {}
 
-  async execute(input: { email: string; password: string }) {
+  async execute(input: { email: string; password: string; twoFactorCode?: string }) {
     // valeurs par défaut raisonnables (à externaliser en config si besoin)
     const MAX_ATTEMPTS = 5;
     const LOCK_MS = 15 * 60 * 1000;
@@ -35,6 +37,17 @@ export class LoginUserUseCase {
 
     if (!user.emailVerified) {
       throw new Error('EMAIL_NOT_VERIFIED');
+    }
+
+    if (user.twoFactorEnabled) {
+      if (!input.twoFactorCode) throw new Error('TWO_FACTOR_REQUIRED');
+      if (!user.twoFactorSecret) throw new Error('TWO_FACTOR_NOT_CONFIGURED');
+
+      const secondFactorValid = await this.twoFactorVerifier.verify(
+        user.twoFactorSecret,
+        input.twoFactorCode,
+      );
+      if (!secondFactorValid) throw new Error('INVALID_TWO_FACTOR_CODE');
     }
 
     user.markLogin(now);

@@ -15,6 +15,7 @@ import {
   IEmailService,
   IUserIdGenerator,
   ISessionIdGenerator,
+  ITwoFactorVerifier,
   USER_ID_GENERATOR,
   SESSION_ID_GENERATOR,
 } from '@forreal/domain';
@@ -42,6 +43,7 @@ import {
 } from '@forreal/application';
 import { SmtpEmailService } from './smtp-email.service';
 import { AuthSchemaBootstrapService } from './auth-schema-bootstrap.service';
+import { TwoFactorService } from './two-factor.service';
 
 const registerUserProvider: Provider = {
   provide: RegisterUserUseCase,
@@ -68,8 +70,15 @@ const loginUserProvider: Provider = {
     hasher: IPasswordHasher,
     tokens: ITokenService,
     sessionIdGenerator: ISessionIdGenerator,
-  ) => new LoginUserUseCase(users, hasher, tokens, sessionIdGenerator),
-  inject: [IUserRepository, IPasswordHasher, ITokenService, SESSION_ID_GENERATOR],
+    twoFactorVerifier: ITwoFactorVerifier,
+  ) => new LoginUserUseCase(users, hasher, tokens, sessionIdGenerator, twoFactorVerifier),
+  inject: [
+    IUserRepository,
+    IPasswordHasher,
+    ITokenService,
+    SESSION_ID_GENERATOR,
+    ITwoFactorVerifier,
+  ],
 };
 
 const requestPasswordResetProvider: Provider = {
@@ -122,6 +131,8 @@ const verifyEmailProvider: Provider = {
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
     { provide: IEmailService, useClass: SmtpEmailService },
+    TwoFactorService,
+    { provide: ITwoFactorVerifier, useExisting: TwoFactorService },
 
     { provide: USER_ID_GENERATOR, useClass: UserUuidGenerator },
     { provide: SESSION_ID_GENERATOR, useClass: SessionUuidGenerator },

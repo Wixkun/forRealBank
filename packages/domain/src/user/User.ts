@@ -20,6 +20,8 @@ export class User {
     // sécurité auth (anti brute-force)
     private _failedLoginCount: number = 0,
     private _lockUntil?: Date,
+    private _twoFactorSecret?: string,
+    private _twoFactorEnabled: boolean = false,
   ) {}
 
   get id() {
@@ -70,6 +72,30 @@ export class User {
   }
   get lockUntil() {
     return this._lockUntil;
+  }
+  get twoFactorSecret() {
+    return this._twoFactorSecret;
+  }
+  get twoFactorEnabled() {
+    return this._twoFactorEnabled ?? false;
+  }
+
+  beginTwoFactorSetup(encryptedSecret: string, at = new Date()) {
+    this._twoFactorSecret = encryptedSecret;
+    this._twoFactorEnabled = false;
+    this.touch(at);
+  }
+
+  enableTwoFactor(at = new Date()) {
+    if (!this._twoFactorSecret) throw new Error('TWO_FACTOR_NOT_CONFIGURED');
+    this._twoFactorEnabled = true;
+    this.touch(at);
+  }
+
+  disableTwoFactor(at = new Date()) {
+    this._twoFactorSecret = undefined;
+    this._twoFactorEnabled = false;
+    this.touch(at);
   }
 
   isLocked(at = new Date()): boolean {

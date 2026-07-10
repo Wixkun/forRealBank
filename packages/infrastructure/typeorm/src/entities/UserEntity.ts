@@ -44,4 +44,10 @@ export class UserEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', name: 'lock_until', nullable: true })
   lockUntil!: Date | null;
+
+  @Column({ type: 'text', name: 'two_factor_secret', nullable: true })
+  twoFactorSecret!: string | null;
+
+  @Column({ type: 'boolean', name: 'two_factor_enabled', default: false })
+  twoFactorEnabled!: boolean;
 }
