@@ -34,6 +34,9 @@ export class RequestPasswordResetUseCase {
     const user = await this.userRepository.findByEmail(email);
 
     if (!user || user.isBanned) {
+      console.info(
+        `[RequestPasswordResetUseCase] Ignoring request for ${email}: user ${user ? 'banned' : 'not found'}`,
+      );
       return { success: true };
     }
 
@@ -56,6 +59,7 @@ export class RequestPasswordResetUseCase {
       resetUrl,
       expiresInMinutes: RESET_TOKEN_EXPIRY_MINUTES,
     });
+    console.info(`[RequestPasswordResetUseCase] Reset email prepared for ${user.email}`);
 
     return { success: true };
   }

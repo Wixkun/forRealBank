@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import FormData from 'form-data';
 import Mailgun from 'mailgun.js';
 import nodemailer from 'nodemailer';
@@ -16,6 +16,8 @@ function escapeHtml(value: string): string {
 
 @Injectable()
 export class SmtpEmailService implements IEmailService {
+  private readonly logger = new Logger(SmtpEmailService.name);
+
   async sendPasswordResetEmail(input: {
     to: string;
     firstName: string;
@@ -30,6 +32,7 @@ export class SmtpEmailService implements IEmailService {
       (mailgunDomain ? `ForRealBank <postmaster@${mailgunDomain}>` : undefined);
 
     if (mailgunApiKey && mailgunDomain && mailgunFrom) {
+      this.logger.log(`Sending password reset email via Mailgun to ${input.to}`);
       const mailgun = new Mailgun(FormData);
       const client = mailgun.client({
         username: 'api',
@@ -44,6 +47,7 @@ export class SmtpEmailService implements IEmailService {
         text: this.buildTextBody(input),
         html: this.buildHtmlBody(input),
       });
+      this.logger.log(`Password reset email sent via Mailgun to ${input.to}`);
       return;
     }
 
@@ -54,12 +58,13 @@ export class SmtpEmailService implements IEmailService {
     const from = process.env.SMTP_FROM?.trim() || 'ForRealBank <no-reply@for-real.cloud>';
 
     if (!host || !user || !pass) {
-      console.warn(
-        `[PasswordReset] Email provider is not configured. Reset link for ${input.to}: ${input.resetUrl}`,
+      this.logger.warn(
+        `Email provider is not configured. Reset link for ${input.to}: ${input.resetUrl}`,
       );
       return;
     }
 
+    this.logger.log(`Sending password reset email via SMTP to ${input.to}`);
     const transporter = nodemailer.createTransport({
       host,
       port,
@@ -74,6 +79,7 @@ export class SmtpEmailService implements IEmailService {
       text: this.buildTextBody(input),
       html: this.buildHtmlBody(input),
     });
+    this.logger.log(`Password reset email sent via SMTP to ${input.to}`);
   }
 
   private buildTextBody(input: {

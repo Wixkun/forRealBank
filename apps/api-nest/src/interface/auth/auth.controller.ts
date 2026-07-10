@@ -11,6 +11,7 @@ import {
   Req,
   Inject,
   HttpException,
+  Logger,
 } from '@nestjs/common';
 import { Response, Request } from 'express';
 import { RegisterDto } from './dto/register.dto';
@@ -55,6 +56,8 @@ function enforceLoginRateLimit(req: Request) {
 
 @Controller('/auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly loginUserUseCase: LoginUserUseCase,
@@ -90,17 +93,21 @@ export class AuthController {
   @HttpCode(200)
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const email = dto.email.trim().toLowerCase();
     try {
+      this.logger.log(`Forgot password requested for ${email}`);
       await this.requestPasswordResetUseCase.execute({
-        email: dto.email,
+        email,
         locale: dto.locale,
       });
+      this.logger.log(`Forgot password flow completed for ${email}`);
 
       return {
         success: true,
         message: 'If an account exists for this email, a reset link has been sent',
       };
     } catch (error) {
+      this.logger.error(`Forgot password failed for ${email}`, error);
       throw AuthErrorMapper.mapToHttpException(error);
     }
   }
