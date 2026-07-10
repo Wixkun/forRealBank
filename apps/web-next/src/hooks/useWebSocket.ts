@@ -24,6 +24,9 @@ export function useWebSocket({ url, userId, autoConnect = true }: UseWebSocketOp
 
     const newSocket = io(url, {
       query: { userId },
+      // Envoi du cookie de session (access_token httpOnly) au handshake :
+      // l'API authentifie la connexion côté serveur à partir du JWT.
+      withCredentials: true,
       // WebSocket uniquement : en cluster derrière Traefik, le fallback
       // HTTP-polling exigerait des sessions sticky entre replicas.
       transports: ['websocket'],

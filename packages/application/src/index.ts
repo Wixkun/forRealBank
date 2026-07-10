@@ -27,6 +27,7 @@ export * from './chat/usecases/ListClientsOfAdvisorUseCase';
 export * from './chat/usecases/SetConversationMuteUseCase';
 export * from './chat/usecases/GetConversationNotificationSettingsUseCase';
 export * from './chat/usecases/UpdateConversationUserStateUseCase';
+export * from './chat/usecases/EnsureConversationMemberUseCase';
 
 // feed
 export * from './feed/usecases/CreateNewsUseCase';

@@ -1,8 +1,11 @@
-import { IAccountRepository } from '@forreal/domain';
-import { IInvestmentRepository } from '@forreal/domain';
-import { ITransactionRepository } from '@forreal/domain';
-import { Account } from '@forreal/domain';
-import { InvestmentAccount } from '@forreal/domain';
+import {
+  IAccountRepository,
+  IInvestmentRepository,
+  ITransferGateway,
+  TransferParty,
+  Account,
+  InvestmentAccount,
+} from '@forreal/domain';
 
 export type TransferRequest = {
   userId: string;
@@ -12,6 +15,7 @@ export type TransferRequest = {
   destinationIban?: string;
   amount: number;
   description?: string;
+  idempotencyKey?: string | null;
 };
 
 export type TransferResult = {
@@ -21,15 +25,31 @@ export type TransferResult = {
   destinationBalance?: number;
 };
 
+// Arrondi monétaire à 2 décimales (les colonnes SQL sont numeric(15,2)).
+function roundMoney(value: number): number {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
+/**
+ * Orchestration métier d'un virement. La validation (montant, propriété des
+ * comptes, règles épargne/IBAN, anti-auto-virement) est faite ici ; le
+ * mouvement d'argent lui-même est délégué à un port atomique et transactionnel
+ * (ITransferGateway) — aucune logique SQL ni verrou dans l'application.
+ */
 export class InitiateTransferUseCase {
   constructor(
     private readonly accountRepo: IAccountRepository,
     private readonly investmentRepo: IInvestmentRepository,
-    private readonly transactionRepo: ITransactionRepository,
+    private readonly transferGateway: ITransferGateway,
   ) {}
 
   async execute(req: TransferRequest): Promise<TransferResult> {
-    if (!req.amount || req.amount <= 0) {
+    // ── Validation du montant ────────────────────────────────────────────────
+    if (typeof req.amount !== 'number' || !Number.isFinite(req.amount) || req.amount <= 0) {
+      return { success: false, message: 'Invalid amount' };
+    }
+    const amount = roundMoney(req.amount);
+    if (amount <= 0) {
       return { success: false, message: 'Invalid amount' };
     }
 
@@ -37,158 +57,101 @@ export class InitiateTransferUseCase {
       return { success: false, message: 'Missing source account' };
     }
 
-    const amount = Number(req.amount);
+    // ── Résolution + validation de la source (propriété) ─────────────────────
+    let source: TransferParty;
+    let sourceAccountType: 'checking' | 'savings' | null = null;
 
     if (req.sourceType === 'bank') {
-      const source = await this.accountRepo.findById(req.sourceAccountId);
-      if (!source || source.userId !== req.userId) {
+      const bank = await this.accountRepo.findById(req.sourceAccountId);
+      if (!bank || bank.userId !== req.userId) {
         return { success: false, message: 'Source account not found' };
       }
-
-      if (source.accountType === 'savings' && req.destinationIban) {
-        return { success: false, message: 'Savings cannot transfer to external IBAN' };
+      sourceAccountType = bank.accountType;
+      source = { kind: 'bank', id: bank.id };
+    } else {
+      const investment = await this.investmentRepo.findById(req.sourceAccountId);
+      if (!investment || investment.userId !== req.userId) {
+        return { success: false, message: 'Investment source not found' };
       }
-
-      if (source.balance < amount) {
-        return { success: false, message: 'Insufficient funds' };
+      if (req.destinationIban) {
+        return { success: false, message: 'Investment account cannot transfer to external IBAN' };
       }
-
-      let destinationBank: Account | null = null;
-      let destinationInvestment: InvestmentAccount | null = null;
-
-      if (req.destinationAccountId) {
-        destinationBank = await this.accountRepo.findById(req.destinationAccountId);
-        if (destinationBank && destinationBank.userId !== req.userId) {
-          return { success: false, message: 'Destination not owned by user' };
-        }
-        if (!destinationBank) {
-          destinationInvestment = await this.investmentRepo.findById(req.destinationAccountId);
-          if (!destinationInvestment || destinationInvestment.userId !== req.userId) {
-            return { success: false, message: 'Destination account not found' };
-          }
-        }
-      } else if (req.destinationIban) {
-        if (source.accountType !== 'checking') {
-          return { success: false, message: 'Only checking can transfer to external IBAN' };
-        }
-        destinationBank = await this.accountRepo.findByIban(req.destinationIban);
-        if (!destinationBank) {
-          return { success: false, message: 'Recipient IBAN not found' };
-        }
-      } else {
-        return { success: false, message: 'Missing destination' };
-      }
-
-      const newSourceBalance = Number((source.balance - amount).toFixed(2));
-      await this.accountRepo.updateBalance(source.id, newSourceBalance);
-      await this.transactionRepo.createBankTransaction({
-        accountId: source.id,
-        type: 'debit',
-        description: req.description || 'Transfer',
-        amount: -amount,
-        balanceAfter: newSourceBalance,
-      });
-
-      let destinationBalanceUpdated: number | undefined = undefined;
-
-      if (destinationBank) {
-        const newDestBalance = Number((destinationBank.balance + amount).toFixed(2));
-        await this.accountRepo.updateBalance(destinationBank.id, newDestBalance);
-        await this.transactionRepo.createBankTransaction({
-          accountId: destinationBank.id,
-          type: 'transfer',
-          description: req.description || 'Incoming transfer',
-          amount: amount,
-          balanceAfter: newDestBalance,
-        });
-        destinationBalanceUpdated = newDestBalance;
-      } else if (destinationInvestment) {
-        const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
-        await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);
-        await this.investmentRepo.createCashMovement({
-          investmentAccountId: destinationInvestment.id,
-          type: 'deposit',
-          amount,
-          cashBalanceAfter: newDestBalance,
-          description: req.description || 'Transfer from bank account',
-        });
-        destinationBalanceUpdated = newDestBalance;
-      }
-
-      return {
-        success: true,
-        message: 'Transfer completed',
-        sourceBalance: newSourceBalance,
-        destinationBalance: destinationBalanceUpdated,
-      };
+      source = { kind: 'investment', id: investment.id };
     }
 
-    const sourceInvestment = await this.investmentRepo.findById(req.sourceAccountId);
-    if (!sourceInvestment || sourceInvestment.userId !== req.userId) {
-      return { success: false, message: 'Investment source not found' };
+    // ── Résolution + validation de la destination ────────────────────────────
+    const resolvedDestination = await this.resolveDestination(req, sourceAccountType);
+    if ('error' in resolvedDestination) {
+      return { success: false, message: resolvedDestination.error };
+    }
+    const destination = resolvedDestination.party;
+
+    // ── Anti-auto-virement : source et destination identiques interdits ──────
+    if (source.kind === destination.kind && source.id === destination.id) {
+      return { success: false, message: 'Cannot transfer to the same account' };
     }
 
-    if (sourceInvestment.cashBalance < amount) {
-      return { success: false, message: 'Insufficient investment cash balance' };
-    }
-
-    if (req.destinationIban) {
-      return { success: false, message: 'Investment account cannot transfer to external IBAN' };
-    }
-
-    if (!req.destinationAccountId) {
-      return { success: false, message: 'Missing destination account for investment transfer' };
-    }
-
-    const destinationBank = await this.accountRepo.findById(req.destinationAccountId);
-    const destinationInvestment = destinationBank
-      ? null
-      : await this.investmentRepo.findById(req.destinationAccountId);
-
-    if (destinationBank && destinationBank.userId !== req.userId) {
-      return { success: false, message: 'Destination not owned by user' };
-    }
-    if (destinationInvestment && destinationInvestment.userId !== req.userId) {
-      return { success: false, message: 'Destination not owned by user' };
-    }
-    if (!destinationBank && !destinationInvestment) {
-      return { success: false, message: 'Destination account not found' };
-    }
-
-    const newSourceBalance = Number((sourceInvestment.cashBalance - amount).toFixed(2));
-    await this.investmentRepo.updateCashBalance(sourceInvestment.id, newSourceBalance);
-    await this.investmentRepo.createCashMovement({
-      investmentAccountId: sourceInvestment.id,
-      type: 'withdrawal',
+    // ── Mouvement atomique délégué au gateway ────────────────────────────────
+    const outcome = await this.transferGateway.execute({
+      source,
+      destination,
       amount,
-      cashBalanceAfter: newSourceBalance,
-      description: req.description || 'Transfer to bank account',
+      description: req.description?.trim() || 'Transfer',
+      idempotencyKey: req.idempotencyKey ?? null,
     });
 
-    let destinationBalanceUpdated: number | undefined = undefined;
-
-    if (destinationBank) {
-      const newDestBalance = Number((destinationBank.balance + amount).toFixed(2));
-      await this.accountRepo.updateBalance(destinationBank.id, newDestBalance);
-      await this.transactionRepo.createBankTransaction({
-        accountId: destinationBank.id,
-        type: 'transfer',
-        description: req.description || 'Incoming transfer',
-        amount: amount,
-        balanceAfter: newDestBalance,
-      });
-      destinationBalanceUpdated = newDestBalance;
-    } else if (destinationInvestment) {
-      const newDestBalance = Number((destinationInvestment.cashBalance + amount).toFixed(2));
-      await this.investmentRepo.updateCashBalance(destinationInvestment.id, newDestBalance);
-      destinationBalanceUpdated = newDestBalance;
+    if (outcome.status === 'insufficient_funds') {
+      return { success: false, message: 'Insufficient funds' };
+    }
+    if (outcome.status === 'duplicate') {
+      return { success: false, message: 'Duplicate transfer request' };
     }
 
     return {
       success: true,
       message: 'Transfer completed',
-      sourceBalance: newSourceBalance,
-      destinationBalance: destinationBalanceUpdated,
+      sourceBalance: outcome.sourceBalance,
+      destinationBalance: outcome.destinationBalance,
     };
+  }
+
+  private async resolveDestination(
+    req: TransferRequest,
+    sourceAccountType: 'checking' | 'savings' | null,
+  ): Promise<{ party: TransferParty } | { error: string }> {
+    // Virement par identifiant de compte (interne).
+    if (req.destinationAccountId) {
+      const bank: Account | null = await this.accountRepo.findById(req.destinationAccountId);
+      if (bank) {
+        if (bank.userId !== req.userId) {
+          return { error: 'Destination not owned by user' };
+        }
+        return { party: { kind: 'bank', id: bank.id } };
+      }
+      const investment: InvestmentAccount | null = await this.investmentRepo.findById(
+        req.destinationAccountId,
+      );
+      if (!investment || investment.userId !== req.userId) {
+        return { error: 'Destination account not found' };
+      }
+      return { party: { kind: 'investment', id: investment.id } };
+    }
+
+    // Virement par IBAN (externe) : réservé aux comptes courants.
+    if (req.destinationIban) {
+      if (req.sourceType !== 'bank') {
+        return { error: 'Investment account cannot transfer to external IBAN' };
+      }
+      if (sourceAccountType !== 'checking') {
+        return { error: 'Only checking can transfer to external IBAN' };
+      }
+      const dest = await this.accountRepo.findByIban(req.destinationIban);
+      if (!dest) {
+        return { error: 'Recipient IBAN not found' };
+      }
+      return { party: { kind: 'bank', id: dest.id } };
+    }
+
+    return { error: 'Missing destination' };
   }
 }
