@@ -234,6 +234,9 @@ jobs:
             -d '{"email":"test-ci@forreal.bank","password":"TestPassword@123","firstName":"CI","lastName":"Test"}')
           echo "Register: $REGISTER_RESPONSE"
 
+          docker compose exec -T db psql -U "${POSTGRES_USER}" -d "${POSTGRES_DB}" \
+            -c "UPDATE users SET email_verified = true, email_verified_at = now() WHERE email = 'test-ci@forreal.bank';"
+
           LOGIN_RESPONSE=$(curl -s -X POST http://localhost:3001/api/auth/login \
             -H "Content-Type: application/json" \
             -d '{"email":"test-ci@forreal.bank","password":"TestPassword@123"}')
