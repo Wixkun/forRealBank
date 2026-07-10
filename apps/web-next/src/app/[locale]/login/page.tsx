@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, Suspense, FormEvent } from 'react';
+import { useState, useEffect, Suspense, FormEvent, useMemo } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -18,20 +18,23 @@ function LoginForm() {
   const searchParams = useSearchParams();
 
   const locale = pathname.split('/')[1] || 'en';
-  const loginMessages = {
-    registrationSuccess:
-      locale === 'fr'
-        ? 'Inscription reussie. Verifiez votre email avant de vous connecter.'
-        : 'Registration successful. Please verify your email before logging in.',
-    verificationSuccess:
-      locale === 'fr'
-        ? 'Votre email a ete verifie. Vous pouvez maintenant vous connecter.'
-        : 'Your email has been verified. You can now log in.',
-    emailNotVerified:
-      locale === 'fr'
-        ? "Vous devez d'abord verifier votre adresse email avant de vous connecter."
-        : 'You must verify your email address before logging in.',
-  };
+  const loginMessages = useMemo(
+    () => ({
+      registrationSuccess:
+        locale === 'fr'
+          ? 'Inscription reussie. Verifiez votre email avant de vous connecter.'
+          : 'Registration successful. Please verify your email before logging in.',
+      verificationSuccess:
+        locale === 'fr'
+          ? 'Votre email a ete verifie. Vous pouvez maintenant vous connecter.'
+          : 'Your email has been verified. You can now log in.',
+      emailNotVerified:
+        locale === 'fr'
+          ? "Vous devez d'abord verifier votre adresse email avant de vous connecter."
+          : 'You must verify your email address before logging in.',
+    }),
+    [locale],
+  );
 
   useEffect(() => {
     const checkAuth = async () => {

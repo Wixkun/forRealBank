@@ -2,15 +2,15 @@
   "name": "@forreal/application",
   "version": "1.0.0",
   "type": "commonjs",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "files": [
-    "dist"
+    "build"
   ],
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc -p tsconfig.typecheck.json --pretty false",
-    "clean": "rimraf dist"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@forreal/domain": "workspace:*"

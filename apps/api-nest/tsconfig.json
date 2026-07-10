@@ -6,7 +6,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "ignoreDeprecations": "5.0",
-    "outDir": "dist"
+    "outDir": "build"
   },
   "references": [
     { "path": "../../packages/domain" },
@@ -16,5 +16,5 @@
     { "path": "../../packages/infrastructure/jwt-nest" },
     { "path": "../../packages/infrastructure/uuid-node" }
   ],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "build"]
 }

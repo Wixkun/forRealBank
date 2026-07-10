@@ -39,4 +39,4 @@ COPY --from=build /prod ./
 
 EXPOSE 3001
 
-CMD ["node", "dist/apps/api-nest/src/main.js"]
+CMD ["node", "build/apps/api-nest/src/main.js"]
