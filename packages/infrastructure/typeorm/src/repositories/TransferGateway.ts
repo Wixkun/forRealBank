@@ -64,7 +64,7 @@ export class TransferGateway implements ITransferGateway {
         if (newSourceBalance === null) {
           throw new InsufficientFundsSignal();
         }
-        await this.writeLedger(
+        const sourceTransactionId = await this.writeLedger(
           manager,
           input.source,
           'out',
@@ -82,7 +82,7 @@ export class TransferGateway implements ITransferGateway {
         if (newDestinationBalance === null) {
           throw new Error('TRANSFER_DESTINATION_NOT_FOUND');
         }
-        await this.writeLedger(
+        const destinationTransactionId = await this.writeLedger(
           manager,
           input.destination,
           'in',
@@ -95,6 +95,8 @@ export class TransferGateway implements ITransferGateway {
           status: 'completed' as const,
           sourceBalance: newSourceBalance,
           destinationBalance: newDestinationBalance,
+          sourceTransactionId,
+          destinationTransactionId,
         };
       });
     } catch (error) {
@@ -142,6 +144,8 @@ export class TransferGateway implements ITransferGateway {
     return rows.length > 0 ? Number(rows[0].balance) : null;
   }
 
+  // Renvoie l'id de l'écriture insérée (utilisé pour relier la notification
+  // « Virement reçu » à la ligne du relevé du destinataire).
   private async writeLedger(
     manager: EntityManager,
     party: TransferParty,
@@ -149,24 +153,27 @@ export class TransferGateway implements ITransferGateway {
     amount: number,
     balanceAfter: number,
     description: string,
-  ): Promise<void> {
+  ): Promise<string | null> {
     if (party.kind === 'bank') {
       const type = direction === 'out' ? 'debit' : 'transfer';
       // Convention existante : les débits sont stockés en montant négatif.
       const signedAmount = direction === 'out' ? -amount : amount;
-      await manager.query(
+      const rows: Array<{ id: string }> = await manager.query(
         `INSERT INTO bank_transactions (account_id, type, description, amount, balance_after)
-         VALUES ($1, $2, $3, $4, $5)`,
+         VALUES ($1, $2, $3, $4, $5)
+         RETURNING id`,
         [party.id, type, description, signedAmount, balanceAfter],
       );
-      return;
+      return rows[0]?.id ?? null;
     }
 
     const type = direction === 'out' ? 'withdrawal' : 'deposit';
-    await manager.query(
+    const rows: Array<{ id: string }> = await manager.query(
       `INSERT INTO investment_transactions (investment_account_id, type, description, amount, cash_balance_after)
-       VALUES ($1, $2, $3, $4, $5)`,
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id`,
       [party.id, type, description, amount, balanceAfter],
     );
+    return rows[0]?.id ?? null;
   }
 }

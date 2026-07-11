@@ -16,4 +16,7 @@ export interface IConversationNotificationSettingsRepository {
     muted: boolean;
     mutedUntil?: Date | null;
   }): Promise<ConversationNotificationSettings>;
+
+  /** Identifiants des conversations actuellement en sourdine pour l'utilisateur. */
+  listMutedConversationIds(userId: string): Promise<string[]>;
 }

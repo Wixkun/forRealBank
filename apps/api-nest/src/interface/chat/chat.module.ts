@@ -56,6 +56,7 @@ import {
   GetConversationNotificationSettingsUseCase,
   UpdateConversationUserStateUseCase,
   EnsureConversationMemberUseCase,
+  CreateGroupConversationUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
 
@@ -110,6 +111,27 @@ import { AuthModule } from '../auth/auth.module';
       inject: [IConversationParticipantRepository],
     },
     {
+      provide: CreateGroupConversationUseCase,
+      useFactory: (
+        conversationRepo: IConversationRepository,
+        participantRepo: IConversationParticipantRepository,
+        userRepo: IUserRepository,
+        advisorClientRepo: IAdvisorClientRepository,
+      ) =>
+        new CreateGroupConversationUseCase(
+          conversationRepo,
+          participantRepo,
+          userRepo,
+          advisorClientRepo,
+        ),
+      inject: [
+        IConversationRepository,
+        IConversationParticipantRepository,
+        IUserRepository,
+        IAdvisorClientRepository,
+      ],
+    },
+    {
       provide: SendMessageUseCase,
       useFactory: (
         messageRepo: IMessageRepository,
@@ -145,8 +167,23 @@ import { AuthModule } from '../auth/auth.module';
         participantRepo: IConversationParticipantRepository,
         conversationRepo: IConversationRepository,
         userRepo: IUserRepository,
-      ) => new ListConversationsByUserUseCase(participantRepo, conversationRepo, userRepo),
-      inject: [IConversationParticipantRepository, IConversationRepository, IUserRepository],
+        messageRepo: IMessageRepository,
+        settingsRepo: IConversationNotificationSettingsRepository,
+      ) =>
+        new ListConversationsByUserUseCase(
+          participantRepo,
+          conversationRepo,
+          userRepo,
+          messageRepo,
+          settingsRepo,
+        ),
+      inject: [
+        IConversationParticipantRepository,
+        IConversationRepository,
+        IUserRepository,
+        IMessageRepository,
+        IConversationNotificationSettingsRepository,
+      ],
     },
     {
       provide: ListParticipantsDetailsByConversationUseCase,

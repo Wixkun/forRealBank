@@ -12,6 +12,7 @@ import {
 } from '@/features/dashboard/types';
 import { AccountChart } from '@/features/dashboard/components/AccountChart';
 import { fetchAccountTransactions } from '@/features/dashboard/api';
+import { useClearNotificationsByTarget } from '@/features/notifications/useClearNotificationsByTarget';
 import { useStatement } from '@/features/statements/StatementContext';
 import {
   NewsDetailModal,
@@ -60,6 +61,10 @@ export function TransactionsSection({
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
   const [txDetail, setTxDetail] = useState<NewsItem | null>(null);
+
+  // Consulter le détail d'une transaction marque lue la notification liée
+  // (ex. « Virement reçu », reliée à la ligne du relevé via son group_key).
+  useClearNotificationsByTarget('TRANSACTION', txDetail?.id);
 
   const statement = useStatement();
 

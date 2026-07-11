@@ -19,7 +19,20 @@ export interface ExecuteTransferInput {
 }
 
 export type ExecuteTransferOutput =
-  | { status: 'completed'; sourceBalance: number; destinationBalance: number }
+  | {
+      status: 'completed';
+      sourceBalance: number;
+      destinationBalance: number;
+      /**
+       * Ids des écritures comptables créées (lignes des relevés source et
+       * destination). Permettent de relier la notification « Virement reçu »
+       * aux transactions affichées dans les relevés (marquage lu à la
+       * consultation, y compris pour un virement interne où l'utilisateur
+       * peut consulter le débit comme le crédit).
+       */
+      sourceTransactionId?: string | null;
+      destinationTransactionId?: string | null;
+    }
   | { status: 'insufficient_funds' }
   | { status: 'duplicate' };
 

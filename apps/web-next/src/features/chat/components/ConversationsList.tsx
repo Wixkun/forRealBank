@@ -12,6 +12,80 @@ interface ConversationsListProps {
   onSelectConversation: (conversationId: string) => void;
   conversations?: Conversation[];
   loadingOverride?: boolean;
+  onToggleMute?: (conversationId: string, currentlyMuted: boolean) => void | Promise<void>;
+}
+
+// Cloche (mute/unmute) : réservée aux groupes, cliquable sans ouvrir la
+// conversation. Accessible (aria-label + état disabled pendant la requête).
+function MuteBell({
+  isMuted,
+  isDark,
+  labelMute,
+  labelUnmute,
+  onToggle,
+}: {
+  isMuted: boolean;
+  isDark: boolean;
+  labelMute: string;
+  labelUnmute: string;
+  onToggle: () => void | Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  const label = isMuted ? labelUnmute : labelMute;
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={busy}
+      onClick={async (e) => {
+        e.stopPropagation();
+        if (busy) return;
+        setBusy(true);
+        try {
+          await onToggle();
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className={`shrink-0 rounded-md p-1.5 transition-colors disabled:opacity-50 ${
+        isDark ? 'hover:bg-white/10 text-fg-muted' : 'hover:bg-gray-200 text-gray-500'
+      }`}
+    >
+      {isMuted ? (
+        // Cloche barrée = notifications désactivées.
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13.73 21a2 2 0 01-3.46 0M18.63 13A17.9 17.9 0 0118 8m-6-4a2 2 0 00-2 2v.1M3 3l18 18"
+          />
+        </svg>
+      ) : (
+        <svg
+          className="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+          />
+        </svg>
+      )}
+    </button>
+  );
 }
 
 export default function ConversationsList({
@@ -19,6 +93,7 @@ export default function ConversationsList({
   onSelectConversation,
   conversations: conversationsProp,
   loadingOverride,
+  onToggleMute,
 }: ConversationsListProps) {
   const { theme } = useTheme();
   const t = useTranslations('chat');
@@ -148,63 +223,96 @@ export default function ConversationsList({
           </div>
         ) : (
           <nav className={`divide-y ${theme === 'dark' ? 'divide-white/5' : 'divide-gray-200'}`}>
-            {filteredConversations.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation.id)}
-                className={`w-full text-left p-4 transition-colors border-l-4 ${
-                  selectedConversationId === conversation.id
-                    ? theme === 'dark'
-                      ? 'bg-primary/15 border-primary'
-                      : 'bg-teal-50 border-teal-600'
-                    : theme === 'dark'
-                      ? 'border-transparent hover:bg-white/5'
-                      : 'border-transparent hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <h3
-                      className={`font-medium truncate text-sm ${
-                        theme === 'dark' ? 'text-white' : 'text-gray-900'
-                      }`}
-                    >
-                      {conversation.name}
-                    </h3>
-                    {conversation.description && (
-                      <p
-                        className={`text-xs truncate mt-1 ${
-                          theme === 'dark' ? 'text-fg-muted' : 'text-gray-600'
-                        }`}
-                      >
-                        {conversation.description}
-                      </p>
-                    )}
-                    {conversation.lastMessage && (
-                      <p
-                        className={`text-xs truncate mt-1 ${
-                          theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
-                        }`}
-                      >
-                        {formatMessagePreview(conversation.lastMessage, {
-                          image: t('list.preview.image'),
-                          file: t('list.preview.file'),
-                        })}
-                      </p>
-                    )}
-                  </div>
-                  {conversation.lastMessageDate && (
-                    <span
-                      className={`text-xs whitespace-nowrap shrink-0 ${
-                        theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
-                      }`}
-                    >
-                      {formatDate(conversation.lastMessageDate)}
-                    </span>
+            {filteredConversations.map((conversation) => {
+              const unread = conversation.unreadCount ?? 0;
+              const hasUnread = conversation.hasUnread ?? unread > 0;
+              const isGroup = conversation.type === 'GROUP';
+              return (
+                <div key={conversation.id} className="relative">
+                  <button
+                    onClick={() => onSelectConversation(conversation.id)}
+                    className={`w-full text-left p-4 transition-colors border-l-4 ${
+                      selectedConversationId === conversation.id
+                        ? theme === 'dark'
+                          ? 'bg-primary/15 border-primary'
+                          : 'bg-teal-50 border-teal-600'
+                        : theme === 'dark'
+                          ? 'border-transparent hover:bg-white/5'
+                          : 'border-transparent hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3
+                            className={`font-medium truncate text-sm ${
+                              theme === 'dark' ? 'text-white' : 'text-gray-900'
+                            } ${hasUnread ? 'font-semibold' : ''}`}
+                          >
+                            {conversation.name}
+                          </h3>
+                          {hasUnread && (
+                            <span
+                              className="shrink-0 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white"
+                              aria-label={t('list.unreadBadge', { count: unread })}
+                            >
+                              {unread > 1 ? `${t('list.new')} · ${unread}` : t('list.new')}
+                            </span>
+                          )}
+                        </div>
+                        {conversation.description && (
+                          <p
+                            className={`text-xs truncate mt-1 ${
+                              theme === 'dark' ? 'text-fg-muted' : 'text-gray-600'
+                            }`}
+                          >
+                            {conversation.description}
+                          </p>
+                        )}
+                        {conversation.lastMessage && (
+                          <p
+                            className={`text-xs truncate mt-1 ${
+                              theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
+                            }`}
+                          >
+                            {formatMessagePreview(conversation.lastMessage, {
+                              image: t('list.preview.image'),
+                              file: t('list.preview.file'),
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {conversation.lastMessageDate && (
+                          <span
+                            className={`text-xs whitespace-nowrap ${
+                              theme === 'dark' ? 'text-fg-subtle' : 'text-gray-500'
+                            }`}
+                          >
+                            {formatDate(conversation.lastMessageDate)}
+                          </span>
+                        )}
+                        {/* Espace réservé pour la cloche (rendue au-dessus). */}
+                        {isGroup && onToggleMute && <span className="w-7" aria-hidden="true" />}
+                      </div>
+                    </div>
+                  </button>
+                  {isGroup && onToggleMute && (
+                    <div className="absolute right-3 top-4">
+                      <MuteBell
+                        isMuted={conversation.isMuted ?? false}
+                        isDark={theme === 'dark'}
+                        labelMute={t('list.muteGroup')}
+                        labelUnmute={t('list.unmuteGroup')}
+                        onToggle={() =>
+                          onToggleMute(conversation.id, conversation.isMuted ?? false)
+                        }
+                      />
+                    </div>
                   )}
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </nav>
         )}
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { onChatEvent } from '@/features/chat/chat-events';
 
 export interface Notification {
   id: string;
@@ -50,6 +51,22 @@ export function useNotifications({
     const intervalId = setInterval(fetchNotifications, pollingInterval);
     return () => clearInterval(intervalId);
   }, [fetchNotifications, pollingInterval]);
+
+  // Rafraîchit immédiatement le compteur quand une conversation est lue ou
+  // que des notifications ont été marquées lues côté serveur (ex. détail
+  // d'une news / d'un virement consulté).
+  useEffect(() => {
+    const offRead = onChatEvent('chat:read', () => {
+      void fetchNotifications();
+    });
+    const offNotif = onChatEvent('notifications:read', () => {
+      void fetchNotifications();
+    });
+    return () => {
+      offRead();
+      offNotif();
+    };
+  }, [fetchNotifications]);
 
   const markAsRead = async (notificationId: string) => {
     try {

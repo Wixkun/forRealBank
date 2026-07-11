@@ -15,6 +15,9 @@ export interface ConversationData {
   lastMessage?: string;
   lastMessageDate?: string;
   description?: string;
+  unreadCount?: number;
+  hasUnread?: boolean;
+  isMuted?: boolean;
 }
 
 export const getCachedConversations = unstable_cache(

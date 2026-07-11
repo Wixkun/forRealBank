@@ -329,7 +329,11 @@
         "minutesAgo": "{count}m ago",
         "hoursAgo": "{count}h ago",
         "yesterday": "Yesterday"
-      }
+      },
+      "new": "New",
+      "unreadBadge": "{count} unread message(s)",
+      "muteGroup": "Mute this group's notifications",
+      "unmuteGroup": "Unmute this group's notifications"
     },
     "display": {
       "advisorDefaultName": "Your advisor",
@@ -370,6 +374,23 @@
       "fetchAdvisor": "Unable to fetch the advisor",
       "fetchClients": "Unable to fetch your clients",
       "fetchUsers": "Unable to fetch users"
+    },
+    "group": {
+      "create": "New group",
+      "title": "Create a group",
+      "nameLabel": "Group name",
+      "namePlaceholder": "Group name",
+      "participantsLabel": "Participants",
+      "searchPlaceholder": "Search a user…",
+      "selected": "Selected",
+      "add": "Add",
+      "remove": "Remove",
+      "submit": "Create group",
+      "cancel": "Cancel",
+      "creating": "Creating…",
+      "minParticipants": "Select at least 2 participants",
+      "nameRequired": "Group name is required",
+      "error": "Group creation failed"
     }
   },
   "feed": {

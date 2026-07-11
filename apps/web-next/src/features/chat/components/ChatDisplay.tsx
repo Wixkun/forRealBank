@@ -103,7 +103,7 @@ export default function ChatDisplay({
   const [senderRoles, setSenderRoles] = useState<{ [key: string]: string }>({});
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const dragCounterRef = useRef(0);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<MessageComposerHandle>(null);
   const { theme } = useTheme();
   const t = useTranslations('chat');
@@ -115,7 +115,7 @@ export default function ChatDisplay({
     messages,
     typingUsers,
     isConnected,
-    presentUserIds,
+    onlineUserIds,
     sendMessage,
     startTyping,
     stopTyping,
@@ -137,8 +137,16 @@ export default function ChatDisplay({
     }
   }, [conversation]);
 
+  // On ne fait défiler QUE la zone de messages : scrollIntoView() ferait
+  // défiler tous les ancêtres (y compris la carte en overflow-hidden), ce qui
+  // décale toute la page et masque les en-têtes.
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    // Repli scrollTop : jsdom (tests) n'implémente pas Element.scrollTo.
+    if (typeof el.scrollTo === 'function')
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+    else el.scrollTop = el.scrollHeight;
   };
 
   useEffect(() => {
@@ -175,11 +183,48 @@ export default function ChatDisplay({
   };
 
   const isGroupChat = conversation?.type === 'GROUP';
-  const isUserOnline = isConnected
-    ? true
-    : isGroupChat
-      ? presentUserIds.filter((id) => id !== userId).length > 0
-      : presentUserIds.includes(userId) && presentUserIds.length > 0;
+  // Présence réelle de l'interlocuteur d'une conversation privée : l'autre
+  // participant est-il en ligne (au moins un socket authentifié actif) ?
+  // Jamais dérivée de « mon » socket ni d'une valeur codée en dur.
+  const otherParticipant = conversation?.participants?.find((p) => p.id !== userId);
+
+  // Repli REST fiable (état initial + rafraîchissement) : le snapshot temps réel
+  // peut arriver avant l'attachement des listeners. Les transitions WebSocket
+  // (onlineUserIds) fournissent l'immédiateté.
+  const [restOnline, setRestOnline] = useState(false);
+  const otherParticipantId = otherParticipant?.id;
+  useEffect(() => {
+    // Reset systématique : sans lui, l'état « en ligne » du précédent
+    // interlocuteur s'affiche sur le nouveau le temps du fetch.
+    setRestOnline(false);
+    if (!otherParticipantId) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch(
+          `/api/chat/presence?userIds=${encodeURIComponent(otherParticipantId)}`,
+          {
+            credentials: 'include',
+          },
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled) setRestOnline(Boolean(data?.[otherParticipantId]));
+      } catch {
+        // Repli silencieux : les transitions temps réel prennent le relais.
+      }
+    };
+    load();
+    const intervalId = setInterval(load, 20000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [otherParticipantId]);
+
+  const isUserOnline = otherParticipantId
+    ? onlineUserIds.has(otherParticipantId) || restOnline
+    : false;
   const displayName = conversation?.name || advisorName || t('display.advisorDefaultName');
   const displayRole = isGroupChat
     ? t('display.groupMembers', { count: conversation?.participants?.length || 0 })
@@ -246,6 +291,7 @@ export default function ChatDisplay({
 
       {/* Zone de messages — seule partie scrollable */}
       <div
+        ref={messagesContainerRef}
         className={`flex-1 min-h-0 overflow-y-auto scrollbar-slim p-6 space-y-4 ${
           isDark ? 'bg-surface-1' : 'bg-gray-50'
         }`}
@@ -367,7 +413,6 @@ export default function ChatDisplay({
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </>
         )}
       </div>

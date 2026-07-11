@@ -11,6 +11,9 @@ export interface IUserRepository {
 
   findById(id: string): Promise<User | null>;
 
+  /** Récupère plusieurs utilisateurs en une requête (évite le N+1). */
+  findByIds(ids: string[]): Promise<User[]>;
+
   deleteById(id: string): Promise<void>;
 
   list(params?: {

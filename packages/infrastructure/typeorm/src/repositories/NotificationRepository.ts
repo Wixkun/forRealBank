@@ -6,6 +6,7 @@ import {
   INotificationRepository,
   CreateNotificationParams,
   NotificationType,
+  NotificationTargetType,
 } from '@forreal/domain';
 import { NotificationEntity } from '../entities/NotificationEntity';
 import { UserEntity } from '../entities/UserEntity';
@@ -131,6 +132,36 @@ export class NotificationRepository implements INotificationRepository {
       relations: ['user'],
     });
     return entity ? NotificationMapper.toDomain(entity) : null;
+  }
+
+  async markAsReadByTarget(
+    userId: string,
+    targetType: NotificationTargetType,
+    targetId: string,
+  ): Promise<number> {
+    // Deux façons de relier une notification à l'entité consultée : sa cible
+    // directe (target_type/target_id) ou son group_key — utilisé quand le même
+    // événement est consultable à plusieurs endroits (ex. un virement reçu :
+    // news de détail ET lignes du relevé). Le group_key peut contenir
+    // plusieurs jetons « type:id » séparés par des espaces (débit et crédit
+    // d'un virement interne) : on matche si l'un d'eux correspond.
+    const result = await this.repo
+      .createQueryBuilder()
+      .update(NotificationEntity)
+      .set({ isRead: true, readAt: new Date() })
+      .where('user_id = :userId', { userId })
+      .andWhere('is_read = false')
+      .andWhere(
+        `((target_type = :targetType AND target_id = :targetId)
+          OR :groupKey = ANY(string_to_array(group_key, ' ')))`,
+        {
+          targetType,
+          targetId,
+          groupKey: `${targetType.toLowerCase()}:${targetId}`,
+        },
+      )
+      .execute();
+    return result.affected ?? 0;
   }
 
   async incrementGrouped(id: string, title: string, content: string): Promise<void> {

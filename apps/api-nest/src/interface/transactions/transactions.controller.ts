@@ -231,6 +231,16 @@ export class TransactionsController {
           targetType: NotificationTargetType.NEWS,
           targetId: recipientNews.id,
           targetUrl: `/dashboard?newsId=${recipientNews.id}`,
+          // Même virement, plusieurs portes d'entrée : le détail est consultable
+          // via la news (targetId) ou via une ligne de relevé (groupKey, jetons
+          // séparés par des espaces — crédit ET débit, car un virement interne
+          // est visible des deux côtés). Consulter l'une d'elles marque la
+          // notification lue.
+          groupKey:
+            [result.destinationTransactionId, result.sourceTransactionId]
+              .filter(Boolean)
+              .map((id) => `transaction:${id}`)
+              .join(' ') || null,
         });
       }
     } catch {

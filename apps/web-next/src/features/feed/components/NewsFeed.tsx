@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useSSE } from '@/hooks/useSSE';
+import { useClearNotificationsByTarget } from '@/features/notifications/useClearNotificationsByTarget';
 import { CreateNewsInlineForm } from '@/features/feed/components/CreateNewsInlineForm';
 import {
   NewsDetailModal,
@@ -277,6 +278,11 @@ export default function NewsFeed({
       cancelled = true;
     };
   }, [newsIdParam, apiUrl]);
+
+  // Consulter le détail d'une news (clic dans le fil ou deep-link ?newsId=)
+  // marque lues les notifications qui la ciblent — « Virement reçu »,
+  // « Nouvelle actualité »...
+  useClearNotificationsByTarget('NEWS', detail?.item?.id, { apiUrl, enabled: !!userId });
 
   useEffect(() => {
     if (!userId) {

@@ -6,10 +6,16 @@ export class ConversationMapper {
     const entity = new ConversationEntity();
     entity.id = conversation.id;
     entity.type = conversation.type as ConversationType;
+    entity.name = conversation.name ?? null;
     return entity;
   }
 
   static toDomain(entity: ConversationEntity): Conversation {
-    return new Conversation(entity.id, entity.type as ConversationType, entity.createdAt);
+    return new Conversation(
+      entity.id,
+      entity.type as ConversationType,
+      entity.createdAt,
+      entity.name ?? null,
+    );
   }
 }

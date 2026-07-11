@@ -23,6 +23,15 @@ export class UserRepository implements IUserRepository {
     return userEntity ? UserMapper.toDomain(userEntity) : null;
   }
 
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+    const entities = await this.userRepository.find({
+      where: { id: In(Array.from(new Set(ids))) },
+      relations: ['roles'],
+    });
+    return entities.map(UserMapper.toDomain);
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { email },

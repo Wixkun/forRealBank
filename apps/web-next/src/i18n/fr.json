@@ -329,7 +329,11 @@
         "minutesAgo": "Il y a {count}m",
         "hoursAgo": "Il y a {count}h",
         "yesterday": "Hier"
-      }
+      },
+      "new": "Nouveau",
+      "unreadBadge": "{count} message(s) non lu(s)",
+      "muteGroup": "Désactiver les notifications de ce groupe",
+      "unmuteGroup": "Réactiver les notifications de ce groupe"
     },
     "display": {
       "advisorDefaultName": "Votre conseiller",
@@ -370,6 +374,23 @@
       "fetchAdvisor": "Impossible de récupérer le conseiller",
       "fetchClients": "Impossible de récupérer vos clients",
       "fetchUsers": "Impossible de récupérer les utilisateurs"
+    },
+    "group": {
+      "create": "Nouveau groupe",
+      "title": "Créer un groupe",
+      "nameLabel": "Nom du groupe",
+      "namePlaceholder": "Nom du groupe",
+      "participantsLabel": "Participants",
+      "searchPlaceholder": "Rechercher un utilisateur…",
+      "selected": "Sélectionnés",
+      "add": "Ajouter",
+      "remove": "Retirer",
+      "submit": "Créer le groupe",
+      "cancel": "Annuler",
+      "creating": "Création…",
+      "minParticipants": "Sélectionnez au moins 2 participants",
+      "nameRequired": "Le nom du groupe est requis",
+      "error": "La création du groupe a échoué"
     }
   },
   "feed": {

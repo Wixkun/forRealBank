@@ -101,8 +101,13 @@ CREATE TABLE IF NOT EXISTS advisor_clients (
 CREATE TABLE IF NOT EXISTS conversations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     type text NOT NULL CHECK (type IN ('PRIVATE','GROUP')),
+    -- Nom personnalisé des groupes (NULL pour les conversations privées).
+    name varchar(120) NULL,
     created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE conversations
+    ADD COLUMN IF NOT EXISTS name varchar(120) NULL;
 
 CREATE TABLE IF NOT EXISTS conversation_participants (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -4,6 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslations } from 'next-intl';
 import ConversationsList from '@/features/chat/components/ConversationsList';
 import ChatDisplay from '@/features/chat/components/ChatDisplay';
+import NewGroupModal from '@/features/chat/components/NewGroupModal';
 import { ConversationData } from '@/lib/cache/conversations';
 
 interface User {
@@ -29,6 +30,12 @@ interface ChatPagePresenterProps {
   isClient: boolean;
   isAdvisor: boolean;
   isDirector: boolean;
+  onToggleMute: (conversationId: string, currentlyMuted: boolean) => void | Promise<void>;
+  canCreateGroup: boolean;
+  isGroupModalOpen: boolean;
+  onOpenGroupModal: () => void;
+  onCloseGroupModal: () => void;
+  onCreateGroup: (name: string, participantIds: string[]) => Promise<void>;
 }
 
 export default function ChatPagePresenter({
@@ -47,6 +54,12 @@ export default function ChatPagePresenter({
   isClient,
   isAdvisor,
   isDirector,
+  onToggleMute,
+  canCreateGroup,
+  isGroupModalOpen,
+  onOpenGroupModal,
+  onCloseGroupModal,
+  onCreateGroup,
 }: ChatPagePresenterProps) {
   const { theme } = useTheme();
   const t = useTranslations('chat');
@@ -96,17 +109,52 @@ export default function ChatPagePresenter({
             theme === 'dark' ? 'bg-surface-1 border-white/5' : 'bg-white border-transparent'
           }`}
         >
+          {/* flex-col + min-h-0 : le bouton « créer un groupe » reste visible et
+              seule la liste scrolle (sans ça, la liste en h-full déborde de la
+              hauteur du bouton). */}
           <div
-            className={`w-80 shrink-0 border-r ${
+            className={`w-80 shrink-0 border-r flex flex-col min-h-0 ${
               theme === 'dark' ? 'bg-surface-1 border-white/5' : 'bg-gray-50 border-gray-200'
             }`}
           >
-            <ConversationsList
-              selectedConversationId={conversationId}
-              onSelectConversation={onSelectConversation}
-              conversations={conversations}
-              loadingOverride={false}
-            />
+            {canCreateGroup && (
+              <div
+                className={`flex items-center justify-between px-4 pt-4 ${
+                  theme === 'dark' ? 'bg-surface-1' : 'bg-gray-50'
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={onOpenGroupModal}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-primary-hover"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  {t('group.create')}
+                </button>
+              </div>
+            )}
+            <div className="flex-1 min-h-0">
+              <ConversationsList
+                selectedConversationId={conversationId}
+                onSelectConversation={onSelectConversation}
+                conversations={conversations}
+                loadingOverride={false}
+                onToggleMute={onToggleMute}
+              />
+            </div>
           </div>
 
           <div
@@ -255,6 +303,13 @@ export default function ChatPagePresenter({
           </div>
         </div>
       </main>
+
+      <NewGroupModal
+        open={isGroupModalOpen}
+        candidates={clientsList}
+        onClose={onCloseGroupModal}
+        onCreate={onCreateGroup}
+      />
     </div>
   );
 }

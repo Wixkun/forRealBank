@@ -24,8 +24,8 @@ export class ConversationRepository implements IConversationRepository {
     await this.repo.save(entity);
   }
 
-  async create(type: ConversationType): Promise<Conversation> {
-    const entity = this.repo.create({ id: uuidv4(), type });
+  async create(type: ConversationType, name?: string | null): Promise<Conversation> {
+    const entity = this.repo.create({ id: uuidv4(), type, name: name ?? null });
     const saved = await this.repo.save(entity);
     return ConversationMapper.toDomain(saved);
   }

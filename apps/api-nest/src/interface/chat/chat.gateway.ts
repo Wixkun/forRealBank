@@ -83,6 +83,16 @@ export class ChatGateway
   private peerPresence = new Map<string, Map<string, { userIds: string[]; at: number }>>();
   private presenceHeartbeat: NodeJS.Timeout | null = null;
 
+  // ─── Présence GLOBALE (en ligne / hors ligne) ─────────────────────────────
+  // Nombre de sockets locaux par utilisateur : > 0 ⇒ en ligne (multi-onglets).
+  private userSocketCount = new Map<string, number>();
+  // Présence des autres instances (union pour le statut global multi-réplica).
+  private peerOnline = new Map<string, { userIds: Set<string>; at: number }>();
+  // Dernier ensemble d'utilisateurs en ligne diffusé (pour n'émettre que les
+  // transitions online/offline).
+  private lastBroadcastOnline = new Set<string>();
+  private globalPresenceHeartbeat: NodeJS.Timeout | null = null;
+
   constructor(
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
     @Inject(AddConversationParticipantUseCase)
@@ -124,10 +134,93 @@ export class ChatGateway
         }
       });
     }, PRESENCE_HEARTBEAT_MS);
+
+    // Présence globale : republier périodiquement la liste locale et purger les
+    // pairs expirés (convergence même après un événement manqué / crash).
+    this.globalPresenceHeartbeat = setInterval(() => {
+      this.publishGlobalPresence();
+      this.recomputeGlobalPresence();
+    }, PRESENCE_HEARTBEAT_MS);
   }
 
   onModuleDestroy() {
     if (this.presenceHeartbeat) clearInterval(this.presenceHeartbeat);
+    if (this.globalPresenceHeartbeat) clearInterval(this.globalPresenceHeartbeat);
+  }
+
+  // ─── Présence globale : helpers ────────────────────────────────────────────
+
+  private localOnlineUserIds(): string[] {
+    return Array.from(this.userSocketCount.entries())
+      .filter(([, count]) => count > 0)
+      .map(([userId]) => userId);
+  }
+
+  /** Union des utilisateurs en ligne localement et sur les autres instances. */
+  onlineUserIds(): Set<string> {
+    const online = new Set(this.localOnlineUserIds());
+    const now = Date.now();
+    this.peerOnline.forEach((state, instanceId) => {
+      if (now - state.at > PRESENCE_TTL_MS) {
+        this.peerOnline.delete(instanceId);
+        return;
+      }
+      state.userIds.forEach((userId) => online.add(userId));
+    });
+    return online;
+  }
+
+  isUserOnline(userId: string): boolean {
+    return this.onlineUserIds().has(userId);
+  }
+
+  /**
+   * Émet un événement vers tous les sockets locaux d'un ensemble d'utilisateurs
+   * (ex. « conversation_created » aux membres d'un nouveau groupe). Le relais
+   * inter-instances éventuel passe par le bus cluster côté appelant.
+   */
+  notifyUsers(userIds: string[], event: string, payload: unknown): void {
+    const targets = new Set(userIds);
+    this.connectedUsers.forEach((user, socketId) => {
+      if (targets.has(user.userId)) {
+        this.server.to(socketId).emit(event, payload);
+      }
+    });
+  }
+
+  private publishGlobalPresence(): void {
+    this.bus.publish({ type: 'global_presence', userIds: this.localOnlineUserIds() });
+  }
+
+  // Émet un événement `user_presence { userId, online }` uniquement pour les
+  // utilisateurs dont le statut a changé depuis la dernière diffusion.
+  private recomputeGlobalPresence(): void {
+    const online = this.onlineUserIds();
+    const changes: Array<{ userId: string; online: boolean }> = [];
+    online.forEach((userId) => {
+      if (!this.lastBroadcastOnline.has(userId)) changes.push({ userId, online: true });
+    });
+    this.lastBroadcastOnline.forEach((userId) => {
+      if (!online.has(userId)) changes.push({ userId, online: false });
+    });
+    for (const change of changes) {
+      this.server.emit('user_presence', change);
+    }
+    this.lastBroadcastOnline = online;
+  }
+
+  private addLocalPresence(userId: string): void {
+    this.userSocketCount.set(userId, (this.userSocketCount.get(userId) ?? 0) + 1);
+    this.publishGlobalPresence();
+    this.recomputeGlobalPresence();
+  }
+
+  private removeLocalPresence(userId: string): void {
+    const next = (this.userSocketCount.get(userId) ?? 0) - 1;
+    if (next <= 0) this.userSocketCount.delete(userId);
+    else this.userSocketCount.set(userId, next);
+    this.publishGlobalPresence();
+    this.recomputeGlobalPresence();
   }
 
   // Vérifie un token de handshake et renvoie l'identité serveur. Extrait pour
@@ -149,28 +242,29 @@ export class ChatGateway
   // ─── Relais des événements publiés par les autres instances ───────────────
 
   private handleBusMessage(message: ChatBusEnvelope) {
-    const room = `conversation:${message.conversationId}`;
     switch (message.type) {
       case 'new_message':
-        this.server.to(room).emit('new_message', message.message);
+        this.server
+          .to(`conversation:${message.conversationId}`)
+          .emit('new_message', message.message);
         break;
       case 'new_message_ref':
         void this.emitMessageById(message.conversationId, message.messageId);
         break;
       case 'user_typing':
-        this.server.to(room).emit('user_typing', {
+        this.server.to(`conversation:${message.conversationId}`).emit('user_typing', {
           conversationId: message.conversationId,
           userId: message.userId,
         });
         break;
       case 'user_stopped_typing':
-        this.server.to(room).emit('user_stopped_typing', {
+        this.server.to(`conversation:${message.conversationId}`).emit('user_stopped_typing', {
           conversationId: message.conversationId,
           userId: message.userId,
         });
         break;
       case 'user_joined':
-        this.server.to(room).emit('user_joined', {
+        this.server.to(`conversation:${message.conversationId}`).emit('user_joined', {
           conversationId: message.conversationId,
           userId: message.userId,
         });
@@ -186,6 +280,14 @@ export class ChatGateway
           at: Date.now(),
         });
         this.emitPresence(message.conversationId);
+        break;
+      }
+      case 'global_presence': {
+        this.peerOnline.set(message.senderInstanceId, {
+          userIds: new Set(message.userIds),
+          at: Date.now(),
+        });
+        this.recomputeGlobalPresence();
         break;
       }
     }
@@ -236,6 +338,9 @@ export class ChatGateway
     const userId = client.data.userId as string | undefined;
     if (userId) {
       this.connectedUsers.set(client.id, { socketId: client.id, userId });
+      this.addLocalPresence(userId);
+      // État initial : envoyer au nouveau socket la liste des utilisateurs en ligne.
+      client.emit('presence_snapshot', { userIds: Array.from(this.onlineUserIds()) });
     } else {
       // Sécurité : aucune identité vérifiée → on ferme la connexion.
       client.disconnect(true);
@@ -259,6 +364,9 @@ export class ChatGateway
     }
     this.socketRooms.delete(client.id);
     this.connectedUsers.delete(client.id);
+    // Présence globale : décrémente le compteur de sockets ; le user passe hors
+    // ligne quand son dernier socket se ferme (multi-onglets gérés).
+    if (user) this.removeLocalPresence(user.userId);
   }
 
   @SubscribeMessage('join_conversation')

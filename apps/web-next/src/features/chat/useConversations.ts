@@ -12,6 +12,9 @@ export interface Conversation {
   description?: string;
   lastMessage?: string;
   lastMessageDate?: string;
+  unreadCount?: number;
+  hasUnread?: boolean;
+  isMuted?: boolean;
 }
 
 interface UseConversationsOptions {

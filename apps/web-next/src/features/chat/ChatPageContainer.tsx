@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useCreateConversation, useConversationsList } from '@/features/chat/use-cases';
 import { useClientAdvisor, useAdvisorClients, useUsersByRole } from '@/features/chat/hooks';
 import { ConversationData } from '@/lib/cache/conversations';
+import { onChatEvent, emitChatEvent } from '@/features/chat/chat-events';
 import ChatPagePresenter from './ChatPagePresenter';
 
 interface ChatPageContainerProps {
@@ -47,25 +48,81 @@ export default function ChatPageContainer({ initialConversations }: ChatPageCont
   const isDirector = user?.roles?.includes('DIRECTOR') ?? false;
   const isAdvisor = user?.roles?.includes('ADVISOR') ?? false;
   const isClient = user?.roles?.includes('CLIENT') ?? false;
+  const canCreateGroup = isDirector || isAdvisor || (user?.roles?.includes('ADMIN') ?? false);
+
+  const [isGroupModalOpen, setGroupModalOpen] = useState(false);
+
+  const refreshConversations = useCallback(async () => {
+    if (!user?.id) return;
+    try {
+      const res = await fetch(`/api/chat/conversations/by-user/${user.id}`, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        const list = await res.json();
+        updateConversations(Array.isArray(list) ? list : []);
+      }
+    } catch (e) {
+      console.error('Failed to load conversations', e);
+    }
+  }, [user?.id, updateConversations]);
 
   useEffect(() => {
-    if (!user?.id) return;
-    const loadConversations = async () => {
+    refreshConversations();
+  }, [refreshConversations]);
+
+  // Rafraîchit la liste (badges non-lus) dès qu'une conversation est lue.
+  useEffect(() => {
+    return onChatEvent('chat:read', () => {
+      void refreshConversations();
+    });
+  }, [refreshConversations]);
+
+  const handleToggleMute = useCallback(
+    async (targetConversationId: string, currentlyMuted: boolean) => {
+      const action = currentlyMuted ? 'unmute' : 'mute';
       try {
-        const res = await fetch(`/api/chat/conversations/by-user/${user.id}`, {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (res.ok) {
-          const list = await res.json();
-          updateConversations(Array.isArray(list) ? list : []);
-        }
+        const res = await fetch(
+          `/api/chat/conversations/${targetConversationId}/notifications/${action}`,
+          {
+            method: 'PATCH',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+          },
+        );
+        if (res.ok) await refreshConversations();
       } catch (e) {
-        console.error('Failed to load conversations', e);
+        console.error('Failed to toggle mute', e);
       }
-    };
-    loadConversations();
-  }, [user?.id, updateConversations]);
+    },
+    [refreshConversations],
+  );
+
+  const handleCreateGroup = useCallback(
+    async (name: string, participantIds: string[]) => {
+      const res = await fetch('/api/chat/groups', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, participantIds }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || `HTTP ${res.status}`);
+      }
+      const created = await res.json();
+      setGroupModalOpen(false);
+      emitChatEvent('chat:conversations-changed');
+      await refreshConversations();
+      if (created?.conversationId) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('conversationId', created.conversationId);
+        router.replace(url.pathname + '?' + url.searchParams.toString());
+      }
+    },
+    [refreshConversations, router],
+  );
 
   useEffect(() => {
     if (!user || conversationId || conversations.length === 0) return;
@@ -128,6 +185,12 @@ export default function ChatPageContainer({ initialConversations }: ChatPageCont
       isClient={isClient}
       isAdvisor={isAdvisor}
       isDirector={isDirector}
+      onToggleMute={handleToggleMute}
+      canCreateGroup={canCreateGroup}
+      isGroupModalOpen={isGroupModalOpen}
+      onOpenGroupModal={() => setGroupModalOpen(true)}
+      onCloseGroupModal={() => setGroupModalOpen(false)}
+      onCreateGroup={handleCreateGroup}
     />
   );
 }

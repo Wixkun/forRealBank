@@ -20,9 +20,12 @@ import { memoryStorage } from 'multer';
 import type { Request as ExpressRequest, Response } from 'express';
 import type { Request } from 'express';
 import { ChatFilesService } from './chat-files.service';
-import { ConversationType } from '@forreal/domain';
+import { ConversationType, IConversationRepository } from '@forreal/domain';
 import { RoleName } from '@forreal/domain';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import { ChatGateway } from './chat.gateway';
 import { CreateConversationUseCase } from '@forreal/application';
 import { SendMessageUseCase } from '@forreal/application';
 import { ListMessagesUseCase } from '@forreal/application';
@@ -38,6 +41,7 @@ import { SetConversationMuteUseCase } from '@forreal/application';
 import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
 import { UpdateConversationUserStateUseCase } from '@forreal/application';
 import { EnsureConversationMemberUseCase } from '@forreal/application';
+import { CreateGroupConversationUseCase } from '@forreal/application';
 import {
   CreateConversationDto,
   SendMessageDto,
@@ -45,6 +49,7 @@ import {
   LinkAdvisorClientDto,
   UpdateConversationStateDto,
   MuteConversationDto,
+  CreateGroupDto,
 } from './dto/chat.dto';
 
 const CHAT_FILE_MIME_TYPES = /^(image\/(jpeg|png|gif|webp)|application\/pdf)$/;
@@ -107,6 +112,12 @@ export class ChatController {
     private readonly updateConversationStateUC: UpdateConversationUserStateUseCase,
     @Inject(EnsureConversationMemberUseCase)
     private readonly ensureConversationMember: EnsureConversationMemberUseCase,
+    @Inject(CreateGroupConversationUseCase)
+    private readonly createGroupUC: CreateGroupConversationUseCase,
+    @Inject(IConversationRepository)
+    private readonly conversationRepository: IConversationRepository,
+    @Inject(ChatGateway)
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   // Autorisation centralisée : l'utilisateur doit être participant de la
@@ -117,10 +128,60 @@ export class ChatController {
     if (!isMember) throw new ForbiddenException('Not a participant of this conversation');
   }
 
+  // Le mute n'est autorisé que sur les conversations de groupe (les
+  // conversations privées avec conseiller/directeur restent notifiées).
+  private async assertGroupConversation(conversationId: string): Promise<void> {
+    const conversation = await this.conversationRepository.findById(conversationId);
+    if (!conversation || conversation.type !== ConversationType.GROUP) {
+      throw new ForbiddenException('Only group conversations can be muted');
+    }
+  }
+
   @Post('conversations')
   async createConversation(@Body() body: CreateConversationDto) {
     const type = body.type === 'PRIVATE' ? ConversationType.PRIVATE : ConversationType.GROUP;
     return this.createConversationUseCase.execute({ type });
+  }
+
+  // Création d'un groupe : réservée aux rôles métier (contrôle backend par
+  // RolesGuard, pas seulement masquage du bouton côté frontend).
+  @Post('groups')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.ADVISOR, RoleName.DIRECTOR, RoleName.ADMIN)
+  async createGroup(@Body() body: CreateGroupDto, @Req() req: Request) {
+    const creatorId = extractUserId(req);
+    // Les rôles proviennent du contexte authentifié peuplé par RolesGuard,
+    // jamais du corps de la requête.
+    const creatorRoles = ((req as any).auth?.roles ?? []) as RoleName[];
+    try {
+      const result = await this.createGroupUC.execute({
+        creatorId,
+        creatorRoles,
+        name: body.name,
+        participantIds: body.participantIds,
+      });
+      // Notifie les participants en ligne pour rafraîchir leur liste sans reload.
+      this.chatGateway.notifyUsers(result.participantIds, 'conversation_created', {
+        conversationId: result.conversationId,
+      });
+      return result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'GROUP_CREATION_FAILED';
+      throw new BadRequestException(message);
+    }
+  }
+
+  // Présence : statut en ligne d'un ensemble d'utilisateurs (état initial /
+  // repli du temps réel). La vérité vient des sockets authentifiés du cluster.
+  @Get('presence')
+  async getPresence(@Query('userIds') userIds?: string): Promise<Record<string, boolean>> {
+    const ids = (userIds ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const result: Record<string, boolean> = {};
+    for (const id of ids) result[id] = this.chatGateway.isUserOnline(id);
+    return result;
   }
 
   @Post('advisor-client')
@@ -258,6 +319,7 @@ export class ChatController {
     @Req() req: Request,
   ) {
     const userId = extractUserId(req);
+    await this.assertGroupConversation(conversationId);
     await this.assertConversationMember(conversationId, userId);
     return this.setConversationMuteUC.execute({
       userId,
@@ -271,6 +333,7 @@ export class ChatController {
   @UseGuards(JwtAuthGuard)
   async unmuteConversation(@Param('id') conversationId: string, @Req() req: Request) {
     const userId = extractUserId(req);
+    await this.assertGroupConversation(conversationId);
     await this.assertConversationMember(conversationId, userId);
     return this.setConversationMuteUC.execute({ userId, conversationId, muted: false });
   }

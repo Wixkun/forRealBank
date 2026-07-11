@@ -28,6 +28,7 @@ export * from './chat/usecases/SetConversationMuteUseCase';
 export * from './chat/usecases/GetConversationNotificationSettingsUseCase';
 export * from './chat/usecases/UpdateConversationUserStateUseCase';
 export * from './chat/usecases/EnsureConversationMemberUseCase';
+export * from './chat/usecases/CreateGroupConversationUseCase';
 
 // feed
 export * from './feed/usecases/CreateNewsUseCase';
@@ -40,6 +41,7 @@ export * from './feed/usecases/SetNewsUserStatusUseCase';
 export * from './notifications/usecases/ListNotificationsByUserUseCase';
 export * from './notifications/usecases/MarkNotificationReadUseCase';
 export * from './notifications/usecases/MarkAllNotificationsReadUseCase';
+export * from './notifications/usecases/MarkNotificationsReadByTargetUseCase';
 export * from './notifications/usecases/GetUnreadCountUseCase';
 export * from './notifications/usecases/DeleteNotificationUseCase';
 
