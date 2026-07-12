@@ -92,6 +92,10 @@ export class UserRepository implements IUserRepository {
     await this.userRepository.delete({ id });
   }
 
+  async updateLastSeen(userId: string, at: Date): Promise<void> {
+    await this.userRepository.update({ id: userId }, { lastSeenAt: at });
+  }
+
   async list(params: { limit?: number; offset?: number; search?: string } = {}): Promise<User[]> {
     const { limit = 20, offset = 0, search } = params;
     const where = search

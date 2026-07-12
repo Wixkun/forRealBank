@@ -32,6 +32,8 @@ export class VerifyEmailUseCase {
     await this.verificationTokens.save(verificationToken);
     await this.userRepository.save(user);
 
-    return { success: true };
+    // L'appelant déclenche l'initialisation du client (comptes, carte,
+    // conseiller) une fois l'inscription validée.
+    return { success: true, userId: user.id };
   }
 }

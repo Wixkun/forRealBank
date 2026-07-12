@@ -17,6 +17,7 @@ import { ITransferGateway, IAccountRepository, IInvestmentRepository } from '@fo
 import { InitiateTransferUseCase } from '@forreal/application';
 import { NewsModule } from '../feed/news.module';
 import { TransfersSchemaBootstrapService } from './transfers-schema-bootstrap.service';
+import { NotBannedGuard } from '../auth/not-banned.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TransfersSchemaBootstrapService } from './transfers-schema-bootstrap.se
   controllers: [TransactionsController],
   providers: [
     TransfersSchemaBootstrapService,
+    NotBannedGuard,
     {
       provide: ITransferGateway,
       useFactory: (dataSource: DataSource) => new TransferGateway(dataSource),

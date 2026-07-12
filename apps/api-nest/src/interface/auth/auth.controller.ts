@@ -22,6 +22,7 @@ import { RegisterUserUseCase } from '@forreal/application';
 import { LoginUserUseCase } from '@forreal/application';
 import { RequestPasswordResetUseCase, ResetPasswordUseCase } from '@forreal/application';
 import { VerifyEmailUseCase } from '@forreal/application';
+import { InitializeClientUseCase } from '@forreal/application';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
@@ -67,6 +68,7 @@ export class AuthController {
     private readonly requestPasswordResetUseCase: RequestPasswordResetUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
+    private readonly initializeClientUseCase: InitializeClientUseCase,
 
     @Inject(ITokenService)
     private readonly tokenService: ITokenService,
@@ -108,7 +110,19 @@ export class AuthController {
   @Post('verify-email')
   async verifyEmail(@Body() dto: { token: string }) {
     try {
-      await this.verifyEmailUseCase.execute({ token: dto.token });
+      const { userId } = await this.verifyEmailUseCase.execute({ token: dto.token });
+      // Inscription validée → initialisation automatique du client (comptes,
+      // carte, conseiller). Idempotente ; un échec est journalisé mais ne
+      // remet pas en cause la vérification de l'email déjà persistée.
+      try {
+        await this.initializeClientUseCase.execute({ userId });
+      } catch (onboardingError) {
+        this.logger.error(
+          `Client onboarding failed for user ${userId}: ${
+            onboardingError instanceof Error ? onboardingError.message : String(onboardingError)
+          }`,
+        );
+      }
       return { success: true, message: 'Email verified successfully' };
     } catch (error) {
       throw AuthErrorMapper.mapToHttpException(error);

@@ -1,107 +1,68 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { ConversationData } from '@/lib/cache/conversations';
+import { useCallback, useRef, useState } from 'react';
+import { Conversation } from '@/features/chat/useConversations';
 
-interface UseCreateConversationOptions {
-  onSuccess?: (conversationId: string) => void;
+interface UseOpenPrivateConversationOptions {
+  onSuccess?: (conversationId: string, created: boolean) => void;
   onError?: (error: string) => void;
 }
 
-export function useCreateConversation(options?: UseCreateConversationOptions) {
+/**
+ * Ouvre (ou rouvre) LA conversation privée avec un interlocuteur via l'endpoint
+ * dédié : le backend applique les règles d'autorisation, déduplique par
+ * identifiants et démasque une conversation masquée. Les doubles clics et
+ * requêtes concurrentes côté client sont neutralisés par un verrou local.
+ */
+export function useOpenPrivateConversation(options?: UseOpenPrivateConversationOptions) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const API_URL = '/api';
+  const inFlightRef = useRef(false);
 
-  const createPrivateConversation = useCallback(
-    async (targetUserId: string, currentUserId: string) => {
-      if (!targetUserId.trim() || !currentUserId) {
-        return null;
-      }
+  const openPrivateConversation = useCallback(
+    async (targetUserId: string): Promise<string | null> => {
+      if (!targetUserId.trim() || inFlightRef.current) return null;
 
+      inFlightRef.current = true;
       setIsSubmitting(true);
       setError(null);
 
       try {
-        const createRes = await fetch(`${API_URL}/chat/conversations`, {
+        const res = await fetch('/api/chat/conversations/private/open', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'PRIVATE' }),
+          body: JSON.stringify({ targetUserId: targetUserId.trim() }),
         });
-        if (!createRes.ok) throw new Error(`HTTP ${createRes.status}`);
-        const created = await createRes.json();
-        const convId: string = created.conversationId || created.id;
-
-        const addCurrentRes = await fetch(`${API_URL}/chat/conversations/${convId}/participants`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: currentUserId }),
-        });
-        if (!addCurrentRes.ok) throw new Error(`HTTP ${addCurrentRes.status}`);
-
-        const addTargetRes = await fetch(`${API_URL}/chat/conversations/${convId}/participants`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: targetUserId.trim() }),
-        });
-        if (!addTargetRes.ok) throw new Error(`HTTP ${addTargetRes.status}`);
-
-        options?.onSuccess?.(convId);
-        return convId;
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || `HTTP ${res.status}`);
+        }
+        const result = (await res.json()) as { conversationId: string; created: boolean };
+        options?.onSuccess?.(result.conversationId, result.created);
+        return result.conversationId;
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Erreur inattendue';
+        const errorMessage = err instanceof Error ? err.message : 'Unexpected error';
         setError(errorMessage);
         options?.onError?.(errorMessage);
         return null;
       } finally {
+        inFlightRef.current = false;
         setIsSubmitting(false);
       }
     },
-    [API_URL, options],
+    [options],
   );
 
-  return {
-    createPrivateConversation,
-    isSubmitting,
-    error,
-  };
+  return { openPrivateConversation, isSubmitting, error };
 }
 
-export function useConversationsList(initialConversations: ConversationData[]) {
-  const [conversations, setConversations] = useState<ConversationData[]>(initialConversations);
+export function useConversationsList(initialConversations: Conversation[]) {
+  const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
 
-  const hasPrivateConversationWith = useCallback(
-    (targetUserId: string) =>
-      conversations.some(
-        (conv: ConversationData) =>
-          conv.type === 'PRIVATE' && conv.participants?.some((p) => p.id === targetUserId),
-      ),
-    [conversations],
-  );
-
-  const openConversationWith = useCallback(
-    (targetUserId: string) => {
-      const existing = conversations.find(
-        (conv: ConversationData) =>
-          conv.type === 'PRIVATE' && conv.participants?.some((p) => p.id === targetUserId),
-      );
-      return existing?.id || null;
-    },
-    [conversations],
-  );
-
-  const updateConversations = useCallback((newConversations: ConversationData[]) => {
+  const updateConversations = useCallback((newConversations: Conversation[]) => {
     setConversations(newConversations);
   }, []);
 
-  return {
-    conversations,
-    isLoading: false,
-    hasPrivateConversationWith,
-    openConversationWith,
-    updateConversations,
-  };
+  return { conversations, updateConversations };
 }

@@ -2,7 +2,6 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsIn,
   IsOptional,
   IsString,
   IsUUID,
@@ -13,9 +12,9 @@ import {
 // Limite haute de taille d'un message : borne les payloads (mémoire / abus).
 const MAX_MESSAGE_LENGTH = 4000;
 
-export class CreateConversationDto {
-  @IsIn(['PRIVATE', 'GROUP'])
-  type!: 'PRIVATE' | 'GROUP';
+export class OpenPrivateConversationDto {
+  @IsUUID()
+  targetUserId!: string;
 }
 
 export class SendMessageDto {
@@ -26,11 +25,6 @@ export class SendMessageDto {
   @MinLength(1)
   @MaxLength(MAX_MESSAGE_LENGTH)
   content!: string;
-}
-
-export class AddParticipantDto {
-  @IsUUID()
-  userId!: string;
 }
 
 export class LinkAdvisorClientDto {

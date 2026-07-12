@@ -15,4 +15,8 @@ export class ConversationUserStateEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', name: 'last_read_at', nullable: true })
   lastReadAt!: Date | null;
+
+  // Masquage par utilisateur (NULL = visible dans sa liste).
+  @Column({ type: 'timestamptz', name: 'hidden_at', nullable: true })
+  hiddenAt!: Date | null;
 }

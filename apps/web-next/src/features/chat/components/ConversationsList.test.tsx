@@ -76,3 +76,86 @@ describe('ConversationsList — badge New & cloche mute', () => {
     expect(onSelectConversation).not.toHaveBeenCalled();
   });
 });
+
+describe('ConversationsList — masquer une conversation', () => {
+  it('affiche une action Masquer par conversation, qui ne sélectionne pas la conversation', async () => {
+    const onHideConversation = vi.fn();
+    const onSelectConversation = vi.fn();
+    render(
+      <ConversationsList
+        selectedConversationId=""
+        onSelectConversation={onSelectConversation}
+        conversations={conversations}
+        loadingOverride={false}
+        onHideConversation={onHideConversation}
+      />,
+    );
+    const hideButtons = screen.getAllByRole('button', { name: 'list.hideConversation' });
+    // Une action Masquer pour chaque conversation (privées ET groupes).
+    expect(hideButtons.length).toBe(conversations.length);
+    await userEvent.click(hideButtons[0]);
+    expect(onHideConversation).toHaveBeenCalledWith('p1');
+    expect(onSelectConversation).not.toHaveBeenCalled();
+  });
+});
+
+describe('ConversationsList — création de groupe & recherche', () => {
+  it("montre l'icône de création de groupe uniquement quand autorisé", () => {
+    const onCreateGroup = vi.fn();
+    const { rerender } = render(
+      <ConversationsList
+        selectedConversationId=""
+        onSelectConversation={vi.fn()}
+        conversations={conversations}
+        loadingOverride={false}
+        canCreateGroup
+        onCreateGroup={onCreateGroup}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'list.createGroupTooltip' })).toBeInTheDocument();
+
+    rerender(
+      <ConversationsList
+        selectedConversationId=""
+        onSelectConversation={vi.fn()}
+        conversations={conversations}
+        loadingOverride={false}
+        canCreateGroup={false}
+        onCreateGroup={onCreateGroup}
+      />,
+    );
+    expect(screen.queryByRole('button', { name: 'list.createGroupTooltip' })).toBeNull();
+  });
+
+  it("l'icône ouvre le flux de création de groupe existant", async () => {
+    const onCreateGroup = vi.fn();
+    render(
+      <ConversationsList
+        selectedConversationId=""
+        onSelectConversation={vi.fn()}
+        conversations={conversations}
+        loadingOverride={false}
+        canCreateGroup
+        onCreateGroup={onCreateGroup}
+      />,
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'list.createGroupTooltip' }));
+    expect(onCreateGroup).toHaveBeenCalledTimes(1);
+  });
+
+  it('filtre les conversations par nom, insensible à la casse et aux espaces', async () => {
+    render(
+      <ConversationsList
+        selectedConversationId=""
+        onSelectConversation={vi.fn()}
+        conversations={conversations}
+        loadingOverride={false}
+      />,
+    );
+    const input = screen.getByPlaceholderText('list.searchPlaceholder');
+    await userEvent.type(input, '  ALICE ');
+    expect(screen.getByText('Alice Advisor')).toBeInTheDocument();
+    expect(screen.queryByText('Groupe A')).toBeNull();
+    expect(screen.queryByText('Groupe B')).toBeNull();
+  });
+});

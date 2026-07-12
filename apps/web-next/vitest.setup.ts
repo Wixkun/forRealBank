@@ -18,6 +18,7 @@ if (!Element.prototype.scrollIntoView) {
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, vars?: Record<string, unknown>) =>
     vars ? `${key} ${JSON.stringify(vars)}` : key,
+  useLocale: () => 'fr',
 }));
 
 // ThemeContext : thème sombre par défaut dans les tests.

@@ -117,22 +117,6 @@ function IconUsersGroup() {
     </svg>
   );
 }
-function IconAdmin() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    </svg>
-  );
-}
 function IconLogout() {
   return (
     <svg
@@ -282,7 +266,7 @@ function IconDownload() {
 export function DashboardShell({ children }: { children: ReactNode }) {
   const t = useTranslations('dashboard.shell');
   const tCommon = useTranslations('common');
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const statement = useStatement();
   const router = useRouter();
   const pathname = usePathname() ?? '';
@@ -291,6 +275,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const isAdvisor = user?.roles?.includes('ADVISOR') ?? false;
   const isDirector = user?.roles?.includes('DIRECTOR') ?? false;
+  const isAdmin = user?.roles?.includes('ADMIN') ?? false;
+  const isStaff = isAdvisor || isDirector || isAdmin;
 
   const initials =
     ((user?.firstName?.[0] ?? '') + (user?.lastName?.[0] ?? '')).toUpperCase() || 'U';
@@ -317,11 +303,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       : []),
     { icon: <IconAnalytics />, label: t('nav.analytics'), href: `/${locale}/dashboard/analytics` },
     { icon: <IconMessage />, label: t('nav.messages'), href: `/${locale}/dashboard/messages` },
-    ...(isAdvisor || isDirector
+    // Page unique de gestion des utilisateurs (l'ancienne entrée Admin est
+    // fusionnée dedans).
+    ...(isStaff
       ? [{ icon: <IconUsersGroup />, label: t('nav.users'), href: `/${locale}/dashboard/users` }]
-      : []),
-    ...(isDirector
-      ? [{ icon: <IconAdmin />, label: t('nav.admin'), href: `/${locale}/dashboard/admin` }]
       : []),
   ];
 
@@ -348,6 +333,20 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     if (href === '#') return false;
     return pathname.startsWith(href);
   };
+
+  // Tant que le profil (et donc les rôles) n'est pas chargé, on ne rend pas le
+  // shell : sinon l'UI client (solde, panneau de droite) flashe avant de
+  // disparaître pour les rôles staff.
+  if (isLoading || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-surface-0">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+          <p className="text-fg-muted text-sm">{tCommon('authChecking')}</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -447,47 +446,51 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <main className="flex-1 overflow-y-auto scrollbar-slim p-6 space-y-5">{children}</main>
 
           {/* ── Right panel ──────────────────────────────────────────── */}
-          <aside className="w-72 shrink-0 border-l border-white/5 overflow-y-auto scrollbar-slim p-5 space-y-5">
-            <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
-              <h3 className="font-semibold text-white text-sm mb-4">{t('quickActions.title')}</h3>
-              <div className="grid grid-cols-2 gap-2.5">
-                {quickActions.map((action) => (
-                  <button
-                    key={action.label}
-                    onClick={() => {
-                      if (!action.disabled && action.href !== '#') router.push(action.href);
-                    }}
-                    className={`rounded-xl p-4 flex flex-col items-center gap-2 transition-colors border ${
-                      action.disabled
-                        ? 'cursor-not-allowed opacity-50 bg-white/4 border-white/5'
-                        : isActive(action.href)
-                          ? 'cursor-pointer bg-primary/15 border-primary/40'
-                          : 'cursor-pointer bg-white/4 hover:bg-white/8 border-white/5'
-                    }`}
-                  >
-                    <span className="text-tertiary">{action.icon}</span>
-                    <span className="text-xs text-fg-secondary">{action.label}</span>
-                  </button>
-                ))}
+          {!isStaff && (
+            <aside className="w-72 shrink-0 border-l border-white/5 overflow-y-auto scrollbar-slim p-5 space-y-5">
+              <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
+                <h3 className="font-semibold text-white text-sm mb-4">{t('quickActions.title')}</h3>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {quickActions.map((action) => (
+                    <button
+                      key={action.label}
+                      onClick={() => {
+                        if (!action.disabled && action.href !== '#') router.push(action.href);
+                      }}
+                      className={`rounded-xl p-4 flex flex-col items-center gap-2 transition-colors border ${
+                        action.disabled
+                          ? 'cursor-not-allowed opacity-50 bg-white/4 border-white/5'
+                          : isActive(action.href)
+                            ? 'cursor-pointer bg-primary/15 border-primary/40'
+                            : 'cursor-pointer bg-white/4 hover:bg-white/8 border-white/5'
+                      }`}
+                    >
+                      <span className="text-tertiary">{action.icon}</span>
+                      <span className="text-xs text-fg-secondary">{action.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-white text-sm">{t('upcomingPayments.title')}</h3>
-                <span className="text-fg-muted">
-                  <IconCalendar />
-                </span>
+              <div className="bg-surface-1 rounded-2xl border border-white/5 p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-white text-sm">
+                    {t('upcomingPayments.title')}
+                  </h3>
+                  <span className="text-fg-muted">
+                    <IconCalendar />
+                  </span>
+                </div>
+                <div className="py-8 text-center">
+                  <p className="text-fg-muted text-xs">{t('upcomingPayments.empty')}</p>
+                  <p className="text-fg-muted text-xs mt-1">{t('upcomingPayments.comingSoon')}</p>
+                </div>
+                <button className="w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all">
+                  {t('upcomingPayments.schedule')}
+                </button>
               </div>
-              <div className="py-8 text-center">
-                <p className="text-fg-muted text-xs">{t('upcomingPayments.empty')}</p>
-                <p className="text-fg-muted text-xs mt-1">{t('upcomingPayments.comingSoon')}</p>
-              </div>
-              <button className="w-full py-2.5 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all">
-                {t('upcomingPayments.schedule')}
-              </button>
-            </div>
-          </aside>
+            </aside>
+          )}
         </div>
       </div>
     </div>

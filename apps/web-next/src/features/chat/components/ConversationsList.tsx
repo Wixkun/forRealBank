@@ -13,6 +13,11 @@ interface ConversationsListProps {
   conversations?: Conversation[];
   loadingOverride?: boolean;
   onToggleMute?: (conversationId: string, currentlyMuted: boolean) => void | Promise<void>;
+  // Masquer la conversation (visibilité individuelle — rien n'est supprimé).
+  onHideConversation?: (conversationId: string) => void | Promise<void>;
+  // Icône « créer un groupe » à droite du titre (flux NewGroupModal existant).
+  canCreateGroup?: boolean;
+  onCreateGroup?: () => void;
 }
 
 // Cloche (mute/unmute) : réservée aux groupes, cliquable sans ouvrir la
@@ -88,12 +93,65 @@ function MuteBell({
   );
 }
 
+// Œil barré : masque la conversation de MA liste (historique conservé, les
+// autres participants ne sont pas affectés ; réapparaît au prochain message).
+function HideButton({
+  isDark,
+  label,
+  onHide,
+}: {
+  isDark: boolean;
+  label: string;
+  onHide: () => void | Promise<void>;
+}) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      disabled={busy}
+      onClick={async (e) => {
+        e.stopPropagation();
+        if (busy) return;
+        setBusy(true);
+        try {
+          await onHide();
+        } finally {
+          setBusy(false);
+        }
+      }}
+      className={`shrink-0 rounded-md p-1.5 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
+        isDark ? 'hover:bg-white/10 text-fg-muted' : 'hover:bg-gray-200 text-gray-500'
+      }`}
+    >
+      <svg
+        className="h-4 w-4"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  );
+}
+
 export default function ConversationsList({
   selectedConversationId,
   onSelectConversation,
   conversations: conversationsProp,
   loadingOverride,
   onToggleMute,
+  onHideConversation,
+  canCreateGroup,
+  onCreateGroup,
 }: ConversationsListProps) {
   const { theme } = useTheme();
   const t = useTranslations('chat');
@@ -104,12 +162,16 @@ export default function ConversationsList({
   const isLoading = loadingOverride ?? hookLoading;
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Recherche insensible à la casse, tolérante aux espaces : nom (participant
+  // ou groupe), description et dernier message.
   const filteredConversations = useMemo(() => {
+    const searchLower = searchQuery.trim().toLowerCase();
+    if (!searchLower) return conversations;
     return conversations.filter((conv) => {
-      const searchLower = searchQuery.toLowerCase();
       const nameMatches = conv.name.toLowerCase().includes(searchLower);
       const descMatches = conv.description?.toLowerCase().includes(searchLower);
-      return nameMatches || descMatches;
+      const lastMessageMatches = conv.lastMessage?.toLowerCase().includes(searchLower);
+      return nameMatches || descMatches || lastMessageMatches;
     });
   }, [conversations, searchQuery]);
 
@@ -141,11 +203,40 @@ export default function ConversationsList({
       }`}
     >
       <div className={`p-4 border-b ${theme === 'dark' ? 'border-white/5' : 'border-gray-200'}`}>
-        <h2
-          className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
-        >
-          {t('list.title')}
-        </h2>
+        <div className="mb-4 flex items-center justify-between gap-2">
+          <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            {t('list.title')}
+          </h2>
+          {canCreateGroup && onCreateGroup && (
+            <button
+              type="button"
+              onClick={onCreateGroup}
+              aria-label={t('list.createGroupTooltip')}
+              title={t('list.createGroupTooltip')}
+              className={`shrink-0 rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-95 ${
+                theme === 'dark'
+                  ? 'text-fg-muted hover:bg-white/10 hover:text-tertiary'
+                  : 'text-gray-500 hover:bg-gray-100 hover:text-teal-700'
+              }`}
+            >
+              {/* MessageSquarePlus */}
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                <line x1="12" y1="7" x2="12" y2="13" />
+                <line x1="9" y1="10" x2="15" y2="10" />
+              </svg>
+            </button>
+          )}
+        </div>
         <div className="relative">
           <svg
             className={`absolute left-3 top-3 h-5 w-5 ${theme === 'dark' ? 'text-fg-muted' : 'text-gray-400'}`}
@@ -227,6 +318,8 @@ export default function ConversationsList({
               const unread = conversation.unreadCount ?? 0;
               const hasUnread = conversation.hasUnread ?? unread > 0;
               const isGroup = conversation.type === 'GROUP';
+              const showMute = isGroup && Boolean(onToggleMute);
+              const actionCount = (showMute ? 1 : 0) + (onHideConversation ? 1 : 0);
               return (
                 <div key={conversation.id} className="relative">
                   <button
@@ -292,22 +385,33 @@ export default function ConversationsList({
                             {formatDate(conversation.lastMessageDate)}
                           </span>
                         )}
-                        {/* Espace réservé pour la cloche (rendue au-dessus). */}
-                        {isGroup && onToggleMute && <span className="w-7" aria-hidden="true" />}
+                        {/* Espace réservé pour les actions (rendues au-dessus). */}
+                        {actionCount > 0 && (
+                          <span className={actionCount > 1 ? 'w-14' : 'w-7'} aria-hidden="true" />
+                        )}
                       </div>
                     </div>
                   </button>
-                  {isGroup && onToggleMute && (
-                    <div className="absolute right-3 top-4">
-                      <MuteBell
-                        isMuted={conversation.isMuted ?? false}
-                        isDark={theme === 'dark'}
-                        labelMute={t('list.muteGroup')}
-                        labelUnmute={t('list.unmuteGroup')}
-                        onToggle={() =>
-                          onToggleMute(conversation.id, conversation.isMuted ?? false)
-                        }
-                      />
+                  {actionCount > 0 && (
+                    <div className="absolute right-3 top-4 flex items-center gap-0.5">
+                      {showMute && onToggleMute && (
+                        <MuteBell
+                          isMuted={conversation.isMuted ?? false}
+                          isDark={theme === 'dark'}
+                          labelMute={t('list.muteGroup')}
+                          labelUnmute={t('list.unmuteGroup')}
+                          onToggle={() =>
+                            onToggleMute(conversation.id, conversation.isMuted ?? false)
+                          }
+                        />
+                      )}
+                      {onHideConversation && (
+                        <HideButton
+                          isDark={theme === 'dark'}
+                          label={t('list.hideConversation')}
+                          onHide={() => onHideConversation(conversation.id)}
+                        />
+                      )}
                     </div>
                   )}
                 </div>

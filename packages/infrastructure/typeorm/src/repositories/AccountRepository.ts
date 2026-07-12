@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { IAccountRepository, Account } from '@forreal/domain';
+import { IAccountRepository, Account, AccountType } from '@forreal/domain';
 import { AccountEntity } from '../entities/AccountEntity';
 
 export class AccountRepository implements IAccountRepository {
@@ -22,6 +22,29 @@ export class AccountRepository implements IAccountRepository {
 
   async updateBalance(id: string, newBalance: number): Promise<void> {
     await this.repo.update({ id }, { balance: newBalance });
+  }
+
+  async create(params: {
+    userId: string;
+    name: string;
+    accountType: AccountType;
+    iban: string;
+    accountNumber: string;
+    interestRate?: number | null;
+  }): Promise<Account> {
+    const entity = this.repo.create({
+      userId: params.userId,
+      name: params.name,
+      accountType: params.accountType,
+      balance: 0,
+      iban: params.iban,
+      accountNumber: params.accountNumber,
+      interestRate: params.interestRate ?? null,
+      status: 'active',
+      openedAt: new Date(),
+    });
+    const saved = await this.repo.save(entity);
+    return this.map(saved);
   }
 
   private map(e: AccountEntity): Account {

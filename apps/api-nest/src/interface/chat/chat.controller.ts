@@ -26,30 +26,30 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { ChatGateway } from './chat.gateway';
-import { CreateConversationUseCase } from '@forreal/application';
 import { SendMessageUseCase } from '@forreal/application';
 import { ListMessagesUseCase } from '@forreal/application';
 import { MarkMessageReadUseCase } from '@forreal/application';
 import { LinkAdvisorClientUseCase } from '@forreal/application';
 import { ListConversationsByUserUseCase } from '@forreal/application';
 import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application';
-import { AddConversationParticipantUseCase } from '@forreal/application';
 import { ListClientsOfAdvisorUseCase } from '@forreal/application';
 import { FindAdvisorOfClientUseCase } from '@forreal/application';
-import { ListUsersByRoleUseCase } from '@forreal/application';
 import { SetConversationMuteUseCase } from '@forreal/application';
 import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
 import { UpdateConversationUserStateUseCase } from '@forreal/application';
 import { EnsureConversationMemberUseCase } from '@forreal/application';
 import { CreateGroupConversationUseCase } from '@forreal/application';
+import { SetConversationHiddenUseCase } from '@forreal/application';
+import { ListContactableUsersUseCase } from '@forreal/application';
+import { OpenPrivateConversationUseCase } from '@forreal/application';
+import { CanUseConversationUseCase } from '@forreal/application';
 import {
-  CreateConversationDto,
   SendMessageDto,
-  AddParticipantDto,
   LinkAdvisorClientDto,
   UpdateConversationStateDto,
   MuteConversationDto,
   CreateGroupDto,
+  OpenPrivateConversationDto,
 } from './dto/chat.dto';
 
 const CHAT_FILE_MIME_TYPES = /^(image\/(jpeg|png|gif|webp)|application\/pdf)$/;
@@ -81,13 +81,16 @@ function extractUserId(req: Request): string {
   return userId as string;
 }
 
+// Rôles vérifiés côté serveur (peuplés par RolesGuard), jamais issus du client.
+function extractRoles(req: Request): RoleName[] {
+  return ((req as any).auth?.roles ?? []) as RoleName[];
+}
+
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
 export class ChatController {
   constructor(
     @Inject(ChatFilesService) private readonly chatFilesService: ChatFilesService,
-    @Inject(CreateConversationUseCase)
-    private readonly createConversationUseCase: CreateConversationUseCase,
     @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
     @Inject(ListMessagesUseCase) private readonly listMessagesUseCase: ListMessagesUseCase,
     @Inject(MarkMessageReadUseCase) private readonly markMessageReadUseCase: MarkMessageReadUseCase,
@@ -97,13 +100,18 @@ export class ChatController {
     private readonly listConversationsByUserUseCase: ListConversationsByUserUseCase,
     @Inject(ListParticipantsDetailsByConversationUseCase)
     private readonly listParticipantsDetails: ListParticipantsDetailsByConversationUseCase,
-    @Inject(AddConversationParticipantUseCase)
-    private readonly addConversationParticipant: AddConversationParticipantUseCase,
     @Inject(ListClientsOfAdvisorUseCase)
     private readonly listClientsOfAdvisor: ListClientsOfAdvisorUseCase,
     @Inject(FindAdvisorOfClientUseCase)
     private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
-    @Inject(ListUsersByRoleUseCase) private readonly listUsersByRole: ListUsersByRoleUseCase,
+    @Inject(SetConversationHiddenUseCase)
+    private readonly setConversationHidden: SetConversationHiddenUseCase,
+    @Inject(ListContactableUsersUseCase)
+    private readonly listContactableUsers: ListContactableUsersUseCase,
+    @Inject(OpenPrivateConversationUseCase)
+    private readonly openPrivateConversation: OpenPrivateConversationUseCase,
+    @Inject(CanUseConversationUseCase)
+    private readonly canUseConversation: CanUseConversationUseCase,
     @Inject(SetConversationMuteUseCase)
     private readonly setConversationMuteUC: SetConversationMuteUseCase,
     @Inject(GetConversationNotificationSettingsUseCase)
@@ -137,10 +145,43 @@ export class ChatController {
     }
   }
 
-  @Post('conversations')
-  async createConversation(@Body() body: CreateConversationDto) {
-    const type = body.type === 'PRIVATE' ? ConversationType.PRIVATE : ConversationType.GROUP;
-    return this.createConversationUseCase.execute({ type });
+  // Ouvre (ou rouvre) LA conversation privée avec un interlocuteur autorisé.
+  // Remplace l'ancien flux « create + add participants » (qui permettait
+  // d'ouvrir une privée avec n'importe qui) : autorisation par les règles
+  // métier, déduplication par identifiants et démasquage côté use case.
+  @Post('conversations/private/open')
+  @UseGuards(RolesGuard)
+  async openPrivate(@Body() body: OpenPrivateConversationDto, @Req() req: Request) {
+    try {
+      const result = await this.openPrivateConversation.execute({
+        requesterId: extractUserId(req),
+        requesterRoles: extractRoles(req),
+        targetUserId: body.targetUserId,
+      });
+      if (result.created) {
+        this.chatGateway.notifyUsers([body.targetUserId], 'conversation_created', {
+          conversationId: result.conversationId,
+        });
+      }
+      return result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'OPEN_CONVERSATION_FAILED';
+      if (message === 'CONTACT_NOT_ALLOWED') throw new ForbiddenException(message);
+      throw new BadRequestException(message);
+    }
+  }
+
+  // Annuaire des interlocuteurs autorisés (filtré par rôle CÔTÉ SERVEUR : un
+  // advisor ne voit que ses clients, un client que son conseiller…), avec
+  // recherche insensible à la casse sur prénom / nom / nom complet.
+  @Get('contacts')
+  @UseGuards(RolesGuard)
+  async listContacts(@Query('search') search: string | undefined, @Req() req: Request) {
+    return this.listContactableUsers.execute({
+      requesterId: extractUserId(req),
+      requesterRoles: extractRoles(req),
+      search,
+    });
   }
 
   // Création d'un groupe : réservée aux rôles métier (contrôle backend par
@@ -184,7 +225,11 @@ export class ChatController {
     return result;
   }
 
+  // Administration de la relation conseiller-client : réservée aux rôles
+  // habilités (auparavant ouvert à tout utilisateur authentifié).
   @Post('advisor-client')
+  @UseGuards(RolesGuard)
+  @Roles(RoleName.DIRECTOR, RoleName.ADMIN)
   async linkAdvisor(@Body() body: LinkAdvisorClientDto) {
     return this.linkAdvisorClientUseCase.execute(body);
   }
@@ -195,6 +240,10 @@ export class ChatController {
     // senderId arbitraire depuis le corps de la requête (usurpation).
     const senderId = extractUserId(req);
     await this.assertConversationMember(body.conversationId, senderId);
+    // Conversation gelée (relation advisor-client retirée) : lecture seule.
+    if (!(await this.canUseConversation.isWritable(body.conversationId))) {
+      throw new ForbiddenException('CONVERSATION_LOCKED');
+    }
     return this.sendMessageUseCase.execute({
       conversationId: body.conversationId,
       senderId,
@@ -249,64 +298,49 @@ export class ChatController {
 
   // Le :userId de l'URL est ignoré au profit de l'utilisateur authentifié :
   // on ne peut lister que SES propres conversations (protection IDOR).
-  @Get('conversations/group/by-user/:userId')
-  async listGroupConversationsByUser(@Req() req: Request) {
-    return this.listConversationsByUserUseCase.execute({
-      userId: extractUserId(req),
-      type: 'GROUP',
-    });
-  }
-
   @Get('conversations/by-user/:userId')
   async listConversationsByUser(@Req() req: Request) {
     return this.listConversationsByUserUseCase.execute({ userId: extractUserId(req) });
   }
 
+  // Un advisor ne peut lister que SES clients ; DIRECTOR/ADMIN peuvent
+  // consulter la liste de n'importe quel conseiller.
   @Get('advisor/:advisorId/clients')
-  async listClients(@Param('advisorId') advisorId: string) {
+  @UseGuards(RolesGuard)
+  async listClients(@Param('advisorId') advisorId: string, @Req() req: Request) {
+    const roles = extractRoles(req);
+    const isPrivileged = roles.includes(RoleName.DIRECTOR) || roles.includes(RoleName.ADMIN);
+    if (!isPrivileged && advisorId !== extractUserId(req)) {
+      throw new ForbiddenException('Cannot list clients of another advisor');
+    }
     return this.listClientsOfAdvisor.execute({ advisorId });
   }
 
+  // Un client ne peut consulter que SON conseiller (ou rôles privilégiés).
   @Get('client/:clientId/advisor')
-  async getAdvisorOfClient(@Param('clientId') clientId: string) {
-    return this.findAdvisorOfClient.execute({ clientId });
-  }
-
-  @Get('users/by-role/:role')
-  async listUsersByRoleEndpoint(@Param('role') role: string) {
-    const normalized = role.toUpperCase() as keyof typeof RoleName;
-    if (!RoleName[normalized]) return [];
-    return this.listUsersByRole.execute({ role: RoleName[normalized] });
-  }
-
-  @Post('conversations/:id/participants')
-  async addParticipant(
-    @Param('id') conversationId: string,
-    @Body() body: AddParticipantDto,
-    @Req() req: Request,
-  ) {
-    const requesterId = extractUserId(req);
-    const isMember = await this.ensureConversationMember.isMember({
-      conversationId,
-      userId: requesterId,
-    });
-    if (!isMember) {
-      // Exception au contrôle d'appartenance : le créateur peut s'ajouter à une
-      // conversation encore vide (flux de création). Toute autre situation est
-      // refusée (on ne peut pas s'inviter dans la conversation d'autrui).
-      const participants = await this.listParticipantsDetails.execute({ conversationId });
-      const isSelfIntoEmptyConversation = body.userId === requesterId && participants.length === 0;
-      if (!isSelfIntoEmptyConversation) {
-        throw new ForbiddenException('Not a participant of this conversation');
-      }
+  @UseGuards(RolesGuard)
+  async getAdvisorOfClient(@Param('clientId') clientId: string, @Req() req: Request) {
+    const roles = extractRoles(req);
+    const isPrivileged = roles.includes(RoleName.DIRECTOR) || roles.includes(RoleName.ADMIN);
+    if (!isPrivileged && clientId !== extractUserId(req)) {
+      throw new ForbiddenException('Cannot read advisor of another client');
     }
-    return this.addConversationParticipant.execute({ conversationId, userId: body.userId });
+    return this.findAdvisorOfClient.execute({ clientId });
   }
 
   @Get('conversations/:id/participants')
   async listParticipants(@Param('id') conversationId: string, @Req() req: Request) {
     await this.assertConversationMember(conversationId, extractUserId(req));
     return this.listParticipantsDetails.execute({ conversationId });
+  }
+
+  // La conversation accepte-t-elle encore l'écriture ? false = gelée (paire
+  // advisor-client dont la relation d'attribution a été retirée) : le front
+  // masque le composer, le backend refuse de toute façon l'envoi.
+  @Get('conversations/:id/writable')
+  async isConversationWritable(@Param('id') conversationId: string, @Req() req: Request) {
+    await this.assertConversationMember(conversationId, extractUserId(req));
+    return { writable: await this.canUseConversation.isWritable(conversationId) };
   }
 
   // ─── Notifications de conversation ──────────────────────────────────────────
@@ -347,6 +381,30 @@ export class ChatController {
     const userId = extractUserId(req);
     await this.assertConversationMember(conversationId, userId);
     return this.getConversationSettingsUC.execute({ userId, conversationId });
+  }
+
+  // ─── Masquage (visibilité individuelle, rien n'est supprimé) ─────────────
+  // Ne modifie QUE la visibilité de l'utilisateur connecté : l'historique, les
+  // autres participants, le mute et l'appartenance au groupe sont intacts. La
+  // conversation réapparaît automatiquement au prochain message reçu.
+
+  @Patch('conversations/:id/hide')
+  async hideConversation(@Param('id') conversationId: string, @Req() req: Request) {
+    const userId = extractUserId(req);
+    await this.assertConversationMember(conversationId, userId);
+    return this.setConversationHidden.execute({ userId, conversationId, hidden: true });
+  }
+
+  @Patch('conversations/:id/unhide')
+  async unhideConversation(@Param('id') conversationId: string, @Req() req: Request) {
+    const userId = extractUserId(req);
+    await this.assertConversationMember(conversationId, userId);
+    // Une conversation gelée (relation advisor-client retirée) ne peut pas
+    // être rouverte manuellement par l'ancien advisor.
+    if (!(await this.canUseConversation.isWritable(conversationId))) {
+      throw new ForbiddenException('CONVERSATION_LOCKED');
+    }
+    return this.setConversationHidden.execute({ userId, conversationId, hidden: false });
   }
 
   // ─── État de lecture ──────────────────────────────────────────────────────

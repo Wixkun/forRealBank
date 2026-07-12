@@ -1,6 +1,7 @@
 import { Module, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
+import { ChatModule } from '../chat/chat.module';
 import { UsersController } from './users.controller';
 
 import { IUserRepository } from '@forreal/domain';
@@ -60,7 +61,7 @@ const unbanUserProvider: Provider = {
 };
 
 @Module({
-  imports: [AuthModule, TypeOrmModule.forFeature([UserEntity, RoleEntity])],
+  imports: [AuthModule, ChatModule, TypeOrmModule.forFeature([UserEntity, RoleEntity])],
   controllers: [UsersController],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },

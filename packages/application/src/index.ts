@@ -5,7 +5,6 @@ export * from './user/usecases/RequestPasswordResetUseCase';
 export * from './user/usecases/ResetPasswordUseCase';
 export * from './user/usecases/VerifyEmailUseCase';
 export * from './user/usecases/ListUsersUseCase';
-export * from './user/usecases/ListUsersByRoleUseCase';
 export * from './user/usecases/UpdateUserProfileUseCase';
 export * from './user/usecases/UpdateUserRolesUseCase';
 export * from './user/usecases/BanUserUseCase';
@@ -14,7 +13,6 @@ export * from './user/usecases/DeleteOwnAccountUseCase';
 export * from './user/usecases/DeleteUserByAdminUseCase';
 
 // chat
-export * from './chat/usecases/CreateConversationUseCase';
 export * from './chat/usecases/AddConversationParticipantUseCase';
 export * from './chat/usecases/ListConversationsByUserUseCase';
 export * from './chat/usecases/ListMessagesUseCase';
@@ -29,6 +27,19 @@ export * from './chat/usecases/GetConversationNotificationSettingsUseCase';
 export * from './chat/usecases/UpdateConversationUserStateUseCase';
 export * from './chat/usecases/EnsureConversationMemberUseCase';
 export * from './chat/usecases/CreateGroupConversationUseCase';
+export * from './chat/usecases/SetConversationHiddenUseCase';
+export * from './chat/usecases/ListContactableUsersUseCase';
+export * from './chat/usecases/OpenPrivateConversationUseCase';
+export * from './chat/usecases/CanUseConversationUseCase';
+
+// common
+export * from './common/pickLeastLoaded';
+
+// users (policies)
+export * from './users/BanPolicy';
+
+// onboarding
+export * from './onboarding/usecases/InitializeClientUseCase';
 
 // feed
 export * from './feed/usecases/CreateNewsUseCase';

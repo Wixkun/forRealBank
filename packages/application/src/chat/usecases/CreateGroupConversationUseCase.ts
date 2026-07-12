@@ -30,7 +30,9 @@ const MAX_GROUP_MEMBERS = 50;
  * guard du contrôleur. Le créateur est toujours ajouté comme participant.
  *
  * Règle d'ajout : un DIRECTOR ou ADMIN peut ajouter n'importe quel utilisateur ;
- * un ADVISOR ne peut ajouter que ses propres clients (relation advisor_clients).
+ * un ADVISOR ne peut ajouter que ses propres clients (relation advisor_clients)
+ * et les membres du personnel (autres advisors, directors) — même périmètre
+ * que son annuaire de contacts.
  */
 export class CreateGroupConversationUseCase {
   constructor(
@@ -64,14 +66,19 @@ export class CreateGroupConversationUseCase {
       throw new Error('INVALID_PARTICIPANT');
     }
 
-    // Restriction de périmètre : un ADVISOR ne peut ajouter que ses clients.
-    // Un DIRECTOR / ADMIN n'est pas restreint.
+    // Restriction de périmètre : un ADVISOR ne peut ajouter que ses clients
+    // et le personnel (advisors / directors). Un DIRECTOR / ADMIN n'est pas
+    // restreint.
     const roles = input.creatorRoles ?? [];
     const isPrivileged = roles.includes(RoleName.DIRECTOR) || roles.includes(RoleName.ADMIN);
     if (!isPrivileged) {
       const links = await this.advisorClientRepository.listClientsOf(input.creatorId);
       const allowedClientIds = new Set(links.map((l) => l.clientId));
-      const outsider = requested.find((id) => !allowedClientIds.has(id));
+      const outsider = users.find((user) => {
+        if (allowedClientIds.has(user.id)) return false;
+        const userRoles = user.roles ?? new Set<RoleName>();
+        return !userRoles.has(RoleName.ADVISOR) && !userRoles.has(RoleName.DIRECTOR);
+      });
       if (outsider) {
         throw new Error('PARTICIPANT_NOT_ALLOWED');
       }

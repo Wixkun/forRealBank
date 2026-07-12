@@ -3,14 +3,17 @@ import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { NotBannedGuard } from '../auth/not-banned.guard';
 import { TradingPositionEntity } from '@forreal/infrastructure-typeorm';
 import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
 
+// NotBannedGuard : comptes bloqués pour les utilisateurs bannis (le JWT peut
+// rester valide quelques minutes, l'état banni est revérifié en base).
 @Controller('trading')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, NotBannedGuard)
 export class TradingController {
   constructor(
     @InjectRepository(TradingPositionEntity)

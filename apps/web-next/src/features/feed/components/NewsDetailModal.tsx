@@ -54,6 +54,96 @@ function getTransferMetadata(item: NewsItem): TransferMetadata | null {
   return null;
 }
 
+// Métadonnées des news ciblées de réattribution d'advisor :
+//  - ADVISOR_CHANGED (client)  → bouton « Contacter mon nouvel advisor »
+//  - CLIENT_ASSIGNED (advisor) → bouton « Consulter le client »
+export interface AdvisorChangeMetadata {
+  kind: 'ADVISOR_CHANGED' | 'CLIENT_ASSIGNED';
+  advisorId?: string;
+  advisorName?: string;
+  clientId?: string;
+  clientName?: string;
+}
+
+function getAdvisorChangeMetadata(item: NewsItem): AdvisorChangeMetadata | null {
+  const meta = item.metadata;
+  const kind = meta && typeof meta === 'object' ? (meta as { kind?: unknown }).kind : null;
+  if (kind === 'ADVISOR_CHANGED' || kind === 'CLIENT_ASSIGNED') {
+    return meta as unknown as AdvisorChangeMetadata;
+  }
+  return null;
+}
+
+// Boutons d'action des news de réattribution. Le contact passe par l'endpoint
+// dédupliqué (une seule conversation privée par paire) puis redirige vers la
+// conversation sélectionnée.
+function AdvisorChangeActions({
+  meta,
+  onCloseAction,
+}: {
+  meta: AdvisorChangeMetadata;
+  onCloseAction: () => void;
+}) {
+  const t = useTranslations('feed.detail.advisorChange');
+  const router = useRouter();
+  const locale = useLocale();
+  const [isOpening, setIsOpening] = useState(false);
+  const [error, setError] = useState(false);
+
+  const contactAdvisor = async () => {
+    if (!meta.advisorId) return;
+    setIsOpening(true);
+    setError(false);
+    try {
+      const res = await fetch('/api/chat/conversations/private/open', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUserId: meta.advisorId }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as { conversationId: string };
+      onCloseAction();
+      router.push(`/${locale}/dashboard/messages?conversationId=${data.conversationId}`);
+    } catch {
+      setError(true);
+    } finally {
+      setIsOpening(false);
+    }
+  };
+
+  const viewClient = () => {
+    if (!meta.clientId) return;
+    onCloseAction();
+    router.push(`/${locale}/dashboard/users?userId=${meta.clientId}`);
+  };
+
+  return (
+    <div className="mt-4 space-y-2">
+      {meta.kind === 'ADVISOR_CHANGED' && meta.advisorId && (
+        <button
+          type="button"
+          onClick={() => void contactAdvisor()}
+          disabled={isOpening}
+          className="w-full rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50"
+        >
+          {isOpening ? t('opening') : t('contactAdvisor')}
+        </button>
+      )}
+      {meta.kind === 'CLIENT_ASSIGNED' && meta.clientId && (
+        <button
+          type="button"
+          onClick={viewClient}
+          className="w-full rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary-hover transition"
+        >
+          {t('viewClient')}
+        </button>
+      )}
+      {error && <p className="text-xs text-red-400 text-center">{t('error')}</p>}
+    </div>
+  );
+}
+
 export type NewsStatusConfig = { label: string; bg: string; color: string; icon: JSX.Element };
 
 export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
@@ -548,6 +638,7 @@ export function NewsDetailModal({
   const t = useTranslations('feed.detail');
   const locale = useLocale();
   const transfer = item ? getTransferMetadata(item) : null;
+  const advisorChange = item ? getAdvisorChangeMetadata(item) : null;
 
   return (
     <ModalShell onCloseAction={onCloseAction} cardClassName="max-h-[85vh] overflow-y-auto">
@@ -663,6 +754,9 @@ export function NewsDetailModal({
                 ),
               )}
             </div>
+            {advisorChange && (
+              <AdvisorChangeActions meta={advisorChange} onCloseAction={onCloseAction} />
+            )}
           </>
         )}
       </div>

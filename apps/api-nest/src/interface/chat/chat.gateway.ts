@@ -13,6 +13,7 @@ import { Inject, Logger, OnModuleDestroy } from '@nestjs/common';
 import { SendMessageUseCase } from '@forreal/application';
 import { AddConversationParticipantUseCase } from '@forreal/application';
 import { EnsureConversationMemberUseCase } from '@forreal/application';
+import { CanUseConversationUseCase } from '@forreal/application';
 import { IMessageRepository, ITokenService, IUserRepository } from '@forreal/domain';
 import {
   ChatClusterBus,
@@ -99,6 +100,8 @@ export class ChatGateway
     private readonly addConversationParticipantUseCase: AddConversationParticipantUseCase,
     @Inject(EnsureConversationMemberUseCase)
     private readonly ensureConversationMember: EnsureConversationMemberUseCase,
+    @Inject(CanUseConversationUseCase)
+    private readonly canUseConversation: CanUseConversationUseCase,
     @Inject(IMessageRepository) private readonly messageRepository: IMessageRepository,
     @Inject(ITokenService) private readonly tokenService: ITokenService,
     @Inject(IUserRepository) private readonly userRepository: IUserRepository,
@@ -217,10 +220,39 @@ export class ChatGateway
 
   private removeLocalPresence(userId: string): void {
     const next = (this.userSocketCount.get(userId) ?? 0) - 1;
-    if (next <= 0) this.userSocketCount.delete(userId);
-    else this.userSocketCount.set(userId, next);
+    if (next <= 0) {
+      this.userSocketCount.delete(userId);
+      // Dernier socket local fermé : on fige la dernière présence constatée.
+      // (Si l'utilisateur reste connecté sur une autre instance, celle-ci
+      // écrira une valeur plus récente à sa propre fermeture.)
+      void this.userRepository.updateLastSeen(userId, new Date()).catch(() => undefined);
+    } else {
+      this.userSocketCount.set(userId, next);
+    }
     this.publishGlobalPresence();
     this.recomputeGlobalPresence();
+  }
+
+  /**
+   * Ferme immédiatement tous les sockets d'un utilisateur (bannissement) sur
+   * cette instance et, via le bus, sur les autres replicas du cluster.
+   */
+  disconnectUser(userId: string): void {
+    this.disconnectLocalSockets(userId);
+    this.bus.publish({ type: 'force_disconnect', userId });
+  }
+
+  private disconnectLocalSockets(userId: string): void {
+    const socketIds: string[] = [];
+    this.connectedUsers.forEach((user, socketId) => {
+      if (user.userId === userId) socketIds.push(socketId);
+    });
+    // Gateway à namespace : au runtime `server` est un Namespace dont
+    // `sockets` est une Map<socketId, Socket> (le type Nest déclare Server).
+    const sockets = this.server.sockets as unknown as Map<string, Socket>;
+    for (const socketId of socketIds) {
+      sockets.get(socketId)?.disconnect(true);
+    }
   }
 
   // Vérifie un token de handshake et renvoie l'identité serveur. Extrait pour
@@ -290,6 +322,9 @@ export class ChatGateway
         this.recomputeGlobalPresence();
         break;
       }
+      case 'force_disconnect':
+        this.disconnectLocalSockets(message.userId);
+        break;
     }
   }
 
@@ -339,6 +374,9 @@ export class ChatGateway
     if (userId) {
       this.connectedUsers.set(client.id, { socketId: client.id, userId });
       this.addLocalPresence(userId);
+      // Trace de présence aussi à la connexion : si l'instance meurt sans
+      // exécuter handleDisconnect, la « dernière présence » reste plausible.
+      void this.userRepository.updateLastSeen(userId, new Date()).catch(() => undefined);
       // État initial : envoyer au nouveau socket la liste des utilisateurs en ligne.
       client.emit('presence_snapshot', { userIds: Array.from(this.onlineUserIds()) });
     } else {
@@ -453,6 +491,13 @@ export class ChatGateway
     });
     if (!isMember) {
       return { success: false, error: 'FORBIDDEN' };
+    }
+
+    // Conversation gelée (advisor-client dont la relation d'attribution a été
+    // retirée) : l'historique reste consultable mais plus aucun envoi.
+    const writable = await this.canUseConversation.isWritable(data.conversationId);
+    if (!writable) {
+      return { success: false, error: 'CONVERSATION_LOCKED' };
     }
 
     try {

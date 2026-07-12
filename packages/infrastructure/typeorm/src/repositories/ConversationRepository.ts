@@ -33,4 +33,27 @@ export class ConversationRepository implements IConversationRepository {
   async deleteById(id: string): Promise<void> {
     await this.repo.delete({ id });
   }
+
+  async findPrivateBetween(userIdA: string, userIdB: string): Promise<Conversation | null> {
+    // Jointure double sur les participants : conversation PRIVÉE contenant les
+    // deux utilisateurs (les privées ont exactement 2 membres par construction).
+    const entity = await this.repo
+      .createQueryBuilder('conversation')
+      .innerJoin(
+        'conversation_participants',
+        'pa',
+        'pa.conversation_id = conversation.id AND pa.user_id = :userIdA',
+        { userIdA },
+      )
+      .innerJoin(
+        'conversation_participants',
+        'pb',
+        'pb.conversation_id = conversation.id AND pb.user_id = :userIdB',
+        { userIdB },
+      )
+      .where('conversation.type = :type', { type: ConversationType.PRIVATE })
+      .orderBy('conversation.createdAt', 'ASC')
+      .getOne();
+    return entity ? ConversationMapper.toDomain(entity) : null;
+  }
 }

@@ -3,6 +3,7 @@ import { IConversationRepository } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
 import { IMessageRepository } from '@forreal/domain';
 import { IConversationNotificationSettingsRepository } from '@forreal/domain';
+import { IConversationUserStateRepository } from '@forreal/domain';
 import { RoleName } from '@forreal/domain';
 
 export interface ConversationListItem {
@@ -22,6 +23,8 @@ export interface ConversationListItem {
  * Liste enrichie des conversations d'un utilisateur : nom, participants,
  * dernier message, non-lus et statut « muet », calculés sans requête N+1
  * (résumé agrégé + lookups groupés des utilisateurs et des réglages).
+ * Les conversations masquées PAR l'utilisateur sont exclues (elles
+ * réapparaissent automatiquement au prochain message reçu).
  */
 export class ListConversationsByUserUseCase {
   constructor(
@@ -30,6 +33,7 @@ export class ListConversationsByUserUseCase {
     private readonly userRepository?: IUserRepository,
     private readonly messageRepository?: IMessageRepository,
     private readonly settingsRepository?: IConversationNotificationSettingsRepository,
+    private readonly userStateRepository?: IConversationUserStateRepository,
   ) {}
 
   async execute(input: {
@@ -37,7 +41,14 @@ export class ListConversationsByUserUseCase {
     type?: 'PRIVATE' | 'GROUP';
   }): Promise<Array<{ id: string }> | ConversationListItem[]> {
     const participants = await this.participantRepository.listByUser(input.userId);
-    const conversationIds = Array.from(new Set(participants.map((p) => p.conversationId)));
+    const hiddenIds = new Set(
+      this.userStateRepository
+        ? await this.userStateRepository.listHiddenConversationIds(input.userId)
+        : [],
+    );
+    const conversationIds = Array.from(new Set(participants.map((p) => p.conversationId))).filter(
+      (id) => !hiddenIds.has(id),
+    );
 
     if (!this.conversationRepository || !this.userRepository) {
       return conversationIds.map((id) => ({ id }));

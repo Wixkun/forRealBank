@@ -81,7 +81,6 @@
       "send": "Send",
       "receive": "Receive",
       "chat": "Chat",
-      "director": "Management",
       "stats": "Stats",
       "more": "More"
     },
@@ -132,8 +131,7 @@
         "beneficiaries": "Beneficiaries",
         "analytics": "Analytics",
         "messages": "Messages",
-        "users": "Users",
-        "admin": "Admin"
+        "users": "Users"
       },
       "quickActions": {
         "title": "Quick Actions",
@@ -303,16 +301,32 @@
   "chat": {
     "loadingConversations": "Loading your conversations...",
     "loginRequired": "Please log in to access messaging.",
-    "directorSectionTitle": "Clients & Advisors",
-    "advisorSectionTitle": "My clients",
-    "createPrivateHint": "Click to create a private conversation.",
-    "alreadyCreatedSuffix": "(already created)",
-    "noneAvailable": "None available.",
-    "contactAdvisor": "Contact my advisor",
-    "creating": "Creating...",
     "noConversationsTitle": "No conversations",
     "noConversationsDescription": "No conversations found for your account.",
     "selectConversation": "Select a conversation to start",
+    "closePanel": "Close panel",
+    "emptyClient": {
+      "hint": "Your advisor {name} is here to help.",
+      "contactAdvisor": "Contact my advisor",
+      "opening": "Opening...",
+      "noAdvisor": "No advisor has been assigned to you yet. They will appear here once assigned."
+    },
+    "directory": {
+      "title": "Clients and advisors",
+      "searchPlaceholder": "Search for a person...",
+      "empty": "No one to contact yet.",
+      "emptySearch": "No person found.",
+      "error": "Unable to load the directory.",
+      "open": "Open the private conversation",
+      "online": "Online",
+      "offline": "Offline"
+    },
+    "roles": {
+      "CLIENT": "Client",
+      "ADVISOR": "Advisor",
+      "DIRECTOR": "Director",
+      "ADMIN": "Administrator"
+    },
     "list": {
       "title": "Conversations",
       "searchPlaceholder": "Search a conversation...",
@@ -333,7 +347,9 @@
       "new": "New",
       "unreadBadge": "{count} unread message(s)",
       "muteGroup": "Mute this group's notifications",
-      "unmuteGroup": "Unmute this group's notifications"
+      "unmuteGroup": "Unmute this group's notifications",
+      "hideConversation": "Hide conversation",
+      "createGroupTooltip": "Create a group"
     },
     "display": {
       "advisorDefaultName": "Your advisor",
@@ -368,11 +384,29 @@
         "imageAlt": "Attached image"
       },
       "groupMembers": "{count} members",
-      "typing": "{name} is typing..."
+      "typing": "{name} is typing...",
+      "lockedConversation": "This conversation is locked: the advisor-client relationship has changed. The history remains available."
+    },
+    "banRequest": {
+      "title": "Ban request",
+      "status": {
+        "PENDING": "Pending",
+        "ACCEPTED": "Accepted",
+        "REJECTED": "Rejected"
+      },
+      "client": "Client:",
+      "advisor": "Requesting advisor:",
+      "date": "Date:",
+      "processedAt": "Processed on {date}",
+      "comment": "Comment: {comment}",
+      "accept": "Accept",
+      "reject": "Reject",
+      "confirmReject": "Confirm rejection",
+      "cancel": "Cancel",
+      "commentPlaceholder": "Comment (optional)...",
+      "error": "The action failed. The request may already have been processed."
     },
     "errors": {
-      "fetchAdvisor": "Unable to fetch the advisor",
-      "fetchClients": "Unable to fetch your clients",
       "fetchUsers": "Unable to fetch users"
     },
     "group": {
@@ -400,6 +434,8 @@
       "back": "← Back",
       "archivedCount": "Archived ({count})",
       "select": "Select",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
       "cancel": "Cancel",
       "hintArchive": "archive",
       "hintDelete": "delete",
@@ -460,6 +496,12 @@
       "notFoundTitle": "News item unavailable",
       "notFound": "This news item could not be found. It may have been deleted.",
       "archived": "This news item is archived.",
+      "advisorChange": {
+        "contactAdvisor": "Contact my new advisor",
+        "viewClient": "View client",
+        "opening": "Opening...",
+        "error": "Unable to open the conversation."
+      },
       "transfer": {
         "sent": "Transfer sent",
         "received": "Transfer received",
@@ -532,32 +574,137 @@
     "empty": "No notifications",
     "emptyUnread": "No new notifications"
   },
-  "director": {
-    "title": "Director · Customer management",
-    "subtitle": "Available actions: list, view, ban/unban, delete.",
-    "searchPlaceholder": "Search (email, name...)",
-    "searchButton": "Search",
-    "total": "Total: {count}",
-    "table": {
-      "email": "Email",
-      "name": "Name",
-      "roles": "Roles",
-      "status": "Status",
-      "actions": "Actions"
+  "users": {
+    "title": "Users",
+    "subtitlePrivileged": "Manage all advisors and clients.",
+    "subtitleAdvisor": "Manage your clients.",
+    "accessRestricted": "Access restricted",
+    "searchPlaceholder": "Search for a person...",
+    "loadError": "Unable to load the list.",
+    "empty": "No users.",
+    "emptySearch": "No results.",
+    "bannedBadge": "Banned",
+    "clientCount": "{count} client{count, plural, one {} other {s}}",
+    "sections": {
+      "advisors": "Advisors",
+      "clients": "Clients",
+      "myClients": "My clients"
     },
-    "loading": "Loading...",
-    "empty": "No results.",
-    "statusValues": {
-      "active": "Active",
-      "banned": "Banned"
+    "presence": {
+      "online": "Online",
+      "offlineSince": "Offline for {duration}",
+      "lastSeen": {
+        "justNow": "less than a minute",
+        "minutes": "{count} minute{count, plural, one {} other {s}}",
+        "hours": "{count} hour{count, plural, one {} other {s}}",
+        "days": "{count} day{count, plural, one {} other {s}}",
+        "months": "{count} month{count, plural, one {} other {s}}"
+      }
     },
-    "actions": {
+    "modal": {
+      "back": "Back",
+      "close": "Close",
+      "titleUser": "User details",
+      "titleAccount": "Account and transactions",
+      "titleReassign": "Change advisor",
+      "titleRequestBan": "Request ban"
+    },
+    "details": {
+      "loadError": "Unable to load this profile.",
+      "statusActive": "Active",
+      "statusBanned": "Banned",
+      "memberSince": "Member since {date}",
+      "roles": {
+        "CLIENT": "Client",
+        "ADVISOR": "Advisor",
+        "DIRECTOR": "Director",
+        "ADMIN": "Administrator"
+      },
+      "assignedAdvisor": "Assigned advisor",
+      "noAdvisor": "No advisor assigned.",
+      "assignedClients": "Assigned clients ({count})",
+      "noClients": "No assigned clients.",
+      "sendMessage": "Send a message",
+      "messageError": "Unable to open the conversation.",
+      "changeAdvisor": "Change advisor",
+      "requestBan": "Request ban",
       "ban": "Ban",
       "unban": "Unban",
-      "delete": "Delete"
+      "banError": "Action failed."
     },
-    "confirmDelete": "Delete this customer?",
-    "errorPrefix": "Error:"
+    "accounts": {
+      "title": "Accounts",
+      "empty": "No accounts.",
+      "types": {
+        "checking": "Checking",
+        "savings": "Savings",
+        "investment": "Investment"
+      },
+      "status": {
+        "active": "Active",
+        "closed": "Closed",
+        "suspended": "Suspended"
+      }
+    },
+    "transactions": {
+      "startDate": "Start date",
+      "endDate": "End date",
+      "invalidRange": "The start date must be before the end date.",
+      "downloadStatement": "Download PDF statement",
+      "generating": "Generating...",
+      "pdfError": "PDF generation failed.",
+      "loadError": "Unable to load transactions.",
+      "empty": "No transactions for this period.",
+      "investmentNote": "Cash movements only",
+      "downloadDetail": "Download PDF detail",
+      "detail": {
+        "balanceAfter": "Balance after operation",
+        "type": "Type",
+        "credit": "Credit",
+        "debit": "Debit",
+        "reference": "Reference"
+      }
+    },
+    "transactionPdf": {
+      "title": "Transaction detail",
+      "editedOn": "Issued on {date}",
+      "holder": "Holder",
+      "account": "Account",
+      "date": "Date",
+      "description": "Description",
+      "type": "Type",
+      "credit": "Credit",
+      "debit": "Debit",
+      "balanceAfter": "Balance after operation",
+      "reference": "Reference",
+      "footer": "ForRealBank — Electronically generated document, valid without signature."
+    },
+    "reassign": {
+      "subtitle": "Choose the new advisor for {name}.",
+      "searchPlaceholder": "Search for an advisor...",
+      "loadError": "Unable to load advisors.",
+      "empty": "No other advisor available.",
+      "banned": "Banned",
+      "clientCount": "{count} client{count, plural, one {} other {s}}",
+      "error": "Reassignment failed."
+    },
+    "requestBan": {
+      "subtitle": "Ban request for client {name}. It will be sent to a director for decision.",
+      "reasonLabel": "Reason (required)",
+      "reasonPlaceholder": "Describe the reason for this request...",
+      "emojis": "Emojis",
+      "attach": "Attach files (images, PDF)",
+      "removeFile": "Remove attachment",
+      "send": "Send request",
+      "sending": "Sending...",
+      "errors": {
+        "reasonRequired": "The reason is required.",
+        "invalidType": "Unsupported format. Images and PDF only.",
+        "tooLarge": "File too large (max 10 MB).",
+        "tooMany": "Maximum {count} attachments.",
+        "submitFailed": "Failed to send the request."
+      }
+    }
   },
   "banned": {
     "code": "BANNED",

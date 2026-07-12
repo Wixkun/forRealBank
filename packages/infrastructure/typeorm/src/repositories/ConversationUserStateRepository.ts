@@ -14,6 +14,7 @@ function toDomain(entity: ConversationUserStateEntity): ConversationUserState {
     entity.lastReadAt,
     entity.createdAt,
     entity.updatedAt,
+    entity.hiddenAt,
   );
 }
 
@@ -55,5 +56,44 @@ export class ConversationUserStateRepository implements IConversationUserStateRe
       lastReadAt: new Date(),
     });
     return toDomain(await this.repo.save(entity));
+  }
+
+  async setHidden(userId: string, conversationId: string, hidden: boolean): Promise<void> {
+    const hiddenAt = hidden ? new Date() : null;
+    const existing = await this.repo.findOne({ where: { userId, conversationId } });
+    if (existing) {
+      existing.hiddenAt = hiddenAt;
+      await this.repo.save(existing);
+      return;
+    }
+    await this.repo.save(
+      this.repo.create({
+        id: uuidv4(),
+        userId,
+        conversationId,
+        lastReadMessageId: null,
+        lastReadAt: null,
+        hiddenAt,
+      }),
+    );
+  }
+
+  async listHiddenConversationIds(userId: string): Promise<string[]> {
+    const rows = await this.repo
+      .createQueryBuilder('state')
+      .select('state.conversation_id', 'conversationId')
+      .where('state.user_id = :userId', { userId })
+      .andWhere('state.hidden_at IS NOT NULL')
+      .getRawMany<{ conversationId: string }>();
+    return rows.map((r) => r.conversationId);
+  }
+
+  async clearHiddenForConversation(conversationId: string): Promise<void> {
+    await this.repo
+      .createQueryBuilder()
+      .update(ConversationUserStateEntity)
+      .set({ hiddenAt: null })
+      .where('conversation_id = :conversationId AND hidden_at IS NOT NULL', { conversationId })
+      .execute();
   }
 }

@@ -14,10 +14,12 @@ function makeGateway(overrides: {
 
   const userRepository = {
     findById: overrides.findById ?? jest.fn(),
+    updateLastSeen: jest.fn(async () => undefined),
   } as unknown as IUserRepository;
 
   // Les autres dépendances ne sont pas sollicitées par authenticate().
   return new ChatGateway(
+    undefined as never,
     undefined as never,
     undefined as never,
     undefined as never,

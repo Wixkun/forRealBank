@@ -402,6 +402,13 @@ export default function NewsFeed({
     setSelectionMode(false);
     setSelectedIds(new Set());
   };
+  // Tout sélectionner / tout désélectionner sur la liste affichée (fil actif
+  // ou archives selon l'onglet courant).
+  const toggleSelectAll = (items: NewsItem[]) => {
+    setSelectedIds((prev) =>
+      prev.size === items.length ? new Set() : new Set(items.map((n) => n.id)),
+    );
+  };
   const handleBulkDelete = async () => {
     const ids = [...selectedIds];
     exitSelection();
@@ -446,6 +453,14 @@ export default function NewsFeed({
               className="text-fg-muted hover:text-fg-secondary text-xs transition-colors"
             >
               {showArchived ? t('back') : t('archivedCount', { count: archived.length })}
+            </button>
+          )}
+          {selectionMode && displayedNews.length > 0 && (
+            <button
+              onClick={() => toggleSelectAll(displayedNews)}
+              className="text-tertiary hover:text-teal-300 text-xs transition"
+            >
+              {selectedIds.size === displayedNews.length ? t('deselectAll') : t('selectAll')}
             </button>
           )}
           {displayedNews.length > 0 && (

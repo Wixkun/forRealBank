@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ChatService } from './chat.service';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { ChatGateway } from './chat.gateway';
 import { ChatController } from './chat.controller';
 import { ChatFilesService } from './chat-files.service';
@@ -41,7 +41,6 @@ import {
 } from '@forreal/infrastructure-typeorm';
 
 import {
-  CreateConversationUseCase,
   AddConversationParticipantUseCase,
   SendMessageUseCase,
   ListMessagesUseCase,
@@ -51,12 +50,15 @@ import {
   ListParticipantsDetailsByConversationUseCase,
   ListClientsOfAdvisorUseCase,
   FindAdvisorOfClientUseCase,
-  ListUsersByRoleUseCase,
   SetConversationMuteUseCase,
   GetConversationNotificationSettingsUseCase,
   UpdateConversationUserStateUseCase,
   EnsureConversationMemberUseCase,
   CreateGroupConversationUseCase,
+  SetConversationHiddenUseCase,
+  ListContactableUsersUseCase,
+  OpenPrivateConversationUseCase,
+  CanUseConversationUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
 
@@ -78,7 +80,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [ChatController],
   providers: [
-    ChatService,
     ChatGateway,
     ChatFilesService,
     ChatClusterBus,
@@ -86,18 +87,21 @@ import { AuthModule } from '../auth/auth.module';
     { provide: IMessageRepository, useClass: MessageRepository },
     { provide: IConversationParticipantRepository, useClass: ConversationParticipantRepository },
     { provide: IUserRepository, useClass: UserRepository },
-    { provide: IAdvisorClientRepository, useClass: AdvisorClientRepository },
+    {
+      provide: IAdvisorClientRepository,
+      useFactory: (
+        repo: Repository<AdvisorClientEntity>,
+        userRepo: Repository<UserEntity>,
+        dataSource: DataSource,
+      ) => new AdvisorClientRepository(repo, userRepo, dataSource),
+      inject: [getRepositoryToken(AdvisorClientEntity), getRepositoryToken(UserEntity), DataSource],
+    },
     { provide: INotificationRepository, useClass: NotificationRepository },
     {
       provide: IConversationNotificationSettingsRepository,
       useClass: ConversationNotificationSettingsRepository,
     },
     { provide: IConversationUserStateRepository, useClass: ConversationUserStateRepository },
-    {
-      provide: CreateConversationUseCase,
-      useFactory: (repo: IConversationRepository) => new CreateConversationUseCase(repo),
-      inject: [IConversationRepository],
-    },
     {
       provide: AddConversationParticipantUseCase,
       useFactory: (repo: IConversationParticipantRepository) =>
@@ -138,12 +142,21 @@ import { AuthModule } from '../auth/auth.module';
         participantRepo: IConversationParticipantRepository,
         notifRepo: INotificationRepository,
         settingsRepo: IConversationNotificationSettingsRepository,
-      ) => new SendMessageUseCase(messageRepo, participantRepo, notifRepo, settingsRepo),
+        userStateRepo: IConversationUserStateRepository,
+      ) =>
+        new SendMessageUseCase(
+          messageRepo,
+          participantRepo,
+          notifRepo,
+          settingsRepo,
+          userStateRepo,
+        ),
       inject: [
         IMessageRepository,
         IConversationParticipantRepository,
         INotificationRepository,
         IConversationNotificationSettingsRepository,
+        IConversationUserStateRepository,
       ],
     },
     {
@@ -169,6 +182,7 @@ import { AuthModule } from '../auth/auth.module';
         userRepo: IUserRepository,
         messageRepo: IMessageRepository,
         settingsRepo: IConversationNotificationSettingsRepository,
+        userStateRepo: IConversationUserStateRepository,
       ) =>
         new ListConversationsByUserUseCase(
           participantRepo,
@@ -176,6 +190,7 @@ import { AuthModule } from '../auth/auth.module';
           userRepo,
           messageRepo,
           settingsRepo,
+          userStateRepo,
         ),
       inject: [
         IConversationParticipantRepository,
@@ -183,6 +198,7 @@ import { AuthModule } from '../auth/auth.module';
         IUserRepository,
         IMessageRepository,
         IConversationNotificationSettingsRepository,
+        IConversationUserStateRepository,
       ],
     },
     {
@@ -206,9 +222,61 @@ import { AuthModule } from '../auth/auth.module';
       inject: [IAdvisorClientRepository, IUserRepository],
     },
     {
-      provide: ListUsersByRoleUseCase,
-      useFactory: (userRepo: IUserRepository) => new ListUsersByRoleUseCase(userRepo),
-      inject: [IUserRepository],
+      provide: SetConversationHiddenUseCase,
+      useFactory: (userStateRepo: IConversationUserStateRepository) =>
+        new SetConversationHiddenUseCase(userStateRepo),
+      inject: [IConversationUserStateRepository],
+    },
+    {
+      provide: CanUseConversationUseCase,
+      useFactory: (
+        conversationRepo: IConversationRepository,
+        participantRepo: IConversationParticipantRepository,
+        userRepo: IUserRepository,
+        advisorClientRepo: IAdvisorClientRepository,
+      ) =>
+        new CanUseConversationUseCase(
+          conversationRepo,
+          participantRepo,
+          userRepo,
+          advisorClientRepo,
+        ),
+      inject: [
+        IConversationRepository,
+        IConversationParticipantRepository,
+        IUserRepository,
+        IAdvisorClientRepository,
+      ],
+    },
+    {
+      provide: ListContactableUsersUseCase,
+      useFactory: (advisorClientRepo: IAdvisorClientRepository, userRepo: IUserRepository) =>
+        new ListContactableUsersUseCase(advisorClientRepo, userRepo),
+      inject: [IAdvisorClientRepository, IUserRepository],
+    },
+    {
+      provide: OpenPrivateConversationUseCase,
+      useFactory: (
+        conversationRepo: IConversationRepository,
+        participantRepo: IConversationParticipantRepository,
+        userRepo: IUserRepository,
+        userStateRepo: IConversationUserStateRepository,
+        contactable: ListContactableUsersUseCase,
+      ) =>
+        new OpenPrivateConversationUseCase(
+          conversationRepo,
+          participantRepo,
+          userRepo,
+          userStateRepo,
+          contactable,
+        ),
+      inject: [
+        IConversationRepository,
+        IConversationParticipantRepository,
+        IUserRepository,
+        IConversationUserStateRepository,
+        ListContactableUsersUseCase,
+      ],
     },
     {
       provide: SetConversationMuteUseCase,
@@ -231,6 +299,8 @@ import { AuthModule } from '../auth/auth.module';
       inject: [IConversationUserStateRepository, INotificationRepository],
     },
   ],
-  exports: [ChatService],
+  // ChatGateway est exporté pour la déconnexion immédiate lors d'un
+  // bannissement (users) et les notifications temps réel (users-management).
+  exports: [ChatGateway],
 })
 export class ChatModule {}

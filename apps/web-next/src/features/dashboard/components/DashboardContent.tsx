@@ -29,10 +29,12 @@ export function DashboardContent({
   totalBalance,
   onRefreshAction,
 }: DashboardContentProps) {
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const isStaff =
-    (user?.roles?.includes('ADVISOR') ?? false) || (user?.roles?.includes('DIRECTOR') ?? false);
+    (user?.roles?.includes('ADVISOR') ?? false) ||
+    (user?.roles?.includes('DIRECTOR') ?? false) ||
+    (user?.roles?.includes('ADMIN') ?? false);
 
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
@@ -44,6 +46,16 @@ export function DashboardContent({
       ) ?? accountData.accounts[0];
     if (checking) setSelectedAccountId(checking.id);
   }, [accountData.accounts, selectedAccountId]);
+
+  // On attend les rôles avant d'afficher : sinon la carte solde flashe pour
+  // les rôles staff (advisor/director/admin, sans compte bancaire).
+  if (isAuthLoading || !user) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <>

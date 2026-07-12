@@ -6,6 +6,7 @@ import { TradingOrderEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentAccountEntity } from '@forreal/infrastructure-typeorm';
 import { MarketAssetEntity } from '@forreal/infrastructure-typeorm';
 import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
+import { NotBannedGuard } from '../auth/not-banned.guard';
 
 @Module({
   imports: [
@@ -18,5 +19,6 @@ import { InvestmentTransactionEntity } from '@forreal/infrastructure-typeorm';
     ]),
   ],
   controllers: [TradingController],
+  providers: [NotBannedGuard],
 })
 export class TradingModule {}

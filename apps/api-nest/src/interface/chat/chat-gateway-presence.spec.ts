@@ -6,6 +6,9 @@ import type { Socket } from 'socket.io';
 // dernier. Le serveur et le bus sont remplacés par des stubs.
 function makeGateway(): ChatGateway {
   const bus = { publish: jest.fn(), onMessage: jest.fn() };
+  // La présence écrit last_seen_at à la connexion / fermeture du dernier
+  // socket : stub pour ne pas toucher de base dans ces tests.
+  const userRepository = { updateLastSeen: jest.fn(async () => undefined) };
   const gateway = new ChatGateway(
     undefined as never,
     undefined as never,
@@ -13,6 +16,7 @@ function makeGateway(): ChatGateway {
     undefined as never,
     undefined as never,
     undefined as never,
+    userRepository as never,
     bus as never,
   );
   // Stub minimal du serveur socket.io (emit global + emit ciblé).

@@ -41,6 +41,10 @@ class FakeAccountRepo implements IAccountRepository {
   async updateBalance() {
     /* non utilisé : le mouvement passe par le gateway */
   }
+  async create(): Promise<Account> {
+    /* non utilisé : l'ouverture de compte relève de l'onboarding */
+    throw new Error('not implemented');
+  }
 }
 
 class FakeInvestmentRepo implements IInvestmentRepository {
@@ -53,6 +57,10 @@ class FakeInvestmentRepo implements IInvestmentRepository {
   }
   async updateCashBalance() {}
   async createCashMovement() {}
+  async create(): Promise<InvestmentAccount> {
+    /* non utilisé : l'ouverture de compte relève de l'onboarding */
+    throw new Error('not implemented');
+  }
 }
 
 class SpyGateway implements ITransferGateway {

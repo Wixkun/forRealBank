@@ -23,6 +23,20 @@ export class InvestmentAccountRepository implements IInvestmentRepository {
     await this.repo.update({ id }, { cashBalance: newBalance });
   }
 
+  async create(params: { userId: string; name: string }): Promise<InvestmentAccount> {
+    const entity = this.repo.create({
+      userId: params.userId,
+      name: params.name,
+      cashBalance: 0,
+      totalValue: 0,
+      totalGainLoss: 0,
+      status: 'active',
+      openedAt: new Date(),
+    });
+    const saved = await this.repo.save(entity);
+    return this.map(saved);
+  }
+
   async createCashMovement(data: CashMovementData): Promise<void> {
     if (!this.txnRepo) return;
     await this.txnRepo.save(

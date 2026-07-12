@@ -81,7 +81,6 @@
       "send": "Envoyer",
       "receive": "Recevoir",
       "chat": "Chat",
-      "director": "Gestion",
       "stats": "Stats",
       "more": "Plus"
     },
@@ -132,8 +131,7 @@
         "beneficiaries": "Bénéficiaires",
         "analytics": "Analyse",
         "messages": "Messages",
-        "users": "Utilisateurs",
-        "admin": "Admin"
+        "users": "Utilisateurs"
       },
       "quickActions": {
         "title": "Actions rapides",
@@ -303,16 +301,32 @@
   "chat": {
     "loadingConversations": "Chargement de vos conversations...",
     "loginRequired": "Veuillez vous connecter pour accéder à la messagerie.",
-    "directorSectionTitle": "Clients & Conseillers",
-    "advisorSectionTitle": "Mes clients",
-    "createPrivateHint": "Cliquez pour créer une conversation privée.",
-    "alreadyCreatedSuffix": "(déjà créé)",
-    "noneAvailable": "Aucun disponible.",
-    "contactAdvisor": "Contacter mon conseiller",
-    "creating": "Création...",
     "noConversationsTitle": "Aucune conversation",
     "noConversationsDescription": "Aucune conversation trouvée pour votre compte.",
     "selectConversation": "Sélectionnez une conversation pour commencer",
+    "closePanel": "Fermer le panneau",
+    "emptyClient": {
+      "hint": "Votre conseiller {name} est à votre disposition.",
+      "contactAdvisor": "Contacter mon conseiller",
+      "opening": "Ouverture...",
+      "noAdvisor": "Aucun conseiller ne vous est encore attribué. Il apparaîtra ici dès son attribution."
+    },
+    "directory": {
+      "title": "Clients et conseillers",
+      "searchPlaceholder": "Rechercher une personne...",
+      "empty": "Personne à contacter pour le moment.",
+      "emptySearch": "Aucune personne trouvée.",
+      "error": "Impossible de charger l'annuaire.",
+      "open": "Ouvrir la conversation privée",
+      "online": "En ligne",
+      "offline": "Hors ligne"
+    },
+    "roles": {
+      "CLIENT": "Client",
+      "ADVISOR": "Conseiller",
+      "DIRECTOR": "Directeur",
+      "ADMIN": "Administrateur"
+    },
     "list": {
       "title": "Conversations",
       "searchPlaceholder": "Rechercher une conversation...",
@@ -333,7 +347,9 @@
       "new": "Nouveau",
       "unreadBadge": "{count} message(s) non lu(s)",
       "muteGroup": "Désactiver les notifications de ce groupe",
-      "unmuteGroup": "Réactiver les notifications de ce groupe"
+      "unmuteGroup": "Réactiver les notifications de ce groupe",
+      "hideConversation": "Masquer la conversation",
+      "createGroupTooltip": "Créer un groupe"
     },
     "display": {
       "advisorDefaultName": "Votre conseiller",
@@ -368,11 +384,29 @@
         "imageAlt": "Image jointe"
       },
       "groupMembers": "{count} membres",
-      "typing": "{name} est en train d'écrire..."
+      "typing": "{name} est en train d'écrire...",
+      "lockedConversation": "Cette conversation est verrouillée : la relation conseiller-client a changé. L'historique reste consultable."
+    },
+    "banRequest": {
+      "title": "Demande de bannissement",
+      "status": {
+        "PENDING": "En attente",
+        "ACCEPTED": "Acceptée",
+        "REJECTED": "Refusée"
+      },
+      "client": "Client concerné :",
+      "advisor": "Advisor demandeur :",
+      "date": "Date :",
+      "processedAt": "Traitée le {date}",
+      "comment": "Commentaire : {comment}",
+      "accept": "Accepter",
+      "reject": "Refuser",
+      "confirmReject": "Confirmer le refus",
+      "cancel": "Annuler",
+      "commentPlaceholder": "Commentaire (facultatif)...",
+      "error": "L'action a échoué. La demande a peut-être déjà été traitée."
     },
     "errors": {
-      "fetchAdvisor": "Impossible de récupérer le conseiller",
-      "fetchClients": "Impossible de récupérer vos clients",
       "fetchUsers": "Impossible de récupérer les utilisateurs"
     },
     "group": {
@@ -400,6 +434,8 @@
       "back": "← Retour",
       "archivedCount": "Archivés ({count})",
       "select": "Sélectionner",
+      "selectAll": "Tout sélectionner",
+      "deselectAll": "Tout désélectionner",
       "cancel": "Annuler",
       "hintArchive": "archiver",
       "hintDelete": "supprimer",
@@ -460,6 +496,12 @@
       "notFoundTitle": "Actualité indisponible",
       "notFound": "Cette actualité est introuvable. Elle a peut-être été supprimée.",
       "archived": "Cette actualité est archivée.",
+      "advisorChange": {
+        "contactAdvisor": "Contacter mon nouvel advisor",
+        "viewClient": "Consulter le client",
+        "opening": "Ouverture...",
+        "error": "Impossible d'ouvrir la conversation."
+      },
       "transfer": {
         "sent": "Virement émis",
         "received": "Virement reçu",
@@ -532,32 +574,137 @@
     "empty": "Aucune notification",
     "emptyUnread": "Aucune nouvelle notification"
   },
-  "director": {
-    "title": "Directeur · Gestion clients",
-    "subtitle": "Actions disponibles : lister, consulter, bannir/débannir, supprimer.",
-    "searchPlaceholder": "Recherche (email, nom...)",
-    "searchButton": "Rechercher",
-    "total": "Total : {count}",
-    "table": {
-      "email": "Email",
-      "name": "Nom",
-      "roles": "Rôles",
-      "status": "Statut",
-      "actions": "Actions"
+  "users": {
+    "title": "Utilisateurs",
+    "subtitlePrivileged": "Gérez tous les conseillers et clients.",
+    "subtitleAdvisor": "Gérez vos clients.",
+    "accessRestricted": "Accès restreint",
+    "searchPlaceholder": "Rechercher une personne...",
+    "loadError": "Impossible de charger la liste.",
+    "empty": "Aucun utilisateur.",
+    "emptySearch": "Aucun résultat.",
+    "bannedBadge": "Banni",
+    "clientCount": "{count} client{count, plural, one {} other {s}}",
+    "sections": {
+      "advisors": "Advisors",
+      "clients": "Clients",
+      "myClients": "Mes clients"
     },
-    "loading": "Chargement...",
-    "empty": "Aucun résultat.",
-    "statusValues": {
-      "active": "Actif",
-      "banned": "Banni"
+    "presence": {
+      "online": "En ligne",
+      "offlineSince": "Hors ligne depuis {duration}",
+      "lastSeen": {
+        "justNow": "moins d'une minute",
+        "minutes": "{count} minute{count, plural, one {} other {s}}",
+        "hours": "{count} heure{count, plural, one {} other {s}}",
+        "days": "{count} jour{count, plural, one {} other {s}}",
+        "months": "{count} mois"
+      }
     },
-    "actions": {
+    "modal": {
+      "back": "Retour",
+      "close": "Fermer",
+      "titleUser": "Fiche détaillée",
+      "titleAccount": "Compte et transactions",
+      "titleReassign": "Changer d'advisor",
+      "titleRequestBan": "Demander le bannissement"
+    },
+    "details": {
+      "loadError": "Impossible de charger la fiche.",
+      "statusActive": "Actif",
+      "statusBanned": "Banni",
+      "memberSince": "Client depuis le {date}",
+      "roles": {
+        "CLIENT": "Client",
+        "ADVISOR": "Conseiller",
+        "DIRECTOR": "Directeur",
+        "ADMIN": "Administrateur"
+      },
+      "assignedAdvisor": "Advisor attribué",
+      "noAdvisor": "Aucun advisor attribué.",
+      "assignedClients": "Clients attribués ({count})",
+      "noClients": "Aucun client attribué.",
+      "sendMessage": "Envoyer un message",
+      "messageError": "Impossible d'ouvrir la conversation.",
+      "changeAdvisor": "Changer d'advisor",
+      "requestBan": "Demander le bannissement",
       "ban": "Bannir",
       "unban": "Débannir",
-      "delete": "Supprimer"
+      "banError": "Action impossible."
     },
-    "confirmDelete": "Supprimer ce client ?",
-    "errorPrefix": "Erreur :"
+    "accounts": {
+      "title": "Comptes",
+      "empty": "Aucun compte.",
+      "types": {
+        "checking": "Checking",
+        "savings": "Savings",
+        "investment": "Investment"
+      },
+      "status": {
+        "active": "Actif",
+        "closed": "Clôturé",
+        "suspended": "Suspendu"
+      }
+    },
+    "transactions": {
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "invalidRange": "La date de début doit précéder la date de fin.",
+      "downloadStatement": "Télécharger le relevé PDF",
+      "generating": "Génération...",
+      "pdfError": "La génération du PDF a échoué.",
+      "loadError": "Impossible de charger les transactions.",
+      "empty": "Aucune transaction sur la période.",
+      "investmentNote": "Mouvements monétaires uniquement",
+      "downloadDetail": "Télécharger le détail PDF",
+      "detail": {
+        "balanceAfter": "Solde après opération",
+        "type": "Type",
+        "credit": "Crédit",
+        "debit": "Débit",
+        "reference": "Référence"
+      }
+    },
+    "transactionPdf": {
+      "title": "Détail de transaction",
+      "editedOn": "Édité le {date}",
+      "holder": "Titulaire",
+      "account": "Compte",
+      "date": "Date",
+      "description": "Description",
+      "type": "Type",
+      "credit": "Crédit",
+      "debit": "Débit",
+      "balanceAfter": "Solde après opération",
+      "reference": "Référence",
+      "footer": "ForRealBank — Document généré électroniquement, valable sans signature."
+    },
+    "reassign": {
+      "subtitle": "Choisissez le nouvel advisor de {name}.",
+      "searchPlaceholder": "Rechercher un advisor...",
+      "loadError": "Impossible de charger les advisors.",
+      "empty": "Aucun autre advisor disponible.",
+      "banned": "Banni",
+      "clientCount": "{count} client{count, plural, one {} other {s}}",
+      "error": "La réattribution a échoué."
+    },
+    "requestBan": {
+      "subtitle": "Demande de bannissement du client {name}. Elle sera transmise à un directeur pour décision.",
+      "reasonLabel": "Motif (obligatoire)",
+      "reasonPlaceholder": "Décrivez le motif de la demande...",
+      "emojis": "Emojis",
+      "attach": "Joindre des fichiers (images, PDF)",
+      "removeFile": "Retirer la pièce jointe",
+      "send": "Envoyer la demande",
+      "sending": "Envoi...",
+      "errors": {
+        "reasonRequired": "Le motif est obligatoire.",
+        "invalidType": "Format non supporté. Images et PDF uniquement.",
+        "tooLarge": "Fichier trop lourd (max 10 Mo).",
+        "tooMany": "Maximum {count} pièces jointes.",
+        "submitFailed": "L'envoi de la demande a échoué."
+      }
+    }
   },
   "banned": {
     "code": "BANNI",
