@@ -1,4 +1,4 @@
-import { Controller, Get, Param, UseGuards, Req, NotFoundException } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -16,49 +16,11 @@ export class AccountsController {
     private readonly investmentAccountRepo: Repository<InvestmentAccountEntity>,
   ) {}
 
-  @Get()
-  async getAccounts(@Req() req: Request) {
-    const userId = (req.user as any).id;
-    const accounts = await this.accountRepo.find({
-      where: { userId },
-      order: { createdAt: 'ASC' },
-    });
-    return accounts;
-  }
-
-  @Get(':id')
-  async getAccountById(@Param('id') id: string, @Req() req: Request) {
-    const userId = (req.user as any).id;
-    const account = await this.accountRepo.findOne({ where: { id, userId } });
-    if (!account) {
-      throw new NotFoundException('Account not found');
-    }
-    return account;
-  }
-
-  @Get('investment/all')
-  async getInvestmentAccounts(@Req() req: Request) {
-    const userId = (req.user as any).id;
-    const accounts = await this.investmentAccountRepo.find({
-      where: { userId },
-      order: { createdAt: 'ASC' },
-    });
-    return accounts;
-  }
-
-  @Get('investment/:id')
-  async getInvestmentAccountById(@Param('id') id: string, @Req() req: Request) {
-    const userId = (req.user as any).id;
-    const account = await this.investmentAccountRepo.findOne({ where: { id, userId } });
-    if (!account) {
-      throw new NotFoundException('Investment account not found');
-    }
-    return account;
-  }
-
+  // Vue synthétique consommée par le dashboard : comptes bancaires +
+  // investissement de l'utilisateur authentifié, montants normalisés en number.
   @Get('all/summary')
   async getAllAccountsSummary(@Req() req: Request) {
-    const userId = (req.user as any).id;
+    const userId = (req.user as { id: string }).id;
     const [accounts, investmentAccounts] = await Promise.all([
       this.accountRepo.find({ where: { userId }, order: { createdAt: 'ASC' } }),
       this.investmentAccountRepo.find({ where: { userId }, order: { createdAt: 'ASC' } }),

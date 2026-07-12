@@ -157,7 +157,11 @@ export default function ConversationsList({
   const t = useTranslations('chat');
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'en';
-  const { conversations: fetchedConversations, isLoading: hookLoading } = useConversations();
+  // Ne fetche que si le parent ne fournit pas déjà les conversations (sinon
+  // la page Messages déclenchait deux fois le même appel by-user).
+  const { conversations: fetchedConversations, isLoading: hookLoading } = useConversations({
+    enabled: conversationsProp == null,
+  });
   const conversations = conversationsProp ?? fetchedConversations;
   const isLoading = loadingOverride ?? hookLoading;
   const [searchQuery, setSearchQuery] = useState('');

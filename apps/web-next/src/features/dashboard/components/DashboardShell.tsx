@@ -351,7 +351,6 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-      if (typeof window !== 'undefined') localStorage.removeItem('auth_token');
     } catch {}
     router.push(`/${locale}/login`);
   };

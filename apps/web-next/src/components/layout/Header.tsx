@@ -1,33 +1,16 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
 import { useTranslations } from 'next-intl';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
   const t = useTranslations('common');
   const pathname = usePathname();
   const locale = pathname.split('/')[1] || 'en';
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch(`/api/auth/me`, {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        setIsAuthenticated(response.ok);
-      } catch {
-        setIsAuthenticated(false);
-      }
-    };
-    checkAuth();
-  }, []);
+  // État d'auth partagé via AuthProvider : pas de fetch /auth/me dupliqué ici.
+  const { isAuthenticated } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -36,7 +19,6 @@ export default function Header() {
         credentials: 'include',
       });
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_token');
         window.location.href = `/${locale}/login`;
       }
     } catch (error) {

@@ -39,7 +39,10 @@ test.describe('Home Page', () => {
 });
 
 test.describe('Responsive Design', () => {
-  test('should be mobile friendly on iPhone', async ({ page }) => {
+  test('should be mobile friendly on iPhone', async ({ page }, testInfo) => {
+    // Ne s'exécute que sur le projet mobile : les projets desktop ont un
+    // viewport large et l'assertion n'aurait aucun sens.
+    test.skip(!testInfo.project.name.startsWith('Mobile'), 'mobile-only check');
     await page.goto('/');
 
     const viewport = page.viewportSize();

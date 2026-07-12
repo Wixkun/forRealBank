@@ -120,9 +120,6 @@ function LoginForm() {
         throw new Error(data.message || t('loginFailed'));
       }
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('auth_token', data.token || 'authenticated');
-      }
       setTimeout(() => {
         router.push(`/${locale}/dashboard`);
       }, 500);

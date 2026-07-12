@@ -126,10 +126,6 @@ export class NewsService {
     return this.setStatusUC.execute({ newsId, userId, status: 'DELETED' });
   }
 
-  async markAsRead(newsId: string, userId: string) {
-    return this.setStatusUC.execute({ newsId, userId, status: 'READ' });
-  }
-
   // ─── Opérations admin ────────────────────────────────────────────────────
 
   async deactivateNews(id: string) {

@@ -17,13 +17,7 @@ export * from './chat/usecases/AddConversationParticipantUseCase';
 export * from './chat/usecases/ListConversationsByUserUseCase';
 export * from './chat/usecases/ListMessagesUseCase';
 export * from './chat/usecases/SendMessageUseCase';
-export * from './chat/usecases/MarkMessageReadUseCase';
-export * from './chat/usecases/ListParticipantsDetailsByConversationUseCase';
-export * from './chat/usecases/FindAdvisorOfClientUseCase';
-export * from './chat/usecases/LinkAdvisorClientUseCase';
-export * from './chat/usecases/ListClientsOfAdvisorUseCase';
 export * from './chat/usecases/SetConversationMuteUseCase';
-export * from './chat/usecases/GetConversationNotificationSettingsUseCase';
 export * from './chat/usecases/UpdateConversationUserStateUseCase';
 export * from './chat/usecases/EnsureConversationMemberUseCase';
 export * from './chat/usecases/CreateGroupConversationUseCase';
@@ -53,7 +47,6 @@ export * from './notifications/usecases/ListNotificationsByUserUseCase';
 export * from './notifications/usecases/MarkNotificationReadUseCase';
 export * from './notifications/usecases/MarkAllNotificationsReadUseCase';
 export * from './notifications/usecases/MarkNotificationsReadByTargetUseCase';
-export * from './notifications/usecases/GetUnreadCountUseCase';
 export * from './notifications/usecases/DeleteNotificationUseCase';
 
 // transactions

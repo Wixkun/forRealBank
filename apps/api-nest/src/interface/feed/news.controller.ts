@@ -114,29 +114,6 @@ export class NewsController {
     );
   }
 
-  // Alias rétrocompatible (ancienne route POST /)
-  @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(RoleName.ADVISOR, RoleName.DIRECTOR)
-  @UseInterceptors(newsImageInterceptor)
-  async createLegacy(
-    @Body() body: CreateNewsDto,
-    @UploadedFiles() files: NewsUploadedFiles | undefined,
-    @Req() req: Request,
-  ) {
-    const userId = extractUserId(req);
-    const { imageUrl, inlineUrls } = await this.storeNewsImages(files, userId);
-    const content = resolveInlineImages(body.content, inlineUrls);
-    return this.newsService.createManualNews(
-      userId,
-      body.title,
-      content,
-      body.status,
-      imageUrl,
-      body.subtitle?.trim() || null,
-    );
-  }
-
   // Stocke en base l'image legacy et les images inline ; retourne leurs URLs.
   private async storeNewsImages(files: NewsUploadedFiles | undefined, userId: string) {
     const legacyImage = files?.image?.[0];
@@ -165,26 +142,8 @@ export class NewsController {
   }
 
   // ─── Lecture du fil ──────────────────────────────────────────────────────
-
-  @Get('feed')
-  @UseGuards(JwtAuthGuard)
-  async getFeed(
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
-    @Req() req?: Request,
-  ) {
-    const userId = optionalUserId(req!);
-    return this.newsService.listNews(limit ? +limit : 20, offset ? +offset : 0, userId);
-  }
-
-  @Get('archived')
-  @UseGuards(JwtAuthGuard)
-  async getArchived(@Req() req: Request) {
-    const userId = optionalUserId(req);
-    return this.newsService.listNews(100, 0, userId, false, true);
-  }
-
-  // Alias rétrocompatible (ancienne route GET /)
+  // Liste filtrée par utilisateur (news publiques + SES news privées) ;
+  // `archivedOnly=true` renvoie ses news archivées.
   @Get()
   @UseGuards(OptionalJwtGuard)
   async list(
@@ -207,55 +166,25 @@ export class NewsController {
   // ─── Actions utilisateur (per-user, ne modifient jamais la news globale) ─
 
   @HttpCode(200)
-  @Patch(':id/archive')
+  @Post(':id/archive')
   @UseGuards(JwtAuthGuard)
   async archive(@Param('id') id: string, @Req() req: Request) {
     return this.newsService.archiveNews(id, extractUserId(req));
   }
 
-  // Alias rétrocompatible POST (ancien endpoint)
-  @HttpCode(200)
-  @Post(':id/archive')
-  @UseGuards(JwtAuthGuard)
-  async archiveLegacy(@Param('id') id: string, @Req() req: Request) {
-    return this.newsService.archiveNews(id, extractUserId(req));
-  }
-
-  @HttpCode(200)
-  @Patch(':id/restore')
-  @UseGuards(JwtAuthGuard)
-  async restore(@Param('id') id: string, @Req() req: Request) {
-    return this.newsService.unarchiveNews(id, extractUserId(req));
-  }
-
-  // Alias rétrocompatible POST (ancien endpoint /unarchive)
   @HttpCode(200)
   @Post(':id/unarchive')
   @UseGuards(JwtAuthGuard)
-  async unarchiveLegacy(@Param('id') id: string, @Req() req: Request) {
+  async unarchive(@Param('id') id: string, @Req() req: Request) {
     return this.newsService.unarchiveNews(id, extractUserId(req));
   }
 
-  @HttpCode(200)
-  @Patch(':id/delete')
-  @UseGuards(JwtAuthGuard)
-  async deleteForUser(@Param('id') id: string, @Req() req: Request) {
-    return this.newsService.deleteNewsForUser(id, extractUserId(req));
-  }
-
-  // Alias rétrocompatible POST (ancien endpoint /dismiss)
+  // « Dismiss » : masque la news pour cet utilisateur uniquement.
   @HttpCode(200)
   @Post(':id/dismiss')
   @UseGuards(JwtAuthGuard)
-  async dismissLegacy(@Param('id') id: string, @Req() req: Request) {
+  async dismiss(@Param('id') id: string, @Req() req: Request) {
     return this.newsService.deleteNewsForUser(id, extractUserId(req));
-  }
-
-  @HttpCode(200)
-  @Patch(':id/read')
-  @UseGuards(JwtAuthGuard)
-  async markAsRead(@Param('id') id: string, @Req() req: Request) {
-    return this.newsService.markAsRead(id, extractUserId(req));
   }
 
   // ─── Mise à jour d'une news (DIRECTOR / ADVISOR) ────────────────────────
