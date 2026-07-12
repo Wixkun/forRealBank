@@ -1,5 +1,3 @@
-const DEFAULT_API_ORIGIN = '';
-
 /**
  * Base des appels API côté navigateur.
  *
@@ -18,22 +16,11 @@ export const SERVER_API_URL =
   process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://api:3001/api';
 
 /**
- * Normalise une URL base en retirant le trailing slash.
- */
-export function normalizeBaseUrl(url: string): string {
-  return url.replace(/\/+$/, '');
-}
-
-/**
- * Construit une URL d'API.
- * - Si `base` commence par '/', on renvoie une URL relative.
- * - Sinon, on concatène sur l'origin fourni.
+ * Construit une URL d'API : base sans trailing slash + endpoint avec slash
+ * initial. Fonctionne pour une base relative ('/api') comme absolue.
  */
 export function buildApiUrl(base: string, endpoint: string): string {
-  const cleanBase = normalizeBaseUrl(base || DEFAULT_API_ORIGIN);
+  const cleanBase = (base || '').replace(/\/+$/, '');
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  if (cleanBase.startsWith('/')) {
-    return `${cleanBase}${cleanEndpoint}`;
-  }
   return `${cleanBase}${cleanEndpoint}`;
 }

@@ -35,6 +35,11 @@ export class MonitoringMiddleware implements NestMiddleware {
       const statusCode = this.statusCode;
 
       monitoring.recordHttpRequest(req.method, normalizedRoute, statusCode, durationSeconds);
+      // Alimente app_errors_total (alerte ApplicationErrorsDetected) : sans ce
+      // signal, le compteur n'était jamais incrémenté et l'alerte était morte.
+      if (statusCode >= 500) {
+        monitoring.recordAppError('http_5xx');
+      }
 
       return originalSend(data);
     };

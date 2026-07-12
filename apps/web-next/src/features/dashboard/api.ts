@@ -1,8 +1,10 @@
 import type { Account, DisplayTransaction } from '@/features/dashboard/types';
 
-// Récupère les comptes bancaires + investissement, normalisés au format Account
+// Récupère les comptes bancaires + investissement, normalisés au format Account.
+// Appelle directement l'endpoint Nest : en prod, Traefik route /api vers l'API
+// sans passer par Next, donc aucune réécriture de chemin n'est possible.
 export async function fetchAccounts(): Promise<Account[]> {
-  const res = await fetch('/api/accounts', { credentials: 'include' });
+  const res = await fetch('/api/accounts/all/summary', { credentials: 'include' });
   if (!res.ok) throw new Error(`Failed to load accounts (${res.status})`);
   const data = await res.json();
 

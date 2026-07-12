@@ -64,10 +64,6 @@ ForRealBank is a comprehensive fintech solution offering:
 
 ```
 forRealBank/
-├── documentation/
-│   ├──clusterInstallation.md
-│   ├──schéma_archi.png
-│   ├──tests_cluster.docx
 ├── apps/
 │   ├── api-nest/              # NestJS REST API
 │   │   ├── src/
@@ -110,7 +106,6 @@ forRealBank/
 │   └── infrastructure/         # Technical implementations
 │       ├── crypto-bcrypt/      # Password hashing
 │       ├── jwt-nest/           # JWT authentication
-│       ├── mongodb/            # (Optional) MongoDB adapter
 │       ├── typeorm/            # Database ORM
 │       └── uuid-node/          # UUID generation
 │
@@ -205,29 +200,31 @@ pnpm --filter web-next test         # Web tests
 The API follows a modular architecture:
 
 ```
-/api/accounts        → Account management
-/api/auth            → Authentication endpoints
-/api/users           → User management
-/api/chat            → Real-time chat (WebSocket)
-/api/feed            → Activity feeds
-/api/market          → Market data & quotes
-/api/trading         → Trading operations
-/api/transactions    → Transaction history & records
-/api/notifications   → Push notifications
+/api/auth            → Authentication (register, login, 2FA, reset password)
+/api/users           → Profile & user administration
+/api/management      → Users management (directory, accounts, ban requests)
+/api/accounts        → Account summary
+/api/transactions    → Transactions & transfers
+/api/trading         → Trading operations (UI en refonte)
+/api/chat            → Messaging (REST + WebSocket /api/socket.io)
+/api/news            → News feed (REST + SSE /api/news/stream)
+/api/notifications   → Notification center
 /api/metrics         → Prometheus metrics
 ```
 
 ### Frontend Routes
 
-- `/` — Dashboard
-- `/auth/login` → Login & Registration
-- `/auth/2fa` → Two-factor authentication
-- `/accounts` → Account management
-- `/transactions` → Transaction history
-- `/market` → Market data & charts
-- `/trading` → Trading interface
-- `/chat` → Messaging
-- `/notifications` → Notification center
+All pages are locale-prefixed (`/en/...`, `/fr/...`):
+
+- `/` → Landing page
+- `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email` → Auth flows
+- `/dashboard` → Accounts overview & news feed
+- `/dashboard/transfer` → Transfers
+- `/dashboard/messages` → Messaging
+- `/dashboard/users` → Users management (staff roles)
+- `/dashboard/settings`, `/dashboard/security` → Profile & 2FA
+- `/dashboard/trading`, `/dashboard/analytics`, `/dashboard/beneficiaries` → Coming soon
+- `/banned` → Banned account notice
 
 ## Docker Setup
 
@@ -237,11 +234,8 @@ The API follows a modular architecture:
 # Development environment (with hot reload)
 pnpm db:up
 
-# Production environment (with all services)
+# Full stack (db, api, web, monitoring)
 docker compose up --build
-
-# Custom environment
-docker compose -f docker-compose.dev.yml up --build
 ```
 
 ### Services

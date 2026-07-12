@@ -15,7 +15,6 @@ import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { NotificationTargetType } from '@forreal/domain';
 import { ListNotificationsByUserUseCase } from '@forreal/application';
-import { GetUnreadCountUseCase } from '@forreal/application';
 import { MarkNotificationReadUseCase } from '@forreal/application';
 import { MarkAllNotificationsReadUseCase } from '@forreal/application';
 import { MarkNotificationsReadByTargetUseCase } from '@forreal/application';
@@ -32,8 +31,6 @@ export class NotificationsController {
   constructor(
     @Inject(ListNotificationsByUserUseCase)
     private readonly listUC: ListNotificationsByUserUseCase,
-    @Inject(GetUnreadCountUseCase)
-    private readonly unreadCountUC: GetUnreadCountUseCase,
     @Inject(MarkNotificationReadUseCase)
     private readonly markReadUC: MarkNotificationReadUseCase,
     @Inject(MarkAllNotificationsReadUseCase)
@@ -57,13 +54,6 @@ export class NotificationsController {
       limit: limit ? +limit : 50,
       offset: offset ? +offset : 0,
     });
-  }
-
-  @Get('unread-count')
-  @UseGuards(JwtAuthGuard)
-  async getUnreadCount(@Req() req: Request) {
-    const userId = extractUserId(req);
-    return this.unreadCountUC.execute({ userId });
   }
 
   @HttpCode(200)

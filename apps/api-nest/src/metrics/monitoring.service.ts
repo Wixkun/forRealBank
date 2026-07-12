@@ -7,7 +7,6 @@ export class MonitoringService implements OnModuleInit {
   private httpRequestDuration: Histogram;
   private authLoginTotal: Counter;
   private appErrorsTotal: Counter;
-  private databaseQueriesTotal: Counter;
 
   constructor() {
     this.httpRequestsTotal = this.getOrCreateCounter(
@@ -33,12 +32,6 @@ export class MonitoringService implements OnModuleInit {
       'app_errors_total',
       'Total number of application errors',
       ['type'],
-    );
-
-    this.databaseQueriesTotal = this.getOrCreateCounter(
-      'database_queries_total',
-      'Total number of database queries',
-      ['status'],
     );
   }
 
@@ -113,19 +106,9 @@ export class MonitoringService implements OnModuleInit {
     });
   }
 
-  recordAuthAttempt(endpoint: string, success: boolean): void {
-    this.recordLoginAttempt(success ? 'success' : 'failure');
-  }
-
   recordAppError(type: string): void {
     this.appErrorsTotal.inc({
       type,
-    });
-  }
-
-  recordDatabaseQuery(status: 'success' | 'error'): void {
-    this.databaseQueriesTotal.inc({
-      status,
     });
   }
 }

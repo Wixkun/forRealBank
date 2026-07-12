@@ -26,16 +26,9 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { ChatGateway } from './chat.gateway';
-import { SendMessageUseCase } from '@forreal/application';
 import { ListMessagesUseCase } from '@forreal/application';
-import { MarkMessageReadUseCase } from '@forreal/application';
-import { LinkAdvisorClientUseCase } from '@forreal/application';
 import { ListConversationsByUserUseCase } from '@forreal/application';
-import { ListParticipantsDetailsByConversationUseCase } from '@forreal/application';
-import { ListClientsOfAdvisorUseCase } from '@forreal/application';
-import { FindAdvisorOfClientUseCase } from '@forreal/application';
 import { SetConversationMuteUseCase } from '@forreal/application';
-import { GetConversationNotificationSettingsUseCase } from '@forreal/application';
 import { UpdateConversationUserStateUseCase } from '@forreal/application';
 import { EnsureConversationMemberUseCase } from '@forreal/application';
 import { CreateGroupConversationUseCase } from '@forreal/application';
@@ -44,8 +37,6 @@ import { ListContactableUsersUseCase } from '@forreal/application';
 import { OpenPrivateConversationUseCase } from '@forreal/application';
 import { CanUseConversationUseCase } from '@forreal/application';
 import {
-  SendMessageDto,
-  LinkAdvisorClientDto,
   UpdateConversationStateDto,
   MuteConversationDto,
   CreateGroupDto,
@@ -91,19 +82,9 @@ function extractRoles(req: Request): RoleName[] {
 export class ChatController {
   constructor(
     @Inject(ChatFilesService) private readonly chatFilesService: ChatFilesService,
-    @Inject(SendMessageUseCase) private readonly sendMessageUseCase: SendMessageUseCase,
     @Inject(ListMessagesUseCase) private readonly listMessagesUseCase: ListMessagesUseCase,
-    @Inject(MarkMessageReadUseCase) private readonly markMessageReadUseCase: MarkMessageReadUseCase,
-    @Inject(LinkAdvisorClientUseCase)
-    private readonly linkAdvisorClientUseCase: LinkAdvisorClientUseCase,
     @Inject(ListConversationsByUserUseCase)
     private readonly listConversationsByUserUseCase: ListConversationsByUserUseCase,
-    @Inject(ListParticipantsDetailsByConversationUseCase)
-    private readonly listParticipantsDetails: ListParticipantsDetailsByConversationUseCase,
-    @Inject(ListClientsOfAdvisorUseCase)
-    private readonly listClientsOfAdvisor: ListClientsOfAdvisorUseCase,
-    @Inject(FindAdvisorOfClientUseCase)
-    private readonly findAdvisorOfClient: FindAdvisorOfClientUseCase,
     @Inject(SetConversationHiddenUseCase)
     private readonly setConversationHidden: SetConversationHiddenUseCase,
     @Inject(ListContactableUsersUseCase)
@@ -114,8 +95,6 @@ export class ChatController {
     private readonly canUseConversation: CanUseConversationUseCase,
     @Inject(SetConversationMuteUseCase)
     private readonly setConversationMuteUC: SetConversationMuteUseCase,
-    @Inject(GetConversationNotificationSettingsUseCase)
-    private readonly getConversationSettingsUC: GetConversationNotificationSettingsUseCase,
     @Inject(UpdateConversationUserStateUseCase)
     private readonly updateConversationStateUC: UpdateConversationUserStateUseCase,
     @Inject(EnsureConversationMemberUseCase)
@@ -225,32 +204,6 @@ export class ChatController {
     return result;
   }
 
-  // Administration de la relation conseiller-client : réservée aux rôles
-  // habilités (auparavant ouvert à tout utilisateur authentifié).
-  @Post('advisor-client')
-  @UseGuards(RolesGuard)
-  @Roles(RoleName.DIRECTOR, RoleName.ADMIN)
-  async linkAdvisor(@Body() body: LinkAdvisorClientDto) {
-    return this.linkAdvisorClientUseCase.execute(body);
-  }
-
-  @Post('messages')
-  async postMessage(@Body() body: SendMessageDto, @Req() req: Request) {
-    // Le sender est toujours l'utilisateur authentifié : on n'accepte pas de
-    // senderId arbitraire depuis le corps de la requête (usurpation).
-    const senderId = extractUserId(req);
-    await this.assertConversationMember(body.conversationId, senderId);
-    // Conversation gelée (relation advisor-client retirée) : lecture seule.
-    if (!(await this.canUseConversation.isWritable(body.conversationId))) {
-      throw new ForbiddenException('CONVERSATION_LOCKED');
-    }
-    return this.sendMessageUseCase.execute({
-      conversationId: body.conversationId,
-      senderId,
-      content: body.content,
-    });
-  }
-
   @Post('uploads')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(chatFilesInterceptor)
@@ -291,47 +244,11 @@ export class ChatController {
     });
   }
 
-  @Post('messages/:id/read')
-  async markMessageRead(@Param('id') messageId: string) {
-    return this.markMessageReadUseCase.execute({ messageId });
-  }
-
   // Le :userId de l'URL est ignoré au profit de l'utilisateur authentifié :
   // on ne peut lister que SES propres conversations (protection IDOR).
   @Get('conversations/by-user/:userId')
   async listConversationsByUser(@Req() req: Request) {
     return this.listConversationsByUserUseCase.execute({ userId: extractUserId(req) });
-  }
-
-  // Un advisor ne peut lister que SES clients ; DIRECTOR/ADMIN peuvent
-  // consulter la liste de n'importe quel conseiller.
-  @Get('advisor/:advisorId/clients')
-  @UseGuards(RolesGuard)
-  async listClients(@Param('advisorId') advisorId: string, @Req() req: Request) {
-    const roles = extractRoles(req);
-    const isPrivileged = roles.includes(RoleName.DIRECTOR) || roles.includes(RoleName.ADMIN);
-    if (!isPrivileged && advisorId !== extractUserId(req)) {
-      throw new ForbiddenException('Cannot list clients of another advisor');
-    }
-    return this.listClientsOfAdvisor.execute({ advisorId });
-  }
-
-  // Un client ne peut consulter que SON conseiller (ou rôles privilégiés).
-  @Get('client/:clientId/advisor')
-  @UseGuards(RolesGuard)
-  async getAdvisorOfClient(@Param('clientId') clientId: string, @Req() req: Request) {
-    const roles = extractRoles(req);
-    const isPrivileged = roles.includes(RoleName.DIRECTOR) || roles.includes(RoleName.ADMIN);
-    if (!isPrivileged && clientId !== extractUserId(req)) {
-      throw new ForbiddenException('Cannot read advisor of another client');
-    }
-    return this.findAdvisorOfClient.execute({ clientId });
-  }
-
-  @Get('conversations/:id/participants')
-  async listParticipants(@Param('id') conversationId: string, @Req() req: Request) {
-    await this.assertConversationMember(conversationId, extractUserId(req));
-    return this.listParticipantsDetails.execute({ conversationId });
   }
 
   // La conversation accepte-t-elle encore l'écriture ? false = gelée (paire
@@ -372,17 +289,6 @@ export class ChatController {
     return this.setConversationMuteUC.execute({ userId, conversationId, muted: false });
   }
 
-  @Get('conversations/:id/notifications/settings')
-  @UseGuards(JwtAuthGuard)
-  async getConversationNotificationSettings(
-    @Param('id') conversationId: string,
-    @Req() req: Request,
-  ) {
-    const userId = extractUserId(req);
-    await this.assertConversationMember(conversationId, userId);
-    return this.getConversationSettingsUC.execute({ userId, conversationId });
-  }
-
   // ─── Masquage (visibilité individuelle, rien n'est supprimé) ─────────────
   // Ne modifie QUE la visibilité de l'utilisateur connecté : l'historique, les
   // autres participants, le mute et l'appartenance au groupe sont intacts. La
@@ -393,18 +299,6 @@ export class ChatController {
     const userId = extractUserId(req);
     await this.assertConversationMember(conversationId, userId);
     return this.setConversationHidden.execute({ userId, conversationId, hidden: true });
-  }
-
-  @Patch('conversations/:id/unhide')
-  async unhideConversation(@Param('id') conversationId: string, @Req() req: Request) {
-    const userId = extractUserId(req);
-    await this.assertConversationMember(conversationId, userId);
-    // Une conversation gelée (relation advisor-client retirée) ne peut pas
-    // être rouverte manuellement par l'ancien advisor.
-    if (!(await this.canUseConversation.isWritable(conversationId))) {
-      throw new ForbiddenException('CONVERSATION_LOCKED');
-    }
-    return this.setConversationHidden.execute({ userId, conversationId, hidden: false });
   }
 
   // ─── État de lecture ──────────────────────────────────────────────────────

@@ -6,7 +6,6 @@ import { INotificationRepository } from '@forreal/domain';
 import { NotificationRepository } from '@forreal/infrastructure-typeorm';
 import {
   ListNotificationsByUserUseCase,
-  GetUnreadCountUseCase,
   MarkNotificationReadUseCase,
   MarkAllNotificationsReadUseCase,
   MarkNotificationsReadByTargetUseCase,
@@ -22,11 +21,6 @@ import { AuthModule } from '../auth/auth.module';
     {
       provide: ListNotificationsByUserUseCase,
       useFactory: (repo: INotificationRepository) => new ListNotificationsByUserUseCase(repo),
-      inject: [INotificationRepository],
-    },
-    {
-      provide: GetUnreadCountUseCase,
-      useFactory: (repo: INotificationRepository) => new GetUnreadCountUseCase(repo),
       inject: [INotificationRepository],
     },
     {

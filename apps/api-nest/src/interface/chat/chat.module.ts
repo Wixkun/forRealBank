@@ -44,14 +44,8 @@ import {
   AddConversationParticipantUseCase,
   SendMessageUseCase,
   ListMessagesUseCase,
-  MarkMessageReadUseCase,
-  LinkAdvisorClientUseCase,
   ListConversationsByUserUseCase,
-  ListParticipantsDetailsByConversationUseCase,
-  ListClientsOfAdvisorUseCase,
-  FindAdvisorOfClientUseCase,
   SetConversationMuteUseCase,
-  GetConversationNotificationSettingsUseCase,
   UpdateConversationUserStateUseCase,
   EnsureConversationMemberUseCase,
   CreateGroupConversationUseCase,
@@ -165,16 +159,6 @@ import { AuthModule } from '../auth/auth.module';
       inject: [IMessageRepository],
     },
     {
-      provide: MarkMessageReadUseCase,
-      useFactory: (repo: IMessageRepository) => new MarkMessageReadUseCase(repo),
-      inject: [IMessageRepository],
-    },
-    {
-      provide: LinkAdvisorClientUseCase,
-      useFactory: (repo: IAdvisorClientRepository) => new LinkAdvisorClientUseCase(repo),
-      inject: [IAdvisorClientRepository],
-    },
-    {
       provide: ListConversationsByUserUseCase,
       useFactory: (
         participantRepo: IConversationParticipantRepository,
@@ -200,26 +184,6 @@ import { AuthModule } from '../auth/auth.module';
         IConversationNotificationSettingsRepository,
         IConversationUserStateRepository,
       ],
-    },
-    {
-      provide: ListParticipantsDetailsByConversationUseCase,
-      useFactory: (
-        participantRepo: IConversationParticipantRepository,
-        userRepo: IUserRepository,
-      ) => new ListParticipantsDetailsByConversationUseCase(participantRepo, userRepo),
-      inject: [IConversationParticipantRepository, IUserRepository],
-    },
-    {
-      provide: ListClientsOfAdvisorUseCase,
-      useFactory: (advisorClientRepo: IAdvisorClientRepository, userRepo: IUserRepository) =>
-        new ListClientsOfAdvisorUseCase(advisorClientRepo, userRepo),
-      inject: [IAdvisorClientRepository, IUserRepository],
-    },
-    {
-      provide: FindAdvisorOfClientUseCase,
-      useFactory: (advisorClientRepo: IAdvisorClientRepository, userRepo: IUserRepository) =>
-        new FindAdvisorOfClientUseCase(advisorClientRepo, userRepo),
-      inject: [IAdvisorClientRepository, IUserRepository],
     },
     {
       provide: SetConversationHiddenUseCase,
@@ -282,12 +246,6 @@ import { AuthModule } from '../auth/auth.module';
       provide: SetConversationMuteUseCase,
       useFactory: (settingsRepo: IConversationNotificationSettingsRepository) =>
         new SetConversationMuteUseCase(settingsRepo),
-      inject: [IConversationNotificationSettingsRepository],
-    },
-    {
-      provide: GetConversationNotificationSettingsUseCase,
-      useFactory: (settingsRepo: IConversationNotificationSettingsRepository) =>
-        new GetConversationNotificationSettingsUseCase(settingsRepo),
       inject: [IConversationNotificationSettingsRepository],
     },
     {

@@ -19,17 +19,21 @@ export interface Conversation {
 
 interface UseConversationsOptions {
   apiUrl?: string;
+  /** false = pas de fetch (les conversations sont fournies par le parent). */
+  enabled?: boolean;
 }
 
-export function useConversations({ apiUrl = '/api' }: UseConversationsOptions = {}) {
+export function useConversations({
+  apiUrl = '/api',
+  enabled = true,
+}: UseConversationsOptions = {}) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
   const refresh = useCallback(async () => {
-    if (!user?.id) {
-      console.log('[useConversations] Waiting for user to load');
+    if (!enabled || !user?.id) {
       return;
     }
 
@@ -52,7 +56,7 @@ export function useConversations({ apiUrl = '/api' }: UseConversationsOptions = 
     } finally {
       setIsLoading(false);
     }
-  }, [apiUrl, user?.id]);
+  }, [apiUrl, enabled, user?.id]);
 
   useEffect(() => {
     refresh();

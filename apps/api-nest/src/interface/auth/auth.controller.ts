@@ -24,7 +24,6 @@ import { RequestPasswordResetUseCase, ResetPasswordUseCase } from '@forreal/appl
 import { VerifyEmailUseCase } from '@forreal/application';
 import { InitializeClientUseCase } from '@forreal/application';
 import { JwtAuthGuard } from './jwt-auth.guard';
-import { ITokenService } from '@forreal/domain';
 import { IUserRepository } from '@forreal/domain';
 import { AuthErrorMapper } from './error-mapper';
 import { MonitoringService } from '../../metrics/monitoring.service';
@@ -69,9 +68,6 @@ export class AuthController {
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
     private readonly verifyEmailUseCase: VerifyEmailUseCase,
     private readonly initializeClientUseCase: InitializeClientUseCase,
-
-    @Inject(ITokenService)
-    private readonly tokenService: ITokenService,
 
     @Inject(IUserRepository)
     private readonly userRepository: IUserRepository,
@@ -280,39 +276,28 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getAuthenticatedUser(@Req() req: Request) {
-    const token = req.cookies?.['access_token'];
-    if (!token) throw new UnauthorizedException('Missing access token');
-
-    try {
-      const decodedToken = await this.tokenService.verify(token);
-      const user = await this.userRepository.findById(decodedToken.userId);
-
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      if (user.isBanned) {
-        throw new ForbiddenException('Account banned');
-      }
-
-      return {
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          emailVerified: user.emailVerified,
-          emailVerifiedAt: user.emailVerifiedAt,
-          roles: Array.from(user.roles),
-          lastLoginAt: user.lastLoginAt,
-          createdAt: user.createdAt,
-          twoFactorEnabled: user.twoFactorEnabled,
-        },
-      };
-    } catch (error) {
-      console.error('[Auth.me] Error verifying token:', error);
-      throw new UnauthorizedException('Invalid or expired token');
+    // Le JWT (signature, expiration, issuer, audience) a déjà été validé par
+    // JwtAuthGuard ; il reste à recharger l'utilisateur et à revérifier l'état
+    // banni en base (le token peut rester valide quelques minutes après un ban).
+    const user = await this.authenticatedUser(req);
+    if (user.isBanned) {
+      throw new ForbiddenException('Account banned');
     }
+
+    return {
+      success: true,
+      user: {
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        emailVerified: user.emailVerified,
+        emailVerifiedAt: user.emailVerifiedAt,
+        roles: Array.from(user.roles),
+        lastLoginAt: user.lastLoginAt,
+        createdAt: user.createdAt,
+        twoFactorEnabled: user.twoFactorEnabled,
+      },
+    };
   }
 }
