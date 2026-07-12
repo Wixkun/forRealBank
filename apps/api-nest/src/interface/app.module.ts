@@ -26,6 +26,8 @@ import { BeneficiariesModule } from './beneficiaries/beneficiaries.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { TradingModule } from './trading/trading.module';
 import { UsersManagementModule } from './users-management/users-management.module';
+import { CardsModule } from './cards/cards.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -53,6 +55,8 @@ import { UsersManagementModule } from './users-management/users-management.modul
     TransactionsModule,
     TradingModule,
     UsersManagementModule,
+    CardsModule,
+    AnalyticsModule,
     MetricsModule,
   ],
   controllers: [AppController],

@@ -2,7 +2,7 @@ import { cleanPdfText, PDF_COLORS } from '@/lib/pdf';
 
 export interface ReceiptPdfInput {
   title: string; // ex : « Virement émis » / « Virement reçu »
-  amount: string; // montant signé déjà formaté, ex : « - 200,00 € »
+  amount: string; // montant signé déjà formaté, ex : « - 200,00 $ »
   rows: [string, string][];
   generatedAt: string; // date d'édition déjà formatée
   fileName: string;

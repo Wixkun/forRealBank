@@ -368,6 +368,11 @@ CREATE TABLE IF NOT EXISTS cards (
     last_four varchar(4) NOT NULL,
     expiry_date timestamptz NOT NULL,
     status varchar(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'frozen', 'cancelled')),
+    online_payments_enabled boolean NOT NULL DEFAULT true,
+    contactless_enabled boolean NOT NULL DEFAULT true,
+    international_payments_enabled boolean NOT NULL DEFAULT false,
+    spending_limit decimal(10, 2) NOT NULL DEFAULT 2500.00 CHECK (spending_limit BETWEEN 100 AND 20000),
+    withdrawal_limit decimal(10, 2) NOT NULL DEFAULT 500.00 CHECK (withdrawal_limit BETWEEN 20 AND 5000),
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -407,7 +412,9 @@ CREATE TABLE IF NOT EXISTS market_assets (
     symbol varchar(20) NOT NULL UNIQUE,
     name varchar(100) NOT NULL,
     asset_type varchar(20) NOT NULL CHECK (asset_type IN ('stock', 'crypto', 'etf', 'commodity')),
-    is_tradable boolean NOT NULL DEFAULT true,
+    is_tradable boolean NOT NULL DEFAULT false,
+    proposed_by_director_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
+    proposed_at timestamptz NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -636,8 +643,8 @@ BEGIN
     INSERT INTO news (author_id, user_id, title, subtitle, content, status, source, is_active, metadata) VALUES
         (NULL, v_client1_id::varchar,
             'Virement reçu avec succès',
-            '+ 1 250,00 € de Sophie Martin',
-            'Vous avez reçu un virement de 1 250,00 € sur votre compte principal. Le solde a été mis à jour.',
+            '+ 1 250,00 $ de Sophie Martin',
+            'Vous avez reçu un virement de 1 250,00 $ sur votre compte principal. Le solde a été mis à jour.',
             'TRANSACTION', 'AUTOMATIC', true,
             '{"kind":"TRANSFER","direction":"IN","status":"COMPLETED","amount":1250,"currency":"EUR","fees":0,"transactionId":"TRX-20240520-143245-8F7A2C1D","sourceAccountName":"Compte Courant","sourceIban":"FR76 1234 5678 9012 3456 7890 123","destinationAccountName":"Compte Courant","destinationIban":"FR14 2004 1010 0505 0001 3M02 606","beneficiaryName":"Sophie Martin","description":"Loyer mai 2024"}'::jsonb);
 
@@ -648,7 +655,7 @@ BEGIN
             'SECURITY', 'AUTOMATIC', true),
         (NULL, v_client1_id::varchar,
             'Prélèvement automatique programmé',
-            'Un prélèvement de 89,99 € est prévu le 28 de ce mois pour votre abonnement. Vérifiez que votre solde est suffisant.',
+            'Un prélèvement de 89,99 $ est prévu le 28 de ce mois pour votre abonnement. Vérifiez que votre solde est suffisant.',
             'PAYMENT', 'AUTOMATIC', true),
         (NULL, v_client1_id::varchar,
             'Informations de profil mises à jour',
@@ -660,15 +667,15 @@ BEGIN
     INSERT INTO news (author_id, user_id, title, subtitle, content, status, source, is_active, metadata) VALUES
         (NULL, v_client2_id::varchar,
             'Virement effectué',
-            '- 500,00 € vers Compte Épargne',
-            'Votre virement de 500,00 € vers votre compte épargne a été exécuté avec succès.',
+            '- 500,00 $ vers Compte Épargne',
+            'Votre virement de 500,00 $ vers votre compte épargne a été exécuté avec succès.',
             'TRANSACTION', 'AUTOMATIC', true,
             '{"kind":"TRANSFER","direction":"OUT","status":"COMPLETED","amount":500,"currency":"EUR","fees":0,"transactionId":"TRX-20240612-091812-2C4E8A1B","sourceAccountName":"Compte Courant","sourceIban":"FR76 9876 5432 1098 7654 3210 987","destinationAccountName":"Compte Épargne","destinationIban":"FR76 5555 4444 3333 2222 1111 000","description":"Épargne mensuelle"}'::jsonb);
 
     INSERT INTO news (author_id, user_id, title, content, status, source, is_active) VALUES
         (NULL, v_client2_id::varchar,
             'Intérêts crédités',
-            'Des intérêts de 45,80 € ont été crédités sur votre compte épargne (taux annuel 2,75 %).',
+            'Des intérêts de 45,80 $ ont été crédités sur votre compte épargne (taux annuel 2,75 %).',
             'ACCOUNT', 'AUTOMATIC', true);
 
 END $$;
@@ -745,7 +752,7 @@ BEGIN
     VALUES (
         v_client1_id,
         'Virement reçu',
-        'Vous avez reçu un virement de 1 250,00 €.',
+        'Vous avez reçu un virement de 1 250,00 $.',
         'TRANSACTION', 'ACCOUNT', '/accounts', false
     );
 
@@ -842,6 +849,17 @@ BEGIN
         ('GOLD',  'Gold Futures',          'commodity'),
         ('OIL',   'Crude Oil',             'commodity')
     ON CONFLICT (symbol) DO NOTHING;
+
+    -- Catalogue initial proposÃ© par la directrice seedÃ©e. Les commoditÃ©s
+    -- restent hors pÃ©rimÃ¨tre du trading client.
+    UPDATE market_assets
+    SET
+        is_tradable = true,
+        proposed_by_director_id = v_director_id,
+        proposed_at = COALESCE(proposed_at, now())
+    WHERE v_director_id IS NOT NULL
+      AND asset_type IN ('stock', 'etf', 'crypto')
+      AND symbol IN ('AAPL', 'AMZN', 'BTC', 'ETH', 'GOOGL', 'MSFT', 'QQQ', 'SOL', 'SPY', 'TSLA');
 
     IF v_investment_id IS NOT NULL THEN
         INSERT INTO trading_positions (investment_account_id, asset_id, quantity, avg_purchase_price)
@@ -1012,6 +1030,19 @@ BEGIN
 
 END $$;
 
+-- Every existing checking account must have a manageable card, including
+-- accounts added outside the demo seed blocks. Re-running this block is safe.
+INSERT INTO cards (account_id, type, last_four, expiry_date)
+SELECT
+    account.id,
+    'virtual',
+    COALESCE(NULLIF(right(regexp_replace(account.account_number, '[^0-9]', '', 'g'), 4), ''),
+             lpad((floor(random() * 10000))::int::text, 4, '0')),
+    now() + interval '3 years'
+FROM accounts account
+WHERE account.account_type = 'checking'
+  AND NOT EXISTS (SELECT 1 FROM cards card WHERE card.account_id = account.id);
+
 -- ============================================================================
 -- Initialization Complete
 -- ============================================================================
@@ -1024,8 +1055,8 @@ END $$;
 -- Investment : 1 compte investissement par client avec 8 positions chacun
 -- Assets     : BTC ETH SOL AAPL MSFT TSLA GOOGL AMZN SPY QQQ GOLD OIL
 -- News       : 3 globales MANUAL (DIRECTOR/ADVISOR) + 4 ciblées client1 + 2 ciblées client2
--- Client1    : Checking €5 420,50 | Savings €12 350,00 | Invest cash €10 000
--- Client2    : Checking €8 750,80 | Savings €25 600,00 | Invest cash €15 000
+-- Client1    : Checking $5 420,50 | Savings $12 350,00 | Invest cash $10 000
+-- Client2    : Checking $8 750,80 | Savings $25 600,00 | Invest cash $15 000
 -- Notifications:
 --   client1  : bienvenue, message non lu (conv privée), sécurité, transaction, maintenance (lue)
 --   client2  : bienvenue, maintenance (lue)

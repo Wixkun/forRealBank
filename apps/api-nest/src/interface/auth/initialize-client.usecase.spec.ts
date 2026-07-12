@@ -93,6 +93,11 @@ function cardRepo() {
         lastFour: params.lastFour,
         expiryDate: params.expiryDate,
         status: 'active',
+        onlinePaymentsEnabled: true,
+        contactlessEnabled: true,
+        internationalPaymentsEnabled: false,
+        spendingLimit: 2500,
+        withdrawalLimit: 500,
         createdAt: new Date(),
       };
       cards.push(card);
