@@ -26,6 +26,7 @@ export * from './entities/ConversationNotificationSettingsEntity';
 export * from './entities/ConversationUserStateEntity';
 export * from './entities/AdvisorClientHistoryEntity';
 export * from './entities/BanRequestEntity';
+export * from './entities/BeneficiaryEntity';
 
 // repositories
 export * from './repositories/AdvisorClientRepository';

@@ -42,7 +42,8 @@
       "copyrightSuffix": ". Tous droits réservés."
     },
     "authChecking": "Vérification d'authentification...",
-    "accessDenied": "Accès refusé."
+    "accessDenied": "Accès refusé.",
+    "noAccountYet": "Vous n'avez pas encore de compte ?"
   },
   "auth": {
     "login": {
@@ -53,12 +54,17 @@
       "loading": "Connexion...",
       "emailPlaceholder": "exemple@banque.com",
       "passwordPlaceholder": "********",
-      "registrationSuccess": "Inscription réussie ! Connectez-vous.",
+      "registrationSuccess": "Inscription réussie. Vérifiez votre email avant de vous connecter.",
       "accountLocked": "Trop de tentatives échouées. Votre compte est temporairement verrouillé. Veuillez réessayer plus tard.",
       "tooManyAttempts": "Trop de tentatives. Patientez un instant puis réessayez.",
       "loginFailed": "La connexion a échoué",
       "genericError": "Une erreur est survenue lors de la connexion",
-      "forgotPassword": "Mot de passe oublié ?"
+      "forgotPassword": "Mot de passe oublié ?",
+      "verificationSuccess": "Votre email a été vérifié. Vous pouvez maintenant vous connecter.",
+      "emailNotVerified": "Vous devez d'abord vérifier votre adresse email avant de vous connecter.",
+      "twoFactorLabel": "Code de sécurité",
+      "twoFactorPrompt": "Saisissez le code à 6 chiffres de votre application d'authentification.",
+      "invalidTwoFactorCode": "Code de sécurité invalide."
     },
     "register": {
       "title": "Créer un compte",
@@ -68,7 +74,50 @@
       "password": "Mot de passe",
       "submit": "S'inscrire",
       "loading": "Inscription...",
-      "loginLink": "Déjà un compte ? Se connecter"
+      "confirmPassword": "Confirmer le mot de passe",
+      "registerFailed": "L'inscription a échoué",
+      "genericError": "Une erreur est survenue lors de l'inscription",
+      "validation": {
+        "firstNameTooShort": "Le prénom est trop court",
+        "lastNameTooShort": "Le nom est trop court",
+        "invalidEmail": "Adresse email invalide",
+        "passwordTooShort": "Le mot de passe doit contenir au moins 12 caractères",
+        "passwordComplexity": "Le mot de passe doit contenir majuscule, minuscule, chiffre et symbole",
+        "passwordsMismatch": "Les mots de passe ne correspondent pas"
+      }
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Saisissez votre adresse email et nous vous enverrons un lien de réinitialisation.",
+      "email": "Email",
+      "emailPlaceholder": "exemple@banque.com",
+      "submit": "Envoyer le lien",
+      "sending": "Envoi...",
+      "successMessage": "Si un compte existe pour cet email, un lien de réinitialisation a été envoyé.",
+      "genericError": "Une erreur est survenue. Veuillez réessayer.",
+      "rememberedPassword": "Vous vous souvenez de votre mot de passe ?",
+      "backToLogin": "Retour à la connexion"
+    },
+    "resetPassword": {
+      "title": "Réinitialiser le mot de passe",
+      "subtitle": "Choisissez un nouveau mot de passe pour votre compte.",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "submit": "Réinitialiser le mot de passe",
+      "loading": "Réinitialisation...",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+      "invalidLink": "Lien de réinitialisation invalide.",
+      "successMessage": "Mot de passe réinitialisé. Redirection vers la connexion...",
+      "genericError": "Impossible de réinitialiser le mot de passe.",
+      "backToLogin": "Retour à la connexion"
+    },
+    "verifyEmail": {
+      "title": "Vérification de l'email",
+      "loading": "Vérification de votre adresse email...",
+      "success": "Votre adresse email a bien été confirmée. Redirection vers la connexion...",
+      "failed": "Le lien de vérification est invalide ou expiré.",
+      "missingToken": "Le lien de vérification est incomplet.",
+      "backToLogin": "Retour à la connexion"
     }
   },
   "dashboard": {
@@ -130,9 +179,9 @@
         "dashboard": "Tableau de bord",
         "cards": "Mes cartes",
         "trading": "Trading",
-        "beneficiaries": "Bénéficiaires",
         "analytics": "Analyse",
         "messages": "Messages",
+        "settings": "Paramètres",
         "users": "Utilisateurs"
       },
       "quickActions": {
@@ -198,6 +247,41 @@
       "credits": "Crédits",
       "debits": "Débits",
       "period": "Période"
+    },
+    "beneficiaries": {
+      "title": "Mes bénéficiaires",
+      "add": "Ajouter un bénéficiaire",
+      "empty": "Vous n’avez encore aucun bénéficiaire.",
+      "added": "Bénéficiaire ajouté avec succès.",
+      "loadError": "Impossible de charger vos bénéficiaires.",
+      "modal": {
+        "title": "Ajouter un bénéficiaire",
+        "label": "Nom ou libellé",
+        "labelPlaceholder": "Jean Dupont",
+        "iban": "IBAN",
+        "cancel": "Annuler",
+        "confirm": "Ajouter",
+        "saving": "Enregistrement...",
+        "errors": {
+          "duplicate": "Ce bénéficiaire figure déjà dans votre liste.",
+          "invalidIban": "IBAN invalide.",
+          "generic": "L’ajout du bénéficiaire a échoué. Veuillez réessayer."
+        }
+      },
+      "searchPlaceholder": "Rechercher un bénéficiaire...",
+      "searchNoResults": "Aucun bénéficiaire ne correspond à votre recherche.",
+      "editAria": "Modifier {label}",
+      "editModal": {
+        "title": "Modifier le bénéficiaire",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "confirmDelete": "Confirmer la suppression",
+        "deleting": "Suppression...",
+        "errors": {
+          "updateFailed": "La modification du bénéficiaire a échoué.",
+          "deleteFailed": "La suppression du bénéficiaire a échoué."
+        }
+      }
     }
   },
   "errors": {
@@ -715,10 +799,7 @@
       "title": "Profil",
       "firstName": "Prénom",
       "lastName": "Nom",
-      "save": "Enregistrer",
-      "saving": "Enregistrement...",
-      "saved": "Profil mis à jour.",
-      "error": "La mise à jour a échoué.",
+      "readOnlyHint": "Ces informations ne peuvent être modifiées que par votre conseiller.",
       "memberSince": "Membre depuis le {date}",
       "roles": {
         "CLIENT": "Client",

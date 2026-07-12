@@ -1,14 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
-import { apiFetch } from '@/lib/api-client';
-
-const inputClass =
-  'w-full rounded-lg border border-edge-strong bg-input px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary/60';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -20,10 +15,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 /**
- * Paramètres du compte : informations du profil (prénom / nom modifiables via
- * l'endpoint existant PATCH /users/me), langue de l'interface (fr / en, via le
- * segment de locale de l'URL) et apparence (thème sombre / clair, persisté en
- * localStorage par le ThemeContext).
+ * Paramètres du compte : informations du profil (identité en lecture seule —
+ * l'état civil ne se modifie pas en self-service), langue de l'interface
+ * (fr / en, via le segment de locale de l'URL) et apparence (thème sombre /
+ * clair, persisté en localStorage par le ThemeContext).
  */
 export function SettingsPage() {
   const t = useTranslations('settings');
@@ -31,20 +26,8 @@ export function SettingsPage() {
   const router = useRouter();
   const pathname = usePathname() ?? '';
   const searchParams = useSearchParams();
-  const { user, isLoading, refresh } = useAuth();
+  const { user, isLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
-
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<'saved' | 'error' | null>(null);
-
-  useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName);
-      setLastName(user.lastName);
-    }
-  }, [user]);
 
   if (isLoading || !user) {
     return (
@@ -58,24 +41,6 @@ export function SettingsPage() {
   const createdAt = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')
     : null;
-  const profileChanged = firstName.trim() !== user.firstName || lastName.trim() !== user.lastName;
-
-  const saveProfile = async () => {
-    setIsSaving(true);
-    setSaveMessage(null);
-    try {
-      await apiFetch('/users/me', {
-        method: 'PATCH',
-        body: JSON.stringify({ firstName: firstName.trim(), lastName: lastName.trim() }),
-      });
-      await refresh();
-      setSaveMessage('saved');
-    } catch {
-      setSaveMessage('error');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   // Bascule fr ↔ en : remplace le segment de locale de l'URL en conservant le
   // reste du chemin et la query (le middleware next-intl fait le reste).
@@ -119,51 +84,22 @@ export function SettingsPage() {
           </div>
         </div>
 
+        {/* Identité en lecture seule : aucune action de sauvegarde ici. */}
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="block text-fg-muted text-xs mb-1.5" htmlFor="settings-firstname">
-              {t('profile.firstName')}
-            </label>
-            <input
-              id="settings-firstname"
-              type="text"
-              value={firstName}
-              maxLength={100}
-              onChange={(e) => setFirstName(e.target.value)}
-              className={inputClass}
-            />
+            <span className="block text-fg-muted text-xs mb-1.5">{t('profile.firstName')}</span>
+            <p className="rounded-lg border border-edge bg-hover px-3 py-2 text-sm text-fg-secondary">
+              {user.firstName}
+            </p>
           </div>
           <div>
-            <label className="block text-fg-muted text-xs mb-1.5" htmlFor="settings-lastname">
-              {t('profile.lastName')}
-            </label>
-            <input
-              id="settings-lastname"
-              type="text"
-              value={lastName}
-              maxLength={100}
-              onChange={(e) => setLastName(e.target.value)}
-              className={inputClass}
-            />
+            <span className="block text-fg-muted text-xs mb-1.5">{t('profile.lastName')}</span>
+            <p className="rounded-lg border border-edge bg-hover px-3 py-2 text-sm text-fg-secondary">
+              {user.lastName}
+            </p>
           </div>
         </div>
-
-        <div className="mt-3 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => void saveProfile()}
-            disabled={isSaving || !profileChanged || !firstName.trim() || !lastName.trim()}
-            className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50"
-          >
-            {isSaving ? t('profile.saving') : t('profile.save')}
-          </button>
-          {saveMessage === 'saved' && (
-            <span className="text-xs text-tertiary">{t('profile.saved')}</span>
-          )}
-          {saveMessage === 'error' && (
-            <span className="text-xs text-danger">{t('profile.error')}</span>
-          )}
-        </div>
+        <p className="mt-3 text-xs text-fg-subtle">{t('profile.readOnlyHint')}</p>
       </Section>
 
       {/* ── Langue ─────────────────────────────────────────────────────── */}

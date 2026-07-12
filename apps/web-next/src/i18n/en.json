@@ -42,7 +42,8 @@
       "copyrightSuffix": ". All rights reserved."
     },
     "authChecking": "Checking authentication...",
-    "accessDenied": "Access denied."
+    "accessDenied": "Access denied.",
+    "noAccountYet": "Don't have an account yet?"
   },
   "auth": {
     "login": {
@@ -53,12 +54,17 @@
       "loading": "Logging in...",
       "emailPlaceholder": "example@bank.com",
       "passwordPlaceholder": "********",
-      "registrationSuccess": "Registration successful! Please login.",
+      "registrationSuccess": "Registration successful. Please verify your email before logging in.",
       "accountLocked": "Too many failed attempts. Your account is temporarily locked. Please try again later.",
       "tooManyAttempts": "Too many attempts. Please wait a moment and try again.",
       "loginFailed": "Login failed",
       "genericError": "An error occurred during login",
-      "forgotPassword": "Forgot your password?"
+      "forgotPassword": "Forgot your password?",
+      "verificationSuccess": "Your email has been verified. You can now log in.",
+      "emailNotVerified": "You must verify your email address before logging in.",
+      "twoFactorLabel": "Security code",
+      "twoFactorPrompt": "Enter the 6-digit code from your authenticator app.",
+      "invalidTwoFactorCode": "Invalid security code."
     },
     "register": {
       "title": "Create an account",
@@ -68,7 +74,50 @@
       "password": "Password",
       "submit": "Register",
       "loading": "Registering...",
-      "loginLink": "Already have an account? Login"
+      "confirmPassword": "Confirm password",
+      "registerFailed": "Registration failed",
+      "genericError": "An error occurred during registration",
+      "validation": {
+        "firstNameTooShort": "First name is too short",
+        "lastNameTooShort": "Last name is too short",
+        "invalidEmail": "Invalid email address",
+        "passwordTooShort": "Password must be at least 12 characters",
+        "passwordComplexity": "Password must include uppercase, lowercase, number and symbol",
+        "passwordsMismatch": "Passwords do not match"
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subtitle": "Enter your email address and we will send you a reset link.",
+      "email": "Email",
+      "emailPlaceholder": "example@bank.com",
+      "submit": "Send reset link",
+      "sending": "Sending...",
+      "successMessage": "If an account exists for this email, a reset link has been sent.",
+      "genericError": "Something went wrong. Please try again.",
+      "rememberedPassword": "Remembered your password?",
+      "backToLogin": "Back to login"
+    },
+    "resetPassword": {
+      "title": "Reset password",
+      "subtitle": "Choose a new password for your account.",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "submit": "Reset password",
+      "loading": "Resetting...",
+      "passwordsMismatch": "Passwords do not match.",
+      "invalidLink": "Invalid reset link.",
+      "successMessage": "Password reset. Redirecting to login...",
+      "genericError": "Unable to reset the password.",
+      "backToLogin": "Back to login"
+    },
+    "verifyEmail": {
+      "title": "Email verification",
+      "loading": "Verifying your email address...",
+      "success": "Your email address has been confirmed. Redirecting to login...",
+      "failed": "The verification link is invalid or expired.",
+      "missingToken": "The verification link is incomplete.",
+      "backToLogin": "Back to login"
     }
   },
   "dashboard": {
@@ -130,9 +179,9 @@
         "dashboard": "Dashboard",
         "cards": "My cards",
         "trading": "Trading",
-        "beneficiaries": "Beneficiaries",
         "analytics": "Analytics",
         "messages": "Messages",
+        "settings": "Settings",
         "users": "Users"
       },
       "quickActions": {
@@ -198,6 +247,41 @@
       "credits": "Credits",
       "debits": "Debits",
       "period": "Period"
+    },
+    "beneficiaries": {
+      "title": "My beneficiaries",
+      "add": "Add a beneficiary",
+      "empty": "You don't have any beneficiaries yet.",
+      "added": "Beneficiary added successfully.",
+      "loadError": "Unable to load your beneficiaries.",
+      "modal": {
+        "title": "Add a beneficiary",
+        "label": "Name or label",
+        "labelPlaceholder": "Jean Dupont",
+        "iban": "IBAN",
+        "cancel": "Cancel",
+        "confirm": "Add",
+        "saving": "Saving...",
+        "errors": {
+          "duplicate": "This beneficiary is already in your list.",
+          "invalidIban": "Invalid IBAN.",
+          "generic": "Failed to add the beneficiary. Please try again."
+        }
+      },
+      "searchPlaceholder": "Search a beneficiary...",
+      "searchNoResults": "No beneficiary matches your search.",
+      "editAria": "Edit {label}",
+      "editModal": {
+        "title": "Edit beneficiary",
+        "save": "Save",
+        "delete": "Delete",
+        "confirmDelete": "Confirm deletion",
+        "deleting": "Deleting...",
+        "errors": {
+          "updateFailed": "Failed to update the beneficiary.",
+          "deleteFailed": "Failed to delete the beneficiary."
+        }
+      }
     }
   },
   "errors": {
@@ -715,10 +799,7 @@
       "title": "Profile",
       "firstName": "First name",
       "lastName": "Last name",
-      "save": "Save",
-      "saving": "Saving...",
-      "saved": "Profile updated.",
-      "error": "Update failed.",
+      "readOnlyHint": "These details can only be changed by your advisor.",
       "memberSince": "Member since {date}",
       "roles": {
         "CLIENT": "Client",

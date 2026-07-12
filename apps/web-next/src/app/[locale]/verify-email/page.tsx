@@ -3,42 +3,24 @@
 import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { AuthLayout } from '@/features/auth/components/AuthLayout';
 import { buildApiUrl, BROWSER_API_BASE } from '@/lib/env';
 
 function VerifyEmailContent() {
+  const t = useTranslations('auth.verifyEmail');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const locale = pathname.split('/')[1] || 'fr';
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
-  const pageText = {
-    title: locale === 'fr' ? "Verification de l'email" : 'Email verification',
-    loading:
-      locale === 'fr'
-        ? 'Verification de votre adresse email...'
-        : 'Verifying your email address...',
-    success:
-      locale === 'fr'
-        ? 'Votre adresse email a bien ete confirmee. Redirection vers la connexion...'
-        : 'Your email address has been confirmed. Redirecting to login...',
-    failed:
-      locale === 'fr'
-        ? 'Le lien de verification est invalide ou expire.'
-        : 'The verification link is invalid or expired.',
-    missingToken:
-      locale === 'fr'
-        ? 'Le lien de verification est incomplet.'
-        : 'The verification link is incomplete.',
-    backToLogin: locale === 'fr' ? 'Retour a la connexion' : 'Back to login',
-  };
 
   useEffect(() => {
     const token = searchParams?.get('token');
     if (!token) {
       setStatus('error');
-      setMessage(pageText.missingToken);
+      setMessage(t('missingToken'));
       return;
     }
 
@@ -52,27 +34,32 @@ function VerifyEmailContent() {
 
         const data = await response.json().catch(() => ({}));
         if (!response.ok) {
-          throw new Error(data?.message || pageText.failed);
+          throw new Error(data?.message || t('failed'));
         }
 
         setStatus('success');
-        setMessage(pageText.success);
+        setMessage(t('success'));
         setTimeout(() => {
           router.replace(`/${locale}/login?verified=true`);
         }, 1500);
       } catch (error) {
         setStatus('error');
-        setMessage(error instanceof Error ? error.message : pageText.failed);
+        setMessage(error instanceof Error ? error.message : t('failed'));
       }
     };
 
     void verifyEmail();
-  }, [locale, pageText.failed, pageText.missingToken, pageText.success, router, searchParams]);
+  }, [locale, router, searchParams, t]);
 
   return (
-    <AuthLayout title={pageText.title}>
+    <AuthLayout title={t('title')} wallpaper="/verif_mail_wallpaper.png">
       <div className="space-y-4 text-center">
-        {status === 'loading' && <p className="text-sm text-gray-200">{pageText.loading}</p>}
+        {status === 'loading' && (
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+            <p className="text-sm text-gray-200">{t('loading')}</p>
+          </div>
+        )}
         {status !== 'loading' && (
           <div
             className={`px-4 py-3 rounded-lg text-sm border ${
@@ -85,7 +72,7 @@ function VerifyEmailContent() {
           </div>
         )}
         <Link href={`/${locale}/login`} className="text-teal-400 hover:underline text-sm">
-          {pageText.backToLogin}
+          {t('backToLogin')}
         </Link>
       </div>
     </AuthLayout>
@@ -96,8 +83,8 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center force-dark bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
-          <div className="text-fg">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center force-dark bg-surface-0">
+          <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
         </div>
       }
     >

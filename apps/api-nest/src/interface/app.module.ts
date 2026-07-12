@@ -22,6 +22,7 @@ import { ChatModule } from './chat/chat.module';
 import { NewsModule } from './feed/news.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AccountsModule } from './accounts/accounts.module';
+import { BeneficiariesModule } from './beneficiaries/beneficiaries.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { TradingModule } from './trading/trading.module';
 import { UsersManagementModule } from './users-management/users-management.module';
@@ -50,6 +51,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     NewsModule,
     NotificationsModule,
     AccountsModule,
+    BeneficiariesModule,
     TransactionsModule,
     TradingModule,
     UsersManagementModule,

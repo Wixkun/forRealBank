@@ -204,6 +204,7 @@ The API follows a modular architecture:
 /api/users           → Profile & user administration
 /api/management      → Users management (directory, accounts, ban requests)
 /api/accounts        → Account summary
+/api/beneficiaries   → Transfer beneficiaries
 /api/transactions    → Transactions & transfers
 /api/trading         → Trading operations (UI en refonte)
 /api/chat            → Messaging (REST + WebSocket /api/socket.io)
@@ -219,11 +220,11 @@ All pages are locale-prefixed (`/en/...`, `/fr/...`):
 - `/` → Landing page
 - `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email` → Auth flows
 - `/dashboard` → Accounts overview & news feed
-- `/dashboard/transfer` → Transfers
+- `/dashboard/transfer` → Transfers & beneficiaries
 - `/dashboard/messages` → Messaging
 - `/dashboard/users` → Users management (staff roles)
 - `/dashboard/settings`, `/dashboard/security` → Profile & 2FA
-- `/dashboard/trading`, `/dashboard/analytics`, `/dashboard/beneficiaries` → Coming soon
+- `/dashboard/trading`, `/dashboard/analytics` → Coming soon
 - `/banned` → Banned account notice
 
 ## Docker Setup

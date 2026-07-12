@@ -10,19 +10,12 @@ import { RoleEntity } from '@forreal/infrastructure-typeorm';
 import { UserRepository } from '@forreal/infrastructure-typeorm';
 
 import { RolesGuard } from '../auth/roles.guard';
-import { UpdateUserProfileUseCase } from '@forreal/application';
 import { DeleteOwnAccountUseCase } from '@forreal/application';
 import { ListUsersUseCase } from '@forreal/application';
 import { UpdateUserRolesUseCase } from '@forreal/application';
 import { DeleteUserByAdminUseCase } from '@forreal/application';
 import { BanUserUseCase } from '@forreal/application';
 import { UnbanUserUseCase } from '@forreal/application';
-
-const updateProfileProvider: Provider = {
-  provide: UpdateUserProfileUseCase,
-  useFactory: (users: IUserRepository) => new UpdateUserProfileUseCase(users),
-  inject: [IUserRepository],
-};
 
 const deleteOwnProvider: Provider = {
   provide: DeleteOwnAccountUseCase,
@@ -66,7 +59,6 @@ const unbanUserProvider: Provider = {
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
     RolesGuard,
-    updateProfileProvider,
     deleteOwnProvider,
     listUsersProvider,
     updateRolesProvider,
