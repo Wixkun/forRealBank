@@ -110,14 +110,14 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
           <path d="M19 6l-1 14H6L5 6" />
           <path d="M10 11v6M14 11v6" />
         </svg>
-        <span className="text-red-400 text-xs font-semibold">{t('delete')}</span>
+        <span className="text-danger text-xs font-semibold">{t('delete')}</span>
       </div>
 
       <div
         className="absolute inset-0 rounded-xl flex items-center justify-end pr-4 gap-2"
         style={{ opacity: isLeft ? progress : 0, background: `rgba(34,197,94,${0.15 * progress})` }}
       >
-        <span className="text-green-400 text-xs font-semibold">{t('archive')}</span>
+        <span className="text-success text-xs font-semibold">{t('archive')}</span>
         <svg
           width="14"
           height="14"
@@ -134,7 +134,7 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
       </div>
 
       <div
-        className="relative flex items-start gap-3 p-3.5 bg-surface-2 rounded-xl border border-white/4 cursor-pointer select-none hover:border-white/10 transition-colors"
+        className="relative flex items-start gap-3 p-3.5 bg-surface-2 rounded-xl border border-edge cursor-pointer select-none hover:border-edge-strong transition-colors"
         style={{
           transform: `translateX(${translateX}px)`,
           transition: isDragging ? 'none' : 'transform 240ms cubic-bezier(0.25,0.46,0.45,0.94)',
@@ -149,7 +149,7 @@ function DraggableNewsItem({ item, onArchive, onDelete, onOpen, isNew }: Draggab
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <span className="text-white text-sm font-semibold leading-snug truncate">
+            <span className="text-fg text-sm font-semibold leading-snug truncate">
               {item.title}
             </span>
             <span className="text-fg-muted text-xs whitespace-nowrap shrink-0 mt-0.5">
@@ -430,14 +430,14 @@ export default function NewsFeed({
   return (
     <div className="p-5">
       {canPublish && !showArchived && (
-        <div className="mb-5 pb-5 border-b border-white/5">
+        <div className="mb-5 pb-5 border-b border-edge">
           <CreateNewsInlineForm apiUrl={apiUrl} onCreatedAction={loadNews} />
         </div>
       )}
 
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2.5">
-          <h3 className="font-semibold text-white text-base">
+          <h3 className="font-semibold text-fg text-base">
             {showArchived ? t('archivedTitle') : t('title')}
           </h3>
           {!showArchived && news.length > 0 && (
@@ -478,7 +478,7 @@ export default function NewsFeed({
         <p className="text-fg-muted text-xs mb-2.5 flex items-center gap-1.5">
           <span className="text-green-500">←</span> {t('hintArchive')}
           <span className="mx-1 text-fg-subtle">·</span>
-          {t('hintDelete')} <span className="text-red-400">→</span>
+          {t('hintDelete')} <span className="text-danger">→</span>
         </p>
       )}
 
@@ -495,7 +495,7 @@ export default function NewsFeed({
               <div
                 key={item.id}
                 onClick={() => (selectionMode ? toggleSelect(item.id) : openNews(item))}
-                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${selected ? 'bg-primary/10 border-primary/40' : 'bg-surface-2/50 border-white/4 hover:border-white/10'}`}
+                className={`flex items-center gap-3 p-3 rounded-xl border transition-colors cursor-pointer ${selected ? 'bg-primary/10 border-primary/40' : 'bg-surface-2/50 border-edge hover:border-edge-strong'}`}
               >
                 {selectionMode && (
                   <div
@@ -539,7 +539,7 @@ export default function NewsFeed({
                 <div
                   key={item.id}
                   onClick={() => toggleSelect(item.id)}
-                  className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors select-none ${selected ? 'bg-primary/10 border-primary/40' : 'bg-surface-2 border-white/4'}`}
+                  className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-colors select-none ${selected ? 'bg-primary/10 border-primary/40' : 'bg-surface-2 border-edge'}`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${selected ? 'border-tertiary bg-tertiary' : 'border-fg-subtle'}`}
@@ -552,7 +552,7 @@ export default function NewsFeed({
                     {cfg.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-sm font-semibold leading-snug truncate">
+                    <p className="text-fg text-sm font-semibold leading-snug truncate">
                       {item.title}
                     </p>
                     <p className="text-fg-muted text-xs mt-0.5 line-clamp-1 leading-relaxed">
@@ -577,7 +577,7 @@ export default function NewsFeed({
       </div>
 
       {selectionMode && selectedIds.size > 0 && (
-        <div className="mt-3 p-3 bg-surface-2 rounded-xl border border-white/8 flex items-center justify-between gap-2">
+        <div className="mt-3 p-3 bg-surface-2 rounded-xl border border-edge flex items-center justify-between gap-2">
           <span className="text-fg-muted text-xs">
             {t('selected', { count: selectedIds.size })}
           </span>
@@ -592,14 +592,14 @@ export default function NewsFeed({
             ) : (
               <button
                 onClick={handleBulkArchive}
-                className="text-xs px-2.5 py-1 rounded-lg bg-green-500/15 text-green-400 hover:bg-green-500/25 transition"
+                className="text-xs px-2.5 py-1 rounded-lg bg-green-500/15 text-success hover:bg-green-500/25 transition"
               >
                 {t('archive')}
               </button>
             )}
             <button
               onClick={handleBulkDelete}
-              className="text-xs px-2.5 py-1 rounded-lg bg-red-500/15 text-red-400 hover:bg-red-500/25 transition"
+              className="text-xs px-2.5 py-1 rounded-lg bg-red-500/15 text-danger hover:bg-red-500/25 transition"
             >
               {t('delete')}
             </button>

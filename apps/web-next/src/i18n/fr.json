@@ -125,6 +125,7 @@
       "welcomeBack": "Bon retour, {name}",
       "overviewSubtitle": "Voici votre aperçu financier du jour.",
       "statement": "Relevé",
+      "settingsAria": "Paramètres",
       "nav": {
         "dashboard": "Tableau de bord",
         "trading": "Trading",
@@ -704,6 +705,41 @@
         "tooMany": "Maximum {count} pièces jointes.",
         "submitFailed": "L'envoi de la demande a échoué."
       }
+    }
+  },
+  "settings": {
+    "title": "Paramètres",
+    "subtitle": "Gérez votre profil, la langue et l'apparence de l'application.",
+    "profile": {
+      "title": "Profil",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "saved": "Profil mis à jour.",
+      "error": "La mise à jour a échoué.",
+      "memberSince": "Membre depuis le {date}",
+      "roles": {
+        "CLIENT": "Client",
+        "ADVISOR": "Conseiller",
+        "DIRECTOR": "Directeur",
+        "ADMIN": "Administrateur"
+      }
+    },
+    "language": {
+      "title": "Langue",
+      "subtitle": "Choisissez la langue de l'interface."
+    },
+    "appearance": {
+      "title": "Apparence",
+      "subtitle": "Choisissez entre le mode sombre et le mode clair.",
+      "dark": "Sombre",
+      "light": "Clair"
+    },
+    "security": {
+      "title": "Sécurité",
+      "subtitle": "Authentification à deux facteurs et protection du compte.",
+      "manage": "Gérer la sécurité"
     }
   },
   "banned": {

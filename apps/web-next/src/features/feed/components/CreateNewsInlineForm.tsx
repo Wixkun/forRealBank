@@ -20,7 +20,7 @@ const STATUS_OPTIONS: { value: NewsStatus; label: string; color: string; dot: st
 
 const MAX_IMAGES = 10;
 const EDITOR_IMG_CLASS =
-  'my-2 max-w-full max-h-48 h-auto rounded-lg border border-white/10 object-contain';
+  'my-2 max-w-full max-h-48 h-auto rounded-lg border border-edge-strong object-contain';
 
 // Sérialise le contenu de l'éditeur en texte brut avec marqueurs `![image](src)`.
 function serializeNode(node: Node): string {
@@ -251,14 +251,14 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
 
   return (
     <>
-      <h3 className="text-base font-semibold text-white mb-3">{t('title')}</h3>
+      <h3 className="text-base font-semibold text-fg mb-3">{t('title')}</h3>
 
       {message && (
         <div
           className={`mb-3 text-xs px-3 py-2 rounded-lg border ${
             message.ok
               ? 'bg-primary/10 border-primary/40 text-tertiary'
-              : 'bg-red-500/10 border-red-500/30 text-red-300'
+              : 'bg-red-500/10 border-red-500/30 text-danger'
           }`}
         >
           {message.text}
@@ -276,8 +276,8 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
                 onClick={() => setStatus(opt.value)}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
                   status === opt.value
-                    ? `${opt.color} border-current bg-white/5`
-                    : 'text-fg-muted border-white/5 hover:text-fg-secondary hover:border-white/10'
+                    ? `${opt.color} border-current bg-hover`
+                    : 'text-fg-muted border-edge hover:text-fg-secondary hover:border-edge-strong'
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
@@ -292,7 +292,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
+            className="w-full bg-input border border-edge-strong rounded-lg px-3 py-2 text-fg text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
             required
             maxLength={120}
             placeholder="Titre de l'actualité"
@@ -304,7 +304,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
           <input
             value={subtitle}
             onChange={(e) => setSubtitle(e.target.value)}
-            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
+            className="w-full bg-input border border-edge-strong rounded-lg px-3 py-2 text-fg text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
             required
             maxLength={180}
             placeholder="Résumé affiché dans le fil"
@@ -318,7 +318,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
               <button
                 type="button"
                 onClick={() => setShowEmojiPicker((v) => !v)}
-                className="p-1 rounded text-fg-muted hover:text-fg-secondary hover:bg-white/5 transition"
+                className="p-1 rounded text-fg-muted hover:text-fg-secondary hover:bg-hover transition"
                 aria-label="Emoji"
                 title="Emoji"
               >
@@ -341,7 +341,7 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
               <button
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
-                className="p-1 rounded text-fg-muted hover:text-fg-secondary hover:bg-white/5 transition"
+                className="p-1 rounded text-fg-muted hover:text-fg-secondary hover:bg-hover transition"
                 aria-label="Image"
                 title="Image"
               >
@@ -389,10 +389,10 @@ export function CreateNewsInlineForm({ apiUrl = '/api', onCreatedAction }: Props
                 setDragOver(true);
               }}
               onDragLeave={() => setDragOver(false)}
-              className={`w-full bg-black/30 border rounded-lg px-3 py-2 text-white text-sm focus:outline-none min-h-24 whitespace-pre-wrap wrap-break-word transition-colors ${
+              className={`w-full bg-input border rounded-lg px-3 py-2 text-fg text-sm focus:outline-none min-h-24 whitespace-pre-wrap wrap-break-word transition-colors ${
                 dragOver
                   ? 'border-primary/60 bg-primary/5'
-                  : 'border-white/10 focus:border-primary/60'
+                  : 'border-edge-strong focus:border-primary/60'
               }`}
             />
             {!hasContent && (

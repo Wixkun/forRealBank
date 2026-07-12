@@ -41,13 +41,13 @@ export default function ForgotPasswordPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center 
-      bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800
+      force-dark bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800
       bg-cover bg-center relative"
       style={{ backgroundImage: "url('/wallpaper.jpeg')" }}
     >
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-input" />
 
-      <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 text-white">
+      <div className="relative z-10 w-full max-w-md bg-hover-strong backdrop-blur-lg border border-edge-strong rounded-2xl shadow-2xl p-8 text-fg">
         <form onSubmit={handleSubmit} className="space-y-4">
           {message && (
             <div className="bg-green-500/20 border border-green-500/50 text-green-100 px-4 py-2 rounded-lg text-sm">
@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
               placeholder="example@bank.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
+              className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 
               focus:outline-none focus:ring-2 focus:ring-teal-400"
               required
             />

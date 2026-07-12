@@ -8,7 +8,7 @@ import { generateStatementPdf } from '@/features/statements/generateStatementPdf
 import { generateTransactionDetailPdf } from '@/features/users/generateTransactionDetailPdf';
 
 const inputClass =
-  'w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary/60 [color-scheme:dark]';
+  'w-full bg-input border border-edge-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-primary/60 [color-scheme:dark]';
 
 /**
  * Transactions d'un compte client (lecture seule) : filtre par date / période
@@ -131,7 +131,7 @@ export function AccountTransactionsView({
   return (
     <div className="px-5 py-4 space-y-4">
       <div>
-        <h3 className="text-white text-sm font-semibold">{maskedNumber}</h3>
+        <h3 className="text-fg text-sm font-semibold">{maskedNumber}</h3>
         <p className="text-xs text-fg-muted">
           {ownerName}
           {account.kind === 'investment' && ` · ${t('investmentNote')}`}
@@ -161,7 +161,7 @@ export function AccountTransactionsView({
           />
         </div>
       </div>
-      {!rangeValid && <p className="text-amber-300 text-xs">{t('invalidRange')}</p>}
+      {!rangeValid && <p className="text-warning text-xs">{t('invalidRange')}</p>}
 
       <button
         type="button"
@@ -185,7 +185,7 @@ export function AccountTransactionsView({
         </svg>
         {isGenerating ? t('generating') : t('downloadStatement')}
       </button>
-      {pdfError && <p className="text-xs text-red-400">{t('pdfError')}</p>}
+      {pdfError && <p className="text-xs text-danger">{t('pdfError')}</p>}
 
       {/* Liste des transactions */}
       {isLoading ? (
@@ -193,11 +193,11 @@ export function AccountTransactionsView({
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
         </div>
       ) : error ? (
-        <p className="text-sm text-red-300">{t('loadError')}</p>
+        <p className="text-sm text-danger">{t('loadError')}</p>
       ) : items.length === 0 ? (
         <p className="text-sm text-fg-muted">{t('empty')}</p>
       ) : (
-        <ul className="divide-y divide-white/5 rounded-xl border border-white/5 bg-black/20">
+        <ul className="divide-y divide-edge rounded-xl border border-edge bg-input">
           {items.map((tx) => {
             const isCredit = tx.amount >= 0;
             const isExpanded = expandedId === tx.id;
@@ -207,38 +207,36 @@ export function AccountTransactionsView({
                   type="button"
                   onClick={() => setExpandedId(isExpanded ? null : tx.id)}
                   aria-expanded={isExpanded}
-                  className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset"
+                  className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate text-sm text-white">
-                      {tx.description || '—'}
-                    </span>
+                    <span className="block truncate text-sm text-fg">{tx.description || '—'}</span>
                     <span className="block text-xs text-fg-muted">
                       {new Date(tx.date).toLocaleDateString(dateLocale)}
                     </span>
                   </span>
                   <span
-                    className={`shrink-0 text-sm font-semibold ${isCredit ? 'text-tertiary' : 'text-red-300'}`}
+                    className={`shrink-0 text-sm font-semibold ${isCredit ? 'text-tertiary' : 'text-danger'}`}
                   >
                     {isCredit ? '+' : '-'} {money(tx.amount)}
                   </span>
                 </button>
                 {isExpanded && (
-                  <div className="space-y-2 border-t border-white/5 bg-black/20 px-3 py-3 text-xs">
+                  <div className="space-y-2 border-t border-edge bg-input px-3 py-3 text-xs">
                     <div className="grid grid-cols-2 gap-2 text-fg-muted">
                       <span>{t('detail.balanceAfter')}</span>
-                      <span className="text-right text-white">{money(tx.balance)}</span>
+                      <span className="text-right text-fg">{money(tx.balance)}</span>
                       <span>{t('detail.type')}</span>
-                      <span className="text-right text-white">
+                      <span className="text-right text-fg">
                         {isCredit ? t('detail.credit') : t('detail.debit')}
                       </span>
                       <span>{t('detail.reference')}</span>
-                      <span className="truncate text-right text-white">{tx.id}</span>
+                      <span className="truncate text-right text-fg">{tx.id}</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => void downloadTransactionDetail(tx)}
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-fg-secondary hover:bg-white/10 transition"
+                      className="w-full rounded-lg border border-edge-strong bg-hover px-3 py-2 text-xs font-semibold text-fg-secondary hover:bg-hover-strong transition"
                     >
                       {t('downloadDetail')}
                     </button>

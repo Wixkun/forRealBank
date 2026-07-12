@@ -99,7 +99,7 @@ export function ReassignAdvisorModalView({
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t('searchPlaceholder')}
           aria-label={t('searchPlaceholder')}
-          className="w-full rounded-lg border border-white/10 bg-black/30 py-2 pl-9 pr-3 text-sm text-white placeholder:text-fg-subtle focus:outline-none focus:border-primary/60"
+          className="w-full rounded-lg border border-edge-strong bg-input py-2 pl-9 pr-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary/60"
         />
       </div>
 
@@ -108,28 +108,28 @@ export function ReassignAdvisorModalView({
           <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
         </div>
       ) : error ? (
-        <p className="text-sm text-red-300">{t('loadError')}</p>
+        <p className="text-sm text-danger">{t('loadError')}</p>
       ) : candidates.length === 0 ? (
         <p className="text-sm text-fg-muted">
           {search.trim() ? tUsers('emptySearch') : t('empty')}
         </p>
       ) : (
-        <ul className="divide-y divide-white/5 rounded-xl border border-white/5 bg-black/20">
+        <ul className="divide-y divide-edge rounded-xl border border-edge bg-input">
           {candidates.map((advisor) => (
             <li key={advisor.id}>
               <button
                 type="button"
                 onClick={() => void choose(advisor.id)}
                 disabled={advisor.isBanned || submittingId !== null}
-                className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset"
+                className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left transition hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset"
               >
                 <span className="min-w-0">
                   <span className="flex items-center gap-2">
-                    <span className="truncate text-sm text-white">
+                    <span className="truncate text-sm text-fg">
                       {advisor.firstName} {advisor.lastName}
                     </span>
                     {advisor.isBanned && (
-                      <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-300">
+                      <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-danger">
                         {t('banned')}
                       </span>
                     )}
@@ -152,7 +152,7 @@ export function ReassignAdvisorModalView({
           ))}
         </ul>
       )}
-      {submitError && <p className="text-xs text-red-400">{t('error')}</p>}
+      {submitError && <p className="text-xs text-danger">{t('error')}</p>}
     </div>
   );
 }

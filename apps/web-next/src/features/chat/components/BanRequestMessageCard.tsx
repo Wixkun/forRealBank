@@ -49,9 +49,9 @@ export function BanRequestMessageCard({
   };
 
   const statusStyles: Record<BanRequestCard['status'], string> = {
-    PENDING: 'bg-amber-500/15 text-amber-300',
-    ACCEPTED: 'bg-red-500/15 text-red-300',
-    REJECTED: 'bg-white/10 text-fg-muted',
+    PENDING: 'bg-amber-500/15 text-warning',
+    ACCEPTED: 'bg-red-500/15 text-danger',
+    REJECTED: 'bg-hover-strong text-fg-muted',
   };
 
   return (
@@ -61,7 +61,7 @@ export function BanRequestMessageCard({
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+        <p className={`text-sm font-semibold ${isDark ? 'text-fg' : 'text-gray-900'}`}>
           {t('title')}
         </p>
         <span
@@ -91,7 +91,7 @@ export function BanRequestMessageCard({
       <p
         className={`whitespace-pre-wrap wrap-break-word rounded-lg border px-3 py-2 text-sm ${
           isDark
-            ? 'border-white/10 bg-black/20 text-fg'
+            ? 'border-edge-strong bg-input text-fg'
             : 'border-gray-200 bg-gray-50 text-gray-900'
         }`}
       >
@@ -117,7 +117,7 @@ export function BanRequestMessageCard({
         </div>
       )}
 
-      {error && <p className="text-xs text-red-400">{t('error')}</p>}
+      {error && <p className="text-xs text-danger">{t('error')}</p>}
 
       {request.canDecide && !isRejecting && (
         <div className="flex gap-2">
@@ -135,7 +135,7 @@ export function BanRequestMessageCard({
             disabled={isSubmitting}
             className={`flex-1 rounded-lg border px-3 py-2 text-xs font-semibold transition disabled:opacity-50 ${
               isDark
-                ? 'border-white/10 bg-white/5 text-fg-secondary hover:bg-white/10'
+                ? 'border-edge-strong bg-hover text-fg-secondary hover:bg-hover-strong'
                 : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -154,7 +154,7 @@ export function BanRequestMessageCard({
             placeholder={t('commentPlaceholder')}
             className={`w-full resize-y rounded-lg border px-3 py-2 text-sm focus:outline-none ${
               isDark
-                ? 'border-white/10 bg-black/30 text-white placeholder:text-fg-subtle focus:border-primary/60'
+                ? 'border-edge-strong bg-input text-fg placeholder:text-fg-subtle focus:border-primary/60'
                 : 'border-gray-300 bg-white text-gray-900 focus:border-teal-500'
             }`}
           />
@@ -173,7 +173,7 @@ export function BanRequestMessageCard({
               disabled={isSubmitting}
               className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${
                 isDark
-                  ? 'border-white/10 bg-white/5 text-fg-secondary hover:bg-white/10'
+                  ? 'border-edge-strong bg-hover text-fg-secondary hover:bg-hover-strong'
                   : 'border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100'
               }`}
             >

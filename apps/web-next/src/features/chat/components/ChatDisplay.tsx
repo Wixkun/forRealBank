@@ -56,7 +56,7 @@ function AttachmentView({
           src={attachment.url}
           alt={attachment.name || imageAlt}
           loading="lazy"
-          className="max-w-full max-h-64 h-auto w-auto rounded-lg border border-white/10 object-contain"
+          className="max-w-full max-h-64 h-auto w-auto rounded-lg border border-edge-strong object-contain"
         />
       </a>
     );
@@ -68,13 +68,15 @@ function AttachmentView({
       rel="noopener noreferrer"
       className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
         isOwnMessage
-          ? 'border-white/20 bg-white/10 text-white hover:bg-white/20'
+          ? // Pièce jointe dans MA bulle (fond teal constant) : blanc fixe,
+            // indépendant du thème.
+            'border-white/20 bg-white/10 text-white hover:bg-white/20'
           : isDark
-            ? 'border-white/10 bg-surface-3 text-fg hover:bg-white/10'
+            ? 'border-edge-strong bg-surface-3 text-fg hover:bg-hover-strong'
             : 'border-gray-200 bg-gray-50 text-gray-900 hover:bg-gray-100'
       }`}
     >
-      <span className={isOwnMessage ? 'text-white/80' : 'text-red-400'}>
+      <span className={isOwnMessage ? 'text-white/80' : 'text-danger'}>
         <IconPdf />
       </span>
       <span className="min-w-0">
@@ -305,7 +307,7 @@ export default function ChatDisplay({
       <div
         className={`shrink-0 flex items-center justify-between px-6 py-4 border-b ${
           isDark
-            ? 'border-white/5 bg-surface-2'
+            ? 'border-edge bg-surface-2'
             : 'border-gray-200 bg-linear-to-r from-teal-50 to-blue-50'
         }`}
       >
@@ -314,7 +316,7 @@ export default function ChatDisplay({
             {firstLetter}
           </div>
           <div>
-            <h3 className={`font-semibold text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`font-semibold text-lg ${isDark ? 'text-fg' : 'text-gray-900'}`}>
               {displayName}
             </h3>
             <div className="flex items-center gap-2">
@@ -333,7 +335,7 @@ export default function ChatDisplay({
         {!isConnected && (
           <div
             className={`text-sm px-3 py-1 rounded-full ${
-              isDark ? 'text-yellow-400 bg-yellow-900/30' : 'text-yellow-600 bg-yellow-50'
+              isDark ? 'text-warning bg-yellow-900/30' : 'text-yellow-600 bg-yellow-50'
             }`}
           >
             {t('display.reconnecting')}
@@ -431,7 +433,7 @@ export default function ChatDisplay({
                           : isDirector
                             ? 'bg-red-500 text-white rounded-bl-none'
                             : isDark
-                              ? 'bg-surface-2 text-fg rounded-bl-none border border-white/10'
+                              ? 'bg-surface-2 text-fg rounded-bl-none border border-edge-strong'
                               : 'bg-white text-gray-900 rounded-bl-none border border-gray-200'
                       }`}
                     >
@@ -475,7 +477,7 @@ export default function ChatDisplay({
                 <div
                   className={`px-4 py-3 rounded-lg rounded-bl-none ${
                     isDark
-                      ? 'bg-surface-2 text-fg border border-white/10'
+                      ? 'bg-surface-2 text-fg border border-edge-strong'
                       : 'bg-white text-gray-900 border border-gray-200'
                   }`}
                 >
@@ -514,7 +516,7 @@ export default function ChatDisplay({
           <div
             className={`border-t px-6 py-4 text-center text-sm ${
               isDark
-                ? 'border-white/5 bg-surface-2 text-fg-muted'
+                ? 'border-edge bg-surface-2 text-fg-muted'
                 : 'border-gray-200 bg-gray-50 text-gray-500'
             }`}
           >

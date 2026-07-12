@@ -125,6 +125,7 @@
       "welcomeBack": "Welcome back, {name}",
       "overviewSubtitle": "Here's your financial overview for today.",
       "statement": "Statement",
+      "settingsAria": "Settings",
       "nav": {
         "dashboard": "Dashboard",
         "trading": "Trading",
@@ -704,6 +705,41 @@
         "tooMany": "Maximum {count} attachments.",
         "submitFailed": "Failed to send the request."
       }
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your profile, language and application appearance.",
+    "profile": {
+      "title": "Profile",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Profile updated.",
+      "error": "Update failed.",
+      "memberSince": "Member since {date}",
+      "roles": {
+        "CLIENT": "Client",
+        "ADVISOR": "Advisor",
+        "DIRECTOR": "Director",
+        "ADMIN": "Administrator"
+      }
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "Choose the interface language."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Choose between dark and light mode.",
+      "dark": "Dark",
+      "light": "Light"
+    },
+    "security": {
+      "title": "Security",
+      "subtitle": "Two-factor authentication and account protection.",
+      "manage": "Manage security"
     }
   },
   "banned": {

@@ -74,9 +74,7 @@ function EmptyState({
             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
           />
         </svg>
-        <h3 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-          {title}
-        </h3>
+        <h3 className={`text-sm font-medium ${isDark ? 'text-fg' : 'text-gray-900'}`}>{title}</h3>
         {subtitle && (
           <p className={`text-sm mt-1 ${isDark ? 'text-fg-muted' : 'text-gray-500'}`}>{subtitle}</p>
         )}
@@ -193,13 +191,13 @@ export default function ChatPagePresenter({
       <main className="flex-1 min-h-0 overflow-hidden">
         <div
           className={`relative rounded-lg shadow-lg overflow-hidden flex h-full min-h-0 border ${
-            isDark ? 'bg-surface-1 border-white/5' : 'bg-white border-transparent'
+            isDark ? 'bg-surface-1 border-edge' : 'bg-white border-transparent'
           }`}
         >
           {/* ── Colonne gauche : conversations (drawer < md) ─────────────── */}
           <div
             className={`hidden md:flex w-72 xl:w-80 shrink-0 flex-col min-h-0 border-r ${
-              isDark ? 'border-white/5' : 'border-gray-200'
+              isDark ? 'border-edge' : 'border-gray-200'
             }`}
           >
             {conversationsColumn}
@@ -212,7 +210,7 @@ export default function ChatPagePresenter({
             {/* Barre d'accès aux panneaux latéraux sur écrans étroits. */}
             <div
               className={`flex md:hidden xl:hidden items-center justify-between gap-2 border-b px-3 py-2 md:justify-end ${
-                isDark ? 'border-white/5' : 'border-gray-200'
+                isDark ? 'border-edge' : 'border-gray-200'
               }`}
             >
               <button
@@ -221,7 +219,7 @@ export default function ChatPagePresenter({
                 aria-expanded={isListDrawerOpen}
                 className={`md:hidden rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                   isDark
-                    ? 'border-white/10 text-fg-secondary hover:bg-white/5'
+                    ? 'border-edge-strong text-fg-secondary hover:bg-hover'
                     : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -234,7 +232,7 @@ export default function ChatPagePresenter({
                   aria-expanded={isDirectoryDrawerOpen}
                   className={`xl:hidden rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                     isDark
-                      ? 'border-white/10 text-fg-secondary hover:bg-white/5'
+                      ? 'border-edge-strong text-fg-secondary hover:bg-hover'
                       : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -246,7 +244,7 @@ export default function ChatPagePresenter({
             {showDirectory && (
               <div
                 className={`hidden md:flex xl:hidden items-center justify-end gap-2 border-b px-3 py-2 ${
-                  isDark ? 'border-white/5' : 'border-gray-200'
+                  isDark ? 'border-edge' : 'border-gray-200'
                 }`}
               >
                 <button
@@ -255,7 +253,7 @@ export default function ChatPagePresenter({
                   aria-expanded={isDirectoryDrawerOpen}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
                     isDark
-                      ? 'border-white/10 text-fg-secondary hover:bg-white/5'
+                      ? 'border-edge-strong text-fg-secondary hover:bg-hover'
                       : 'border-gray-200 text-gray-700 hover:bg-gray-50'
                   }`}
                 >
@@ -315,7 +313,7 @@ export default function ChatPagePresenter({
           {showDirectory && (
             <div
               className={`hidden xl:flex w-72 shrink-0 flex-col min-h-0 border-l ${
-                isDark ? 'border-white/5' : 'border-gray-200'
+                isDark ? 'border-edge' : 'border-gray-200'
               }`}
             >
               {directoryColumn}

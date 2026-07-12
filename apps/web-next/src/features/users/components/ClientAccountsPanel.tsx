@@ -37,7 +37,7 @@ export function ClientAccountsPanel({
             key={account.id}
             type="button"
             onClick={() => onOpenAccount(account)}
-            className="rounded-xl border border-white/5 bg-black/20 p-3 text-left transition hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            className="rounded-xl border border-edge bg-input p-3 text-left transition hover:border-primary/40 hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-semibold uppercase tracking-wide text-fg-muted">
@@ -51,7 +51,7 @@ export function ClientAccountsPanel({
                 aria-hidden="true"
               />
             </div>
-            <p className="mt-1 text-sm font-semibold text-white">
+            <p className="mt-1 text-sm font-semibold text-fg">
               {account.kind === 'bank'
                 ? money(account.balance, account.currency)
                 : money(account.totalValue, account.currency)}

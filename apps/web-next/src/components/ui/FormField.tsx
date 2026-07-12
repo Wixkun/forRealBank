@@ -10,7 +10,7 @@ export function FormField({ label, error, ...props }: Props) {
     <div>
       <label className="block text-sm mb-1 text-gray-200">{label}</label>
       <Input {...props} />
-      {error && <p className="text-red-300 text-xs mt-1">{error}</p>}
+      {error && <p className="text-danger text-xs mt-1">{error}</p>}
     </div>
   );
 }

@@ -135,7 +135,7 @@ export function UserDetailsView({
     );
   }
   if (error || !details) {
-    return <p className="p-6 text-sm text-red-300">{t('loadError')}</p>;
+    return <p className="p-6 text-sm text-danger">{t('loadError')}</p>;
   }
 
   const fullName = `${details.firstName} ${details.lastName}`.trim();
@@ -152,9 +152,9 @@ export function UserDetailsView({
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-white text-base font-semibold">{fullName}</h3>
+            <h3 className="text-fg text-base font-semibold">{fullName}</h3>
             {details.isBanned ? (
-              <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-300">
+              <span className="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-danger">
                 {t('statusBanned')}
               </span>
             ) : (
@@ -183,7 +183,7 @@ export function UserDetailsView({
 
       {/* ── Advisor attribué (fiche client) — cliquable ──────────────────── */}
       {isClient && (
-        <div className="rounded-xl border border-white/5 bg-black/20 p-3">
+        <div className="rounded-xl border border-edge bg-input p-3">
           <p className="text-xs text-fg-muted mb-1.5">{t('assignedAdvisor')}</p>
           {details.advisor ? (
             <button
@@ -201,7 +201,7 @@ export function UserDetailsView({
 
       {/* ── Clients attribués (fiche advisor) — cliquables ───────────────── */}
       {isAdvisorSheet && (
-        <div className="rounded-xl border border-white/5 bg-black/20 p-3">
+        <div className="rounded-xl border border-edge bg-input p-3">
           <p className="text-xs text-fg-muted mb-2">
             {t('assignedClients', { count: details.clientCount ?? 0 })}
           </p>
@@ -214,13 +214,13 @@ export function UserDetailsView({
                   <button
                     type="button"
                     onClick={() => onOpenUser(client.id)}
-                    className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-white hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-left text-sm text-fg hover:bg-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                   >
                     <span className="truncate">
                       {client.firstName} {client.lastName}
                     </span>
                     {client.isBanned && (
-                      <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-300">
+                      <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-danger">
                         {t('statusBanned')}
                       </span>
                     )}
@@ -240,10 +240,10 @@ export function UserDetailsView({
         />
       )}
 
-      {actionError && <p className="text-xs text-red-400">{actionError}</p>}
+      {actionError && <p className="text-xs text-danger">{actionError}</p>}
 
       {/* ── Actions ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 border-t border-white/5 pt-4">
+      <div className="flex flex-wrap gap-2 border-t border-edge pt-4">
         {canMessage && (
           <button
             type="button"
@@ -272,7 +272,7 @@ export function UserDetailsView({
             type="button"
             onClick={() => onOpenReassign(details)}
             disabled={isActing}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-fg-secondary hover:bg-white/10 transition disabled:opacity-50"
+            className="rounded-lg border border-edge-strong bg-hover px-3 py-2 text-xs font-semibold text-fg-secondary hover:bg-hover-strong transition disabled:opacity-50"
           >
             {t('changeAdvisor')}
           </button>
@@ -287,7 +287,7 @@ export function UserDetailsView({
               type="button"
               onClick={() => onOpenRequestBan(details)}
               disabled={isActing}
-              className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-red-300 hover:bg-red-500/20 transition disabled:opacity-50"
+              className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs font-semibold text-danger hover:bg-red-500/20 transition disabled:opacity-50"
             >
               {t('requestBan')}
             </button>
@@ -300,8 +300,8 @@ export function UserDetailsView({
             disabled={isActing}
             className={`rounded-lg px-3 py-2 text-xs font-semibold transition disabled:opacity-50 ${
               details.isBanned
-                ? 'border border-white/10 bg-white/5 text-fg-secondary hover:bg-white/10'
-                : 'border border-red-400/30 bg-red-500/10 text-red-300 hover:bg-red-500/20'
+                ? 'border border-edge-strong bg-hover text-fg-secondary hover:bg-hover-strong'
+                : 'border border-red-400/30 bg-red-500/10 text-danger hover:bg-red-500/20'
             }`}
           >
             {details.isBanned ? t('unban') : t('ban')}

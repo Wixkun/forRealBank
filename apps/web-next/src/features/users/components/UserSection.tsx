@@ -73,11 +73,11 @@ export function UserSection({
   };
 
   return (
-    <section className="bg-surface-1 rounded-2xl border border-white/5 flex flex-col min-h-0">
-      <div className="p-4 border-b border-white/5">
+    <section className="bg-surface-1 rounded-2xl border border-edge flex flex-col min-h-0">
+      <div className="p-4 border-b border-edge">
         <div className="flex items-center justify-between gap-2 mb-3">
-          <h2 className="text-white text-sm font-semibold">{title}</h2>
-          <span className="text-xs text-fg-muted bg-white/5 rounded-full px-2 py-0.5">
+          <h2 className="text-fg text-sm font-semibold">{title}</h2>
+          <span className="text-xs text-fg-muted bg-hover rounded-full px-2 py-0.5">
             {items.length}
           </span>
         </div>
@@ -102,7 +102,7 @@ export function UserSection({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder={t('searchPlaceholder')}
             aria-label={t('searchPlaceholder')}
-            className="w-full rounded-lg border border-white/10 bg-black/30 py-2 pl-9 pr-3 text-sm text-white placeholder:text-fg-subtle focus:outline-none focus:border-primary/60"
+            className="w-full rounded-lg border border-edge-strong bg-input py-2 pl-9 pr-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary/60"
           />
         </div>
       </div>
@@ -113,13 +113,13 @@ export function UserSection({
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
           </div>
         ) : error ? (
-          <p className="p-4 text-sm text-red-300">{t('loadError')}</p>
+          <p className="p-4 text-sm text-danger">{t('loadError')}</p>
         ) : items.length === 0 ? (
           <p className="p-4 text-sm text-fg-muted">
             {search.trim() ? t('emptySearch') : t('empty')}
           </p>
         ) : (
-          <ul className="divide-y divide-white/5">
+          <ul className="divide-y divide-edge">
             {items.map((user) => (
               <UserListItem
                 key={user.id}

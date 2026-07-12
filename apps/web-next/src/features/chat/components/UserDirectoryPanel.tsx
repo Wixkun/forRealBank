@@ -44,8 +44,8 @@ export default function UserDirectoryPanel({ onOpenContact, isOpening }: UserDir
 
   return (
     <div className={`flex h-full min-h-0 flex-col ${isDark ? 'bg-surface-1' : 'bg-white'}`}>
-      <div className={`p-4 border-b ${isDark ? 'border-white/5' : 'border-gray-200'}`}>
-        <h2 className={`text-sm font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+      <div className={`p-4 border-b ${isDark ? 'border-edge' : 'border-gray-200'}`}>
+        <h2 className={`text-sm font-semibold mb-3 ${isDark ? 'text-fg' : 'text-gray-900'}`}>
           {t('title')}
         </h2>
         <div className="relative">
@@ -71,7 +71,7 @@ export default function UserDirectoryPanel({ onOpenContact, isOpening }: UserDir
             aria-label={t('searchPlaceholder')}
             className={`w-full rounded-lg border py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
               isDark
-                ? 'border-white/10 bg-surface-2 text-white placeholder:text-fg-subtle'
+                ? 'border-edge-strong bg-surface-2 text-fg placeholder:text-fg-subtle'
                 : 'border-gray-300 bg-white text-gray-900'
             }`}
           />
@@ -84,13 +84,13 @@ export default function UserDirectoryPanel({ onOpenContact, isOpening }: UserDir
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
           </div>
         ) : error ? (
-          <p className={`p-4 text-sm ${isDark ? 'text-red-300' : 'text-red-600'}`}>{t('error')}</p>
+          <p className={`p-4 text-sm ${isDark ? 'text-danger' : 'text-red-600'}`}>{t('error')}</p>
         ) : contacts.length === 0 ? (
           <p className={`p-4 text-sm ${isDark ? 'text-fg-muted' : 'text-gray-500'}`}>
             {search.trim() ? t('emptySearch') : t('empty')}
           </p>
         ) : (
-          <ul className={`divide-y ${isDark ? 'divide-white/5' : 'divide-gray-100'}`}>
+          <ul className={`divide-y ${isDark ? 'divide-edge' : 'divide-gray-100'}`}>
             {contacts.map((contact) => {
               const isOnline = online[contact.id] ?? false;
               return (
@@ -101,7 +101,7 @@ export default function UserDirectoryPanel({ onOpenContact, isOpening }: UserDir
                     disabled={isOpening}
                     title={t('open')}
                     className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-inset ${
-                      isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'
+                      isDark ? 'hover:bg-hover' : 'hover:bg-gray-50'
                     }`}
                   >
                     <span className="relative shrink-0">
@@ -118,7 +118,7 @@ export default function UserDirectoryPanel({ onOpenContact, isOpening }: UserDir
                     <span className="min-w-0 flex-1">
                       <span
                         className={`block truncate text-sm font-medium ${
-                          isDark ? 'text-white' : 'text-gray-900'
+                          isDark ? 'text-fg' : 'text-gray-900'
                         }`}
                       >
                         {contact.firstName} {contact.lastName}

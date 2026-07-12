@@ -44,13 +44,13 @@ export function UserDetailsModal({
       maxWidthClass="max-w-2xl"
       cardClassName="max-h-[92vh] overflow-y-auto scrollbar-slim max-sm:h-full max-sm:max-h-full max-sm:rounded-none"
     >
-      <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/5">
+      <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-edge">
         <div className="flex items-center gap-2">
           {stack.length > 1 && (
             <button
               type="button"
               onClick={pop}
-              className="p-1.5 rounded-lg text-fg-muted hover:text-white hover:bg-white/5 transition"
+              className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-hover transition"
               aria-label={t('back')}
             >
               <svg
@@ -67,7 +67,7 @@ export function UserDetailsModal({
               </svg>
             </button>
           )}
-          <h2 className="text-white text-sm font-semibold">
+          <h2 className="text-fg text-sm font-semibold">
             {current.type === 'user' && t('titleUser')}
             {current.type === 'account' && t('titleAccount')}
             {current.type === 'reassign' && t('titleReassign')}
@@ -77,7 +77,7 @@ export function UserDetailsModal({
         <button
           type="button"
           onClick={onCloseAction}
-          className="p-1.5 rounded-lg text-fg-muted hover:text-white hover:bg-white/5 transition"
+          className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-hover transition"
           aria-label={t('close')}
         >
           <svg

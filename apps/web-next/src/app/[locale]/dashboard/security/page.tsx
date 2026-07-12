@@ -96,7 +96,7 @@ export default function SecurityPage() {
         </p>
       </div>
 
-      <div className="bg-surface-1 border border-white/10 rounded-2xl p-6 space-y-5">
+      <div className="bg-surface-1 border border-edge-strong rounded-2xl p-6 space-y-5">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="font-semibold">
@@ -117,7 +117,7 @@ export default function SecurityPage() {
             </p>
           </div>
           <span
-            className={`px-3 py-1 rounded-full text-xs font-medium ${enabled ? 'bg-green-500/15 text-green-300' : 'bg-white/5 text-fg-muted'}`}
+            className={`px-3 py-1 rounded-full text-xs font-medium ${enabled ? 'bg-green-500/15 text-green-300' : 'bg-hover text-fg-muted'}`}
           >
             {enabled ? '2FA ON' : '2FA OFF'}
           </span>
@@ -145,7 +145,7 @@ export default function SecurityPage() {
         )}
 
         {setup && (
-          <div className="space-y-4 border-t border-white/10 pt-5">
+          <div className="space-y-4 border-t border-edge-strong pt-5">
             <ol className="list-decimal pl-5 text-sm text-fg-secondary space-y-2">
               <li>
                 {fr
@@ -187,7 +187,7 @@ export default function SecurityPage() {
         )}
 
         {enabled && (
-          <div className="space-y-3 border-t border-white/10 pt-5">
+          <div className="space-y-3 border-t border-edge-strong pt-5">
             <p className="text-sm text-fg-muted">
               {fr
                 ? 'Pour désactiver le 2FA, confirmez avec un code actuel.'
@@ -197,7 +197,7 @@ export default function SecurityPage() {
             <button
               disabled={loading || code.length !== 6}
               onClick={disable}
-              className="px-4 py-2 rounded-lg border border-red-400/40 text-red-300 hover:bg-red-500/10 disabled:opacity-50 font-medium"
+              className="px-4 py-2 rounded-lg border border-red-400/40 text-danger hover:bg-red-500/10 disabled:opacity-50 font-medium"
             >
               {fr ? 'Désactiver le 2FA' : 'Disable 2FA'}
             </button>
@@ -228,7 +228,7 @@ function CodeInput({
       placeholder="123456"
       value={code}
       onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
-      className="w-full max-w-xs px-4 py-2 rounded-lg bg-white/5 border border-white/10 tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-primary"
+      className="w-full max-w-xs px-4 py-2 rounded-lg bg-hover border border-edge-strong tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-primary"
     />
   );
 }

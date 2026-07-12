@@ -76,7 +76,7 @@ export function DashboardContent({
         />
       )}
 
-      <div className="bg-surface-1 rounded-2xl border border-white/5 overflow-hidden">
+      <div className="bg-surface-1 rounded-2xl border border-edge overflow-hidden">
         <NewsFeed userRoles={user?.roles ?? null} userId={user?.id ?? null} />
       </div>
     </>

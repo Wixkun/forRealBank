@@ -54,7 +54,7 @@ function MuteBell({
         }
       }}
       className={`shrink-0 rounded-md p-1.5 transition-colors disabled:opacity-50 ${
-        isDark ? 'hover:bg-white/10 text-fg-muted' : 'hover:bg-gray-200 text-gray-500'
+        isDark ? 'hover:bg-hover-strong text-fg-muted' : 'hover:bg-gray-200 text-gray-500'
       }`}
     >
       {isMuted ? (
@@ -122,7 +122,7 @@ function HideButton({
         }
       }}
       className={`shrink-0 rounded-md p-1.5 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
-        isDark ? 'hover:bg-white/10 text-fg-muted' : 'hover:bg-gray-200 text-gray-500'
+        isDark ? 'hover:bg-hover-strong text-fg-muted' : 'hover:bg-gray-200 text-gray-500'
       }`}
     >
       <svg
@@ -199,12 +199,12 @@ export default function ConversationsList({
   return (
     <div
       className={`flex flex-col h-full border-r ${
-        theme === 'dark' ? 'bg-surface-1 border-white/5' : 'bg-white border-gray-200'
+        theme === 'dark' ? 'bg-surface-1 border-edge' : 'bg-white border-gray-200'
       }`}
     >
-      <div className={`p-4 border-b ${theme === 'dark' ? 'border-white/5' : 'border-gray-200'}`}>
+      <div className={`p-4 border-b ${theme === 'dark' ? 'border-edge' : 'border-gray-200'}`}>
         <div className="mb-4 flex items-center justify-between gap-2">
-          <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-fg' : 'text-gray-900'}`}>
             {t('list.title')}
           </h2>
           {canCreateGroup && onCreateGroup && (
@@ -215,7 +215,7 @@ export default function ConversationsList({
               title={t('list.createGroupTooltip')}
               className={`shrink-0 rounded-lg p-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-95 ${
                 theme === 'dark'
-                  ? 'text-fg-muted hover:bg-white/10 hover:text-tertiary'
+                  ? 'text-fg-muted hover:bg-hover-strong hover:text-tertiary'
                   : 'text-gray-500 hover:bg-gray-100 hover:text-teal-700'
               }`}
             >
@@ -258,7 +258,7 @@ export default function ConversationsList({
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm ${
               theme === 'dark'
-                ? 'border-white/10 bg-surface-2 text-white placeholder:text-fg-subtle'
+                ? 'border-edge-strong bg-surface-2 text-fg placeholder:text-fg-subtle'
                 : 'border-gray-300 bg-white text-gray-900'
             }`}
           />
@@ -313,7 +313,7 @@ export default function ConversationsList({
             </div>
           </div>
         ) : (
-          <nav className={`divide-y ${theme === 'dark' ? 'divide-white/5' : 'divide-gray-200'}`}>
+          <nav className={`divide-y ${theme === 'dark' ? 'divide-edge' : 'divide-gray-200'}`}>
             {filteredConversations.map((conversation) => {
               const unread = conversation.unreadCount ?? 0;
               const hasUnread = conversation.hasUnread ?? unread > 0;
@@ -330,7 +330,7 @@ export default function ConversationsList({
                           ? 'bg-primary/15 border-primary'
                           : 'bg-teal-50 border-teal-600'
                         : theme === 'dark'
-                          ? 'border-transparent hover:bg-white/5'
+                          ? 'border-transparent hover:bg-hover'
                           : 'border-transparent hover:bg-gray-50'
                     }`}
                   >
@@ -339,7 +339,7 @@ export default function ConversationsList({
                         <div className="flex items-center gap-2">
                           <h3
                             className={`font-medium truncate text-sm ${
-                              theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              theme === 'dark' ? 'text-fg' : 'text-gray-900'
                             } ${hasUnread ? 'font-semibold' : ''}`}
                           >
                             {conversation.name}

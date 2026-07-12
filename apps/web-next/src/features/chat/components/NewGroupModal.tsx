@@ -98,7 +98,7 @@ export default function NewGroupModal({ open, candidates, onClose, onCreate }: N
         onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-md rounded-xl border p-5 shadow-xl ${
           isDark
-            ? 'bg-surface-1 border-white/10 text-white'
+            ? 'bg-surface-1 border-edge-strong text-fg'
             : 'bg-white border-gray-200 text-gray-900'
         }`}
       >
@@ -116,7 +116,7 @@ export default function NewGroupModal({ open, candidates, onClose, onCreate }: N
           onChange={(e) => setName(e.target.value)}
           placeholder={t('namePlaceholder')}
           className={`mb-4 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
-            isDark ? 'border-white/10 bg-surface-2 text-white' : 'border-gray-300 bg-white'
+            isDark ? 'border-edge-strong bg-surface-2 text-fg' : 'border-gray-300 bg-white'
           }`}
         />
 
@@ -153,10 +153,10 @@ export default function NewGroupModal({ open, candidates, onClose, onCreate }: N
           placeholder={t('searchPlaceholder')}
           aria-label={t('searchPlaceholder')}
           className={`mb-2 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary ${
-            isDark ? 'border-white/10 bg-surface-2 text-white' : 'border-gray-300 bg-white'
+            isDark ? 'border-edge-strong bg-surface-2 text-fg' : 'border-gray-300 bg-white'
           }`}
         />
-        <div className="mb-4 max-h-40 overflow-y-auto scrollbar-slim rounded-lg border border-white/5">
+        <div className="mb-4 max-h-40 overflow-y-auto scrollbar-slim rounded-lg border border-edge">
           {filtered.length === 0 ? (
             <p className={`p-3 text-sm ${isDark ? 'text-fg-muted' : 'text-gray-500'}`}>—</p>
           ) : (
@@ -166,7 +166,7 @@ export default function NewGroupModal({ open, candidates, onClose, onCreate }: N
                 type="button"
                 onClick={() => setSelected((prev) => [...prev, c.id])}
                 className={`block w-full px-3 py-2 text-left text-sm transition-colors ${
-                  isDark ? 'hover:bg-white/5' : 'hover:bg-gray-50'
+                  isDark ? 'hover:bg-hover' : 'hover:bg-gray-50'
                 }`}
               >
                 {c.firstName} {c.lastName}
@@ -184,7 +184,7 @@ export default function NewGroupModal({ open, candidates, onClose, onCreate }: N
             disabled={submitting}
             className={`rounded-lg px-4 py-2 text-sm font-medium disabled:opacity-50 ${
               isDark
-                ? 'bg-white/5 text-fg-secondary hover:bg-white/10'
+                ? 'bg-hover text-fg-secondary hover:bg-hover-strong'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >

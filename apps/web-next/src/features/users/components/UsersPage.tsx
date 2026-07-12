@@ -71,7 +71,7 @@ export function UsersPage() {
   return (
     <div className="max-w-5xl">
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-white mb-1">{t('title')}</h1>
+        <h1 className="text-xl font-semibold text-fg mb-1">{t('title')}</h1>
         <p className="text-fg-muted text-sm">
           {isPrivileged ? t('subtitlePrivileged') : t('subtitleAdvisor')}
         </p>

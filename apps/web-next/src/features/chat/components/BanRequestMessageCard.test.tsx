@@ -4,8 +4,8 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { BanRequestMessageCard } from './BanRequestMessageCard';
 import type { BanRequestCard } from '@/features/users/types';
 
-const acceptMock = vi.fn(async (_id: string) => ({ success: true }));
-const rejectMock = vi.fn(async (_id: string, _comment?: string) => ({ success: true }));
+const acceptMock = vi.fn(async (id: string) => ({ success: true, id }));
+const rejectMock = vi.fn(async (id: string, comment?: string) => ({ success: true, id, comment }));
 vi.mock('@/features/users/api', () => ({
   acceptBanRequest: (id: string) => acceptMock(id),
   rejectBanRequest: (id: string, comment?: string) => rejectMock(id, comment),

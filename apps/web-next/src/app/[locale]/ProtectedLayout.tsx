@@ -30,8 +30,8 @@ export function ProtectedLayout({ children }: ProtectedLayoutProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-teal-950 via-teal-900 to-teal-800">
-        <div className="text-white text-lg">{t('authChecking')}</div>
+      <div className="min-h-screen flex items-center justify-center force-dark bg-linear-to-br from-teal-950 via-teal-900 to-teal-800">
+        <div className="text-fg text-lg">{t('authChecking')}</div>
       </div>
     );
   }

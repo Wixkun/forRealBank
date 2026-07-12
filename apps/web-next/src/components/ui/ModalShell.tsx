@@ -2,9 +2,10 @@
 
 import { useEffect, type ReactNode } from 'react';
 
-// Coquille commune des modales sombres (détail de news/virement, relevé de
-// compte) : overlay flouté, fermeture par Échap et clic à l'extérieur,
-// carte centrée qui stoppe la propagation des clics.
+// Coquille commune des modales (détail de news/virement, relevé de compte,
+// fiches utilisateur) : overlay flouté, fermeture par Échap et clic à
+// l'extérieur, carte centrée qui stoppe la propagation des clics. La carte
+// suit le thème via le token surface-1.
 export function ModalShell({
   onCloseAction,
   children,
@@ -32,7 +33,7 @@ export function ModalShell({
       aria-modal="true"
     >
       <div
-        className={`w-full bg-[#14161c] rounded-2xl border border-white/8 shadow-2xl ${maxWidthClass} ${cardClassName}`}
+        className={`w-full bg-surface-1 rounded-2xl border border-edge shadow-2xl ${maxWidthClass} ${cardClassName}`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
