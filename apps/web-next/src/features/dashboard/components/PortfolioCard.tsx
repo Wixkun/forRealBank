@@ -9,7 +9,7 @@ function BankWatermark() {
     <svg width="160" height="160" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M3 21h18M3 10h18M12 3L2 10h20L12 3zM5 10v11M9 10v11M15 10v11M19 10v11"
-        stroke="white"
+        stroke="var(--pc-watermark)"
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -98,18 +98,27 @@ export function PortfolioCard({
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden p-6"
-      style={{ background: 'linear-gradient(135deg, #0d4a47 0%, #0a3a37 50%, #073030 100%)' }}
+      // Palette dédiée (variables --pc-*) redéfinie en clair par
+      // [data-theme='light'] .portfolio-card dans globals.css : le dégradé
+      // change de teinte (teal foncé → teal pastel), pas seulement le texte.
+      className="portfolio-card relative rounded-2xl overflow-hidden p-6"
+      style={{ background: 'var(--pc-bg)' }}
     >
       <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-[0.07] pointer-events-none">
         <BankWatermark />
       </div>
 
       <div className="relative">
-        <p className="text-teal-300/80 text-xs font-mono tracking-widest uppercase mb-2">
+        <p
+          className="text-xs font-mono tracking-widest uppercase mb-2"
+          style={{ color: 'var(--pc-label)' }}
+        >
           {t('totalBalance')}
         </p>
-        <h2 className="text-4xl font-bold text-white font-mono mb-6 tracking-tight">
+        <h2
+          className="text-4xl font-bold font-mono mb-6 tracking-tight"
+          style={{ color: 'var(--pc-heading)' }}
+        >
           {fmt(totalBalance)}
         </h2>
 
@@ -130,10 +139,16 @@ export function PortfolioCard({
                       onSelectAccount(acc);
                     }
                   }}
+                  style={{
+                    backgroundColor: isSelected
+                      ? 'var(--pc-tile-selected-bg)'
+                      : 'var(--pc-tile-bg)',
+                    borderColor: isSelected
+                      ? 'var(--pc-tile-selected-border)'
+                      : 'var(--pc-tile-border)',
+                  }}
                   className={`relative backdrop-blur-sm rounded-xl p-3 border text-left transition-all cursor-pointer group ${
-                    isSelected
-                      ? 'bg-teal-900/30 border-teal-500/60 ring-1 ring-teal-500/30'
-                      : 'bg-black/25 border-white/5 hover:bg-black/40 hover:border-teal-500/30'
+                    isSelected ? 'ring-1 ring-teal-500/30' : 'hover:bg-(--pc-tile-bg-hover)'
                   }`}
                 >
                   <button
@@ -144,11 +159,10 @@ export function PortfolioCard({
                     }}
                     aria-label={t('copyIban')}
                     title={t('copyIban')}
-                    className={`absolute top-2 right-2 p-1 rounded-md transition-colors cursor-pointer ${
-                      isCopied
-                        ? 'text-teal-300'
-                        : 'text-teal-200/40 hover:text-teal-200 hover:bg-white/10'
-                    }`}
+                    style={{
+                      color: isCopied ? 'var(--pc-copy-icon-hover)' : 'var(--pc-copy-icon)',
+                    }}
+                    className="absolute top-2 right-2 p-1 rounded-md transition-colors cursor-pointer hover:bg-hover-strong"
                   >
                     {isCopied ? <IconCheck /> : <IconCopy />}
                   </button>
@@ -157,13 +171,17 @@ export function PortfolioCard({
                   </span>
 
                   <p
-                    className={`text-xs font-mono truncate pr-5 transition-colors ${
-                      isSelected ? 'text-teal-300' : 'text-teal-200/70 group-hover:text-teal-300/90'
-                    }`}
+                    className="text-xs font-mono truncate pr-5 transition-colors"
+                    style={{
+                      color: isSelected ? 'var(--pc-tile-label-selected)' : 'var(--pc-tile-label)',
+                    }}
                   >
                     {accountLabel(acc, accountTypeLabels)} (···{lastFour(acc)})
                   </p>
-                  <p className="text-white font-semibold text-sm mt-1.5 font-mono">
+                  <p
+                    className="font-semibold text-sm mt-1.5 font-mono"
+                    style={{ color: 'var(--pc-tile-value)' }}
+                  >
                     {fmt(acc.balance)}
                   </p>
                 </div>
@@ -171,7 +189,9 @@ export function PortfolioCard({
             })}
           </div>
         ) : (
-          <p className="text-teal-200/70 text-sm">{t('noAccounts')}</p>
+          <p className="text-sm" style={{ color: 'var(--pc-empty-text)' }}>
+            {t('noAccounts')}
+          </p>
         )}
       </div>
     </div>

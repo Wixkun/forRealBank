@@ -35,8 +35,15 @@ export class ChatFilesService implements OnModuleInit {
           created_at timestamptz NOT NULL DEFAULT now()
         )
       `);
+      // Colonne de nom des groupes : garantie sur les bases existantes, sinon
+      // l'entité Conversation (qui déclare `name`) casserait les requêtes.
+      await this.dataSource.query(`
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS name varchar(120) NULL
+      `);
     } catch (err) {
-      this.logger.warn(`chat_files bootstrap: ${err instanceof Error ? err.message : String(err)}`);
+      this.logger.warn(
+        `chat schema bootstrap: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

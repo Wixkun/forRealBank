@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { onChatEvent, emitChatEvent } from '@/features/chat/chat-events';
 
 export interface Notification {
   id: string;
@@ -31,6 +32,11 @@ export function useNotifications({
 }: UseNotificationsOptions = {}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isMarkAllLoading, setIsMarkAllLoading] = useState(false);
+  // État déjà vu (id → compteur non-lus) : détecte l'arrivée de NOUVEAUX
+  // messages (nouvelle notification OU compteur groupé incrémenté) pour
+  // signaler aux vues (liste des conversations) de se rafraîchir — c'est ce
+  // qui fait réapparaître une conversation masquée sans recharger la page.
+  const seenRef = useRef<Map<string, number> | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -39,7 +45,17 @@ export function useNotifications({
       });
       if (!res.ok) return;
       const data = await res.json();
-      setNotifications(Array.isArray(data) ? data : []);
+      const list: Notification[] = Array.isArray(data) ? data : [];
+      setNotifications(list);
+
+      const previous = seenRef.current;
+      seenRef.current = new Map(list.map((n) => [n.id, n.unreadCount]));
+      if (previous) {
+        const hasNewMessage = list.some(
+          (n) => !n.isRead && n.type === 'MESSAGE' && previous.get(n.id) !== n.unreadCount,
+        );
+        if (hasNewMessage) emitChatEvent('chat:conversations-changed');
+      }
     } catch {
       // silently fail for background polling
     }
@@ -50,6 +66,22 @@ export function useNotifications({
     const intervalId = setInterval(fetchNotifications, pollingInterval);
     return () => clearInterval(intervalId);
   }, [fetchNotifications, pollingInterval]);
+
+  // Rafraîchit immédiatement le compteur quand une conversation est lue ou
+  // que des notifications ont été marquées lues côté serveur (ex. détail
+  // d'une news / d'un virement consulté).
+  useEffect(() => {
+    const offRead = onChatEvent('chat:read', () => {
+      void fetchNotifications();
+    });
+    const offNotif = onChatEvent('notifications:read', () => {
+      void fetchNotifications();
+    });
+    return () => {
+      offRead();
+      offNotif();
+    };
+  }, [fetchNotifications]);
 
   const markAsRead = async (notificationId: string) => {
     try {

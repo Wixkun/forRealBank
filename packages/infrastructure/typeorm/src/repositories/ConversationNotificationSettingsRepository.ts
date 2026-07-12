@@ -62,4 +62,15 @@ export class ConversationNotificationSettingsRepository implements IConversation
     });
     return toDomain(await this.repo.save(entity));
   }
+
+  async listMutedConversationIds(userId: string): Promise<string[]> {
+    const rows: Array<{ conversation_id: string }> = await this.repo
+      .createQueryBuilder('s')
+      .select('s.conversation_id', 'conversation_id')
+      .where('s.user_id = :userId', { userId })
+      .andWhere('s.muted = true')
+      .andWhere('(s.muted_until IS NULL OR s.muted_until > now())')
+      .getRawMany();
+    return rows.map((r) => r.conversation_id);
+  }
 }

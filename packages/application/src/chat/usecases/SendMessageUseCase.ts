@@ -3,6 +3,7 @@ import {
   IConversationParticipantRepository,
   INotificationRepository,
   IConversationNotificationSettingsRepository,
+  IConversationUserStateRepository,
   NotificationType,
   NotificationTargetType,
   ConversationParticipant,
@@ -14,6 +15,7 @@ export class SendMessageUseCase {
     private readonly conversationParticipantRepository: IConversationParticipantRepository,
     private readonly notificationRepository: INotificationRepository,
     private readonly conversationNotificationSettingsRepository: IConversationNotificationSettingsRepository,
+    private readonly conversationUserStateRepository?: IConversationUserStateRepository,
   ) {}
 
   async execute(input: { conversationId: string; senderId: string; content: string }) {
@@ -22,6 +24,12 @@ export class SendMessageUseCase {
       input.senderId,
       input.content,
     );
+
+    // Un nouveau message rend la conversation à nouveau visible pour tous ceux
+    // qui l'avaient masquée (l'état non-lu et le mute restent inchangés).
+    if (this.conversationUserStateRepository) {
+      await this.conversationUserStateRepository.clearHiddenForConversation(input.conversationId);
+    }
 
     const participants = await this.conversationParticipantRepository.listByConversation(
       input.conversationId,

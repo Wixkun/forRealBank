@@ -12,8 +12,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "rimraf .next && tsc --noEmit",
-    "test": "echo 'No unit tests configured yet'",
-    "test:unit": "echo 'No unit tests configured yet'",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug"
@@ -32,16 +33,23 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/eslint-plugin-next": "15.5.14",
     "@playwright/test": "^1.59.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.7.0",
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "15.5.14",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "jsdom": "^25.0.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }

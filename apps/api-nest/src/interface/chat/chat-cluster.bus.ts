@@ -37,7 +37,13 @@ export type ChatBusMessage =
   | { type: 'user_typing'; conversationId: string; userId: string }
   | { type: 'user_stopped_typing'; conversationId: string; userId: string }
   | { type: 'user_joined'; conversationId: string; userId: string }
-  | { type: 'presence_state'; conversationId: string; userIds: string[] };
+  | { type: 'presence_state'; conversationId: string; userIds: string[] }
+  // Présence GLOBALE (en ligne / hors ligne) : chaque instance publie la liste
+  // de ses utilisateurs actuellement connectés (au moins un socket actif).
+  | { type: 'global_presence'; userIds: string[] }
+  // Bannissement : chaque instance ferme immédiatement les sockets de cet
+  // utilisateur (invalidation temps réel sur tout le cluster).
+  | { type: 'force_disconnect'; userId: string };
 
 export type ChatBusEnvelope = ChatBusMessage & { senderInstanceId: string };
 

@@ -7,7 +7,9 @@ import { StatementProvider } from '@/features/statements/StatementContext';
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <ProtectedLayout>
-      <ThemeProvider forcedTheme="dark">
+      {/* Plus de forcedTheme : la page Paramètres expose désormais le choix
+          sombre / clair (persisté en localStorage par le ThemeContext). */}
+      <ThemeProvider>
         <StatementProvider>
           <DashboardShell>{children}</DashboardShell>
         </StatementProvider>

@@ -12,6 +12,7 @@ import {
 } from '@/features/dashboard/types';
 import { AccountChart } from '@/features/dashboard/components/AccountChart';
 import { fetchAccountTransactions } from '@/features/dashboard/api';
+import { useClearNotificationsByTarget } from '@/features/notifications/useClearNotificationsByTarget';
 import { useStatement } from '@/features/statements/StatementContext';
 import {
   NewsDetailModal,
@@ -60,6 +61,10 @@ export function TransactionsSection({
   const [transferLoading, setTransferLoading] = useState(false);
   const [transferError, setTransferError] = useState<string | null>(null);
   const [txDetail, setTxDetail] = useState<NewsItem | null>(null);
+
+  // Consulter le détail d'une transaction marque lue la notification liée
+  // (ex. « Virement reçu », reliée à la ligne du relevé via son group_key).
+  useClearNotificationsByTarget('TRANSACTION', txDetail?.id);
 
   const statement = useStatement();
 
@@ -193,10 +198,10 @@ export function TransactionsSection({
   const displayed = filterByPeriod(transactions, period);
 
   return (
-    <div className="bg-surface-1 rounded-2xl border border-white/5">
+    <div className="bg-surface-1 rounded-2xl border border-edge">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
-        <h3 className="font-semibold text-white text-base flex items-center gap-2">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-edge">
+        <h3 className="font-semibold text-fg text-base flex items-center gap-2">
           {t('title')}
           {selectedAccount && (
             <span className="text-tertiary font-normal text-xs">
@@ -205,7 +210,7 @@ export function TransactionsSection({
           )}
         </h3>
 
-        <div className="flex items-center gap-1 bg-black/20 rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-input rounded-lg p-0.5">
           {PERIODS.map((key) => (
             <button
               key={key}
@@ -231,7 +236,7 @@ export function TransactionsSection({
               className={`w-7 h-7 flex items-center justify-center rounded-lg border transition ${
                 showChart
                   ? 'bg-primary/20 border-primary/50 text-tertiary'
-                  : 'border-white/10 text-fg-muted hover:text-tertiary hover:border-primary/40'
+                  : 'border-edge-strong text-fg-muted hover:text-tertiary hover:border-primary/40'
               }`}
             >
               <svg
@@ -266,7 +271,7 @@ export function TransactionsSection({
 
       {/* Inline transfer form */}
       {showTransfer && selectedAccount && sourceOptions.length > 0 && (
-        <div className="px-5 py-4 border-b border-white/5 bg-teal-950/30">
+        <div className="px-5 py-4 border-b border-edge bg-teal-950/30">
           <p className="text-tertiary text-xs mb-2 font-medium">
             {t('fromTo', { account: accountLabel(selectedAccount) })}
           </p>
@@ -274,7 +279,7 @@ export function TransactionsSection({
             <select
               value={transferSourceId ?? sourceOptions[0]?.id ?? ''}
               onChange={(e) => setTransferSourceId(e.target.value)}
-              className="bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-xs focus:outline-none focus:border-primary/60"
+              className="bg-input border border-edge-strong rounded-lg px-3 py-1.5 text-fg text-xs focus:outline-none focus:border-primary/60"
             >
               {sourceOptions.map((a) => (
                 <option key={a.id} value={a.id}>
@@ -289,7 +294,7 @@ export function TransactionsSection({
               placeholder={t('amountPlaceholder')}
               value={transferAmount}
               onChange={(e) => setTransferAmount(e.target.value)}
-              className="flex-1 bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-white text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
+              className="flex-1 bg-input border border-edge-strong rounded-lg px-3 py-1.5 text-fg text-sm placeholder-fg-subtle focus:outline-none focus:border-primary/60"
             />
             <button
               onClick={handleTransfer}
@@ -309,7 +314,7 @@ export function TransactionsSection({
               {t('cancel')}
             </button>
           </div>
-          {transferError && <p className="text-red-400 text-xs mt-2">{transferError}</p>}
+          {transferError && <p className="text-danger text-xs mt-2">{transferError}</p>}
         </div>
       )}
 
@@ -345,7 +350,7 @@ export function TransactionsSection({
               <tr
                 key={tx.id}
                 onClick={() => openTransactionDetail(tx)}
-                className="border-t border-white/4 hover:bg-primary/5 transition-colors cursor-pointer"
+                className="border-t border-edge hover:bg-primary/5 transition-colors cursor-pointer"
               >
                 <td className="px-5 py-3 text-fg-muted text-xs whitespace-nowrap">
                   {fmtDate(tx.date)}
@@ -353,7 +358,7 @@ export function TransactionsSection({
                 <td className="px-5 py-3 text-fg-secondary text-sm">{tx.description}</td>
                 <td className="px-5 py-3 text-fg-muted text-xs capitalize">{tx.type}</td>
                 <td
-                  className={`px-5 py-3 text-right font-mono text-sm font-semibold ${tx.type === 'credit' ? 'text-tertiary' : 'text-red-400'}`}
+                  className={`px-5 py-3 text-right font-mono text-sm font-semibold ${tx.type === 'credit' ? 'text-tertiary' : 'text-danger'}`}
                 >
                   {tx.type === 'credit' ? '+' : '-'}
                   {fmt(Math.abs(tx.amount))}

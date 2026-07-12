@@ -1,5 +1,6 @@
 import { Module, Provider } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -16,6 +17,7 @@ import {
   IUserIdGenerator,
   ISessionIdGenerator,
   ITwoFactorVerifier,
+  IAdvisorClientRepository,
   USER_ID_GENERATOR,
   SESSION_ID_GENERATOR,
 } from '@forreal/domain';
@@ -28,6 +30,14 @@ import {
   UserEntity,
   RoleEntity,
   UserRepository,
+  AccountEntity,
+  InvestmentAccountEntity,
+  CardEntity,
+  AdvisorClientEntity,
+  AccountRepository,
+  InvestmentAccountRepository,
+  CardRepository,
+  AdvisorClientRepository,
 } from '@forreal/infrastructure-typeorm';
 
 import { BcryptHasher } from '@forreal/infrastructure-crypto-bcrypt';
@@ -40,6 +50,7 @@ import {
   RequestPasswordResetUseCase,
   ResetPasswordUseCase,
   VerifyEmailUseCase,
+  InitializeClientUseCase,
 } from '@forreal/application';
 import { SmtpEmailService } from './smtp-email.service';
 import { AuthSchemaBootstrapService } from './auth-schema-bootstrap.service';
@@ -108,6 +119,33 @@ const verifyEmailProvider: Provider = {
   inject: [IUserRepository, IEmailVerificationTokenRepository],
 };
 
+// Initialisation automatique d'un nouveau client (comptes, carte, conseiller)
+// déclenchée à la validation de l'inscription.
+const initializeClientProvider: Provider = {
+  provide: InitializeClientUseCase,
+  useFactory: (
+    users: IUserRepository,
+    accountRepo: Repository<AccountEntity>,
+    investmentRepo: Repository<InvestmentAccountEntity>,
+    cardRepo: Repository<CardEntity>,
+    advisorClients: IAdvisorClientRepository,
+  ) =>
+    new InitializeClientUseCase(
+      users,
+      new AccountRepository(accountRepo),
+      new InvestmentAccountRepository(investmentRepo),
+      new CardRepository(cardRepo),
+      advisorClients,
+    ),
+  inject: [
+    IUserRepository,
+    getRepositoryToken(AccountEntity),
+    getRepositoryToken(InvestmentAccountEntity),
+    getRepositoryToken(CardEntity),
+    IAdvisorClientRepository,
+  ],
+};
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -115,6 +153,10 @@ const verifyEmailProvider: Provider = {
       RoleEntity,
       PasswordResetTokenEntity,
       EmailVerificationTokenEntity,
+      AccountEntity,
+      InvestmentAccountEntity,
+      CardEntity,
+      AdvisorClientEntity,
     ]),
     PassportModule.register({
       defaultStrategy: 'jwt',
@@ -127,6 +169,15 @@ const verifyEmailProvider: Provider = {
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IPasswordResetTokenRepository, useClass: PasswordResetTokenRepository },
     { provide: IEmailVerificationTokenRepository, useClass: EmailVerificationTokenRepository },
+    {
+      provide: IAdvisorClientRepository,
+      useFactory: (
+        repo: Repository<AdvisorClientEntity>,
+        userRepo: Repository<UserEntity>,
+        dataSource: DataSource,
+      ) => new AdvisorClientRepository(repo, userRepo, dataSource),
+      inject: [getRepositoryToken(AdvisorClientEntity), getRepositoryToken(UserEntity), DataSource],
+    },
 
     { provide: IPasswordHasher, useClass: BcryptHasher },
     { provide: ITokenService, useClass: JwtTokenService },
@@ -145,6 +196,7 @@ const verifyEmailProvider: Provider = {
     requestPasswordResetProvider,
     resetPasswordProvider,
     verifyEmailProvider,
+    initializeClientProvider,
     AuthSchemaBootstrapService,
   ],
   exports: [ITokenService, JwtAuthGuard],

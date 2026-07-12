@@ -24,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AccountsModule } from './accounts/accounts.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { TradingModule } from './trading/trading.module';
+import { UsersManagementModule } from './users-management/users-management.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { TradingModule } from './trading/trading.module';
     AccountsModule,
     TransactionsModule,
     TradingModule,
+    UsersManagementModule,
     MetricsModule,
   ],
   controllers: [AppController],

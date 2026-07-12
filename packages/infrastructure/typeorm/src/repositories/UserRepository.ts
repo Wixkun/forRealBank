@@ -23,6 +23,15 @@ export class UserRepository implements IUserRepository {
     return userEntity ? UserMapper.toDomain(userEntity) : null;
   }
 
+  async findByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+    const entities = await this.userRepository.find({
+      where: { id: In(Array.from(new Set(ids))) },
+      relations: ['roles'],
+    });
+    return entities.map(UserMapper.toDomain);
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     const userEntity = await this.userRepository.findOne({
       where: { email },
@@ -81,6 +90,10 @@ export class UserRepository implements IUserRepository {
 
   async deleteById(id: string): Promise<void> {
     await this.userRepository.delete({ id });
+  }
+
+  async updateLastSeen(userId: string, at: Date): Promise<void> {
+    await this.userRepository.update({ id: userId }, { lastSeenAt: at });
   }
 
   async list(params: { limit?: number; offset?: number; search?: string } = {}): Promise<User[]> {

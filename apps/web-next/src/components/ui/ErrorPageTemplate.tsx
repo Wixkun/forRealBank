@@ -79,7 +79,7 @@ export function ErrorPageTemplate({
 
         <h2
           className={`text-3xl font-semibold mb-4 ${
-            currentTheme === 'dark' ? 'text-white' : 'text-gray-900'
+            currentTheme === 'dark' ? 'text-fg' : 'text-gray-900'
           }`}
         >
           {subtitle}
@@ -122,7 +122,7 @@ export function ErrorPageTemplate({
               onClick={secondaryButton.onClick}
               className={`px-8 py-3 rounded-full font-medium transition-all border ${
                 currentTheme === 'dark'
-                  ? 'border-white/10 text-fg-secondary hover:bg-white/5'
+                  ? 'border-edge-strong text-fg-secondary hover:bg-hover'
                   : 'border-gray-300 text-gray-700 hover:bg-gray-100'
               }`}
             >

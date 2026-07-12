@@ -39,6 +39,14 @@ export function ThemeProvider({ children, forcedTheme }: ThemeProviderProps) {
     setMounted(true);
   }, [forcedTheme]);
 
+  // Les tokens CSS (surfaces, textes, bordures) sont redéfinis par le
+  // sélecteur [data-theme='light'] de globals.css : poser l'attribut sur
+  // <html> fait basculer toute l'application. Un script anti-flash dans le
+  // layout racine pose la valeur initiale avant l'hydratation.
+  useEffect(() => {
+    document.documentElement.dataset.theme = forcedTheme ?? theme;
+  }, [theme, forcedTheme]);
+
   const toggleTheme = () => {
     if (forcedTheme) return;
     const newTheme = theme === 'light' ? 'dark' : 'light';

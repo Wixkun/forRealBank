@@ -70,7 +70,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`relative p-2 rounded-full transition ${
-          currentTheme === 'dark' ? 'hover:bg-white/5' : 'hover:bg-gray-100'
+          currentTheme === 'dark' ? 'hover:bg-hover' : 'hover:bg-gray-100'
         }`}
         aria-label={t('ariaLabel')}
       >
@@ -97,16 +97,16 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
       {isOpen && (
         <div
           className={`absolute right-0 mt-2 w-96 rounded-lg shadow-xl border z-50 ${
-            currentTheme === 'dark' ? 'bg-surface-1 border-white/10' : 'bg-white border-gray-200'
+            currentTheme === 'dark' ? 'bg-surface-1 border-edge-strong' : 'bg-white border-gray-200'
           }`}
         >
           <div
-            className={`p-4 border-b ${currentTheme === 'dark' ? 'border-white/10' : 'border-gray-200'}`}
+            className={`p-4 border-b ${currentTheme === 'dark' ? 'border-edge-strong' : 'border-gray-200'}`}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3
-                  className={`font-semibold text-lg ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                  className={`font-semibold text-lg ${currentTheme === 'dark' ? 'text-fg' : 'text-gray-900'}`}
                 >
                   {t('title')}
                 </h3>
@@ -124,7 +124,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                   `text-sm px-3 py-1 rounded border transition ` +
                   (unreadCount === 0 || isMarkAllLoading
                     ? currentTheme === 'dark'
-                      ? 'text-fg-subtle border-white/10 cursor-not-allowed'
+                      ? 'text-fg-subtle border-edge-strong cursor-not-allowed'
                       : 'text-gray-400 border-gray-200 cursor-not-allowed'
                     : currentTheme === 'dark'
                       ? 'text-tertiary border-primary/30 hover:bg-primary/10'
@@ -159,14 +159,14 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                     onClick={() => handleNotificationClick(notif)}
                     className={`group p-4 border-b cursor-pointer transition ${
                       currentTheme === 'dark'
-                        ? 'border-white/10 hover:bg-white/5 bg-primary/10'
+                        ? 'border-edge-strong hover:bg-hover bg-primary/10'
                         : 'border-gray-200 hover:bg-gray-50 bg-blue-50'
                     }`}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h4
-                          className={`font-semibold text-sm mb-1 ${currentTheme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                          className={`font-semibold text-sm mb-1 ${currentTheme === 'dark' ? 'text-fg' : 'text-gray-900'}`}
                         >
                           {notif.title}
                           {notif.unreadCount > 1 && (
@@ -190,7 +190,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                           className={`flex items-center gap-2 text-xs ${currentTheme === 'dark' ? 'text-fg-muted' : 'text-gray-500'}`}
                         >
                           <span
-                            className={`px-2 py-1 rounded ${currentTheme === 'dark' ? 'bg-white/8 text-fg-secondary' : 'bg-gray-200'}`}
+                            className={`px-2 py-1 rounded ${currentTheme === 'dark' ? 'bg-hover-strong text-fg-secondary' : 'bg-gray-200'}`}
                           >
                             {notif.type}
                           </span>
@@ -215,7 +215,7 @@ export function NotificationCenter({ apiUrl }: NotificationCenterProps) {
                           }}
                           className={`text-xs p-1 rounded opacity-0 group-hover:opacity-100 transition ${
                             currentTheme === 'dark'
-                              ? 'hover:bg-white/10 text-fg-muted hover:text-fg-secondary'
+                              ? 'hover:bg-hover-strong text-fg-muted hover:text-fg-secondary'
                               : 'hover:bg-gray-100 text-gray-400 hover:text-gray-600'
                           }`}
                           aria-label="Supprimer"

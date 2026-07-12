@@ -93,7 +93,7 @@ export default function DashboardTransferPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-xl font-semibold text-white mb-6">{tAccount('quickTransfer')}</h1>
+      <h1 className="text-xl font-semibold text-fg mb-6">{tAccount('quickTransfer')}</h1>
 
       {error && (
         <div className="px-4 py-3 rounded-lg mb-4 bg-red-500/20 border border-red-500/50 text-red-200 text-sm">
@@ -107,10 +107,10 @@ export default function DashboardTransferPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="bg-surface-1 rounded-2xl p-5 border border-white/5">
+        <div className="bg-surface-1 rounded-2xl p-5 border border-edge">
           <label className="block text-xs text-fg-muted mb-2">{tAccount('sourceAccount')}</label>
           <select
-            className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
+            className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
             value={sourceAccountId}
             onChange={(e) => setSourceAccountId(e.target.value)}
           >
@@ -122,10 +122,10 @@ export default function DashboardTransferPage() {
           </select>
         </div>
 
-        <div className="bg-surface-1 rounded-2xl p-5 border border-white/5">
+        <div className="bg-surface-1 rounded-2xl p-5 border border-edge">
           <label className="block text-xs text-fg-muted mb-2">{tAccount('destination')}</label>
           <select
-            className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
+            className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
             value={destinationAccountId}
             onChange={(e) => {
               const val = e.target.value;
@@ -148,7 +148,7 @@ export default function DashboardTransferPage() {
           {(destinationAccountId === 'external' || !destinationAccountId) && (
             <input
               type="text"
-              className="w-full mt-3 p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
+              className="w-full mt-3 p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
               value={destinationIban}
               onChange={(e) => setDestinationIban(e.target.value)}
               placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
@@ -156,7 +156,7 @@ export default function DashboardTransferPage() {
           )}
         </div>
 
-        <div className="bg-surface-1 rounded-2xl p-5 border border-white/5 space-y-4">
+        <div className="bg-surface-1 rounded-2xl p-5 border border-edge space-y-4">
           <div>
             <label className="block text-xs text-fg-muted mb-2">{tAccount('transferAmount')}</label>
             <input
@@ -164,7 +164,7 @@ export default function DashboardTransferPage() {
               min="0.01"
               step="0.01"
               required
-              className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
+              className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0.00"
@@ -176,7 +176,7 @@ export default function DashboardTransferPage() {
             </label>
             <input
               type="text"
-              className="w-full p-3 rounded-lg bg-black/30 text-white border border-white/10 text-sm focus:outline-none focus:border-primary/60"
+              className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={tAccount('transferDescription')}

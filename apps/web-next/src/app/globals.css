@@ -7,7 +7,8 @@
   --color-secondary: #0891b2; /* accents secondaires uniquement */
   --color-tertiary: #2dd4bf; /* états positifs, petits accents lumineux */
 
-  /* Surfaces */
+  /* Surfaces (valeurs du mode SOMBRE — le mode clair les redéfinit plus bas
+     via [data-theme='light'], posé sur <html> par le ThemeContext) */
   --color-surface-0: #0d0f14; /* fond app */
   --color-surface-1: #111318; /* cartes, sidebar */
   --color-surface-2: #1a1d24; /* lignes, items imbriqués */
@@ -18,6 +19,20 @@
   --color-fg-secondary: #c3cad5;
   --color-fg-muted: #98a2b3; /* plancher pour les métadonnées sur fond sombre */
   --color-fg-subtle: #667085; /* disabled / placeholder uniquement */
+
+  /* Tokens sémantiques thémables : remplacent les blancs/noirs codés en dur.
+     edge = bordures discrètes ; hover = fonds d'interaction ; input = champs. */
+  --color-edge: rgba(255, 255, 255, 0.06);
+  --color-edge-strong: rgba(255, 255, 255, 0.14);
+  --color-hover: rgba(255, 255, 255, 0.05);
+  --color-hover-strong: rgba(255, 255, 255, 0.1);
+  --color-input: rgba(0, 0, 0, 0.3);
+
+  /* Couleurs d'état (versions pastel lisibles sur fond sombre ; le mode
+     clair les assombrit) */
+  --color-danger: #fca5a5;
+  --color-warning: #fcd34d;
+  --color-success: #4ade80;
 
   /* Polices */
   --font-sans:
@@ -30,6 +45,99 @@
   --text-xs--line-height: 1.25rem;
   --text-sm: 0.9375rem; /* 15px */
   --text-sm--line-height: 1.375rem;
+}
+
+/* ── Mode clair ─────────────────────────────────────────────────────────────
+   Redéfinition des tokens : tout composant stylé avec les classes de tokens
+   (bg-surface-*, text-fg-*, border-edge, bg-hover, bg-input…) bascule
+   automatiquement. Les couleurs de marque (primary/secondary) sont conservées;
+   tertiary est assombri pour rester lisible sur fond clair. */
+[data-theme='light'] {
+  --color-tertiary: #0f766e;
+
+  --color-surface-0: #f2f4f8; /* fond app */
+  --color-surface-1: #ffffff; /* cartes, sidebar */
+  --color-surface-2: #eef1f5; /* lignes, items imbriqués */
+  --color-surface-3: #e2e7ee; /* hover */
+
+  --color-fg: #101828;
+  --color-fg-secondary: #344054;
+  --color-fg-muted: #667085;
+  --color-fg-subtle: #98a2b3;
+
+  --color-edge: rgba(16, 24, 40, 0.1);
+  --color-edge-strong: rgba(16, 24, 40, 0.18);
+  --color-hover: rgba(16, 24, 40, 0.045);
+  --color-hover-strong: rgba(16, 24, 40, 0.09);
+  --color-input: rgba(16, 24, 40, 0.04);
+
+  --color-danger: #dc2626;
+  --color-warning: #b45309;
+  --color-success: #15803d;
+}
+
+/* Surfaces à fond sombre FIXE (pages publiques teal, écrans de chargement) :
+   les tokens y restent sombres quel que soit le thème choisi. */
+.force-dark {
+  --color-tertiary: #2dd4bf;
+  --color-surface-0: #0d0f14;
+  --color-surface-1: #111318;
+  --color-surface-2: #1a1d24;
+  --color-surface-3: #232732;
+  --color-fg: #f2f4f8;
+  --color-fg-secondary: #c3cad5;
+  --color-fg-muted: #98a2b3;
+  --color-fg-subtle: #667085;
+  --color-edge: rgba(255, 255, 255, 0.06);
+  --color-edge-strong: rgba(255, 255, 255, 0.14);
+  --color-hover: rgba(255, 255, 255, 0.05);
+  --color-hover-strong: rgba(255, 255, 255, 0.1);
+  --color-input: rgba(0, 0, 0, 0.3);
+  --color-danger: #fca5a5;
+  --color-warning: #fcd34d;
+  --color-success: #4ade80;
+}
+
+/* ── Carte « Solde total du portefeuille » ──────────────────────────────────
+   Dégradé de marque + texte propres à la carte, thémables via variables CSS
+   dédiées (les tokens globaux ne suffisent pas : le dégradé lui-même change
+   de teinte entre sombre et clair, pas seulement le texte dessus). */
+.portfolio-card {
+  --pc-bg: linear-gradient(135deg, #0d4a47 0%, #0a3a37 50%, #073030 100%);
+  --pc-watermark: #ffffff;
+  --pc-label: rgba(94, 234, 212, 0.8);
+  --pc-heading: var(--color-fg);
+  --pc-tile-bg: rgba(0, 0, 0, 0.25);
+  --pc-tile-bg-hover: rgba(0, 0, 0, 0.4);
+  --pc-tile-border: var(--color-edge);
+  --pc-tile-selected-bg: rgba(19, 78, 74, 0.3);
+  --pc-tile-selected-border: rgba(20, 184, 166, 0.6);
+  --pc-tile-label: rgba(153, 246, 228, 0.7);
+  --pc-tile-label-hover: rgba(153, 246, 228, 0.9);
+  --pc-tile-label-selected: #5eead4;
+  --pc-tile-value: var(--color-fg);
+  --pc-copy-icon: rgba(153, 246, 228, 0.4);
+  --pc-copy-icon-hover: #99f6e4;
+  --pc-empty-text: rgba(153, 246, 228, 0.7);
+}
+
+[data-theme='light'] .portfolio-card {
+  --pc-bg: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 55%, #5eead4 100%);
+  --pc-watermark: #0f766e;
+  --pc-label: rgba(15, 118, 110, 0.85);
+  --pc-heading: #0a3330;
+  --pc-tile-bg: rgba(255, 255, 255, 0.55);
+  --pc-tile-bg-hover: rgba(255, 255, 255, 0.85);
+  --pc-tile-border: rgba(15, 118, 110, 0.2);
+  --pc-tile-selected-bg: rgba(255, 255, 255, 0.85);
+  --pc-tile-selected-border: rgba(13, 148, 136, 0.6);
+  --pc-tile-label: rgba(15, 118, 110, 0.75);
+  --pc-tile-label-hover: rgba(15, 118, 110, 0.95);
+  --pc-tile-label-selected: #0f766e;
+  --pc-tile-value: #0a3330;
+  --pc-copy-icon: rgba(15, 118, 110, 0.45);
+  --pc-copy-icon-hover: #0f766e;
+  --pc-empty-text: rgba(15, 118, 110, 0.75);
 }
 
 body {

@@ -81,7 +81,7 @@ export function AccountChart({
       <div className="relative select-none">
         {hovPt && hovered != null && (
           <div
-            className="absolute z-10 pointer-events-none bg-surface-2 border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
+            className="absolute z-10 pointer-events-none bg-surface-2 border border-edge-strong rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
             style={{
               left: `${(px(hovered) / W) * 100}%`,
               top: '-8px',
@@ -99,14 +99,14 @@ export function AccountChart({
               <>
                 <p className="text-fg-secondary truncate max-w-40 mb-0.5">{hovPt.description}</p>
                 <p
-                  className={`font-mono font-semibold ${hovPt.type === 'credit' ? 'text-tertiary' : 'text-red-400'}`}
+                  className={`font-mono font-semibold ${hovPt.type === 'credit' ? 'text-tertiary' : 'text-danger'}`}
                 >
                   {hovPt.type === 'credit' ? '+' : '−'}
                   {fmtA(hovPt.amount)}
                 </p>
               </>
             )}
-            <p className="text-white font-mono font-semibold mt-0.5">
+            <p className="text-fg font-mono font-semibold mt-0.5">
               {t('balance', { value: fmtA(hovPt.balance) })}
             </p>
           </div>
@@ -181,7 +181,7 @@ export function AccountChart({
     <div className="relative select-none">
       {hovTx && hovered != null && (
         <div
-          className="absolute z-10 pointer-events-none bg-surface-2 border border-white/10 rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
+          className="absolute z-10 pointer-events-none bg-surface-2 border border-edge-strong rounded-lg px-2.5 py-1.5 shadow-xl text-xs whitespace-nowrap"
           style={{
             left: `${((PL + (hovered + 0.5) * (cW / sorted.length)) / W) * 100}%`,
             top: '-8px',
@@ -197,7 +197,7 @@ export function AccountChart({
           </p>
           <p className="text-fg-secondary truncate max-w-40 mb-0.5">{hovTx.description}</p>
           <p
-            className={`font-mono font-semibold ${hovTx.type === 'credit' ? 'text-tertiary' : 'text-red-400'}`}
+            className={`font-mono font-semibold ${hovTx.type === 'credit' ? 'text-tertiary' : 'text-danger'}`}
           >
             {hovTx.type === 'credit' ? '+' : '−'}
             {fmtA(hovTx.amount)}

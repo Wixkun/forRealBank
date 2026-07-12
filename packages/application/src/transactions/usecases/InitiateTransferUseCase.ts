@@ -23,6 +23,9 @@ export type TransferResult = {
   message: string;
   sourceBalance?: number;
   destinationBalance?: number;
+  /** Ids des écritures débit/crédit créées (lien notification ↔ relevés). */
+  sourceTransactionId?: string | null;
+  destinationTransactionId?: string | null;
 };
 
 // Arrondi monétaire à 2 décimales (les colonnes SQL sont numeric(15,2)).
@@ -112,6 +115,8 @@ export class InitiateTransferUseCase {
       message: 'Transfer completed',
       sourceBalance: outcome.sourceBalance,
       destinationBalance: outcome.destinationBalance,
+      sourceTransactionId: outcome.sourceTransactionId ?? null,
+      destinationTransactionId: outcome.destinationTransactionId ?? null,
     };
   }
 

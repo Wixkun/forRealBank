@@ -98,11 +98,34 @@ CREATE TABLE IF NOT EXISTS advisor_clients (
     CONSTRAINT uq_advisor_client UNIQUE (advisor_id, client_id)
 );
 
+-- Un client n'a qu'UN conseiller attitré (attribution automatique + findAdvisorOf).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_advisor_clients_client ON advisor_clients(client_id);
+
+-- Dernière présence constatée (fermeture du dernier socket / déconnexion).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at timestamptz NULL;
+
+-- Audit des changements d'advisor (old NULL = première attribution).
+CREATE TABLE IF NOT EXISTS advisor_client_history (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    old_advisor_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
+    new_advisor_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    changed_by uuid NULL REFERENCES users(id) ON DELETE SET NULL,
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_advisor_client_history_client
+    ON advisor_client_history(client_id);
+
 CREATE TABLE IF NOT EXISTS conversations (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     type text NOT NULL CHECK (type IN ('PRIVATE','GROUP')),
+    -- Nom personnalisé des groupes (NULL pour les conversations privées).
+    name varchar(120) NULL,
     created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE conversations
+    ADD COLUMN IF NOT EXISTS name varchar(120) NULL;
 
 CREATE TABLE IF NOT EXISTS conversation_participants (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -120,6 +143,29 @@ CREATE TABLE IF NOT EXISTS messages (
     created_at timestamptz NOT NULL DEFAULT now(),
     read_at timestamptz NULL
 );
+
+-- Demandes de bannissement : objet métier à part entière (le message de chat
+-- n'est qu'un affichage ; les décisions s'appuient sur cet enregistrement).
+CREATE TABLE IF NOT EXISTS ban_requests (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    client_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    advisor_requester_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    assigned_director_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    reason text NOT NULL,
+    status varchar(20) NOT NULL DEFAULT 'PENDING'
+        CHECK (status IN ('PENDING', 'ACCEPTED', 'REJECTED')),
+    conversation_id uuid NULL REFERENCES conversations(id) ON DELETE SET NULL,
+    message_id uuid NULL REFERENCES messages(id) ON DELETE SET NULL,
+    decision_comment text NULL,
+    processed_at timestamptz NULL,
+    processed_by_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
+    created_at timestamptz NOT NULL DEFAULT now(),
+    updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_ban_requests_director_status
+    ON ban_requests(assigned_director_id, status);
+CREATE INDEX IF NOT EXISTS idx_ban_requests_conversation
+    ON ban_requests(conversation_id);
 
 -- Images des Actualités. Stockées en base et non sur disque : accessibles
 -- depuis tous les replicas API du cluster.
@@ -170,10 +216,16 @@ CREATE TABLE IF NOT EXISTS conversation_user_state (
     conversation_id uuid NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
     last_read_message_id uuid NULL REFERENCES messages(id) ON DELETE SET NULL,
     last_read_at timestamptz NULL,
+    -- Masquage PAR utilisateur (NULL = visible) ; remis à NULL à chaque
+    -- nouveau message dans la conversation.
+    hidden_at timestamptz NULL,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz NOT NULL DEFAULT now(),
     CONSTRAINT uq_conv_user_state UNIQUE (user_id, conversation_id)
 );
+
+ALTER TABLE conversation_user_state
+    ADD COLUMN IF NOT EXISTS hidden_at timestamptz NULL;
 
 -- News globales et ciblées
 -- source  : MANUAL  = créée par DIRECTOR/ADVISOR via l'interface
@@ -427,15 +479,19 @@ ON CONFLICT (name) DO NOTHING;
 -- ============================================================================
 -- STEP 7: Seed Users
 -- ============================================================================
--- 1 Director, 1 Advisor, 2 Clients
+-- 1 Director, 2 Advisors, 4 Clients (client1/client2 → advisor1,
+-- client3/client4 → advisor2)
 -- Passwords: Director@123 / Advisor@123 / Client@123
 
 INSERT INTO users (email, "passwordHash", first_name, last_name, email_verified, email_verified_at)
 VALUES
     ('director1@forreal.bank', crypt('Director@123', gen_salt('bf')), 'Diane', 'Director', true, now()),
     ('advisor1@forreal.bank',  crypt('Advisor@123',  gen_salt('bf')), 'Alice', 'Advisor', true, now()),
+    ('advisor2@forreal.bank',  crypt('Advisor@123',  gen_salt('bf')), 'Antoine', 'Advisor', true, now()),
     ('client1@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Bob',   'Client', true, now()),
-    ('client2@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Charlie', 'Client', true, now())
+    ('client2@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Charlie', 'Client', true, now()),
+    ('client3@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'David', 'Client', true, now()),
+    ('client4@forreal.bank',   crypt('Client@123',   gen_salt('bf')), 'Emma',  'Client', true, now())
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================================
@@ -449,12 +505,15 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u JOIN roles r ON r.name = 'ADVISOR'
-WHERE u.email = 'advisor1@forreal.bank'
+WHERE u.email IN ('advisor1@forreal.bank', 'advisor2@forreal.bank')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO user_roles (user_id, role_id)
 SELECT u.id, r.id FROM users u JOIN roles r ON r.name = 'CLIENT'
-WHERE u.email IN ('client1@forreal.bank', 'client2@forreal.bank')
+WHERE u.email IN (
+    'client1@forreal.bank', 'client2@forreal.bank',
+    'client3@forreal.bank', 'client4@forreal.bank'
+)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================================
@@ -466,6 +525,13 @@ SELECT a.id, c.id
 FROM users a CROSS JOIN users c
 WHERE a.email = 'advisor1@forreal.bank'
   AND c.email IN ('client1@forreal.bank', 'client2@forreal.bank')
+ON CONFLICT ON CONSTRAINT uq_advisor_client DO NOTHING;
+
+INSERT INTO advisor_clients (advisor_id, client_id)
+SELECT a.id, c.id
+FROM users a CROSS JOIN users c
+WHERE a.email = 'advisor2@forreal.bank'
+  AND c.email IN ('client3@forreal.bank', 'client4@forreal.bank')
 ON CONFLICT ON CONSTRAINT uq_advisor_client DO NOTHING;
 
 -- ============================================================================
@@ -860,9 +926,85 @@ BEGIN
 END $$;
 
 -- ============================================================================
+-- STEP 15b: Seed Banking Data (Client3 & Client4 — advisor2)
+-- ============================================================================
+-- Même structure que client1/client2 : checking + savings + carte virtuelle
+-- + compte investissement, pour que leurs fiches soient complètes.
+
+DO $$
+DECLARE
+    v_client3_id  uuid;
+    v_client4_id  uuid;
+    v_checking_id uuid;
+BEGIN
+    SELECT id INTO v_client3_id FROM users WHERE email = 'client3@forreal.bank';
+    SELECT id INTO v_client4_id FROM users WHERE email = 'client4@forreal.bank';
+    IF v_client3_id IS NULL OR v_client4_id IS NULL THEN
+        RAISE EXCEPTION 'Client3/Client4 users not found';
+    END IF;
+
+    -- ── Client3 (David) ──────────────────────────────────────────────────
+    INSERT INTO accounts (id, user_id, name, account_type, balance, iban, account_number, interest_rate, opened_at)
+    VALUES
+        (gen_random_uuid(), v_client3_id, 'Compte Courant', 'checking', 3120.40,
+            'FR76 2222 3333 4444 5555 6666 777', '****3341', NULL, '2023-09-05'),
+        (gen_random_uuid(), v_client3_id, 'Compte Épargne', 'savings', 6800.00,
+            'FR76 8888 7777 6666 5555 4444 333', '****9034', 2.50, '2023-10-12')
+    ON CONFLICT (iban) DO NOTHING;
+
+    SELECT id INTO v_checking_id FROM accounts WHERE iban = 'FR76 2222 3333 4444 5555 6666 777';
+    IF v_checking_id IS NOT NULL THEN
+        INSERT INTO cards (account_id, type, last_four, expiry_date)
+        VALUES (v_checking_id, 'virtual', '3341', now() + interval '3 years')
+        ON CONFLICT DO NOTHING;
+
+        INSERT INTO bank_transactions (account_id, type, description, amount, balance_after, created_at)
+        VALUES
+            (v_checking_id, 'credit', 'Salaire',    2800.00, 3120.40, now() - interval '4 days'),
+            (v_checking_id, 'debit',  'Loyer',       -950.00,  320.40, now() - interval '6 days'),
+            (v_checking_id, 'debit',  'Supermarché',  -84.20, 1270.40, now() - interval '9 days')
+        ON CONFLICT DO NOTHING;
+    END IF;
+
+    INSERT INTO investment_accounts (id, user_id, name, cash_balance, total_value, total_gain_loss, opened_at)
+    VALUES (gen_random_uuid(), v_client3_id, 'Compte Investissement', 2500.00, 4870.25, 320.25, '2024-01-18')
+    ON CONFLICT DO NOTHING;
+
+    -- ── Client4 (Emma) ───────────────────────────────────────────────────
+    INSERT INTO accounts (id, user_id, name, account_type, balance, iban, account_number, interest_rate, opened_at)
+    VALUES
+        (gen_random_uuid(), v_client4_id, 'Compte Courant', 'checking', 7245.90,
+            'FR76 9999 0000 1111 2222 3333 444', '****6712', NULL, '2022-06-30'),
+        (gen_random_uuid(), v_client4_id, 'Compte Épargne', 'savings', 18450.00,
+            'FR76 4444 5555 6666 7777 8888 999', '****2258', 2.50, '2022-07-15')
+    ON CONFLICT (iban) DO NOTHING;
+
+    SELECT id INTO v_checking_id FROM accounts WHERE iban = 'FR76 9999 0000 1111 2222 3333 444';
+    IF v_checking_id IS NOT NULL THEN
+        INSERT INTO cards (account_id, type, last_four, expiry_date)
+        VALUES (v_checking_id, 'virtual', '6712', now() + interval '3 years')
+        ON CONFLICT DO NOTHING;
+
+        INSERT INTO bank_transactions (account_id, type, description, amount, balance_after, created_at)
+        VALUES
+            (v_checking_id, 'credit', 'Salaire',          3900.00, 7245.90, now() - interval '3 days'),
+            (v_checking_id, 'debit',  'Assurance auto',    -78.90, 3345.90, now() - interval '8 days'),
+            (v_checking_id, 'credit', 'Remboursement CPAM',  42.60, 3424.80, now() - interval '11 days')
+        ON CONFLICT DO NOTHING;
+    END IF;
+
+    INSERT INTO investment_accounts (id, user_id, name, cash_balance, total_value, total_gain_loss, opened_at)
+    VALUES (gen_random_uuid(), v_client4_id, 'Compte Investissement', 5000.00, 21630.50, 1830.50, '2023-03-22')
+    ON CONFLICT DO NOTHING;
+
+END $$;
+
+-- ============================================================================
 -- Initialization Complete
 -- ============================================================================
--- Users      : 4 (1 Director, 1 Advisor, 2 Clients) — passwords: {Role}@123
+-- Users      : 7 (1 Director, 2 Advisors, 4 Clients) — passwords: {Role}@123
+-- Advisor1   : Alice — clients Bob (client1) et Charlie (client2)
+-- Advisor2   : Antoine — clients David (client3) et Emma (client4)
 -- Roles      : CLIENT / ADVISOR / DIRECTOR / ADMIN
 -- Accounts   : checking + savings par client
 -- Cards      : 1 carte virtuelle par compte courant

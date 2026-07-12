@@ -1,119 +1,106 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 const API_URL = '/api';
+const SEARCH_DEBOUNCE_MS = 300;
 
-interface User {
+export interface ContactUser {
   id: string;
   firstName: string;
   lastName: string;
-  roles?: string[];
+  role: string;
 }
 
-export function useClientAdvisor(clientId: string | undefined) {
+/**
+ * Annuaire des interlocuteurs autorisés pour l'utilisateur connecté.
+ * Le filtrage par rôle (advisor → ses clients, client → son conseiller,
+ * director → clients + conseillers) et la recherche sont faits CÔTÉ SERVEUR
+ * (`GET /chat/contacts?search=`) ; le hook se contente d'un debounce.
+ */
+export function useContacts(search: string) {
   const t = useTranslations('chat.errors');
 
-  const [advisor, setAdvisor] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [contacts, setContacts] = useState<ContactUser[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const debounceRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!clientId) return;
+    let cancelled = false;
 
-    const fetchAdvisor = async () => {
+    const fetchContacts = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_URL}/chat/client/${clientId}/advisor`, {
+        const params = new URLSearchParams();
+        const term = search.trim();
+        if (term) params.set('search', term);
+        const qs = params.toString();
+        const res = await fetch(`${API_URL}/chat/contacts${qs ? `?${qs}` : ''}`, {
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
         });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setAdvisor(data || null);
+        if (!cancelled) setContacts(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('fetchAdvisor'));
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : t('fetchUsers'));
+          setContacts([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     };
 
-    fetchAdvisor();
-  }, [clientId, t]);
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => void fetchContacts(), SEARCH_DEBOUNCE_MS);
 
-  return { advisor, isLoading, error };
+    return () => {
+      cancelled = true;
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    };
+  }, [search, t]);
+
+  return { contacts, isLoading, error };
 }
 
-export function useAdvisorClients(advisorId: string | undefined) {
-  const t = useTranslations('chat.errors');
-
-  const [clients, setClients] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!advisorId) return;
-
-    const fetchClients = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const res = await fetch(`${API_URL}/chat/advisor/${advisorId}/clients`, {
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        setClients(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t('fetchClients'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchClients();
-  }, [advisorId, t]);
-
-  return { clients, isLoading, error };
-}
-
-export function useUsersByRole(role: 'CLIENT' | 'ADVISOR' | 'DIRECTOR' | null) {
-  const t = useTranslations('chat.errors');
-
-  const [users, setUsers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+/**
+ * Présence (en ligne / hors ligne) d'un ensemble d'utilisateurs, depuis la
+ * source fiable du backend (sockets authentifiés du cluster), avec
+ * rafraîchissement périodique — même mécanisme que l'en-tête de conversation.
+ */
+export function usePresence(userIds: string[]) {
+  const [online, setOnline] = useState<Record<string, boolean>>({});
+  const key = userIds.slice().sort().join(',');
 
   useEffect(() => {
-    if (!role) return;
-
-    const fetchUsers = async () => {
-      setIsLoading(true);
-      setError(null);
+    if (!key) {
+      setOnline({});
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
       try {
-        const res = await fetch(`${API_URL}/chat/users/by-role/${role}`, {
+        const res = await fetch(`${API_URL}/chat/presence?userIds=${encodeURIComponent(key)}`, {
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
         });
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) return;
         const data = await res.json();
-        setUsers(Array.isArray(data) ? data : []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t('fetchUsers'));
-      } finally {
-        setIsLoading(false);
+        if (!cancelled && data && typeof data === 'object') {
+          setOnline(data as Record<string, boolean>);
+        }
+      } catch {
+        // Repli silencieux : le prochain tick réessaiera.
       }
     };
+    void load();
+    const intervalId = setInterval(load, 20000);
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+    };
+  }, [key]);
 
-    fetchUsers();
-  }, [role, t]);
-
-  return { users, isLoading, error };
+  return online;
 }

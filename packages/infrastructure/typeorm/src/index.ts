@@ -24,6 +24,8 @@ export * from './entities/NewsEntity';
 export * from './entities/UserNewsStatusEntity';
 export * from './entities/ConversationNotificationSettingsEntity';
 export * from './entities/ConversationUserStateEntity';
+export * from './entities/AdvisorClientHistoryEntity';
+export * from './entities/BanRequestEntity';
 
 // repositories
 export * from './repositories/AdvisorClientRepository';

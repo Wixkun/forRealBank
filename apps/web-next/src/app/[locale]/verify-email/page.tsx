@@ -96,8 +96,8 @@ export default function VerifyEmailPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
-          <div className="text-white">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center force-dark bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
+          <div className="text-fg">Loading...</div>
         </div>
       }
     >

@@ -9,6 +9,7 @@ import {
   GetUnreadCountUseCase,
   MarkNotificationReadUseCase,
   MarkAllNotificationsReadUseCase,
+  MarkNotificationsReadByTargetUseCase,
   DeleteNotificationUseCase,
 } from '@forreal/application';
 import { AuthModule } from '../auth/auth.module';
@@ -36,6 +37,11 @@ import { AuthModule } from '../auth/auth.module';
     {
       provide: MarkAllNotificationsReadUseCase,
       useFactory: (repo: INotificationRepository) => new MarkAllNotificationsReadUseCase(repo),
+      inject: [INotificationRepository],
+    },
+    {
+      provide: MarkNotificationsReadByTargetUseCase,
+      useFactory: (repo: INotificationRepository) => new MarkNotificationsReadByTargetUseCase(repo),
       inject: [INotificationRepository],
     },
     {

@@ -78,7 +78,7 @@ const QUICK_RANGES: QuickRange[] = [
 ];
 
 const inputClass =
-  'w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary/60 [color-scheme:dark]';
+  'w-full bg-input border border-edge-strong rounded-lg px-3 py-2 text-fg text-sm focus:outline-none focus:border-primary/60 [color-scheme:dark]';
 
 export function StatementModal({
   prefill,
@@ -165,7 +165,7 @@ export function StatementModal({
 
   return (
     <ModalShell onCloseAction={onCloseAction} maxWidthClass="max-w-md">
-      <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/5">
+      <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-edge">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center text-tertiary">
             <svg
@@ -184,11 +184,11 @@ export function StatementModal({
               <line x1="8" y1="17" x2="13" y2="17" />
             </svg>
           </div>
-          <h2 className="text-white text-sm font-semibold">{t('title')}</h2>
+          <h2 className="text-fg text-sm font-semibold">{t('title')}</h2>
         </div>
         <button
           onClick={onCloseAction}
-          className="p-1.5 rounded-lg text-fg-muted hover:text-white hover:bg-white/5 transition"
+          className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-hover transition"
           aria-label={t('close')}
         >
           <svg
@@ -231,7 +231,7 @@ export function StatementModal({
                 key={q.key}
                 type="button"
                 onClick={() => setRange(q.range())}
-                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-white/5 text-fg-secondary border border-white/10 hover:bg-primary/15 hover:text-tertiary hover:border-primary/40 transition"
+                className="px-2.5 py-1 rounded-lg text-xs font-medium bg-hover text-fg-secondary border border-edge-strong hover:bg-primary/15 hover:text-tertiary hover:border-primary/40 transition"
               >
                 {t(q.key)}
               </button>
@@ -262,13 +262,11 @@ export function StatementModal({
           </div>
         </div>
 
-        {!datesValid && start && end && (
-          <p className="text-amber-300 text-xs">{t('invalidRange')}</p>
-        )}
-        {error && <p className="text-red-400 text-xs">{error}</p>}
+        {!datesValid && start && end && <p className="text-warning text-xs">{t('invalidRange')}</p>}
+        {error && <p className="text-danger text-xs">{error}</p>}
       </div>
 
-      <div className="flex items-center gap-2 px-5 py-4 border-t border-white/5">
+      <div className="flex items-center gap-2 px-5 py-4 border-t border-edge">
         <button
           onClick={handleDownload}
           disabled={generating || !selectedAccount || !datesValid}
@@ -292,7 +290,7 @@ export function StatementModal({
         </button>
         <button
           onClick={onCloseAction}
-          className="px-5 py-2.5 rounded-lg bg-white/5 text-fg-secondary text-xs font-semibold hover:bg-white/10 transition"
+          className="px-5 py-2.5 rounded-lg bg-hover text-fg-secondary text-xs font-semibold hover:bg-hover-strong transition"
         >
           {t('cancel')}
         </button>

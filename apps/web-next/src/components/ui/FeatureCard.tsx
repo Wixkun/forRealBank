@@ -13,7 +13,7 @@ export function FeatureCard({ icon, title, description }: FeatureCardProps) {
         <div className="p-4 bg-primary/15 rounded-full group-hover:scale-110 transition-transform duration-300">
           <Icon name={icon} className="w-8 h-8 text-teal-400" />
         </div>
-        <h3 className="text-xl font-semibold text-white">{title}</h3>
+        <h3 className="text-xl font-semibold text-fg">{title}</h3>
         <p className="text-gray-300 text-sm leading-relaxed">{description}</p>
       </div>
     </div>

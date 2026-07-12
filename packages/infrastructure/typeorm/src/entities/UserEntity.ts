@@ -24,6 +24,11 @@ export class UserEntity extends BaseEntity {
   @Column({ type: 'timestamptz', name: 'last_login_at', nullable: true })
   lastLoginAt!: Date | null;
 
+  // Dernière présence constatée (fermeture du dernier socket / déconnexion).
+  // NULL = jamais connecté : le frontend n'affiche alors rien.
+  @Column({ type: 'timestamptz', name: 'last_seen_at', nullable: true })
+  lastSeenAt!: Date | null;
+
   @Column({ type: 'boolean', name: 'email_verified', default: false })
   emailVerified!: boolean;
 

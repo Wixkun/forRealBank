@@ -13,4 +13,7 @@ export interface IInvestmentRepository {
   listByUser(userId: string): Promise<InvestmentAccount[]>;
   updateCashBalance(id: string, newBalance: number): Promise<void>;
   createCashMovement(data: CashMovementData): Promise<void>;
+
+  /** Ouvre un compte investissement (soldes 0, statut actif). */
+  create(params: { userId: string; name: string }): Promise<InvestmentAccount>;
 }

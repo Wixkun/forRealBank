@@ -155,7 +155,7 @@ function LoginForm() {
             placeholder={t('emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 
+            className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 
               focus:outline-none focus:ring-2 focus:ring-teal-400"
             required
           />
@@ -175,7 +175,7 @@ function LoginForm() {
               placeholder="123456"
               value={twoFactorCode}
               onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300 tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 tracking-[0.35em] text-center focus:outline-none focus:ring-2 focus:ring-teal-400"
               autoFocus
               required
             />
@@ -189,7 +189,7 @@ function LoginForm() {
             placeholder={t('passwordPlaceholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 rounded-lg bg-white/20 placeholder-gray-300
+            className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300
               focus:outline-none focus:ring-2 focus:ring-teal-400"
             required
           />
@@ -229,8 +229,8 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
-          <div className="text-white">Loading...</div>
+        <div className="min-h-screen flex items-center justify-center force-dark bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800">
+          <div className="text-fg">Loading...</div>
         </div>
       }
     >

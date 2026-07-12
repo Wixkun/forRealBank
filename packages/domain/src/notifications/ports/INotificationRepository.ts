@@ -32,4 +32,12 @@ export interface INotificationRepository {
     groupKey: string,
   ): Promise<Notification | null>;
   incrementGrouped(id: string, title: string, content: string): Promise<void>;
+  /** Marque lues les notifications de l'utilisateur ciblant une entité donnée
+   *  (ex. la news de détail d'un virement consultée). Renvoie le nombre
+   *  de notifications affectées. */
+  markAsReadByTarget(
+    userId: string,
+    targetType: NotificationTargetType,
+    targetId: string,
+  ): Promise<number>;
 }

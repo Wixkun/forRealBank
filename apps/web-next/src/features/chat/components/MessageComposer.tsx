@@ -294,18 +294,18 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
 
     const toolButtonClass = `p-2 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
       isDark
-        ? 'text-fg-muted hover:text-fg-secondary hover:bg-white/5'
+        ? 'text-fg-muted hover:text-fg-secondary hover:bg-hover'
         : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
     }`;
 
     return (
       <div
         className={`px-6 py-4 border-t ${
-          isDark ? 'border-white/5 bg-surface-1' : 'border-gray-200 bg-white'
+          isDark ? 'border-edge bg-surface-1' : 'border-gray-200 bg-white'
         }`}
       >
         {error && (
-          <div className="mb-2 text-xs px-3 py-2 rounded-lg border bg-red-500/10 border-red-500/30 text-red-400">
+          <div className="mb-2 text-xs px-3 py-2 rounded-lg border bg-red-500/10 border-red-500/30 text-danger">
             {error}
           </div>
         )}
@@ -320,7 +320,7 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
                     src={p.previewUrl}
                     alt={p.file.name}
                     className={`h-16 w-16 object-cover rounded-lg border ${
-                      isDark ? 'border-white/10' : 'border-gray-200'
+                      isDark ? 'border-edge-strong' : 'border-gray-200'
                     }`}
                   />
                   <button
@@ -328,7 +328,7 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
                     onClick={() => removePending(p.id)}
                     aria-label={t('composer.removeAttachment')}
                     title={t('composer.removeAttachment')}
-                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 text-fg-secondary border border-white/10 flex items-center justify-center text-xs leading-none hover:bg-red-500 hover:text-white transition-colors"
+                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 text-fg-secondary border border-edge-strong flex items-center justify-center text-xs leading-none hover:bg-red-500 hover:text-white transition-colors"
                   >
                     ×
                   </button>
@@ -338,11 +338,11 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
                   key={p.id}
                   className={`relative flex items-center gap-2 rounded-lg border px-3 py-2 ${
                     isDark
-                      ? 'border-white/10 bg-surface-2 text-fg-secondary'
+                      ? 'border-edge-strong bg-surface-2 text-fg-secondary'
                       : 'border-gray-200 bg-gray-50 text-gray-700'
                   }`}
                 >
-                  <span className="text-red-400 shrink-0">
+                  <span className="text-danger shrink-0">
                     <IconPdf size={18} />
                   </span>
                   <div className="min-w-0">
@@ -356,7 +356,7 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
                     onClick={() => removePending(p.id)}
                     aria-label={t('composer.removeAttachment')}
                     title={t('composer.removeAttachment')}
-                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 text-fg-secondary border border-white/10 flex items-center justify-center text-xs leading-none hover:bg-red-500 hover:text-white transition-colors"
+                    className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-surface-3 text-fg-secondary border border-edge-strong flex items-center justify-center text-xs leading-none hover:bg-red-500 hover:text-white transition-colors"
                   >
                     ×
                   </button>
@@ -368,7 +368,7 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
 
         <div
           className={`flex items-end gap-1.5 rounded-xl border px-2 py-1.5 transition-colors focus-within:border-primary/60 focus-within:ring-1 focus-within:ring-primary/30 ${
-            isDark ? 'border-white/10 bg-surface-2' : 'border-gray-300 bg-white'
+            isDark ? 'border-edge-strong bg-surface-2' : 'border-gray-300 bg-white'
           }`}
         >
           <div className="relative" ref={emojiWrapperRef}>
@@ -427,7 +427,7 @@ const MessageComposer = forwardRef<MessageComposerHandle, MessageComposerProps>(
             aria-label={t('input.placeholder')}
             disabled={sending}
             className={`flex-1 resize-none bg-transparent px-2 py-2 text-sm focus:outline-none scrollbar-slim min-h-9 disabled:opacity-60 ${
-              isDark ? 'text-white placeholder:text-fg-subtle' : 'text-gray-900'
+              isDark ? 'text-fg placeholder:text-fg-subtle' : 'text-gray-900'
             }`}
           />
 

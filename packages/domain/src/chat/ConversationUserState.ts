@@ -7,6 +7,7 @@ export class ConversationUserState {
     private _lastReadAt: Date | null,
     private readonly _createdAt: Date,
     private _updatedAt: Date,
+    private _hiddenAt: Date | null = null,
   ) {}
 
   get id() {
@@ -30,10 +31,26 @@ export class ConversationUserState {
   get updatedAt() {
     return this._updatedAt;
   }
+  get hiddenAt() {
+    return this._hiddenAt;
+  }
+  get isHidden() {
+    return this._hiddenAt !== null;
+  }
 
   markRead(messageId: string): void {
     this._lastReadMessageId = messageId;
     this._lastReadAt = new Date();
+    this._updatedAt = new Date();
+  }
+
+  hide(): void {
+    this._hiddenAt = new Date();
+    this._updatedAt = new Date();
+  }
+
+  unhide(): void {
+    this._hiddenAt = null;
     this._updatedAt = new Date();
   }
 }

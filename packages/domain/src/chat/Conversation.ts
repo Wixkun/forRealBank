@@ -8,6 +8,7 @@ export class Conversation {
     private readonly _id: string,
     private readonly _type: ConversationType,
     private readonly _createdAt: Date,
+    private readonly _name: string | null = null,
   ) {}
 
   get id() {
@@ -20,6 +21,11 @@ export class Conversation {
 
   get createdAt() {
     return this._createdAt;
+  }
+
+  /** Nom personnalisé (groupes). Null pour les conversations privées. */
+  get name() {
+    return this._name;
   }
 
   isPrivate(): boolean {

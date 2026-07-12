@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   HttpCode,
   Inject,
@@ -17,7 +18,9 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { ChatGateway } from '../chat/chat.gateway';
 import { RoleName } from '@forreal/domain';
+import { checkBanPermission } from '@forreal/application';
 
 import { UpdateUserProfileUseCase } from '@forreal/application';
 import { DeleteOwnAccountUseCase } from '@forreal/application';
@@ -47,7 +50,28 @@ export class UsersController {
     private readonly banUser: BanUserUseCase,
     private readonly unbanUser: UnbanUserUseCase,
     @Inject(IUserRepository) private readonly users: IUserRepository,
+    @Inject(ChatGateway) private readonly chatGateway: ChatGateway,
   ) {}
+
+  // Matrice de bannissement (appliquée aussi au débannissement) : DIRECTOR →
+  // CLIENT/ADVISOR uniquement ; ADMIN → tout sauf un autre ADMIN ; jamais
+  // soi-même. Vérifiée CÔTÉ SERVEUR quel que soit ce que le frontend affiche.
+  private async assertBanAllowed(req: Request, targetUserId: string) {
+    const auth = (req as any).auth as { userId: string; roles: RoleName[] };
+    const target = await this.users.findById(targetUserId);
+    if (!target) throw new NotFoundException('User not found');
+
+    const denial = checkBanPermission(
+      { id: auth.userId, roles: auth.roles ?? [] },
+      { id: target.id, roles: Array.from(target.roles ?? []) },
+    );
+    if (denial === 'SELF_BAN_FORBIDDEN') {
+      throw new ForbiddenException('Cannot ban or unban yourself');
+    }
+    if (denial) {
+      throw new ForbiddenException('This role cannot be banned or unbanned by you');
+    }
+  }
 
   @HttpCode(200)
   @Get('me')
@@ -149,15 +173,21 @@ export class UsersController {
   @HttpCode(200)
   @Patch(':id/ban')
   @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
-  async ban(@Param('id') id: string, @Body() body: { reason?: string }) {
+  async ban(@Param('id') id: string, @Body() body: { reason?: string }, @Req() req: Request) {
+    await this.assertBanAllowed(req, id);
     await this.banUser.execute({ targetUserId: id, reason: body?.reason });
+    // Invalidation immédiate : fermeture des sockets sur tout le cluster ; les
+    // requêtes HTTP suivantes sont rejetées par les guards (état banni relu en
+    // base) et /auth/me renvoie 403 → le frontend redirige vers /banned.
+    this.chatGateway.disconnectUser(id);
     return { success: true, message: 'User banned' };
   }
 
   @HttpCode(200)
   @Patch(':id/unban')
   @Roles(RoleName.ADMIN, RoleName.DIRECTOR)
-  async unban(@Param('id') id: string) {
+  async unban(@Param('id') id: string, @Req() req: Request) {
+    await this.assertBanAllowed(req, id);
     await this.unbanUser.execute({ targetUserId: id });
     return { success: true, message: 'User unbanned' };
   }

@@ -13,16 +13,16 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
     <div
       className="min-h-screen flex items-center justify-center
-      bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800
+      force-dark bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800
       bg-cover bg-center relative"
       style={{ backgroundImage: "url('/wallpaper.jpeg')" }}
     >
       <div className="absolute top-0 right-0 p-4 z-20">
         <LanguageSwitcher theme="dark" />
       </div>
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-input" />
 
-      <div className="relative z-10 w-full max-w-md bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 text-white">
+      <div className="relative z-10 w-full max-w-md bg-hover-strong backdrop-blur-lg border border-edge-strong rounded-2xl shadow-2xl p-8 text-fg">
         <div className="mb-6">
           {title ?? (
             <h2

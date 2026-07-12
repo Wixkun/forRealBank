@@ -109,7 +109,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   return (
     <>
       <Header />
-      <main className="relative min-h-screen bg-surface-0 text-white overflow-hidden">
+      <main className="force-dark relative min-h-screen bg-surface-0 text-fg overflow-hidden">
         <HeroSection />
 
         <FeaturesSection

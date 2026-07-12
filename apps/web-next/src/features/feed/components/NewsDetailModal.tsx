@@ -54,6 +54,96 @@ function getTransferMetadata(item: NewsItem): TransferMetadata | null {
   return null;
 }
 
+// Métadonnées des news ciblées de réattribution d'advisor :
+//  - ADVISOR_CHANGED (client)  → bouton « Contacter mon nouvel advisor »
+//  - CLIENT_ASSIGNED (advisor) → bouton « Consulter le client »
+export interface AdvisorChangeMetadata {
+  kind: 'ADVISOR_CHANGED' | 'CLIENT_ASSIGNED';
+  advisorId?: string;
+  advisorName?: string;
+  clientId?: string;
+  clientName?: string;
+}
+
+function getAdvisorChangeMetadata(item: NewsItem): AdvisorChangeMetadata | null {
+  const meta = item.metadata;
+  const kind = meta && typeof meta === 'object' ? (meta as { kind?: unknown }).kind : null;
+  if (kind === 'ADVISOR_CHANGED' || kind === 'CLIENT_ASSIGNED') {
+    return meta as unknown as AdvisorChangeMetadata;
+  }
+  return null;
+}
+
+// Boutons d'action des news de réattribution. Le contact passe par l'endpoint
+// dédupliqué (une seule conversation privée par paire) puis redirige vers la
+// conversation sélectionnée.
+function AdvisorChangeActions({
+  meta,
+  onCloseAction,
+}: {
+  meta: AdvisorChangeMetadata;
+  onCloseAction: () => void;
+}) {
+  const t = useTranslations('feed.detail.advisorChange');
+  const router = useRouter();
+  const locale = useLocale();
+  const [isOpening, setIsOpening] = useState(false);
+  const [error, setError] = useState(false);
+
+  const contactAdvisor = async () => {
+    if (!meta.advisorId) return;
+    setIsOpening(true);
+    setError(false);
+    try {
+      const res = await fetch('/api/chat/conversations/private/open', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetUserId: meta.advisorId }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as { conversationId: string };
+      onCloseAction();
+      router.push(`/${locale}/dashboard/messages?conversationId=${data.conversationId}`);
+    } catch {
+      setError(true);
+    } finally {
+      setIsOpening(false);
+    }
+  };
+
+  const viewClient = () => {
+    if (!meta.clientId) return;
+    onCloseAction();
+    router.push(`/${locale}/dashboard/users?userId=${meta.clientId}`);
+  };
+
+  return (
+    <div className="mt-4 space-y-2">
+      {meta.kind === 'ADVISOR_CHANGED' && meta.advisorId && (
+        <button
+          type="button"
+          onClick={() => void contactAdvisor()}
+          disabled={isOpening}
+          className="w-full rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary-hover transition disabled:opacity-50"
+        >
+          {isOpening ? t('opening') : t('contactAdvisor')}
+        </button>
+      )}
+      {meta.kind === 'CLIENT_ASSIGNED' && meta.clientId && (
+        <button
+          type="button"
+          onClick={viewClient}
+          className="w-full rounded-lg bg-primary px-4 py-2.5 text-xs font-semibold text-white hover:bg-primary-hover transition"
+        >
+          {t('viewClient')}
+        </button>
+      )}
+      {error && <p className="text-xs text-danger text-center">{t('error')}</p>}
+    </div>
+  );
+}
+
 export type NewsStatusConfig = { label: string; bg: string; color: string; icon: JSX.Element };
 
 export const NEWS_STATUS_CONFIG: Record<NewsStatus, NewsStatusConfig> = {
@@ -236,13 +326,13 @@ function Tile({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/3 border border-white/5">
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-white/3 border border-edge">
       <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0 text-tertiary">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-fg-muted text-xs mb-0.5">{label}</p>
-        <p className={`text-xs font-medium break-all ${valueClass ?? 'text-white'}`}>{value}</p>
+        <p className={`text-xs font-medium break-all ${valueClass ?? 'text-fg'}`}>{value}</p>
         {sub && <p className="text-fg-muted text-xs mt-0.5 break-all">{sub}</p>}
       </div>
       {action}
@@ -395,7 +485,7 @@ function TransferDetailBody({
     <div className="space-y-4">
       <div className="text-center py-3">
         <p
-          className={`text-3xl font-bold tracking-tight ${isIncoming ? 'text-teal-300' : 'text-red-400'}`}
+          className={`text-3xl font-bold tracking-tight ${isIncoming ? 'text-teal-300' : 'text-danger'}`}
         >
           {isIncoming ? '+' : '-'} {amount}
         </p>
@@ -438,7 +528,7 @@ function TransferDetailBody({
               <button
                 onClick={copyIban}
                 title={copied ? t('copied') : t('copyIban')}
-                className="p-1.5 rounded text-fg-muted hover:text-tertiary hover:bg-white/5 transition shrink-0"
+                className="p-1.5 rounded text-fg-muted hover:text-tertiary hover:bg-hover transition shrink-0"
               >
                 {copied ? (
                   <svg
@@ -521,7 +611,7 @@ function TransferDetailBody({
         </button>
         <button
           onClick={onCloseAction}
-          className="px-5 py-2.5 rounded-lg bg-white/5 text-fg-secondary text-xs font-semibold hover:bg-white/10 transition"
+          className="px-5 py-2.5 rounded-lg bg-hover text-fg-secondary text-xs font-semibold hover:bg-hover-strong transition"
         >
           {tDetail('close')}
         </button>
@@ -548,10 +638,11 @@ export function NewsDetailModal({
   const t = useTranslations('feed.detail');
   const locale = useLocale();
   const transfer = item ? getTransferMetadata(item) : null;
+  const advisorChange = item ? getAdvisorChangeMetadata(item) : null;
 
   return (
     <ModalShell onCloseAction={onCloseAction} cardClassName="max-h-[85vh] overflow-y-auto">
-      <div className="sticky top-0 flex items-center justify-between gap-3 px-5 py-4 bg-[#14161c]/95 backdrop-blur border-b border-white/5">
+      <div className="sticky top-0 flex items-center justify-between gap-3 px-5 py-4 bg-surface-1/95 backdrop-blur border-b border-edge">
         <div className="flex items-center gap-3 min-w-0">
           {cfg && (
             <div
@@ -561,7 +652,7 @@ export function NewsDetailModal({
             </div>
           )}
           <div className="min-w-0">
-            <h2 className="text-white text-base font-semibold leading-snug truncate">
+            <h2 className="text-fg text-base font-semibold leading-snug truncate">
               {item?.title ?? (loading ? t('loading') : t('notFoundTitle'))}
             </h2>
             {item && (
@@ -596,7 +687,7 @@ export function NewsDetailModal({
         )}
         <button
           onClick={onCloseAction}
-          className="p-1.5 rounded-lg text-fg-muted hover:text-white hover:bg-white/5 transition shrink-0"
+          className="p-1.5 rounded-lg text-fg-muted hover:text-fg hover:bg-hover transition shrink-0"
           aria-label={t('close')}
         >
           <svg
@@ -618,7 +709,7 @@ export function NewsDetailModal({
         {loading && <p className="text-fg-muted text-xs py-6 text-center">{t('loading')}</p>}
 
         {!loading && error && (
-          <p className="text-red-300 text-xs py-6 text-center">{t('notFound')}</p>
+          <p className="text-danger text-xs py-6 text-center">{t('notFound')}</p>
         )}
 
         {!loading && !error && item && transfer && (
@@ -628,7 +719,7 @@ export function NewsDetailModal({
         {!loading && !error && item && !transfer && (
           <>
             {item.archivedAt && (
-              <p className="mb-3 text-xs px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
+              <p className="mb-3 text-xs px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-warning">
                 {t('archived')}
               </p>
             )}
@@ -640,7 +731,7 @@ export function NewsDetailModal({
               <img
                 src={item.imageUrl}
                 alt=""
-                className="mb-3 max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/5 mx-auto"
+                className="mb-3 max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-edge mx-auto"
               />
             )}
             <div className="space-y-3">
@@ -658,11 +749,14 @@ export function NewsDetailModal({
                     key={i}
                     src={segment.value}
                     alt=""
-                    className="max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-white/5 mx-auto"
+                    className="max-w-full h-auto max-h-[60vh] object-contain rounded-xl border border-edge mx-auto"
                   />
                 ),
               )}
             </div>
+            {advisorChange && (
+              <AdvisorChangeActions meta={advisorChange} onCloseAction={onCloseAction} />
+            )}
           </>
         )}
       </div>
