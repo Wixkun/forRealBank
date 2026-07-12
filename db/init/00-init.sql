@@ -788,8 +788,10 @@ DECLARE
     v_checking_id   uuid;
     v_savings_id    uuid;
     v_investment_id uuid;
+    v_director_id   uuid;
 BEGIN
     SELECT id INTO v_client1_id FROM users WHERE email = 'client1@forreal.bank';
+    SELECT id INTO v_director_id FROM users WHERE email = 'director1@forreal.bank';
     IF v_client1_id IS NULL THEN RAISE EXCEPTION 'Client1 user not found'; END IF;
 
     -- Accounts
