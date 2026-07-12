@@ -2,9 +2,12 @@
 import { FormEvent, Suspense, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { buildApiUrl, BROWSER_API_BASE } from '@/lib/env';
+import { AuthLayout } from '@/features/auth/components/AuthLayout';
 
 function ResetPasswordForm() {
+  const t = useTranslations('auth.resetPassword');
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -22,7 +25,7 @@ function ResetPasswordForm() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(t('passwordsMismatch'));
       return;
     }
 
@@ -36,91 +39,94 @@ function ResetPasswordForm() {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(
-          data.message || data.error || 'Impossible de reinitialiser le mot de passe',
-        );
+        throw new Error(data.message || data.error || t('genericError'));
       }
 
-      setMessage('Mot de passe reinitialise. Redirection vers la connexion...');
+      setMessage(t('successMessage'));
       setTimeout(() => router.push(`/${locale}/login`), 1200);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue.');
+      setError(err instanceof Error ? err.message : t('genericError'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center force-dark bg-gradient-to-br from-teal-950 via-teal-900 to-teal-800 bg-cover bg-center relative"
-      style={{ backgroundImage: "url('/wallpaper.jpeg')" }}
-    >
-      <div className="absolute inset-0 bg-input" />
-
-      <div className="relative z-10 w-full max-w-md bg-hover-strong backdrop-blur-lg border border-edge-strong rounded-2xl shadow-2xl p-8 text-fg">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!token && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-2 rounded-lg text-sm">
-              Lien de reinitialisation invalide.
-            </div>
-          )}
-          {message && (
-            <div className="bg-green-500/20 border border-green-500/50 text-green-100 px-4 py-2 rounded-lg text-sm">
-              {message}
-            </div>
-          )}
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-2 rounded-lg text-sm">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm mb-1 text-gray-200">Nouveau mot de passe</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
-              required
-              minLength={12}
-            />
+    <AuthLayout title={t('title')} subtitle={t('subtitle')} wallpaper="/error_wallpaper.png">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!token && (
+          <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-2 rounded-lg text-sm">
+            {t('invalidLink')}
           </div>
-
-          <div>
-            <label className="block text-sm mb-1 text-gray-200">Confirmer le mot de passe</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
-              required
-              minLength={12}
-            />
+        )}
+        {message && (
+          <div className="bg-green-500/20 border border-green-500/50 text-green-100 px-4 py-2 rounded-lg text-sm">
+            {message}
           </div>
+        )}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-2 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading || !token}
-            className="w-full bg-primary hover:bg-primary-hover transition text-white font-semibold py-2 rounded-lg shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Reinitialisation...' : 'Reinitialiser le mot de passe'}
-          </button>
+        <div>
+          <label className="block text-sm mb-1 text-gray-200" htmlFor="reset-password">
+            {t('newPassword')}
+          </label>
+          <input
+            id="reset-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
+            minLength={12}
+          />
+        </div>
 
-          <p className="text-center text-sm text-gray-300 mt-4">
-            <Link href={`/${locale}/login`} className="text-teal-400 hover:underline">
-              Retour a la connexion
-            </Link>
-          </p>
-        </form>
-      </div>
-    </div>
+        <div>
+          <label className="block text-sm mb-1 text-gray-200" htmlFor="reset-confirm-password">
+            {t('confirmPassword')}
+          </label>
+          <input
+            id="reset-confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full px-4 py-2 rounded-lg bg-hover-strong placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            required
+            minLength={12}
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || !token}
+          className="w-full bg-primary hover:bg-primary-hover transition text-white font-semibold py-2 rounded-lg shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? t('loading') : t('submit')}
+        </button>
+
+        <p className="text-center text-sm text-gray-300 mt-4">
+          <Link href={`/${locale}/login`} className="text-teal-400 hover:underline">
+            {t('backToLogin')}
+          </Link>
+        </p>
+      </form>
+    </AuthLayout>
   );
 }
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-teal-950" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center force-dark bg-surface-0">
+          <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+        </div>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

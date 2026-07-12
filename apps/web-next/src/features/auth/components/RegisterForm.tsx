@@ -2,21 +2,36 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { registerSchema, RegisterFormData } from '@/lib/schemas/register.schema';
+import { createRegisterSchema, RegisterFormData } from '@/lib/schemas/register.schema';
 import { FormField } from '@/components/ui/FormField';
 import { Button } from '@/components/ui/Button';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 
 export function RegisterForm() {
   const t = useTranslations('auth.register');
+  const tValidation = useTranslations('auth.register.validation');
   const tCommon = useTranslations('common');
   const router = useRouter();
   const pathname = usePathname();
   const [error, setError] = useState<string>('');
   const locale = pathname.split('/')[1] || 'en';
+
+  // Schéma zod construit avec les messages traduits de la locale courante.
+  const registerSchema = useMemo(
+    () =>
+      createRegisterSchema({
+        firstNameTooShort: tValidation('firstNameTooShort'),
+        lastNameTooShort: tValidation('lastNameTooShort'),
+        invalidEmail: tValidation('invalidEmail'),
+        passwordTooShort: tValidation('passwordTooShort'),
+        passwordComplexity: tValidation('passwordComplexity'),
+        passwordsMismatch: tValidation('passwordsMismatch'),
+      }),
+    [tValidation],
+  );
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -49,24 +64,28 @@ export function RegisterForm() {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError('');
+      // confirmPassword ne sert qu'à la validation client : l'API rejette les
+      // champs inconnus (whitelist), on ne l'envoie donc jamais.
+      const { confirmPassword: _confirmPassword, ...payload } = data;
+      void _confirmPassword;
       const response = await fetch(`/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
-          ...data,
+          ...payload,
           locale,
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
+        throw new Error(errorData.message || t('registerFailed'));
       }
 
       router.push(`/${locale}/login?registered=true`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during registration');
+      setError(err instanceof Error ? err.message : t('genericError'));
     }
   };
 
@@ -103,6 +122,13 @@ export function RegisterForm() {
         type="password"
         {...register('password')}
         error={errors.password?.message}
+      />
+
+      <FormField
+        label={t('confirmPassword')}
+        type="password"
+        {...register('confirmPassword')}
+        error={errors.confirmPassword?.message}
       />
 
       <Button type="submit" disabled={isSubmitting}>

@@ -22,7 +22,6 @@ import { ChatGateway } from '../chat/chat.gateway';
 import { RoleName } from '@forreal/domain';
 import { checkBanPermission } from '@forreal/application';
 
-import { UpdateUserProfileUseCase } from '@forreal/application';
 import { DeleteOwnAccountUseCase } from '@forreal/application';
 import { ListUsersUseCase } from '@forreal/application';
 import { UpdateUserRolesUseCase } from '@forreal/application';
@@ -30,7 +29,6 @@ import { DeleteUserByAdminUseCase } from '@forreal/application';
 import { BanUserUseCase } from '@forreal/application';
 import { UnbanUserUseCase } from '@forreal/application';
 
-import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ListUsersQueryDto } from './dto/list-users.dto';
 import { UpdateRolesDto } from './dto/update-roles.dto';
 import { IUserRepository } from '@forreal/domain';
@@ -42,7 +40,6 @@ type ListUsersQueryWithAlias = ListUsersQueryDto & { q?: string };
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(
-    private readonly updateProfile: UpdateUserProfileUseCase,
     private readonly deleteOwn: DeleteOwnAccountUseCase,
     private readonly listUsers: ListUsersUseCase,
     private readonly updateRoles: UpdateUserRolesUseCase,
@@ -83,33 +80,6 @@ export class UsersController {
     if (!user) throw new NotFoundException('User not found');
 
     return UserPresenter.toDTO(user);
-  }
-
-  @HttpCode(200)
-  @Patch('me')
-  async updateMe(@Body() dto: UpdateProfileDto, @Req() req: Request) {
-    try {
-      const auth = (req as any).auth;
-      if (!auth?.userId) throw new BadRequestException('Missing auth context');
-
-      if (
-        (dto.firstName === undefined || dto.firstName === null) &&
-        (dto.lastName === undefined || dto.lastName === null)
-      ) {
-        throw new BadRequestException('Nothing to update');
-      }
-      await this.updateProfile.execute({
-        userId: auth.userId,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-      });
-      return { success: true, message: 'Profile updated' };
-    } catch (error) {
-      if (error instanceof Error && error.message === 'INVALID_FULL_NAME') {
-        throw new BadRequestException('First and last name are required');
-      }
-      throw error;
-    }
   }
 
   @HttpCode(204)

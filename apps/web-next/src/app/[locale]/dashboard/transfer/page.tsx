@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { Account } from '@/features/dashboard/types';
 import { fetchAccounts } from '@/features/dashboard/api';
+import { BeneficiariesPanel } from '@/features/transfer/components/BeneficiariesPanel';
+import type { Beneficiary } from '@/features/transfer/api';
 
 export default function DashboardTransferPage() {
   const params = useParams();
@@ -35,6 +37,14 @@ export default function DashboardTransferPage() {
     };
     load();
   }, [common]);
+
+  // Sélection rapide d'un bénéficiaire : bascule la destination en mode IBAN
+  // externe et pré-remplit le champ — pas de navigation, pas de second état
+  // métier (on réutilise les états du formulaire).
+  const handleSelectBeneficiary = (beneficiary: Beneficiary) => {
+    setDestinationAccountId('external');
+    setDestinationIban(beneficiary.iban);
+  };
 
   const validDestinations = accounts.filter((acc) => {
     if (acc.id === sourceAccountId) return false;
@@ -91,8 +101,12 @@ export default function DashboardTransferPage() {
   const fmt = (n: number) =>
     new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' }).format(n);
 
+  // Le surlignage du bénéficiaire sélectionné ne vaut qu'en mode IBAN externe
+  // (un compte interne peut porter le même IBAN qu'un bénéficiaire enregistré).
+  const externalMode = destinationAccountId === 'external' || !destinationAccountId;
+
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-5xl">
       <h1 className="text-xl font-semibold text-fg mb-6">{tAccount('quickTransfer')}</h1>
 
       {error && (
@@ -106,92 +120,103 @@ export default function DashboardTransferPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="bg-surface-1 rounded-2xl p-5 border border-edge">
-          <label className="block text-xs text-fg-muted mb-2">{tAccount('sourceAccount')}</label>
-          <select
-            className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
-            value={sourceAccountId}
-            onChange={(e) => setSourceAccountId(e.target.value)}
-          >
-            {accounts.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name} · {a.type} · {fmt(a.balance)}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="bg-surface-1 rounded-2xl p-5 border border-edge">
-          <label className="block text-xs text-fg-muted mb-2">{tAccount('destination')}</label>
-          <select
-            className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
-            value={destinationAccountId}
-            onChange={(e) => {
-              const val = e.target.value;
-              setDestinationAccountId(val);
-              if (val && val !== 'external') {
-                setDestinationIban(accounts.find((a) => a.id === val)?.iban || '');
-              } else {
-                setDestinationIban('');
-              }
-            }}
-          >
-            <option value="external">{tAccount('externalIban')}</option>
-            {validDestinations.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.name} · {a.type}
-              </option>
-            ))}
-          </select>
-
-          {(destinationAccountId === 'external' || !destinationAccountId) && (
-            <input
-              type="text"
-              className="w-full mt-3 p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
-              value={destinationIban}
-              onChange={(e) => setDestinationIban(e.target.value)}
-              placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
-            />
-          )}
-        </div>
-
-        <div className="bg-surface-1 rounded-2xl p-5 border border-edge space-y-4">
-          <div>
-            <label className="block text-xs text-fg-muted mb-2">{tAccount('transferAmount')}</label>
-            <input
-              type="number"
-              min="0.01"
-              step="0.01"
-              required
+      {/* Formulaire à gauche, bénéficiaires à droite ; la section passe sous
+          le formulaire sur écran étroit. */}
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] items-start">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="bg-surface-1 rounded-2xl p-5 border border-edge">
+            <label className="block text-xs text-fg-muted mb-2">{tAccount('sourceAccount')}</label>
+            <select
               className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="0.00"
-            />
+              value={sourceAccountId}
+              onChange={(e) => setSourceAccountId(e.target.value)}
+            >
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} · {a.type} · {fmt(a.balance)}
+                </option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="block text-xs text-fg-muted mb-2">
-              {tAccount('transferDescription')}
-            </label>
-            <input
-              type="text"
-              className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={tAccount('transferDescription')}
-            />
-          </div>
-        </div>
 
-        <button
-          type="submit"
-          disabled={loading || !amount}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? tAccount('processing') : tAccount('transferButton')}
-        </button>
-      </form>
+          <div className="bg-surface-1 rounded-2xl p-5 border border-edge">
+            <label className="block text-xs text-fg-muted mb-2">{tAccount('destination')}</label>
+            <select
+              className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
+              value={destinationAccountId}
+              onChange={(e) => {
+                const val = e.target.value;
+                setDestinationAccountId(val);
+                if (val && val !== 'external') {
+                  setDestinationIban(accounts.find((a) => a.id === val)?.iban || '');
+                } else {
+                  setDestinationIban('');
+                }
+              }}
+            >
+              <option value="external">{tAccount('externalIban')}</option>
+              {validDestinations.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} · {a.type}
+                </option>
+              ))}
+            </select>
+
+            {(destinationAccountId === 'external' || !destinationAccountId) && (
+              <input
+                type="text"
+                className="w-full mt-3 p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
+                value={destinationIban}
+                onChange={(e) => setDestinationIban(e.target.value)}
+                placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX"
+              />
+            )}
+          </div>
+
+          <div className="bg-surface-1 rounded-2xl p-5 border border-edge space-y-4">
+            <div>
+              <label className="block text-xs text-fg-muted mb-2">
+                {tAccount('transferAmount')}
+              </label>
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                required
+                className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-fg-muted mb-2">
+                {tAccount('transferDescription')}
+              </label>
+              <input
+                type="text"
+                className="w-full p-3 rounded-lg bg-input text-fg border border-edge-strong text-sm focus:outline-none focus:border-primary/60"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={tAccount('transferDescription')}
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || !amount}
+            className="w-full py-3 rounded-xl bg-primary text-white font-semibold text-sm hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? tAccount('processing') : tAccount('transferButton')}
+          </button>
+        </form>
+
+        <BeneficiariesPanel
+          selectedIban={externalMode ? destinationIban : ''}
+          onSelectAction={handleSelectBeneficiary}
+        />
+      </div>
     </div>
   );
 }

@@ -5,7 +5,6 @@ export * from './user/usecases/RequestPasswordResetUseCase';
 export * from './user/usecases/ResetPasswordUseCase';
 export * from './user/usecases/VerifyEmailUseCase';
 export * from './user/usecases/ListUsersUseCase';
-export * from './user/usecases/UpdateUserProfileUseCase';
 export * from './user/usecases/UpdateUserRolesUseCase';
 export * from './user/usecases/BanUserUseCase';
 export * from './user/usecases/UnbanUserUseCase';

@@ -1,14 +1,22 @@
+import { getTranslations } from 'next-intl/server';
 import { RegisterForm } from '@/features/auth/components/RegisterForm';
 import { AuthLayout } from '@/features/auth/components/AuthLayout';
 
-export const metadata = {
-  title: 'Register',
-  robots: 'noindex',
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth.register' });
+  return {
+    title: t('title'),
+    robots: 'noindex',
+  };
+}
 
-export default function RegisterPage() {
+export default async function RegisterPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'auth.register' });
+
   return (
-    <AuthLayout>
+    <AuthLayout title={t('title')}>
       <RegisterForm />
     </AuthLayout>
   );

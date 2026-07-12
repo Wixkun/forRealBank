@@ -11,7 +11,15 @@ export class AccountRepository implements IAccountRepository {
   }
 
   async findByIban(iban: string): Promise<Account | null> {
-    const e = await this.repo.findOne({ where: { iban } });
+    // Les IBAN sont historiquement stockés AVEC espaces (« FR76 9876 … ») :
+    // la comparaison ignore les espaces des deux côtés, sinon un IBAN saisi
+    // sans espaces (ou un bénéficiaire enregistré, stocké normalisé) ne
+    // matcherait jamais un compte interne.
+    const normalized = iban.replace(/\s/g, '');
+    const e = await this.repo
+      .createQueryBuilder('account')
+      .where(`REPLACE(account.iban, ' ', '') = :iban`, { iban: normalized })
+      .getOne();
     return e ? this.map(e) : null;
   }
 

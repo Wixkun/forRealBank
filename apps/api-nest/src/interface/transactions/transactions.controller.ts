@@ -158,16 +158,22 @@ export class TransactionsController {
         dto.sourceType === 'bank'
           ? await this.accountRepo.findOne({ where: { id: dto.sourceAccountId, userId } })
           : null;
+      // Comparaison d'IBAN insensible aux espaces : les comptes stockent
+      // l'IBAN avec espaces, mais il peut arriver normalisé (bénéficiaire
+      // enregistré) ou saisi sans espaces.
       const destinationAccount = dto.destinationAccountId
         ? await this.accountRepo.findOne({
             where: { id: dto.destinationAccountId },
             relations: ['user'],
           })
         : dto.destinationIban
-          ? await this.accountRepo.findOne({
-              where: { iban: dto.destinationIban },
-              relations: ['user'],
-            })
+          ? await this.accountRepo
+              .createQueryBuilder('account')
+              .leftJoinAndSelect('account.user', 'user')
+              .where(`REPLACE(account.iban, ' ', '') = :iban`, {
+                iban: dto.destinationIban.replace(/\s/g, ''),
+              })
+              .getOne()
           : null;
 
       const beneficiaryName = destinationAccount?.user

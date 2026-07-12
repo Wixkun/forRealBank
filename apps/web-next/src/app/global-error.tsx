@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ErrorPageTemplate } from '@/components/ui/ErrorPageTemplate';
 import { useTranslations } from 'next-intl';
 
@@ -21,24 +20,22 @@ export default function GlobalError({
   return (
     <html>
       <body>
-        <ThemeProvider>
-          <ErrorPageTemplate
-            errorCode="500"
-            title={t('title')}
-            subtitle={t('subtitle')}
-            description={t('description')}
-            primaryButton={{
-              text: t('backHome'),
-              href: '/fr',
-            }}
-            preferredAuthenticatedHomeHref={'/fr/dashboard'}
-            secondaryButton={{
-              text: t('tryAgain'),
-              onClick: reset,
-            }}
-            locale="fr"
-          />
-        </ThemeProvider>
+        <ErrorPageTemplate
+          errorCode="500"
+          title={t('title')}
+          subtitle={t('subtitle')}
+          description={t('description')}
+          primaryButton={{
+            text: t('backHome'),
+            href: '/fr',
+          }}
+          preferredAuthenticatedHomeHref={'/fr/dashboard'}
+          secondaryButton={{
+            text: t('tryAgain'),
+            onClick: reset,
+          }}
+          locale="fr"
+        />
       </body>
     </html>
   );
