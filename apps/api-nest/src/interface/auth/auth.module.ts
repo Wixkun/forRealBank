@@ -199,6 +199,6 @@ const initializeClientProvider: Provider = {
     initializeClientProvider,
     AuthSchemaBootstrapService,
   ],
-  exports: [ITokenService, JwtAuthGuard],
+  exports: [IUserRepository, ITokenService, JwtAuthGuard],
 })
 export class AuthModule {}

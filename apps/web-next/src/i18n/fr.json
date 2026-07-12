@@ -99,7 +99,7 @@
       },
       "topUp": "+ Alimenter",
       "fromTo": "Depuis → vers {account}",
-      "amountPlaceholder": "Montant (€)",
+      "amountPlaceholder": "Montant ($)",
       "transfer": "Virer",
       "cancel": "Annuler",
       "invalidAmount": "Montant invalide",
@@ -128,6 +128,7 @@
       "settingsAria": "Paramètres",
       "nav": {
         "dashboard": "Tableau de bord",
+        "cards": "Mes cartes",
         "trading": "Trading",
         "beneficiaries": "Bénéficiaires",
         "analytics": "Analyse",
@@ -217,18 +218,18 @@
   },
   "home": {
     "meta": {
-      "title": "AvenirBank - Banque & Courtage Nouvelle Génération",
-      "description": "AvenirBank combine la puissance d'une banque moderne avec les outils de courtage avancés. Gérez vos comptes, investissez en bourse et tradez les cryptos en toute sécurité."
+      "title": "ForRealBank - Banque & Courtage Nouvelle Génération",
+      "description": "ForRealBank combine la puissance d'une banque moderne avec les outils de courtage avancés. Gérez vos comptes, investissez en bourse et tradez les cryptos en toute sécurité."
     },
     "hero": {
       "subtitle": "Banque & Courtage Nouvelle Génération",
       "title": "Votre Liberté Financière Commence Ici",
-      "description": "AvenirBank combine la puissance d'une banque moderne avec les outils de courtage avancés pour vous offrir une expérience financière complète et sécurisée.",
+      "description": "ForRealBank combine la puissance d'une banque moderne avec les outils de courtage avancés pour vous offrir une expérience financière complète et sécurisée.",
       "ctaPrimary": "Ouvrir un compte",
       "ctaSecondary": "Découvrir nos services"
     },
     "features": {
-      "title": "Pourquoi choisir AvenirBank",
+      "title": "Pourquoi choisir ForRealBank",
       "subtitle": "Une plateforme complète pour gérer votre patrimoine avec confiance",
       "items": {
         "security": {
@@ -245,7 +246,7 @@
         },
         "protection": {
           "title": "Fonds Protégés",
-          "description": "Vos dépôts sont garantis jusqu'à 100 000€ avec une assurance FDIC complète"
+          "description": "Vos dépôts sont garantis jusqu'à 100 000$ avec une assurance FDIC complète"
         }
       }
     },
@@ -295,7 +296,7 @@
     },
     "cta": {
       "title": "Prêt à transformer votre expérience financière ?",
-      "description": "Rejoignez plus de 500 000 clients qui font confiance à AvenirBank pour gérer leur argent intelligemment. Ouverture de compte en 5 minutes, 100% en ligne.",
+      "description": "Rejoignez plus de 500 000 clients qui font confiance à ForRealBank pour gérer leur argent intelligemment. Ouverture de compte en 5 minutes, 100% en ligne.",
       "button": "Commencer maintenant"
     }
   },

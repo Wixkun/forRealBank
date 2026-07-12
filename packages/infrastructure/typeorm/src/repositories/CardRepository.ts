@@ -38,6 +38,11 @@ export class CardRepository implements ICardRepository {
       lastFour: e.lastFour,
       expiryDate: e.expiryDate,
       status: e.status,
+      onlinePaymentsEnabled: e.onlinePaymentsEnabled,
+      contactlessEnabled: e.contactlessEnabled,
+      internationalPaymentsEnabled: e.internationalPaymentsEnabled,
+      spendingLimit: Number(e.spendingLimit),
+      withdrawalLimit: Number(e.withdrawalLimit),
       createdAt: e.createdAt,
     };
   }

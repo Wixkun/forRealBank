@@ -16,7 +16,7 @@ export function HeroSection() {
         bg-gradient-to-b from-white via-teal-200 to-teal-300
         text-transparent bg-clip-text opacity-70"
       >
-        AVENIR
+        FORREAL
       </h1>
 
       <div

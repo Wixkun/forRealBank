@@ -107,6 +107,7 @@ services:
       FRONTEND_ORIGIN: https://for-real.cloud
       WEB_APP_URL: ${WEB_APP_URL:-https://for-real.cloud}
       MAILGUN_API_KEY: ${MAILGUN_API_KEY:-}
+      TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:-}
       MAILGUN_DOMAIN: ${MAILGUN_DOMAIN:-}
       MAILGUN_BASE_URL: ${MAILGUN_BASE_URL:-https://api.mailgun.net}
       MAILGUN_FROM: ${MAILGUN_FROM:-}

@@ -291,6 +291,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   const navItems: NavItem[] = [
     { icon: <IconDashboard />, label: t('nav.dashboard'), href: `/${locale}/dashboard` },
+    ...(!isStaff
+      ? [{ icon: <IconCard />, label: t('nav.cards'), href: `/${locale}/dashboard/cards` }]
+      : []),
     { icon: <IconTrading />, label: t('nav.trading'), href: `/${locale}/dashboard/trading` },
     ...(!isAdvisor && !isDirector
       ? [
@@ -324,7 +327,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       href: `/${locale}/dashboard/transfer`,
     },
     { icon: <IconPayBill />, label: t('quickActions.payBill'), href: '#', disabled: true },
-    { icon: <IconCard />, label: t('quickActions.cards'), href: '#', disabled: true },
+    {
+      icon: <IconCard />,
+      label: t('quickActions.cards'),
+      href: `/${locale}/dashboard/cards`,
+    },
     { icon: <IconMore />, label: t('quickActions.more'), href: '#', disabled: true },
   ];
 

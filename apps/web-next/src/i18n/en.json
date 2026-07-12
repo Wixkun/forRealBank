@@ -99,7 +99,7 @@
       },
       "topUp": "+ Top up",
       "fromTo": "From → to {account}",
-      "amountPlaceholder": "Amount (€)",
+      "amountPlaceholder": "Amount ($)",
       "transfer": "Transfer",
       "cancel": "Cancel",
       "invalidAmount": "Invalid amount",
@@ -128,6 +128,7 @@
       "settingsAria": "Settings",
       "nav": {
         "dashboard": "Dashboard",
+        "cards": "My cards",
         "trading": "Trading",
         "beneficiaries": "Beneficiaries",
         "analytics": "Analytics",
@@ -217,18 +218,18 @@
   },
   "home": {
     "meta": {
-      "title": "AvenirBank - Next-Generation Banking & Trading",
-      "description": "AvenirBank combines the power of modern banking with advanced trading tools. Manage your accounts, invest in stocks and trade crypto securely."
+      "title": "ForRealBank - Next-Generation Banking & Trading",
+      "description": "ForRealBank combines the power of modern banking with advanced trading tools. Manage your accounts, invest in stocks and trade crypto securely."
     },
     "hero": {
       "subtitle": "Next-Generation Banking & Trading",
       "title": "Your Financial Freedom Starts Here",
-      "description": "AvenirBank combines the power of modern banking with advanced trading tools to offer you a complete and secure financial experience.",
+      "description": "ForRealBank combines the power of modern banking with advanced trading tools to offer you a complete and secure financial experience.",
       "ctaPrimary": "Open an account",
       "ctaSecondary": "Discover our services"
     },
     "features": {
-      "title": "Why Choose AvenirBank",
+      "title": "Why Choose ForRealBank",
       "subtitle": "A complete platform to manage your wealth with confidence",
       "items": {
         "security": {
@@ -245,7 +246,7 @@
         },
         "protection": {
           "title": "Protected Funds",
-          "description": "Your deposits are guaranteed up to €100,000 with full FDIC insurance"
+          "description": "Your deposits are guaranteed up to $100,000 with full FDIC insurance"
         }
       }
     },
@@ -295,7 +296,7 @@
     },
     "cta": {
       "title": "Ready to transform your financial experience?",
-      "description": "Join over 500,000 customers who trust AvenirBank to manage their money smartly. Open an account in 5 minutes, 100% online.",
+      "description": "Join over 500,000 customers who trust ForRealBank to manage their money smartly. Open an account in 5 minutes, 100% online.",
       "button": "Get started now"
     }
   },
